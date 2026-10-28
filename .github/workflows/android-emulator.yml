@@ -1,15 +1,20 @@
-name: Android emulator FileProvider contract
+name: Android emulator handoff and question flow
 on:
   pull_request:
     paths:
       - "aya/**"
+      - "sample/**"
       - ".github/workflows/android-emulator.yml"
   workflow_dispatch:
+
+concurrency:
+  group: aya-emulator-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   instrumented-sharing:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -30,4 +35,15 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: gradle :aya:connectedDebugAndroidTest --no-daemon --stacktrace
+          script: gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
+
+      - name: Preserve Android UI test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-device-test-evidence
+          path: |
+            aya/build/outputs/androidTest-results/connected/
+            sample/build/outputs/androidTest-results/connected/
+            sample/build/reports/androidTests/connected/
+          if-no-files-found: ignore

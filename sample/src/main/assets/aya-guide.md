@@ -6,8 +6,8 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 1
-source_revision: aya-sample-v1
+guide_revision: 2
+source_revision: aya-sample-question-first-v1
 last_verified_utc: 2026-10-28T00:00:00Z
 owner: AYA maintainers
 ---
@@ -26,14 +26,16 @@ This is a guide to the real AYA Sample *source implementation*. The Android appl
 
 ## Quick orientation
 
-The sample has a title, explanation and an "Ask your agent" button. That button loads this guide, checks it against the installed app version, and opens a local editable review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
+The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
 
 The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
 
 ## Navigation map
 
-- Home: title "AYA: Ask Your Agent", explanation, and button "Ask your agent".
-- Home > Ask your agent: expanded "Ask your agent" review dialog with editable multiline help text.
+- Home: title "AYA: Ask Your Agent", explanation, "Ask your agent" button, "Or type your question here" field, and "Ask using my question" button.
+- Home > Ask your agent: question composer, "What do you need help with?" and multiline input; "Review details" moves to preview.
+- Home > Or type your question here > Ask using my question: skips duplicate question entry and opens preview directly.
+- Both flows > Review details (when needed): expanded "Ask your agent" review dialog with editable multiline help text.
 - Review > Cancel: returns to Home, without sharing.
 - Review > Copy: copies the currently edited text into Android's clipboard.
 - Review > Share: opens the Android Sharesheet with a temporary text document.
@@ -47,10 +49,11 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Start: Home.
 - Prerequisites: a correctly packaged guide; an external application capable of receiving a text attachment.
 1. Tap "Ask your agent".
-2. Review or edit the text. Remove any private information before proceeding.
-3. Tap "Share".
-4. Select an offered destination in Android's Sharesheet.
-5. In the destination, verify that the document content is actually present and start or send the chat as that app requires.
+2. Enter your question in the optional multiline prompt, or leave blank for general help.
+3. Tap "Review details".
+4. Review or edit the complete reference package. Remove private information.
+5. Tap "Share" and select a destination in Android's Sharesheet.
+6. In the destination, verify that the document content is actually present and start or send the chat as that app requires.
 - Expect: the receiving app is offered a UTF-8 text attachment; successful ingestion and chat creation are NOT guaranteed.
 - Verification: the Android share chooser opening proves only that a share was initiated, not that the recipient has read the document.
 - Side effects/undo: a unique temporary file is written to the sample's cache; the selected app may upload or retain a copy. Once sent, AYA cannot retract it.
@@ -63,14 +66,30 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Start: Home.
 - Prerequisites: a valid bundled guide.
 1. Tap "Ask your agent".
-2. Review or edit text in the review screen.
-3. Tap "Copy".
-4. Open an assistant manually and paste the text into a conversation.
+2. Optionally type your question and tap "Review details".
+3. Review or edit text in the review screen.
+4. Tap "Copy".
+5. Open an assistant manually and paste the text into a conversation.
 - Expect: a "Help text copied" message, followed by clipboard data ready for manual paste.
 - Verification: verify the pasted content before submitting; copying alone does not contact an AI service.
 - Side effects/undo: clipboard contains the complete copied text until replaced/cleared by the OS or user; other applications may have access.
 - If it fails: see ERR-001 for the bundled reference or check Android's clipboard behavior.
 - Evidence: `aya/src/main/java/dev/aya/android/Aya.kt`; source-inspected, device behavior unverified.
+
+### TASK-003: Ask using the sample's own text field [AVAILABLE]
+
+- Applies to: AYA Sample 1.0.0 on Android 23+.
+- Start: Home.
+- Prerequisites: valid version-matched reference bundled with app.
+1. Type a question in "Or type your question here".
+2. Tap "Ask using my question".
+3. The full AYA review opens directly, with your typed question already embedded.
+4. Edit or remove any text, then use Copy or Share.
+- Expect: no duplicate question composer because the host already captured the question.
+- Verification: the review's "User's starting question" section reflects what was typed in the host field.
+- Side effects/undo: typing and preview are local only; sharing or copying has the disclosure effects described in TASK-001 and TASK-002.
+- If it fails: see ERR-001.
+- Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt` and `aya/src/main/java/dev/aya/android/Aya.kt`; source-inspected, device behavior unverified.
 
 ## Features and settings
 
@@ -86,10 +105,10 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ### F-002: Editable review and user-controlled sharing [AVAILABLE]
 
-- What it does: shows full help text; Cancel, Copy and Share are separate actions.
-- Location: Home > Ask your agent.
-- Defaults: no automatic share; content is initially the guide, installed version, optional current screen and starting question.
-- Constraints and interactions: sharing disallows blank text and packages over 2 MiB; file is plain UTF-8 text.
+- What it does: shows a question-first composer or accepts the question already typed in the host; then shows full help text; Cancel, Copy and Share are separate actions.
+- Location: Home > Ask your agent, or Home > Ask using my question.
+- Defaults: question-first for "Ask your agent"; host-owned question uses `askQuestion=false`; no automatic share. The help package includes the guide, installed version, current screen and user question.
+- Constraints and interactions: sharing disallows blank text and packages over 2 MiB; file is plain UTF-8 text. The final user-approved question is also shared as bounded `EXTRA_TEXT`, and can be edited in review.
 - Visibility: the dialog appears only after a successfully validated guide.
 - Persistence: approved shares are cached temporarily and older AYA cache entries are pruned opportunistically after seven days on subsequent shares.
 - Evidence: `aya/src/main/java/dev/aya/android/Aya.kt`.
@@ -119,6 +138,7 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 ## Limitations and unsupported behavior
 
 - The sample cannot read assistant responses or operate another app. [UNSUPPORTED]
+- No question is sent before the user explicitly selects Share and chooses a target. [AVAILABLE]
 - AYA cannot force another assistant to create a fresh conversation or ingest the attachment. [UNSUPPORTED]
 - ChatGPT and Claude attachment behavior has not been verified on physical devices. [UNKNOWN]
 - There is no built-in AI model, API subscription, provider login or device diagnostic collection. [UNSUPPORTED]
@@ -126,13 +146,14 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ## Privacy and data handling
 
-No app settings, identities, files or logs are automatically gathered. The source-controlled guide and simple screen label are explicitly supplied to AYA. The user can edit this package before sharing. Copy places full text on Android clipboard. Share creates a unique, private cache file and temporarily grants a selected external app read access. That app may upload/store a copy. AYA has no mechanism to withdraw data already shared.
+No app settings, identities, files or logs are automatically gathered. The source-controlled guide, simple screen label and any question the user types are explicitly supplied to AYA. The user can edit this package before sharing. Copy places full text on Android clipboard. Share creates a unique, private cache file and temporarily grants a selected external app read access. It also puts a bounded representation of the **approved** question in `EXTRA_TEXT`; the attached document retains the entire question and guide. That app may upload/store a copy. AYA has no mechanism to withdraw data already shared.
 
 ## Glossary and synonyms
 
 - Sharesheet: Android's application picker for sharing files; also called share menu/chooser.
 - Help package: self-contained guide, installed app version, question and screen hint.
 - Recipient: the separate app the user chooses, such as an AI chat client; not operated by AYA.
+- Question composer: local multiline prompt where the user describes the problem.
 - Preview: editable local dialog before any share.
 - Installed version: the package version declared in the installed APK, not a forecast of future features.
 
@@ -150,7 +171,7 @@ No app settings, identities, files or logs are automatically gathered. The sourc
 
 ## Assistant answer policy
 
-- First determine whether the user wants to copy or share, whether they saw the local preview, and whether an external app actually imported the attachment.
+- First determine whether the user entered a question in the AYA composer or in the host app field, whether they saw the local review, and whether an external app actually imported the attachment.
 - Distinguish local chooser success from downstream ingestion.
 - Only suggest the controls explicitly documented above.
 - Never claim the assistant can tap buttons inside this sample without a separately authorized tool.
