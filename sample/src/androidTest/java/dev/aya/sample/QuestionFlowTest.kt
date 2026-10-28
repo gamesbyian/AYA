@@ -3,7 +3,6 @@ package dev.aya.sample
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -47,7 +46,7 @@ class QuestionFlowTest {
         onView(withText("Ask your agent")).perform(click())
         onView(withHint("e.g. Why won't this connection work?"))
             .check(matches(isDisplayed()))
-        pressBack()
+        onView(withText("Cancel")).perform(click())
         onView(withText("Ask using my question")).check(matches(isDisplayed()))
         onView(withHint("Help context to share")).check(doesNotExist())
     }
