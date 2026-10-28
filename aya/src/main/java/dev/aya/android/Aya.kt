@@ -43,7 +43,7 @@ object AyaDocument {
         if (index >= 0) {
             val question = lines.drop(index + 1)
                 .takeWhile { !it.startsWith("## ") }
-                .joinToString("\\n").trim()
+                .joinToString("\n").trim()
             if (question.isNotBlank()) {
                 return if (question.length <= 4000) question
                     else "My full question is in the attached AYA help document."
@@ -144,7 +144,7 @@ object Aya {
             .setTitle("Ask your agent")
             .setView(root)
             .setNegativeButton("Cancel", null)
-            .setPositiveButton("Review & share") { _, _ ->
+            .setPositiveButton("Review details") { _, _ ->
                 val edited = questionBox.text.toString().trim().ifBlank { null }
                 // Post after the question dialog has dismissed before opening preview.
                 activity.window?.decorView?.post {
