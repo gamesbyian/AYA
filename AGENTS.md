@@ -15,7 +15,7 @@ When integrating AYA into another app:
 3. Produce a UTF-8 guide with AYA-RAS v1 envelope and all twelve required sections. Each important feature/task/error must have a stable ID, version/status, exact steps, real evidence and user-safe troubleshooting.
 4. Include UNKNOWN and PLANNED states honestly. No invented controls, support URLs, provider guarantees, external assistant powers or secrets.
 5. Run `python3 tools/validate_guide.py --strict path/to/guide.md`; complete a manual behavior/evidence audit and held-out question-bank evaluation.
-6. Ship the guide with the exact installed version and keep it updated in the same PRs that modify user-facing product behavior.
+6. For large apps, use [modular reference builds](docs/reference/MODULAR_BUILDS.md) so the exported reference is deterministic and self-contained. Ship the guide with the exact installed version and keep it updated in the same PRs that modify user-facing product behavior.
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
 ## Engineering constraints
