@@ -10,7 +10,7 @@ AYA is a reusable Android **bring-your-own-AI help handoff**. An app provides ve
 
 ## Prototype API
 
-`Aya.launch(activity, AyaRequest(appName, appVersion, guide, screenName?, question?))`.
+**Preferred host API:** `Aya.launchBundled(activity, guideAsset?, screenName?, question?)` loads an APK asset, verifies its app ID and exact installed `versionName`, and refuses stale or malformed references before opening review. `AyaBundledLaunchResult.PreviewOpened` is strictly a local state; `Rejected(reason)` requires truthful host error handling. The legacy `Aya.launch(activity, AyaRequest(...))` remains for advanced/manual unverified input. Source-only import and staging Maven AAR/POM consumption are both tested by CI.
 
 No data is collected by AYA itself. Android library includes a non-exported FileProvider limited to `cacheDir/aya/`. AYA creates a unique text file with the edited payload and sends it using `ACTION_SEND`, `EXTRA_STREAM`, `ClipData`, and `FLAG_GRANT_READ_URI_PERMISSION`.
 
@@ -30,7 +30,7 @@ Bundled chatbot, vendor lock-in, inference billing, automatically reading instal
 
 ## Acceptance gates and roadmap
 
-**Prototype:** library, documentation/authoring standard, validator, sample build and unit tests.
+**Prototype:** library, documentation/authoring standard, validator, real sample host, exact-version guide guard, module and staged AAR consumer tests, Android URI instrumentation tests (execution separately tracked).
 **Beta:** physical-device and instrumentation verification, accessible preview acceptance, host version-guard, redaction controls, explicit diagnostic opt-in, recipient compatibility ledger.
 **Stable:** real integrating app's released guide plus QA rubric, compatibility contract, maintenance ownership, artifact publication, security and accessibility review.
 
