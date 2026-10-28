@@ -22,5 +22,11 @@ jobs:
             --inventory docs/reference/examples/parcelpad_inventory.json \
             --questions docs/reference/examples/parcelpad_questions.json \
             --strict
+      - name: Validate the actual consuming sample app reference
+        run: |
+          python3 tools/validate_guide.py --strict sample/src/main/assets/aya-guide.md
+          python3 tools/audit_reference.py sample/src/main/assets/aya-guide.md \
+            --inventory docs/reference/examples/aya_sample_inventory.json \
+            --questions docs/reference/examples/aya_sample_questions.json --strict
       - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
