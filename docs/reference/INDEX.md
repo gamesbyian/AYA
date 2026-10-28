@@ -9,7 +9,7 @@ Start in this order:
 3. [QA rubric](QA_RUBRIC.md): measurable completeness criteria and release gates.
 4. [Question bank](QUESTION_BANK.md): adversarial and ordinary questions to test with and without an assistant.
 5. [Maintenance lifecycle](MAINTENANCE.md): update and ownership rules.
-6. [Example fictional application](EXAMPLE_PARCELPAD.md): a fully populated guide, not a claim about a real product.
+6. [Modular builds](MODULAR_BUILDS.md): deterministic, validated assembly of large references from maintained source modules.\n7. [Example fictional application](EXAMPLE_PARCELPAD.md): a fully populated guide, not a claim about a real product.
 
 Validate a candidate: `python3 tools/validate_guide.py path/to/aya-guide.md`. Run `python3 -m unittest discover -s tools -p 'test_*.py'` for validator tests.
 
