@@ -44,23 +44,28 @@ platform: android
 
 The full envelope also needs `locale`, `guide_revision`, `source_revision`, `last_verified_utc`, `owner` and all 12 required sections. Build and validate a source-derived inventory and held-out question set. The runtime guard checks **exact** version identity (no semantic range resolution). If shipping multiple variants with different behavior, bundle the corresponding variant-specific guide in each APK.
 
-## 3. Connect the help button
+## 3. Connect the help button and question editor
 
 ```kotlin
 when (val result = Aya.launchBundled(
     activity = this,
     guideAsset = "aya-guide.md",
     screenName = "Connections", // optional, avoid sensitive/user-entered data
-    question = "Help me configure a remote connection."
+    question = "Help me configure a remote connection." // optional prefilled suggestion
 )) {
     is AyaBundledLaunchResult.Rejected -> {
         Toast.makeText(this, "AYA help unavailable: ${result.reason}", Toast.LENGTH_LONG).show()
     }
-    AyaBundledLaunchResult.PreviewOpened -> Unit // local preview only
+    AyaBundledLaunchResult.QuestionOpened -> Unit // local question editor only
+    AyaBundledLaunchResult.PreviewOpened -> Unit // local review only
 }
 ```
 
 No application name or version string is manually trusted: AYA reads the installed APK package/version and validates the asset. When the user chooses Share, AYA creates one UTF-8 text document with a read-only content URI grant; the destination controls ingestion, chat creation and its own privacy terms.
+
+**Default:** the host action opens AYA's question composer. The user can type an issue or edit the host-supplied suggestion; AYA then shows a full preview, before sharing any data. For a host that already has its own question composer, use `question = hostQuestion, askQuestion = false` to skip AYA's duplicate question screen and go straight to preview.
+
+**Share payload:** AYA includes the final user-approved question in the attachment and also as bounded `EXTRA_TEXT`; `EXTRA_STREAM` holds the complete reference document. Recipients may use one or both; no recipient-specific behavior is assumed. See [Android research](ANDROID_SHARING_RESEARCH.md) and [question UX](QUESTION_COMPOSER.md).
 
 **Unsafe/legacy alternative:** `Aya.launch(this, AyaRequest(...))` takes arbitrary text and skips bundled-version checks. Keep that for intentional advanced workflows, not standard product help.
 
