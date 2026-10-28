@@ -56,7 +56,8 @@ when (val result = Aya.launchBundled(
     is AyaBundledLaunchResult.Rejected -> {
         Toast.makeText(this, "AYA help unavailable: ${result.reason}", Toast.LENGTH_LONG).show()
     }
-    AyaBundledLaunchResult.PreviewOpened -> Unit // local preview only
+    AyaBundledLaunchResult.QuestionOpened -> Unit // local question editor only
+    AyaBundledLaunchResult.PreviewOpened -> Unit // local review only
 }
 ```
 
