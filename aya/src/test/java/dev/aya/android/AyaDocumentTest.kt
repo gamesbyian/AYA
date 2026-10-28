@@ -33,6 +33,12 @@ class AyaDocumentTest {
         assertEquals(question, AyaDocument.shareMessageFromPayload(result))
     }
 
+    @Test fun headingsInsideMultilineQuestionSurviveMessageExtraction() {
+        val question = "Why does sync stop?\n## Observations\nI tried Wi-Fi and mobile data.\n### Details\nIt says timeout."
+        val result = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = question))
+        assertEquals(question, AyaDocument.shareMessageFromPayload(result))
+    }
+
     @Test fun finalReviewEditsControlExtraTextNotOriginalQuestion() {
         val initial = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = "Secret example removed"))
         val edited = initial.replace("Secret example removed", "How do I import?")
