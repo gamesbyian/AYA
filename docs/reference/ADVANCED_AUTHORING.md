@@ -220,3 +220,19 @@ Consider regular revalidation of upstream-dependent recipes: service URLs, provi
 8. **Close the loop.** Fix the guide at its source, regenerate, run tests, and record observed completion rate and residual unknowns.
 
 **Stop rule:** When exhaustive evidence is unavailable, ship only a correctly scoped guide with clear unknowns. Do not fill gaps with reasonable-sounding invented controls. No amount of structural linting can certify complete or truthful app knowledge.
+
+## 18. Broader support workflows: lifecycle, authority, layered failure, hidden state, recovery
+
+The [147-question second-batch exercise](CROSS_CATEGORY_BATCH2.md) demonstrates why features must be evaluated within *user goals* that cross technical and institutional boundaries.
+
+**Transactions:** model state progression and a transition's last reversible point. A sent message, submitted order, pending charge, fulfilled delivery, completed booking and refund request have different guarantees. Record time limits, state-dependent action availability, idempotency/retry risks, authoritative confirmation, and effects on money or data. For externally maintained windows, add claim-level freshness and a current-verification fallback.
+
+**Authority:** map actors and their exact permissions. Host UI may record a request without granting a merchant, bank, carrier, library, workplace administrator or accommodation's approval. Do not promise refunds, reinstatement, access or policy exceptions controlled by third parties. Escalation should identify which actor can actually act and what evidence can be submitted safely.
+
+**Layered delivery:** represent push messages, SMS/RCS, sync, notifications, background jobs, casting, Bluetooth and NFC as chains with stage-specific tests. A message may be generated but blocked by a channel, delivered to another account or never sent by the upstream. Do not conflate transport, permission, client presentation and remote status. Begin with read-only, reversible observations and preserve local data.
+
+**Epistemic ceilings:** some user questions cannot be answered from available evidence. Private blocking, engagement ranking, moderation triggers, availability in other regions and server-side states may be hidden. Distinguish directly visible facts, supported hypotheses, impossible-to-distinguish causes and known inaccessible data. Give observable checks where possible without inventing certainty.
+
+**Recoverability:** before any clear-storage, reinstall, logout, factory reset, migration or restore recommendation, determine where the only remaining copy may exist. Record exact custody and backup age, whether data is merged/overwritten, and whether a failed recovery can worsen the situation. Always distinguish an offline copy from a true independent recoverable backup.
+
+These are lenses for applicable tasks, not assertions that a third-party product supports any particular action. Treat the second-batch case fixture as *research-derived candidate questions*, never as verified product-specific gold answers.
