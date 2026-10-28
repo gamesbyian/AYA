@@ -13,6 +13,8 @@ An app's Help action should be a natural continuation of what the user is doing,
 
 This is a *two-stage consent flow*: writing a question does not send it, and preview/editing does not imply that an AI provider has received anything.
 
+The guarded return value is `AyaBundledLaunchResult.QuestionOpened` for the built-in composer and `PreviewOpened` for the direct-review mode. Both are local-only, not reports of assistant ingestion.
+
 ## Integration patterns
 
 **Standard question-first**: `Aya.launchBundled(activity, screenName="Connections")`. `askQuestion=true` is the default.
