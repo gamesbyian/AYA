@@ -8,6 +8,12 @@ Host app constructs text → AYA renders a reference package → user may **edit
 
 The preferred `Aya.launchBundled()` checks a packaged AYA-RAS guide against the **actual** app package and exact `versionName`, with required sections and metadata. It rejects a stale/cross-app guide before opening review. This validates only structure and identity, not the truth of the guide's claims. The legacy `Aya.launch(AyaRequest(...))` method permits advanced manually supplied text without this guard.
 
+## Question-first disclosure and dual channel
+
+AYA lets the user type a question locally (or edit a prefilled host suggestion). The question is merged into the reference, then shown in the full editable consent preview. On Share, the attachment contains the **current edited text**; Android may also pass the approved question as `EXTRA_TEXT` to the destination. `EXTRA_TEXT` is derived from that edited payload, not an old question, preventing accidental reinstatement of text removed by the user. These are two representations of the same approved data, not two independent disclosures.
+
+A user choosing the recipient may still need to press Send inside the third-party application. Android grants only the required file URI read access; AYA cannot control recipient retention or any automatic imports.
+
 ## Data minimization
 
 No app settings, logs, screenshots, credentials, identifiers, tokens, URLs or personal information are automatically collected. The host developer is responsible for redacting all `AyaRequest` inputs before calling AYA. AYA has **no automatic redaction engine**. User edits can also contain sensitive details; review UI warns about downstream sharing.
