@@ -7,25 +7,29 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 ## Where to start
 
 - [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes the [base authoring standard](docs/reference/AUTHORING_STANDARD.md), [advanced authoring techniques](docs/reference/ADVANCED_AUTHORING.md), [agent production workflow](docs/reference/AGENT_WORKFLOW.md), [independent inventory and traceability](docs/reference/TRACEABILITY.md), [assistant evaluation protocol](docs/reference/EVALUATION_PROTOCOL.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
-- [Android integration](docs/INTEGRATION.md) and [sample app](sample/): how to invoke and inspect AYA.
+- [Android integration](docs/INTEGRATION.md), [readiness checklist](docs/INTEGRATION_READINESS.md), and [real sample host](sample/): version-guarded invocation, standalone AAR consumption, and release gates.
 - [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
 
 ## Android usage
 
-Include `:aya` as a library module, bundle a version-matched Markdown reference file as an APK asset, and call from an Activity:
+The recommended integration method **automatically checks the bundled reference against the installed app's package and exact version**, instead of trusting hardcoded strings:
 
 ```kotlin
-val guide = assets.open("aya-guide.md").bufferedReader(Charsets.UTF_8).use { it.readText() }
-Aya.launch(this, AyaRequest(
-    appName = "My App",
-    appVersion = "1.0.0", // use real installed build version
-    guide = guide,
+when (val result = Aya.launchBundled(
+    activity = this,
+    guideAsset = "aya-guide.md",
     screenName = "Connections",
     question = "How can I configure this connection?"
-))
+)) {
+    is AyaBundledLaunchResult.Rejected ->
+        Toast.makeText(this, "AYA help unavailable: ${result.reason}", Toast.LENGTH_LONG).show()
+    AyaBundledLaunchResult.PreviewOpened -> Unit
+}
 ```
+
+Ship `app/src/main/assets/aya-guide.md` following the [AYA-RAS standard](docs/reference/INDEX.md), with `app_id` and `app_version_min/max` matching the APK. There is no fallback to a stale guide. `PreviewOpened` means the local review started, not that a recipient accepted the file. The original `Aya.launch(AyaRequest(...))` API remains available for advanced/manual cases but does not validate the bundled guide.
 
 The preview shows the complete text and allows edits before **Share**, **Copy** or **Cancel**. Sharing uses Android `ACTION_SEND` with one UTF-8 text attachment and a temporary read-granted content URI. Copy gives a manual fallback. AYA includes a narrowly scoped AndroidX FileProvider.
 
@@ -42,13 +46,13 @@ python3 tools/audit_reference.py docs/reference/EXAMPLE_PARCELPAD.md --inventory
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-GitHub Actions runs both suites and publishes the sample debug APK if the Android build passes. Gradle wrapper is not yet checked in.
+GitHub Actions runs reference checks, Kotlin unit tests and the sample build, compiles Android instrumentation tests, publishes a staging AAR/POM repository, and rebuilds the sample against the staged artifact. To build the Maven repository locally, use `gradle :aya:publishReleasePublicationToStagingRepository`. Its coordinates are `dev.aya:aya-android:0.1.0-SNAPSHOT`; **no Maven Central publication exists yet**. Gradle wrapper is not yet checked in.
 
 ## Prototype status
 
 Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
-Known work: accessibility and lifecycle instrumentation, real-device assistant trials, host guide version selection, automatic redaction, and eventual stable distribution/API.
+Known work: actually executing instrumentation tests on emulator/device, accessibility and lifecycle acceptance, real-device assistant trials, comprehensive privacy review, and stable license/distribution/API policy. The guarded API supports **exact** version-matched guides; multi-version guide resolution is deliberately unsupported.
 
 ## License
 
