@@ -32,7 +32,10 @@ class QuestionFlowTest {
         device.executeShellCommand("wm dismiss-keyguard")
         // Reuse the Activity when possible while bringing it to the foreground.
         device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x24000000")
-        find(By.text("Ask using my question"))
+        // UiAutomator exposes contentDescription rather than displayed text for
+        // these host controls: searching By.text() made every emulator test fail
+        // even though the sample rendered the button correctly.
+        find(By.desc("Review my question with the app reference before sharing"))
     }
 
     private fun find(selector: BySelector): UiObject2 =
@@ -41,8 +44,8 @@ class QuestionFlowTest {
 
     @Test fun builtInComposerFeedsTheActualReviewedDocument() {
         val question = "Why does the help attachment need a file provider?"
-        find(By.text("Ask your agent")).click()
-        find(By.hint("e.g. Why won't this connection work?")).setText(question)
+        find(By.desc("Open AYA help with a version-matched reference")).click()
+        find(By.desc("Your question for the assistant (optional)")).setText(question)
         find(By.text("Review details")).click()
         val preview = find(By.hint("Help context to share"))
         assertTrue("Approved preview must contain the typed question", preview.text.contains(question))
@@ -50,19 +53,19 @@ class QuestionFlowTest {
 
     @Test fun hostProvidedQuestionSkipsDuplicateComposer() {
         val question = "How can I verify the share?"
-        find(By.hint("Or type your question here")).setText(question)
-        find(By.text("Ask using my question")).click()
+        find(By.desc("Type a question in the host app")).setText(question)
+        find(By.desc("Review my question with the app reference before sharing")).click()
         val preview = find(By.hint("Help context to share"))
         assertTrue("Host question must appear in review", preview.text.contains(question))
         assertFalse("Host flow must not open a second question box",
-            device.hasObject(By.hint("e.g. Why won't this connection work?")))
+            device.hasObject(By.desc("Your question for the assistant (optional)")))
     }
 
     @Test fun cancelQuestionComposerKeepsHostAppOpen() {
-        find(By.text("Ask your agent")).click()
-        find(By.hint("e.g. Why won't this connection work?"))
+        find(By.desc("Open AYA help with a version-matched reference")).click()
+        find(By.desc("Your question for the assistant (optional)"))
         find(By.text("Cancel")).click()
-        find(By.text("Ask using my question"))
+        find(By.desc("Review my question with the app reference before sharing"))
         assertFalse(device.hasObject(By.hint("Help context to share")))
     }
 }
