@@ -9,7 +9,7 @@ import java.io.File
 /** Visible to Android instrumentation tests; consumers use Aya.launchBundled(). */
 internal object AyaShareIntents {
     private const val RETAIN_CACHE_DAYS = 7L
-    fun create(context: Context, payload: String): Intent {
+    fun create(context: Context, payload: String, messageText: String? = null): Intent {
         require(payload.isNotBlank()) { "Cannot share an empty document" }
         require(payload.toByteArray(Charsets.UTF_8).size <= 2 * 1024 * 1024) {
             "Document too large"
@@ -32,6 +32,13 @@ internal object AyaShareIntents {
             return Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_STREAM, uri)
+                // Some receivers handle the attachment, some the message text,
+                // and some both. Keep the question in BOTH standard channels.
+                // The message must be derived from the user's final review.
+                messageText?.takeIf { it.isNotBlank() }?.let {
+                    putExtra(Intent.EXTRA_TEXT, it.take(4000))
+                }
+                putExtra(Intent.EXTRA_SUBJECT, "Ask Your Agent")
                 clipData = ClipData.newRawUri("AYA help context", uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
