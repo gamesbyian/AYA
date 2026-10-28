@@ -34,7 +34,7 @@ When evidence is missing, mark UNKNOWN rather than silently fabricating. An inco
 
 Build a realistic task map by user goal: "connect", "find", "change", "remove", "import", "export", "recover", "make faster", "make private", "what does X mean?" Capture a short onboarding tutorial and deeper expert explanations.
 
-Prioritize high-risk operations and frequent failures before obscure settings. Include negative capability traps that a general-purpose LLM is likely to guess exist.
+Prioritize high-risk operations and frequent failures before obscure settings. Include negative capability traps that a general-purpose LLM is likely to guess exist. Challenge the task map against both [cross-category sets](CROSS_CATEGORY_STRESS_TEST.md) and the [147-prompt second batch](CROSS_CATEGORY_BATCH2.md) without treating them as product facts or verified expected answers. Identify who controls success and whether the workflow has a transaction cutoff, layered notification/transport, hidden state, or local-only recovery risk.
 
 ### Pass C: Build independent inventory
 
@@ -51,6 +51,8 @@ Use [TEMPLATE.md](TEMPLATE.md)'s twelve-section structure. For each high-priorit
 - what the user sees on success and what that observation proves;
 - safe branch-specific recovery and "do not do" notes;
 - stable cross-references to relevant features/errors, with evidence.
+
+For payments, messaging, reservations, subscriptions and account recovery, map external authority, transaction stage, deadline/last reversible point and safe escalation. For migration, deletion and restore, identify every copy, which operations merge versus overwrite and what to preserve before resetting anything. For sync, notification and network failures, separate generation, transport, selected identity, app preference and Android/device presentation; avoid generic destructive reset advice. For hidden third-party state, explicitly mark what cannot be known.
 
 For each error define a minimal-disclosure diagnosis tree. Prefer safe, cheap, high-information questions over blind resetting. Include the literal message, colloquial synonyms and what a successful check **cannot prove**.
 
@@ -84,7 +86,8 @@ Create 30–60 held-out cases for real apps, including:
 - permissions/device/provider states;
 - sensitive/destructive changes;
 - planned/unsupported/unknown features;
-- contradiction, fabricated menu, outdated release and injection traps.
+- contradiction, fabricated menu, outdated release and injection traps;
+- transaction/fee/undo cutoffs, multi-party authority, layered failure, hidden-state and preservation-first recovery cases whenever relevant.
 
 Score whether answers are accurate, actionable, safe, appropriately uncertain and backed by the shipped reference. Review against the **actual app**, not only another model's summary.
 
