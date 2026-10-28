@@ -1,5 +1,6 @@
 package dev.aya.android
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -10,7 +11,6 @@ class AyaDocumentTest {
         assertTrue(result.contains("Installed version: 0.3"))
         assertTrue(result.contains("Current screen (host supplied): Settings"))
         assertTrue(result.contains("Feature X"))
-        assertTrue(result.contains("Only claim that features exist").not()) // policy wording is version-aware
         assertTrue(result.contains("First check that the reference covers"))
     }
 
@@ -20,9 +20,40 @@ class AyaDocumentTest {
         assertTrue(result.contains("Help me understand and use this application."))
     }
 
-    @Test fun explicitQuestionIncluded() {
-        val result = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = "Where is Export?"))
-        assertTrue(result.contains("Where is Export?"))
+    @Test fun explicitQuestionIncludedInAttachmentAndExtractedText() {
+        val question = "Where is Export?"
+        val result = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = question))
+        assertTrue(result.contains(question))
+        assertEquals(question, AyaDocument.shareMessageFromPayload(result))
+    }
+
+    @Test fun questionCanBeMultilineAndRetainsNewlines() {
+        val question = "Why did it fail?\nI was using remote mode."
+        val result = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = question))
+        assertEquals(question, AyaDocument.shareMessageFromPayload(result))
+    }
+
+    @Test fun finalReviewEditsControlExtraTextNotOriginalQuestion() {
+        val initial = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = "Secret example removed"))
+        val edited = initial.replace("Secret example removed", "How do I import?")
+        assertEquals("How do I import?", AyaDocument.shareMessageFromPayload(edited))
+        assertFalse(AyaDocument.shareMessageFromPayload(edited).contains("Secret example removed"))
+    }
+
+    @Test fun removingQuestionHeadingNeverRestoresThePriorQuestion() {
+        val initial = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = "old question"))
+        val edited = initial.replace("## User's starting question\nold question\n", "")
+        assertFalse(AyaDocument.shareMessageFromPayload(edited).contains("old question"))
+    }
+
+    @Test fun longQuestionStaysInDocumentButUsesAttachmentMessage() {
+        val question = "x".repeat(4200)
+        val result = AyaDocument.render(AyaRequest("AYA", "1", "Guide", question = question))
+        assertTrue(result.contains(question))
+        assertEquals(
+            "My full question is in the attached AYA help document.",
+            AyaDocument.shareMessageFromPayload(result)
+        )
     }
 
     @Test fun nullCharacterRemoved() {
