@@ -49,6 +49,10 @@ These tags describe **the evidence needed**, *not* whether a feature is currentl
 | 29 | AccuWeather / weather | Persistent status-bar temperature **H O P** | Stale home-screen widget **H O** | Disable non-local severe-alert notifications **H O P S** |
 | 30 | Libby / library | Send borrowed ebooks to Kindle **H O P N** | Add multiple library cards **H P** | Download audiobooks for offline use **H O P** |
 
+## Complementary second batch
+
+The companion [147-question / 21-category stress-test](CROSS_CATEGORY_BATCH2.md) and its [structured prompt fixture](examples/cross_category_batch2_147.json) add transaction deadlines, multi-party adjudication, layered delivery chains, unavailable private evidence and preservation-first recovery cases. The two datasets overlap purposefully but are independently enumerated. Neither constitutes verified app-specific answers.
+
 ## Additional mandatory authoring checks suggested by this challenge
 
 ### A. Identify the controlling authority
