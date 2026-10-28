@@ -10,17 +10,20 @@ AYA is a reusable Android **bring-your-own-AI help handoff**. An app provides ve
 
 ## Prototype API
 
-**Preferred host API:** `Aya.launchBundled(activity, guideAsset?, screenName?, question?)` loads an APK asset, verifies its app ID and exact installed `versionName`, and refuses stale or malformed references before opening review. `AyaBundledLaunchResult.PreviewOpened` is strictly a local state; `Rejected(reason)` requires truthful host error handling. The legacy `Aya.launch(activity, AyaRequest(...))` remains for advanced/manual unverified input. Source-only import and staging Maven AAR/POM consumption are both tested by CI.
+**Preferred host API:** `Aya.launchBundled(activity, guideAsset?, screenName?, question?, askQuestion=true)` loads an APK asset, verifies its app ID and exact installed `versionName`, and refuses stale or malformed references before opening review. `AyaBundledLaunchResult.PreviewOpened` is strictly a local state; `Rejected(reason)` requires truthful host error handling. The legacy `Aya.launch(activity, AyaRequest(...))` remains for advanced/manual unverified input. Source-only import and staging Maven AAR/POM consumption are both tested by CI.
 
 No data is collected by AYA itself. Android library includes a non-exported FileProvider limited to `cacheDir/aya/`. AYA creates a unique text file with the edited payload and sends it using `ACTION_SEND`, `EXTRA_STREAM`, `ClipData`, and `FLAG_GRANT_READ_URI_PERMISSION`.
 
 ## User experience
 
 1. Tap "Ask your agent" within a host app.
-2. Read and edit the entire context in an expanded, scrollable review dialog.
-3. Cancel, Copy to clipboard, or Share using Android Sharesheet.
-4. Choose an external assistant; its app decides how to ingest the attachment and whether to start a chat.
-5. If recipient does not ingest the file, paste copied text manually.
+2. AYA asks "What do you need help with?" in a multiline input, optionally prefilled by the host. If the host already has its own question field, `askQuestion=false` skips this extra screen.
+3. User selects Review details and inspects or edits the entire shared document.
+4. User can Cancel, Copy to clipboard, or Share using Android Sharesheet.
+5. AYA sends an attachment containing the complete question and reference, plus the **final edited** question as `EXTRA_TEXT`. Each receiving app decides which fields it consumes and whether to start a new chat.
+6. If recipient does not ingest the file, paste copied text manually.
+
+See [question-first UX](QUESTION_COMPOSER.md) and [Android-to-agent prior art](ANDROID_SHARING_RESEARCH.md).
 
 No guarantee of new-chat creation, auto-send, or assistant adherence. Destination processing is outside AYA's control. Sharing limit: 2 MiB in the prototype. Old unique cache files pruned on a later share after seven days.
 
