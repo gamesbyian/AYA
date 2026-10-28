@@ -7,12 +7,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
-/** Device/emulator contract tests, independent of third-party AI clients. */
+/** Real Android contracts, not provider-specific assistant integration tests. */
 @RunWith(AndroidJUnit4::class)
 class AyaShareIntentsTest {
     private val context: Context
@@ -31,6 +32,20 @@ class AyaShareIntentsTest {
         assertEquals(uri, intent.clipData!!.getItemAt(0).uri)
         val actual = context.contentResolver.openInputStream(uri)!!.bufferedReader(Charsets.UTF_8).use { it.readText() }
         assertEquals(payload, actual)
+    }
+
+    @Test fun questionTextAccompaniesAttachmentWhenExplicitlySupplied() {
+        val payload = "Full help package and user question"
+        val question = "How do I fix import failure?"
+        val intent = AyaShareIntents.create(context, payload, question)
+        assertEquals(question, intent.getStringExtra(Intent.EXTRA_TEXT))
+        val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!
+        assertEquals(payload, context.contentResolver.openInputStream(uri)!!.bufferedReader().use { it.readText() })
+    }
+
+    @Test fun noExtraTextWhenNoneSupplied() {
+        val intent = AyaShareIntents.create(context, "Full help package")
+        assertNull(intent.getStringExtra(Intent.EXTRA_TEXT))
     }
 
     @Test fun repeatedSharesDoNotOverwriteFiles() {
