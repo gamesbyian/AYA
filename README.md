@@ -7,7 +7,7 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 ## Where to start
 
 - [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes the [base authoring standard](docs/reference/AUTHORING_STANDARD.md), [advanced authoring techniques](docs/reference/ADVANCED_AUTHORING.md), [agent production workflow](docs/reference/AGENT_WORKFLOW.md), [independent inventory and traceability](docs/reference/TRACEABILITY.md), [assistant evaluation protocol](docs/reference/EVALUATION_PROTOCOL.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
-- [Android integration](docs/INTEGRATION.md), [readiness checklist](docs/INTEGRATION_READINESS.md), and [real sample host](sample/): version-guarded invocation, standalone AAR consumption, and release gates.
+- [Android integration](docs/INTEGRATION.md), [question-first UX contract](docs/QUESTION_COMPOSER.md), [Android sharing research](docs/ANDROID_SHARING_RESEARCH.md), [readiness checklist](docs/INTEGRATION_READINESS.md), and [real sample host](sample/): version-guarded invocation, standalone AAR consumption, and release gates.
 - [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
@@ -21,17 +21,20 @@ when (val result = Aya.launchBundled(
     activity = this,
     guideAsset = "aya-guide.md",
     screenName = "Connections",
-    question = "How can I configure this connection?"
+    question = "How can I configure this connection?" // optional editable suggestion
 )) {
     is AyaBundledLaunchResult.Rejected ->
         Toast.makeText(this, "AYA help unavailable: ${result.reason}", Toast.LENGTH_LONG).show()
-    AyaBundledLaunchResult.PreviewOpened -> Unit
+    AyaBundledLaunchResult.QuestionOpened -> Unit // question field is shown
+    AyaBundledLaunchResult.PreviewOpened -> Unit // full review is shown
 }
 ```
 
+**By default, AYA first asks the user to type or edit a question inside the host app**, then opens the complete privacy preview. If your host already has its own question field, pass `question = userTypedQuestion, askQuestion = false` to go straight to review and avoid asking twice. The question is included inside the attachment and is also passed as `Intent.EXTRA_TEXT` when sharing, derived from the final approved payload so edits cannot leak an earlier question. Recipient support varies; see [sharing research](docs/ANDROID_SHARING_RESEARCH.md).
+
 Ship `app/src/main/assets/aya-guide.md` following the [AYA-RAS standard](docs/reference/INDEX.md), with `app_id` and `app_version_min/max` matching the APK. There is no fallback to a stale guide. `PreviewOpened` means the local review started, not that a recipient accepted the file. The original `Aya.launch(AyaRequest(...))` API remains available for advanced/manual cases but does not validate the bundled guide.
 
-The preview shows the complete text and allows edits before **Share**, **Copy** or **Cancel**. Sharing uses Android `ACTION_SEND` with one UTF-8 text attachment and a temporary read-granted content URI. Copy gives a manual fallback. AYA includes a narrowly scoped AndroidX FileProvider.
+The preview shows the complete text and allows edits before **Share**, **Copy** or **Cancel**. Sharing uses Android `ACTION_SEND` with one UTF-8 text attachment, the user-approved question in `EXTRA_TEXT`, and a temporary read-granted content URI. Copy gives a manual fallback. AYA includes a narrowly scoped AndroidX FileProvider.
 
 AYA never gathers settings, logs, device IDs or credentials automatically. The host is responsible for sanitizing explicit context. The receiver may store/upload the shared content. Clipboard copy is a separate privacy boundary.
 
