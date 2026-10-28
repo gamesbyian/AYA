@@ -37,7 +37,7 @@ AYA never gathers settings, logs, device IDs or credentials automatically. The h
 
 ## Run the sample
 
-`:sample` is an Android Activity demonstrating the handoff with a **fictional ParcelPad reference**. No ParcelPad functionality is implemented. Build with JDK 17, Android SDK 35, Gradle 8.9:
+`:sample` is a **real Android consuming application**, with a reference describing the actual sample app, validated against its independent feature inventory and support question cases. The separate ParcelPad guide remains fictional and is used only as an authoring example. Build with JDK 17, Android SDK 35, Gradle 8.9:
 
 ```sh
 gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug
