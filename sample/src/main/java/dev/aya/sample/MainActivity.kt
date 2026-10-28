@@ -39,7 +39,7 @@ class MainActivity : Activity() {
                     activity = this@MainActivity,
                     guideAsset = "aya-guide.md",
                     screenName = "Home",
-                    question = "How does this sample hand off its reference, and what are its limits?"
+                    question = null // user writes their own question in AYA's composer
                 )
                 if (result is AyaBundledLaunchResult.Rejected) {
                     Toast.makeText(
