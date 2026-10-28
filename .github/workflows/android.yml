@@ -1,10 +1,10 @@
-name: Android library checks
+name: Android library and sample
 on:
   push:
     branches: [main]
   pull_request:
 jobs:
-  unit-tests:
+  android:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,4 +18,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - run: gradle :aya:testDebugUnitTest :aya:assembleDebug --no-daemon
+      - run: gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-sample-debug-apk
+          path: sample/build/outputs/apk/debug/sample-debug.apk
+          if-no-files-found: error
