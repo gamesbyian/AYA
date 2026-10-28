@@ -62,11 +62,13 @@ def audit(guide: str, inventory: dict[str, Any], questions: dict[str, Any] | Non
     if version and metadata.get("app_version_min") == metadata.get("app_version_max"):
         if version != metadata.get("app_version_min"):
             errors.append("Inventory app_version does not match guide's exact version.")
-    if not isinstance(inventory.get("items"), list) or not inventory["items"]:
+    items = inventory.get("items")
+    if not isinstance(items, list) or not items:
         errors.append("Inventory must contain a nonempty items array.")
+        items = []
     ids: set[str] = set()
     reviewed: int = 0
-    for index, item in enumerate(inventory.get("items", [])):
+    for index, item in enumerate(items):
         if not isinstance(item, dict):
             errors.append(f"Inventory item {index} must be an object.")
             continue
