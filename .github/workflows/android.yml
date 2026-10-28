@@ -1,10 +1,10 @@
-name: Android library checks
+name: Android library and sample
 on:
   push:
     branches: [main]
   pull_request:
 jobs:
-  unit-tests:
+  android:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,8 +14,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - run: gradle :aya:testDebugUnitTest :aya:assembleDebug --no-daemon
+      - name: Install required Android SDK packages
+        run: |
+          SDKROOT=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+      - run: gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-sample-debug-apk
+          path: sample/build/outputs/apk/debug/sample-debug.apk
+          if-no-files-found: error
