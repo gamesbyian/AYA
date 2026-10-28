@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import dev.aya.android.Aya
-import dev.aya.android.AyaRequest
+import dev.aya.android.AyaBundledLaunchResult
 
-/** Exercises AYA with a wholly fictional reference, without real user data. */
+/** First-party consumer of the version-guarded AYA library. No user data is read. */
 class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,35 +19,36 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(padding, padding, padding, padding)
         }
-        val title = TextView(this).apply {
+        column.addView(TextView(this).apply {
             text = "AYA: Ask Your Agent"
             textSize = 26f
-        }
-        column.addView(title)
+        })
         column.addView(TextView(this).apply {
-            text = "This demonstrates Android's share handoff using a fictional " +
-                "ParcelPad guide. ParcelPad itself is not implemented here. " +
-                "Never share a real password or token with an assistant."
+            text = "This real sample app exercises AYA's help handoff. " +
+                "Its bundled reference describes this demo, not a fictional product. " +
+                "Review all text before sharing with another application."
             textSize = 16f
         }, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
-        val button = Button(this).apply {
+        column.addView(Button(this).apply {
             text = "Ask your agent"
-            contentDescription = "Ask your agent about the fictional ParcelPad app"
+            contentDescription = "Open AYA help with a version-matched reference"
             setOnClickListener {
-                val guide = assets.open("EXAMPLE_PARCELPAD.md")
-                    .bufferedReader(Charsets.UTF_8).use { it.readText() }
-                Aya.launch(this@MainActivity, AyaRequest(
-                    appName = "ParcelPad (fictional demonstration)",
-                    appVersion = "1.0.0",
-                    guide = guide,
-                    screenName = "AYA demonstration",
-                    question = "How do I add a parcel, and does carrier tracking work?"
-                ))
+                val result = Aya.launchBundled(
+                    activity = this@MainActivity,
+                    guideAsset = "aya-guide.md",
+                    screenName = "Home",
+                    question = "How does this sample hand off its reference, and what are its limits?"
+                )
+                if (result is AyaBundledLaunchResult.Rejected) {
+                    Toast.makeText(
+                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
-        }
-        column.addView(button)
+        })
         setContentView(column)
     }
 }

@@ -12,7 +12,6 @@ android {
         versionCode = 1
         versionName = "1.0.0"
     }
-    sourceSets.getByName("main").assets.srcDir("../docs/reference")
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -20,5 +19,9 @@ android {
     kotlinOptions { jvmTarget = "17" }
 }
 dependencies {
-    implementation(project(":aya"))
+    if (providers.gradleProperty("aya.consumePublished").orNull == "true") {
+        implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")
+    } else {
+        implementation(project(":aya"))
+    }
 }

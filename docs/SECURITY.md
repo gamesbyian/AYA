@@ -4,6 +4,10 @@
 
 Host app constructs text → AYA renders a reference package → user may **edit and approve** → AYA writes a unique UTF-8 cache file → Android grants a user-selected recipient temporary read access. AYA never performs network requests itself. The receiving app may upload/store the content under its own policies.
 
+## Version identity and stale references
+
+The preferred `Aya.launchBundled()` checks a packaged AYA-RAS guide against the **actual** app package and exact `versionName`, with required sections and metadata. It rejects a stale/cross-app guide before opening review. This validates only structure and identity, not the truth of the guide's claims. The legacy `Aya.launch(AyaRequest(...))` method permits advanced manually supplied text without this guard.
+
 ## Data minimization
 
 No app settings, logs, screenshots, credentials, identifiers, tokens, URLs or personal information are automatically collected. The host developer is responsible for redacting all `AyaRequest` inputs before calling AYA. AYA has **no automatic redaction engine**. User edits can also contain sensitive details; review UI warns about downstream sharing.

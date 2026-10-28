@@ -1,4 +1,4 @@
-name: Android library and sample
+name: Android library and consumer integration
 on:
   push:
     branches: [main]
@@ -25,9 +25,19 @@ jobs:
           echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
           "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
-      - run: gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug --no-daemon
+      - name: Unit tests and module-based consumer
+        run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :sample:assembleDebug --no-daemon
+      - name: Produce Maven-style library distribution
+        run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
+      - name: Verify sample consumes published AAR and POM dependencies
+        run: gradle :sample:assembleDebug -Paya.consumePublished=true --no-daemon --refresh-dependencies
       - uses: actions/upload-artifact@v4
         with:
           name: aya-sample-debug-apk
           path: sample/build/outputs/apk/debug/sample-debug.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-maven-staging-repository
+          path: aya/build/staging-maven/
           if-no-files-found: error
