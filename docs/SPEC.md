@@ -24,6 +24,12 @@ No data is collected by AYA itself. Android library includes a non-exported File
 
 No guarantee of new-chat creation, auto-send, or assistant adherence. Destination processing is outside AYA's control. Sharing limit: 2 MiB in the prototype. Old unique cache files pruned on a later share after seven days.
 
+## Strict handoff boundary
+
+AYA's job ends when the user invokes Share or Copy and control passes to the selected destination or clipboard. Android and the receiving assistant own everything afterward. AYA does not request a return channel, receive agent replies, monitor conversations, solicit success ratings, collect outcomes, track resolution, or trigger follow-up reminders. No callback, analytics event, or background job may be added to observe what an agent says or what a user does with its advice.
+
+Quality evaluation of reference material belongs exclusively to **separate developer/QA fixtures or explicitly run testing**, not to runtime monitoring of real AYA users or their conversations. Developer testing may measure documentation usefulness in controlled samples; it must never be phrased as a requirement to observe production outcomes.
+
 ## Non-goals
 
 Bundled chatbot, vendor lock-in, inference billing, automatically reading installed accounts, reading assistant responses, screen scraping, silently exporting diagnostics, editing the recipient conversation, unofficial deep links or pretending assistant can operate the host app.
