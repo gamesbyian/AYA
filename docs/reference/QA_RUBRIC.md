@@ -25,11 +25,15 @@ Score each criterion 0–4: 0 absent; 1 mostly absent/wrong; 2 partial; 3 sound 
 - **Release-ready target:** 34/40 or higher, **no criterion below 3**, with zero critical factual or privacy errors.
 - **Critical failure:** wrong destructive advice, false promise of remote data safety, fake credentials/authorization paths, false version availability, fabricated unsupported controls, or leaked secrets. Block release regardless of total.
 - **Conditional coverage:** if a category is N/A, the guide must explain why. Do not silently skip authentication, offline operation or deletion.
+- **Independent inventory:** a separate, shipped-code-derived inventory must enumerate all observed user-facing capabilities, tasks and errors. The published guide cannot define its own denominator. Run `tools/audit_reference.py`; undocumented high-risk items block release.
 - **Traceability:** top tasks, screens, settings and errors must each map to a specific reference section and evidence. A validator alone cannot verify this.
+- **Calibration:** intentionally impossible and unanswerable cases must not trigger fabricated controls; distinguish UNSUPPORTED, PLANNED and UNKNOWN.
+- **State variants:** include permissions, flags, provider and OS variations, not just a single happy path.
+- **Response trials:** use a held-out gold question set, explicit forbidden claims and independently checked actual assistant answers. See [evaluation protocol](EVALUATION_PROTOCOL.md).
 
 ## Evaluation protocol
 
-1. Construct a held-out list of 30–60 actual support questions with expected outcomes. Include novice, power-user, edge cases, adverse states and unanswerable questions.
+1. Construct a held-out list of 30–60 actual support questions, with expected behavior, evidence IDs and forbidden claims. Include novice, power-user, edge cases, adverse states and unanswerable questions.
 2. For each, ask an assistant using *only* the shipped reference document, and record answer, factual errors, hallucinated controls, omissions and whether it requested sensitive data.
 3. Independent reviewer checks steps against the installed build. Verify recoverability, not just wording.
 4. Report task-completion rate, supported-answer precision, unsupported-answer calibration, and critical errors separately.
