@@ -6,7 +6,7 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 
 ## Where to start
 
-- [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes complete [authoring standard](docs/reference/AUTHORING_STANDARD.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
+- [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes complete [authoring standard](docs/reference/AUTHORING_STANDARD.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
 - [Android integration](docs/INTEGRATION.md) and [sample app](sample/): how to invoke and inspect AYA.
 - [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
