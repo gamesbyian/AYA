@@ -20,12 +20,13 @@ When integrating AYA into another app:
 
 ## Engineering constraints
 
+- Prefer `Aya.launchBundled()` and an exact-version, real-package APK guide over manually assembled help context. The code must reject mismatched/missing guides before review; never silently fall back to stale data.
 - Public Android `ACTION_SEND`, one self-contained UTF-8 file, read-only content URI grant.
 - Show exact editable payload before sending, with Cancel and Copy fallback.
 - Do not silently collect/send runtime diagnostics, tokens, IPs, account IDs, private file paths or logs.
 - Receiving apps determine attachment ingestion and new-chat behavior; do not promise one-tap completion.
 - Respect FileProvider scope and file lifetime. Test keyboard, screen readers, repeated shares, large guides, no share targets and Activity lifecycle.
-- Keep sample application fictional; never confuse its scenarios with real app features.
+- The Android sample is a real app (`dev.aya.sample`) with its own validated guide. ParcelPad is a separate, intentionally fictional documentation example; never conflate them.
 
 ## Required checks
 
