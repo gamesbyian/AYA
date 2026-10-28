@@ -4,6 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.text.InputType
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -40,6 +42,34 @@ class MainActivity : Activity() {
                     guideAsset = "aya-guide.md",
                     screenName = "Home",
                     question = null // user writes their own question in AYA's composer
+                )
+                if (result is AyaBundledLaunchResult.Rejected) {
+                    Toast.makeText(
+                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        })
+        val hostQuestion = EditText(this).apply {
+            hint = "Or type your question here"
+            contentDescription = "Type a question in the host app"
+            minLines = 2
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        }
+        column.addView(hostQuestion, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+        column.addView(Button(this).apply {
+            text = "Ask using my question"
+            contentDescription = "Review my question with the app reference before sharing"
+            setOnClickListener {
+                val result = Aya.launchBundled(
+                    activity = this@MainActivity,
+                    guideAsset = "aya-guide.md",
+                    screenName = "Home",
+                    question = hostQuestion.text.toString(),
+                    askQuestion = false // host already captured the question
                 )
                 if (result is AyaBundledLaunchResult.Rejected) {
                     Toast.makeText(
