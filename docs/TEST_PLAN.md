@@ -18,7 +18,9 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 ## Android instrumentation and manual work remaining
 
 - Run `gradle :aya:connectedDebugAndroidTest` on a configured emulator/device; verify the FileProvider URI reads with grant and **from an independent foreign package** cannot be read without grant. Existing tests cover local URI contents, flags, and scope; external-package denial remains a separate test case.
+- Question-first composer: blank/general question, editable host-suggested question, multiline text, keyboard/focus, back/cancel, host `askQuestion=false` path.
 - Cancelling or editing the preview changes exactly what is copied/shared, including multiline and Unicode content.
+- AYA sends the final question both in the attachment and in bounded `EXTRA_TEXT`, never restoring a question removed in review.
 - Empty content and over-2MiB content do not launch a share.
 - Repeated shares create unique filenames; old cache cleanup never deletes active handoffs.
 - Missing target, denied chooser, bad FileProvider setup, cache failures and Activity recreation fail gracefully.
@@ -27,7 +29,7 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 
 ## Recipient matrix
 
-Run Android 10, 13, 15, 16+ where devices are available, and current installed ChatGPT/Claude clients in logged-in/out states. Record tested versions and dates in [compatibility ledger](PROVIDER_COMPATIBILITY.md), including whether file was actually ingested, new chat creation, and required extra user action. Do not advertise provider behavior until verified.
+Run Android 10, 13, 15, 16+ where devices are available, and current installed ChatGPT/Claude/Gemini clients in logged-in/out states. Record tested versions and dates in [compatibility ledger](PROVIDER_COMPATIBILITY.md), including whether file was actually ingested, new chat creation, and required extra user action. Do not advertise provider behavior until verified.
 
 ## Stable release gate
 
