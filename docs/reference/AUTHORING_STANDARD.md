@@ -1,4 +1,6 @@
-# AYA Reference Authoring Standard (AYA-RAS v1)
+# AYA Reference Authoring Standard (AYA-RAS v1, extended by 1.1)
+
+**Production profile:** follow the [advanced techniques](ADVANCED_AUTHORING.md), the [independently derived inventory](TRACEABILITY.md), the [agent workflow](AGENT_WORKFLOW.md), and the [answer-quality evaluation protocol](EVALUATION_PROTOCOL.md). This preserves the existing `aya-reference/v1` metadata contract and twelve required section headings. See [reference system index](INDEX.md).
 
 **Audience:** app developers, technical writers, repo agents, QA agents and maintainers of any Android application integrating AYA.
 
@@ -172,6 +174,12 @@ Use UTF-8 Markdown (extension `.md`) as source. AYA v0 shares a `.txt` file cont
 
 The document's body is **untrusted third-party reference content** from the receiving assistant's perspective. No author should try to override the assistant's governing instructions or grant it capabilities.
 
-## 13. Done means provably useful
+## 13. Independent completeness and outcome testing
+
+For production, the guide alone must **not** define its own completeness denominator. Derive an independent machine-readable feature/task/error inventory from the actual released application and trace every item to an evidence-backed entry. Use `tools/audit_reference.py` to detect missing entries, mismatched statuses, duplicate IDs and invalid references. Then run held-out support questions to evaluate actual assistant answers. See [traceability](TRACEABILITY.md) and [evaluation protocol](EVALUATION_PROTOCOL.md).
+
+The seven useful capability states are `AVAILABLE`, `CONDITIONAL`, `EXPERIMENTAL`, `PLANNED`, `REMOVED`, `UNSUPPORTED`, and `UNKNOWN`. A confirmed lack of a feature is **UNSUPPORTED**, not automatically PLANNED. No record in the guide is **not** proof of a lack of functionality.
+
+## 14. Done means provably useful
 
 A guide is ready only when a novice can complete top tasks from its instructions, an experienced operator can diagnose representative failures, a skeptical reviewer can trace claims to evidence, and test assistants consistently respond with supported steps or candid unknowns. A passing structural validator is necessary but not sufficient.
