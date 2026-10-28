@@ -2,11 +2,12 @@
   "schema_version": "aya-inventory/v1",
   "app_id": "dev.aya.sample",
   "app_version": "1.0.0",
-  "source_revision": "aya-sample-v1",
+  "source_revision": "aya-sample-question-first-v1",
   "reviewed_at_utc": "2026-10-28T00:00:00Z",
   "items": [
     {"id":"TASK-001","kind":"task","title":"Share help through Android","status":"CONDITIONAL","criticality":"high","source_ref":"sample/src/main/java/dev/aya/sample/MainActivity.kt;aya/src/main/java/dev/aya/android/Aya.kt"},
     {"id":"TASK-002","kind":"task","title":"Copy help text","status":"AVAILABLE","criticality":"medium","source_ref":"aya/src/main/java/dev/aya/android/Aya.kt"},
+    {"id":"TASK-003","kind":"task","title":"Ask from the host's own question input","status":"AVAILABLE","criticality":"medium","source_ref":"sample/src/main/java/dev/aya/sample/MainActivity.kt;aya/src/main/java/dev/aya/android/Aya.kt"},
     {"id":"F-001","kind":"feature","title":"Guarded reference validation","status":"AVAILABLE","criticality":"high","source_ref":"aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt"},
     {"id":"F-002","kind":"feature","title":"Editable review and sharing","status":"AVAILABLE","criticality":"high","source_ref":"aya/src/main/java/dev/aya/android/Aya.kt"},
     {"id":"ERR-001","kind":"error","title":"AYA reference unavailable","status":"AVAILABLE","criticality":"high","source_ref":"sample/src/main/java/dev/aya/sample/MainActivity.kt"},
