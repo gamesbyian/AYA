@@ -1,16 +1,17 @@
 # Recipient-app compatibility ledger
 
-**All recipient behavior remains UNVERIFIED on devices.** AYA uses documented Android `ACTION_SEND` / `EXTRA_STREAM` and temporary content-URI grants. Whether ChatGPT, Claude or another receiver imports the attachment and creates a new conversation is controlled by that receiver.
+**All recipient behavior remains UNVERIFIED on devices.** Prior public reports of Gemini's TXT Sharesheet support are useful [research](ANDROID_SHARING_RESEARCH.md), not a substitute for tested AYA end-to-end ingestion. AYA uses documented Android `ACTION_SEND` / `EXTRA_STREAM` and temporary content-URI grants. Whether ChatGPT, Claude or another receiver imports the attachment and creates a new conversation is controlled by that receiver.
 
 | Target | Tested Android version | Tested target version | Attachment ingested | New conversation | Result |
 | --- | --- | --- | --- | --- | --- |
 | ChatGPT | Not tested | Not tested | Unknown | Unknown | UNVERIFIED |
 | Claude | Not tested | Not tested | Unknown | Unknown | UNVERIFIED |
+| Gemini | Not tested | Not tested | Unknown | Unknown | UNVERIFIED |
 | Generic share targets | Not tested | Not tested | Unknown | N/A | UNVERIFIED |
 
 ## Manual test record template
 
-Record UTC timestamp, device/Android version, target app package and release version, target signed-in/out, AYA guide revision/size, whether Sharesheet offers target, whether file appears, whether the target reads document contents, whether a chat is new, whether user must press Send, what error is shown, test result, screenshots redacted and tester identifier.
+Record UTC timestamp, device/Android version, target app package and release version, target signed-in/out, AYA guide revision/size, whether Sharesheet offers target, whether file appears, whether the target reads document contents, whether a chat is new, whether user must press Send, whether the separate `EXTRA_TEXT` question appears correctly, what error is shown, test result, screenshots redacted and tester identifier.
 
 Test at minimum fresh install, target logged out, target logged in, long guide, app backgrounded, repeated shares and no compatible receiver.
 
