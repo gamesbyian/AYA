@@ -9,6 +9,7 @@
     {"id": "TASK-002", "kind": "task", "title": "Export backup", "status": "AVAILABLE", "criticality": "high", "source_ref": "fictional-training-scenario"},
     {"id": "F-001", "kind": "feature", "title": "Delivered checkbox", "status": "AVAILABLE", "criticality": "medium", "source_ref": "fictional-training-scenario"},
     {"id": "F-002", "kind": "feature", "title": "Carrier tracking", "status": "PLANNED", "criticality": "medium", "source_ref": "fictional-training-scenario"},
+    {"id": "F-003", "kind": "feature", "title": "Multi-device sync", "status": "UNSUPPORTED", "criticality": "medium", "source_ref": "fictional-training-scenario"},
     {"id": "ERR-001", "kind": "error", "title": "Title required", "status": "AVAILABLE", "criticality": "high", "source_ref": "fictional-training-scenario"}
   ]
 }
