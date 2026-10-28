@@ -31,6 +31,16 @@ Score each criterion 0–4: 0 absent; 1 mostly absent/wrong; 2 partial; 3 sound 
 - **State variants:** include permissions, flags, provider and OS variations, not just a single happy path.
 - **Response trials:** use a held-out gold question set, explicit forbidden claims and independently checked actual assistant answers. See [evaluation protocol](EVALUATION_PROTOCOL.md).
 
+## Cross-boundary release gates
+
+For workflows depending on another app, OS, provider or account, require an explicitly scoped **controlling authority**, source and destination steps (where applicable), and an actual outcome verification method. Externally controlled claims (subscription, provider policy, moderation, region/rollout, library/issuer eligibility) need a claim-level review date and recheck trigger; an installed-app version match alone does not make them current. High-risk delete/sync/export procedures need an explicit local/remote/trash/backup impact analysis.
+
+A case may pass by correctly identifying an unsupported or unverified capability and giving safe next steps. Do not score inability to force a provider decision as an inaccurate answer. Conversely, claiming that a provider action succeeded or was authorized without evidence is a P0/P1 failure depending on impact. The [90-question cross-category suite](CROSS_CATEGORY_STRESS_TEST.md) supplies test ideas, not prevalidated product answers.
+
+## Second-batch failure-mode criteria
+
+Apply the [147-question second cross-category challenge](CROSS_CATEGORY_BATCH2.md) in addition to the first 90. Relevant high-frequency workflows must document transaction cutoffs, which actor has authority, cross-layer notifications/sync/transport, unobservable private states, and data preservation/recovery semantics. A confident but unverifiable "shadowban" diagnosis, a supposed guaranteed refund, a promise to recall an already delivered message, or advice to reinstall over local-only drafts are release-blocking answer defects according to impact. Do not count a provider's refusal of an externally controlled remedy against a correct AYA answer.
+
 ## Evaluation protocol
 
 1. Construct a held-out list of 30–60 actual support questions, with expected behavior, evidence IDs and forbidden claims. Include novice, power-user, edge cases, adverse states and unanswerable questions.

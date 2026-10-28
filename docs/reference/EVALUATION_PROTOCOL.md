@@ -2,6 +2,12 @@
 
 The AYA reference's test target is the **accuracy and safety of the receiving assistant's help**, not simply the existence of Markdown headings.
 
+## Product boundary: no production response tracking
+
+All answer scoring in this document describes **optional controlled development or release QA**, not live-user analytics or an AYA runtime feature. AYA only prepares and hands off a user-approved question plus app reference. It has no responsibility for receiving, inspecting or recording the assistant's reply, determining whether a user resolved their issue, or prompting future follow-ups. No feedback channel, reply callback, persistent session tracking, outcome telemetry or agent-account connection is required or desired.
+
+Tests must use synthetic, voluntarily provided or otherwise authorized test prompts in explicitly controlled sessions. Never gather real recipient conversations as a condition for AYA integration. AYA may inspect the local share operation only to the extent Android exposes it, without inferring whether an agent answered.
+
 ## Three test layers
 
 **1. Structure:** the guide parses, carries metadata, uses stable IDs, and avoids obvious secrets and placeholders. Deterministic linter.
@@ -73,6 +79,14 @@ Use the **same exported bytes and user question** for each tested assistant. Rec
 ## Automation boundary
 
 AYA includes offline validators for guide structure and gold-case metadata. It does not silently call ChatGPT/Claude APIs or upload reference documents. Actual assistant answer generation and scoring should be a separate, explicitly authorized evaluation workflow.
+
+## Second-batch cross-boundary evaluation
+
+Use the [147-question second batch](CROSS_CATEGORY_BATCH2.md) and [prompt fixture](examples/cross_category_batch2_147.json) to select representative scenarios **after** extracting the real integrating app's own top questions. It is a prompt dataset, not a verified `aya-questions/v1` gold benchmark. Derive expected answers from official/current app and external evidence first.
+
+For applicable scenarios record whether the answer accurately describes: **T** transaction state and last reversible/paid boundary; **A** the actor with authority and verified escalation; **L** diagnostic separation of remote source, transport, Android/client and selected identity; **E** observable versus unknowable status; and **R** preservation of local/cloud copies and realistic recovery. Grade each as correct, incomplete, unsafe, or hallucinated, and record source evidence. A case cannot pass by offering a list of generic settings while ignoring a high-risk data-loss or financial precondition.
+
+When a service dispute cannot be decided by the assistant, score **accurate, safely actionable assistance** independently of the eventual provider outcome. Explicitly penalize certainty about refunds, user bans, hidden private states or data restoration without evidence.
 
 ## Stop / escalation
 

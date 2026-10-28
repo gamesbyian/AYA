@@ -34,6 +34,12 @@ Review **unsupported**, **unknown** and **planned** capability entries whenever 
 
 At least once per release, compare documented menu paths to UI resources, features to release flags, error strings to code, permissions to manifest, and URLs to maintained official endpoints. Mark unresolved discrepancies UNKNOWN. Escalate high-risk drift, especially destructive operations and authentication.
 
+## Volatile upstream policy and entitlement claims
+
+An APK release can remain unchanged while service-side subscription benefits, refund windows, account enforcement, provider rules, region availability, payment issuer requirements and workplace administration change. Track applicable statements at the **claim level**, recording authority, official source/document identifier, region/tier, verification date, risk, review trigger and a fallback when current confirmation is unavailable. Recheck high-risk payment, data-recovery and security assertions at a documented cadence **independent of app releases**. Expired/unverified assertions cannot be treated as confirmed merely because `app_version_min/max` still match the installed app. Where no reliable recheck channel exists, narrow the claim and instruct the agent to acknowledge uncertainty.
+
+A real reported cancellation/booking dispute, notification pipeline failure, lost local-only draft, account recovery or unrecoverable cloud deletion should trigger a regression question with transaction stage, authority, OS/device conditions and data topology. See the [second cross-category challenge](CROSS_CATEGORY_BATCH2.md).
+
 ## Modular authoring
 
 Authors may organize sources across Markdown files. Export a single deterministic, UTF-8, self-contained guide to the application assets. Resolve internal links or include their needed content. The receiving assistant may have no browser or file access.

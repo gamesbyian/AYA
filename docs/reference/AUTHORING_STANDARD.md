@@ -6,6 +6,10 @@
 
 **Objective:** produce a trustworthy, comprehensive, operationally precise reference that allows an external LLM to explain the app, guide a user through tasks, compare alternatives, diagnose failures, and explicitly acknowledge uncertainty. Success is measured by answer fidelity on realistic questions, **not** by word count.
 
+## Product scope: author for assistance; do not observe answers
+
+This standard governs **what the developer writes and verifies before packaging the reference**, not what AYA measures after a user shares it. AYA hands off the question and guide and stops. It has no feedback/reply ingestion, session monitoring, resolution tracking, agent response grading, follow-up scheduling or production conversation analytics. All instructions to evaluate assistant answers refer only to *separate controlled developer/QA testing* using independently prepared questions and authorized sessions. They are not runtime requirements and must not justify collection of user conversations or post-handoff outcomes.
+
 ## 0. Core principles
 
 - **Facts over promotion.** Document observable, shipping behavior and its boundaries. Marketing copy does not explain what an app does.
@@ -183,3 +187,28 @@ The seven useful capability states are `AVAILABLE`, `CONDITIONAL`, `EXPERIMENTAL
 ## 14. Done means provably useful
 
 A guide is ready only when a novice can complete top tasks from its instructions, an experienced operator can diagnose representative failures, a skeptical reviewer can trace claims to evidence, and test assistants consistently respond with supported steps or candid unknowns. A passing structural validator is necessary but not sufficient.
+
+## 15. Cross-boundary support: real-world integration requirements
+
+The [90-question, 30-category stress test](CROSS_CATEGORY_STRESS_TEST.md) tests how an assistant handles questions that cannot be answered solely from an app's own UI. For each important workflow identify **who controls the outcome** (host, Android/OEM, another client/device, upstream service/account, or human adjudicator). Identify what the guide can verify and what needs current external evidence or user observation.
+
+- **Remote-fact freshness:** Provider policies, paid tiers, available features, account eligibility, rollout and region conditions can change without an APK update. At claim level record source, relevant tier/territory, verified date, recheck trigger/expiry and safe fallback when not reverified. Exact APK version matching does not prove a remote policy is fresh.
+- **Two-sided workflows:** For Android-to-iPhone migration, Google Play subscription cancellation, cloud transfer, bank/card services, and external device export, record source and destination prerequisites, data scope, ordered steps, independent verification and rollback. Scope external UI labels to verified client versions.
+- **Data-copy semantics:** For destructive, backup and sync tasks distinguish local originals, managed copies, caches, cloud copies, trash/recovery, synchronized deletion and encryption. Never assume a "Delete" or "Free up space" operation preserves the desired other copy.
+- **Explicit feature limits:** For requests involving nonexistent controls, past features, subscription-only functionality or provider decisions, state AVAILABLE/CONDITIONAL/UNSUPPORTED/UNKNOWN as actually evidenced, with supported alternatives and an honest escalation route. A guide must not assume a requested feature exists.
+- **Context provenance:** Separate build-time facts, consented host observations, user reports and independently verified live state. Do not imply the recipient can inspect Android settings, accounts or a backend merely because a reference was attached. Dynamic contexts should be typed, timestamped, user-reviewable, minimal and redacted.
+- **High-stakes gate:** Account recovery, plaintext credential export, financial effects, private location, paid purchases and permanent data deletion demand explicit preflight, authorization boundaries, exact data effects and confirmed escalation paths. Never treat static guidance as permission to perform an action.
+
+Include applicable cross-boundary and negative-capability cases in held-out evaluation. A correct, evidence-backed "cannot do that" can pass; a plausible fictitious workaround cannot. Tests must measure *useful assistance* separately from *successful task completion*.
+
+## 16. Transaction, authority, layered diagnosis, latent state and recoverability
+
+The [second stress-test batch](CROSS_CATEGORY_BATCH2.md) adds 147 user questions across 21 supplied categories. Its canonical [question fixture](examples/cross_category_batch2_147.json) is **unverified prompt research**, not a validated set of product facts or gold answers. For every applicable high-priority task, document the following under the existing twelve required export sections:
+
+- **Transaction stage and deadline (T):** Map pending, accepted, completed, cancellable, disputed or reversed states; when editing/cancellation/undo expires; provisional charges vs settled payments; externally controlled fees and refunds; duplicate-operation risks; timezone; and the independent success check. Never treat an accepted refund request as a completed refund or an Undo Send cancellation as universal recall.
+- **Authority and escalation (A):** Explicitly identify the host app, merchant, lodging, courier, carrier, issuing bank, payment processor, subscription marketplace, institution, workspace administrator or other party controlling each decision. Separate help-request submission, third-party adjudication and verified resolution, and cite only legitimate support pathways.
+- **Layered delivery and platform dependencies (L):** Troubleshoot notifications, messaging, sync, NFC, audio and remote connectivity at their distinct source, network/transport, identity/target, app preference, Android permission/channel and OEM/device layers. Branch on discriminating observations; do not recommend data-clearing or security weakening as a default fix.
+- **Hidden or unknowable state (E):** Record which facts are observable, only inferable, privately controlled by another user/provider, or fundamentally unidentifiable with available evidence. Never claim conclusive proof of blocking, shadowbans, algorithmic suppression or unexposed moderation mechanisms.
+- **Recovery and data custody (R):** Track app-local, device-visible, cached, cloud, backup, export, trash, encrypted and remote copies; their retention and deletion interactions; whether restores merge or overwrite; the *preserve-first* sequence before reinstall, reset, account switching or clearing data; and independent proof of restored data.
+
+For release-grade integrations, tag applicable gold questions with these failure classes, independently verify the correct conditions and forbid plausible but unsafe shortcuts. Structural validation alone does not demonstrate competence. Do not change AYA-RAS v1 envelope or its twelve required headings merely to add these lenses.

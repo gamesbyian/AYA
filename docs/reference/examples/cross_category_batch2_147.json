@@ -1,0 +1,1673 @@
+{
+  "schema_version": "aya-cross-category-prompts/v1",
+  "title": "Research-informed Android app help questions, batch 2",
+  "date_recorded": "2026-10-28",
+  "source_description": "21 app categories, seven questions each, provided by project owner. Research citations and rankings have not been independently verified within AYA.",
+  "evidence_status": "UNVERIFIED_PROMPTS_NOT_GOLD_ANSWERS",
+  "meaning_of_challenges": {
+    "H": "host-app behavior and UI",
+    "O": "Android or another client/device",
+    "P": "remote service, account, market or entitlement",
+    "N": "negative or unsupported capability",
+    "S": "safety, privacy, loss or irreversible impact",
+    "A": "multiple authority, operator, administrator or adjudicator",
+    "T": "transaction state, fee, cutoff or cancellation window",
+    "L": "layered delivery, network, notification or platform pipeline",
+    "E": "hidden, probabilistic or unavailable evidence",
+    "R": "data recovery, retention, custody and backup topology"
+  },
+  "categories": [
+    {
+      "id": "C01",
+      "app": "Facebook",
+      "category": "Social networking",
+      "questions": [
+        {
+          "id": "B2-01-01",
+          "question": "How do I recover a hacked, locked, or disabled Facebook account?",
+          "challenges": [
+            "H",
+            "P",
+            "S",
+            "A"
+          ]
+        },
+        {
+          "id": "B2-01-02",
+          "question": "How do I restrict who sees posts, photos, and my friends list?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-01-03",
+          "question": "How do I reduce unwanted Reels, suggested posts, and ads in News Feed?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-01-04",
+          "question": "How do I permanently delete or temporarily deactivate my account?",
+          "challenges": [
+            "H",
+            "P",
+            "S",
+            "R"
+          ]
+        },
+        {
+          "id": "B2-01-05",
+          "question": "How can I tell whether someone blocked, unfriended, or restricted me?",
+          "challenges": [
+            "H",
+            "P",
+            "N",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-01-06",
+          "question": "Why was my Marketplace listing rejected, hidden, or removed?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-01-07",
+          "question": "How do I disable group, page, birthday, and suggestion notifications?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "app": "Instagram",
+      "category": "Photo-sharing",
+      "questions": [
+        {
+          "id": "B2-02-01",
+          "question": "Can I turn off Reels or keep them out of my feed?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-02-02",
+          "question": "How do I save Stories, Reels, and photos in original quality?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-02-03",
+          "question": "How do I recover a hacked, suspended, or disabled account?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-02-04",
+          "question": "Can I see who viewed my Instagram profile rather than Stories?",
+          "challenges": [
+            "H",
+            "P",
+            "N",
+            "E",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-02-05",
+          "question": "How do I hide online status, likes, activity, or followers?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-02-06",
+          "question": "How do I restore deleted posts, Stories, archives, or Highlights?",
+          "challenges": [
+            "H",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-02-07",
+          "question": "Why did engagement fall and how do I check content restrictions?",
+          "challenges": [
+            "H",
+            "P",
+            "E",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "app": "WhatsApp",
+      "category": "Instant messaging",
+      "questions": [
+        {
+          "id": "B2-03-01",
+          "question": "How do I move all chats and media between Android and iPhone or two Android phones?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-03-02",
+          "question": "How do I restore a Google Drive backup without losing newer chats?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-03-03",
+          "question": "How do I stop WhatsApp media appearing in my gallery?",
+          "challenges": [
+            "H",
+            "O",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-03-04",
+          "question": "Can I recover deleted messages never backed up?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-03-05",
+          "question": "How do I use the same WhatsApp account on multiple phones?",
+          "challenges": [
+            "H",
+            "O",
+            "P"
+          ]
+        },
+        {
+          "id": "B2-03-06",
+          "question": "How do I hide presence, read receipts, or profile photo from selected contacts?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-03-07",
+          "question": "Why are WhatsApp notifications or verification codes not arriving?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C04",
+      "app": "Google Messages",
+      "category": "SMS/RCS",
+      "questions": [
+        {
+          "id": "B2-04-01",
+          "question": "Why is RCS stuck at Setting up or Verifying?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-04-02",
+          "question": "Why are SMS, verification codes, or iPhone-originated messages missing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-04-03",
+          "question": "How do I migrate SMS and RCS message history to a new Android phone?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-04-04",
+          "question": "How do I block spam, scams, and unwanted senders?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-04-05",
+          "question": "How do I view/send my phone messages from a computer or another device?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-04-06",
+          "question": "How can I schedule a text for a particular date and time?",
+          "challenges": [
+            "H",
+            "O",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-04-07",
+          "question": "Why do some group chats use SMS/MMS rather than RCS?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C05",
+      "app": "YouTube",
+      "category": "Online video",
+      "questions": [
+        {
+          "id": "B2-05-01",
+          "question": "How can I play video in the background or with screen off?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-05-02",
+          "question": "How do I disable or reduce Shorts in recommendations?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-05-03",
+          "question": "How do I download videos offline and why are some downloads unavailable?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-05-04",
+          "question": "How do I stop ads and what are Premium versus Premium Lite benefits?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-05-05",
+          "question": "Why is playback buffering, lowering quality, freezing, or failing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-05-06",
+          "question": "How do I enable PiP, captions, speed, or automatic translation?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-05-07",
+          "question": "How do I reset recommendations, clear watch history, or stop autoplay?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C06",
+      "app": "TikTok",
+      "category": "Short-form video",
+      "questions": [
+        {
+          "id": "B2-06-01",
+          "question": "How do I reset or retrain my For You feed?",
+          "challenges": [
+            "H",
+            "P"
+          ]
+        },
+        {
+          "id": "B2-06-02",
+          "question": "How do I download without watermark and why are downloads disabled?",
+          "challenges": [
+            "H",
+            "P",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-06-03",
+          "question": "How do I recover drafts after phone replacement, storage clearing, or reinstall?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-06-04",
+          "question": "How do I set my account private and conceal viewing activity?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-06-05",
+          "question": "How do I appeal a banned, suspended, or restricted account?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-06-06",
+          "question": "Why are views low or sounds and features unavailable?",
+          "challenges": [
+            "H",
+            "P",
+            "E",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-06-07",
+          "question": "How do I undo reposts, restore deleted videos, or change comment/duet/stitch permissions?",
+          "challenges": [
+            "H",
+            "P",
+            "R",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C07",
+      "app": "Netflix",
+      "category": "Subscription video",
+      "questions": [
+        {
+          "id": "B2-07-01",
+          "question": "How do offline downloads work and why can't some titles be downloaded?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-07-02",
+          "question": "How do I fix a Netflix Household warning?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A"
+          ]
+        },
+        {
+          "id": "B2-07-03",
+          "question": "How many devices can use my subscription and how do I remove an old device?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-07-04",
+          "question": "Why is a movie/series missing or disappearing?",
+          "challenges": [
+            "H",
+            "P",
+            "E",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-07-05",
+          "question": "How do I adjust subtitles, audio language, appearance, and quality?",
+          "challenges": [
+            "H",
+            "O",
+            "P"
+          ]
+        },
+        {
+          "id": "B2-07-06",
+          "question": "How do I cast or watch from my Android phone on a TV?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-07-07",
+          "question": "How do I cancel/change subscription or resolve billing and playback errors?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C08",
+      "app": "Spotify",
+      "category": "Music streaming",
+      "questions": [
+        {
+          "id": "B2-08-01",
+          "question": "How do I download music offline and why do downloads disappear?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R"
+          ]
+        },
+        {
+          "id": "B2-08-02",
+          "question": "How do I turn off Smart Shuffle or maintain exact song order?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-08-03",
+          "question": "How do I transfer playlists across accounts or music services?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R"
+          ]
+        },
+        {
+          "id": "B2-08-04",
+          "question": "How do I use playlist folders, reorder songs, and manage the queue?",
+          "challenges": [
+            "H",
+            "O",
+            "P"
+          ]
+        },
+        {
+          "id": "B2-08-05",
+          "question": "Why are songs greyed out, unavailable, or skipped?",
+          "challenges": [
+            "H",
+            "P",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-08-06",
+          "question": "How do I use Spotify in Android Auto, over Bluetooth, or via Spotify Connect?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-08-07",
+          "question": "How do I cancel Premium, change plans, or manage Duo/Family billing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C09",
+      "app": "Google Chrome",
+      "category": "Web browsing",
+      "questions": [
+        {
+          "id": "B2-09-01",
+          "question": "How can I clear cache/cookies/history/site data without deleting passwords?",
+          "challenges": [
+            "H",
+            "O",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-09-02",
+          "question": "How do I block site notifications, pop-ups, redirects, and ads?",
+          "challenges": [
+            "H",
+            "O",
+            "N",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-09-03",
+          "question": "How do I recover tabs lost after an update or crash?",
+          "challenges": [
+            "H",
+            "O",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-09-04",
+          "question": "How do I sync bookmarks, passwords, tabs, and history across devices?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-09-05",
+          "question": "How do I change default browser, search engine, homepage, or tab settings?",
+          "challenges": [
+            "H",
+            "O",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-09-06",
+          "question": "How do I save webpages/files for offline access?",
+          "challenges": [
+            "H",
+            "O",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-09-07",
+          "question": "Why does Chrome use too much memory/battery or crash?",
+          "challenges": [
+            "H",
+            "O",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C10",
+      "app": "Gmail",
+      "category": "Email",
+      "questions": [
+        {
+          "id": "B2-10-01",
+          "question": "Why are emails missing or not arriving?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-10-02",
+          "question": "How do I limit email notifications but retain important ones?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-10-03",
+          "question": "How do I recall or undo sending an email?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-10-04",
+          "question": "How do I set up email filters, rules, or automatic organization on Android?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-10-05",
+          "question": "How do I free storage without deleting important messages or attachments?",
+          "challenges": [
+            "H",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-10-06",
+          "question": "How do I restore email deleted from Trash or marked as spam?",
+          "challenges": [
+            "H",
+            "P",
+            "R",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-10-07",
+          "question": "How do I add other mail accounts/inboxes or fix sync?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C11",
+      "app": "Google Maps",
+      "category": "Navigation",
+      "questions": [
+        {
+          "id": "B2-11-01",
+          "question": "How do I download map areas for offline navigation?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-11-02",
+          "question": "Why is location or routing wrong?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-11-03",
+          "question": "How do I share and stop sharing live location?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-11-04",
+          "question": "How do I restore Timeline/location history after switching devices?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-11-05",
+          "question": "How do I avoid tolls, highways, ferries, or specific routes?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-11-06",
+          "question": "Why are spoken navigation directions silent?",
+          "challenges": [
+            "H",
+            "O",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-11-07",
+          "question": "How do I add stops, plan routes, or use Android Auto?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C12",
+      "app": "Uber",
+      "category": "Ride-hailing",
+      "questions": [
+        {
+          "id": "B2-12-01",
+          "question": "Why is my fare higher than estimated and what is surge pricing?",
+          "challenges": [
+            "H",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-12-02",
+          "question": "How do I cancel a ride without incurring a fee?",
+          "challenges": [
+            "H",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-12-03",
+          "question": "How do I claim a refund for no-show, wrong route, or incorrect charge?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-12-04",
+          "question": "How do I contact a driver about a lost item?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-12-05",
+          "question": "How do I adjust stops, pickup, or trip sharing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-12-06",
+          "question": "How do I schedule a ride or reserve one?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-12-07",
+          "question": "Why is a pending charge or duplicate charge showing on my card?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C13",
+      "app": "Uber Eats",
+      "category": "Food delivery",
+      "questions": [
+        {
+          "id": "B2-13-01",
+          "question": "How do I request a refund for missing, damaged, wrong, or cold items?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-13-02",
+          "question": "What should I do if order says Delivered but is missing?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-13-03",
+          "question": "How do I cancel an order and determine refund eligibility?",
+          "challenges": [
+            "H",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-13-04",
+          "question": "Why are fees and restaurant prices higher than expected?",
+          "challenges": [
+            "H",
+            "P",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-13-05",
+          "question": "How do I update address/instructions or contact my courier?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-13-06",
+          "question": "Why does a discount or promo code fail?",
+          "challenges": [
+            "H",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-13-07",
+          "question": "How do I cancel Uber One, adjust a tip, or reach support?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C14",
+      "app": "Amazon Shopping",
+      "category": "E-commerce",
+      "questions": [
+        {
+          "id": "B2-14-01",
+          "question": "How do I track a late/missing package or falsely marked delivery?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-14-02",
+          "question": "How do I return an item without printing a label?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-14-03",
+          "question": "How do I cancel or change an order once placed?",
+          "challenges": [
+            "H",
+            "P",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-14-04",
+          "question": "How do I change address, card, or delivery instructions for an existing order?",
+          "challenges": [
+            "H",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-14-05",
+          "question": "What do I do about a counterfeit, damaged, used, or wrong product?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-14-06",
+          "question": "How do I cancel Prime or Subscribe & Save?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-14-07",
+          "question": "How do I switch Amazon region, marketplace, or accounts?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C15",
+      "app": "Google Wallet",
+      "category": "Contactless payments",
+      "questions": [
+        {
+          "id": "B2-15-01",
+          "question": "Why does tap-to-pay fail even though my card works?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-15-02",
+          "question": "How do I add a card and resolve issuer verification refusal?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-15-03",
+          "question": "How do I change default card or remove a saved card?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-15-04",
+          "question": "How do I add loyalty cards, tickets, transit or boarding passes?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-15-05",
+          "question": "Why does Wallet say device security requirements are not met?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-15-06",
+          "question": "Can I pay with phone locked, with app closed, or offline?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-15-07",
+          "question": "How do I migrate cards/passes to a new Android phone?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C16",
+      "app": "Booking.com",
+      "category": "Accommodation booking",
+      "questions": [
+        {
+          "id": "B2-16-01",
+          "question": "How can I cancel a reservation and receive a refund?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-16-02",
+          "question": "Can I change dates, room type, guests, or check-in after payment?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-16-03",
+          "question": "Why was I charged when booking said pay at property?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-16-04",
+          "question": "How do I contact the accommodation through the app?",
+          "challenges": [
+            "H",
+            "P",
+            "A"
+          ]
+        },
+        {
+          "id": "B2-16-05",
+          "question": "Where is the booking confirmation, invoice, or receipt?",
+          "challenges": [
+            "H",
+            "P",
+            "A"
+          ]
+        },
+        {
+          "id": "B2-16-06",
+          "question": "Why is the final total higher than the advertised price?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-16-07",
+          "question": "What if accommodation cancels, loses, or refuses the reservation?",
+          "challenges": [
+            "H",
+            "P",
+            "A",
+            "T",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C17",
+      "app": "Google Photos",
+      "category": "Photo backup",
+      "questions": [
+        {
+          "id": "B2-17-01",
+          "question": "How do I delete cloud photos while keeping phone copies, or vice versa?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-17-02",
+          "question": "How do I free phone storage without losing backed-up media?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-17-03",
+          "question": "Why has backup stopped or devices stopped syncing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L",
+            "R"
+          ]
+        },
+        {
+          "id": "B2-17-04",
+          "question": "Can I recover deleted photos after Trash was emptied?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-17-05",
+          "question": "How do I migrate a full library to another phone/account/service?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-17-06",
+          "question": "How does Locked Folder work and what happens on device replacement?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-17-07",
+          "question": "How do I identify duplicates and large space-consuming items?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C18",
+      "app": "CapCut",
+      "category": "Video editing",
+      "questions": [
+        {
+          "id": "B2-18-01",
+          "question": "How do I export without watermark or Pro payment?",
+          "challenges": [
+            "H",
+            "P",
+            "N",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-18-02",
+          "question": "Why is Pro required to export my project?",
+          "challenges": [
+            "H",
+            "P",
+            "N",
+            "T",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-18-03",
+          "question": "How do I export 1080p/4K/60fps at desired quality?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-18-04",
+          "question": "Why are templates, effects, or transitions missing?",
+          "challenges": [
+            "H",
+            "P",
+            "E",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-18-05",
+          "question": "How do I transfer/synchronize projects between Android and desktop?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-18-06",
+          "question": "How do I make subtitles, background removal, or music-synced edits?",
+          "challenges": [
+            "H",
+            "O",
+            "P"
+          ]
+        },
+        {
+          "id": "B2-18-07",
+          "question": "How do I recover from freezes, crashes, lost projects, and render failure?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C19",
+      "app": "Google Drive",
+      "category": "Cloud storage",
+      "questions": [
+        {
+          "id": "B2-19-01",
+          "question": "How do I share a file/folder without prompting recipients to request access?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-19-02",
+          "question": "Why do people see You need access after I send a link?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-19-03",
+          "question": "How do I download a folder or make files offline on Android?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-19-04",
+          "question": "Why are Drive uploads or syncing stuck?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-19-05",
+          "question": "How do I recover deleted files or restore an earlier document version?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-19-06",
+          "question": "How do I free Google storage without losing important Drive, Gmail, or Photos data?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "R",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-19-07",
+          "question": "Can I automatically back up arbitrary Android folders to Google Drive?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "R",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C20",
+      "app": "Google Calendar",
+      "category": "Scheduling",
+      "questions": [
+        {
+          "id": "B2-20-01",
+          "question": "Why do calendar events not show up or sync between devices?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-20-02",
+          "question": "How can I share calendars with view/edit permissions?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-20-03",
+          "question": "How do I create complex recurring events and exceptions?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "T"
+          ]
+        },
+        {
+          "id": "B2-20-04",
+          "question": "Why are event reminders and notifications missing?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-20-05",
+          "question": "How do I import or sync Outlook/Exchange calendars?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "R"
+          ]
+        },
+        {
+          "id": "B2-20-06",
+          "question": "How do I block spam invitations and auto-created events?",
+          "challenges": [
+            "H",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-20-07",
+          "question": "How do I change time zones, busy/free status, invitations, and appointment settings?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "N",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C21",
+      "app": "Microsoft Teams",
+      "category": "Work communication",
+      "questions": [
+        {
+          "id": "B2-21-01",
+          "question": "Why am I not receiving Teams message/call notifications on Android?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "L"
+          ]
+        },
+        {
+          "id": "B2-21-02",
+          "question": "Can I join a Teams meeting without a Microsoft account?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "N"
+          ]
+        },
+        {
+          "id": "B2-21-03",
+          "question": "How do I share my Android screen in a Teams meeting?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-21-04",
+          "question": "Why does Teams show Away/Offline when I am available?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "E"
+          ]
+        },
+        {
+          "id": "B2-21-05",
+          "question": "How do I change between work, school, and personal accounts?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-21-06",
+          "question": "Why are microphone, camera, headset, or speaker not working?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "L",
+            "S"
+          ]
+        },
+        {
+          "id": "B2-21-07",
+          "question": "How do I locate/download/share Teams files and meeting recordings?",
+          "challenges": [
+            "H",
+            "O",
+            "P",
+            "A",
+            "S"
+          ]
+        }
+      ]
+    }
+  ]
+}

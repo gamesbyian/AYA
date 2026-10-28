@@ -45,6 +45,8 @@ owner: <team-or-maintainer>
 - If it fails: <ERR-001 and safe discriminating check>
 - Verification: <what the outcome proves and does NOT prove>
 - Side effects/undo: <local/remote scope, commit point, cost, reversibility>
+- Authority/deadline: <who controls the outcome; stage, cutoff and last reversible action if applicable>
+- Data custody/recovery: <device, cloud, cache, backup, trash; merge vs overwrite; preserve-first order if applicable>
 - Condition branches: <visible/disabled under permission, provider, flag, OS>
 - Evidence: <path/test/build and verified date>
 
@@ -64,6 +66,7 @@ owner: <team-or-maintainer>
 - Context: <when/where>
 - Meaning: <what this does and does not prove>
 - Check: <non-sensitive question/test, possible outcomes, and what each proves>
+- Failure layer: <upstream generation, transport, account/tenant, host app, OS/device, or hidden/unobservable state>
 - Fix: <safe remediation per observed outcome>
 - Verify: <what successful recovery looks like>
 - Escalate: <legitimate path, no invented contact>
@@ -89,15 +92,17 @@ owner: <team-or-maintainer>
 - UI sources: <path/revision>
 - Tests: <path and result/date>
 - Known gaps: <evidence limitations>
+- External facts: <issuer/provider/merchant/admin-controlled source, locale/tier, checked date, recheck trigger or UNKNOWN>
 
 ## Unknowns and escalation
 - UNKNOWN: <specific unresolved behavior>
 - Safe verification: <user-observable test>
 - Support: <real in-app or official channel, or 'not provided'>
+- Escalation authority: <which organization/person can decide; request-submitted versus confirmed outcome>
 
 ## Assistant answer policy
 - First determine: <top branching questions with high information gain>
-- Avoid: <likely but nonexistent controls, forbidden secrets, dangerous defaults>
+- Avoid: <likely but nonexistent controls, forbidden secrets, dangerous defaults, false refund/undo/recovery guarantees>
 - Distinguish: <unsupported vs unknown vs currently unavailable>
 - When advising: <exact screen labels and non-destructive steps>
 - If unsupported: state it explicitly; do not invent controls

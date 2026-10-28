@@ -71,6 +71,12 @@ An automated extractor can propose IDs and paths but cannot prove behavior. Ask 
 
 A perfect known-item coverage score is meaningless if the inventory was shallow. Publish inventory-review evidence, unresolved gaps and an estimate of discovery breadth alongside the score.
 
+## Cross-boundary coverage (optional item annotations)
+
+For an app whose main workflows involve third parties, transactions, notifications, opaque server decisions or irreplaceable content, enrich independent inventory entries with public, non-sensitive annotations. Suggested keys: `authority_actors`, `transaction_state`, `last_reversible_step`, `remote_policy_source`, `remote_policy_verified_at`, `remote_policy_recheck_trigger`, `data_copies`, `failure_layers`, `observable_signals` and `challenge_lenses` (T/A/L/E/R). These are descriptive source-inventory aids, **not** new validator-enforced fields; missing fields cannot be presumed safe. Confirm them by inspecting the released UI, tests and authoritative external sources.
+
+When a high-risk task is within scope, flag missing authority, cutoff, data topology or proof of success as an evidence gap even if every feature ID is represented in the guide. See the [second cross-category stress set](CROSS_CATEGORY_BATCH2.md).
+
 ## Automated check
 
 ```sh
