@@ -183,3 +183,16 @@ The seven useful capability states are `AVAILABLE`, `CONDITIONAL`, `EXPERIMENTAL
 ## 14. Done means provably useful
 
 A guide is ready only when a novice can complete top tasks from its instructions, an experienced operator can diagnose representative failures, a skeptical reviewer can trace claims to evidence, and test assistants consistently respond with supported steps or candid unknowns. A passing structural validator is necessary but not sufficient.
+
+## 15. Cross-boundary support: real-world integration requirements
+
+The [90-question, 30-category stress test](CROSS_CATEGORY_STRESS_TEST.md) tests how an assistant handles questions that cannot be answered solely from an app's own UI. For each important workflow identify **who controls the outcome** (host, Android/OEM, another client/device, upstream service/account, or human adjudicator). Identify what the guide can verify and what needs current external evidence or user observation.
+
+- **Remote-fact freshness:** Provider policies, paid tiers, available features, account eligibility, rollout and region conditions can change without an APK update. At claim level record source, relevant tier/territory, verified date, recheck trigger/expiry and safe fallback when not reverified. Exact APK version matching does not prove a remote policy is fresh.
+- **Two-sided workflows:** For Android-to-iPhone migration, Google Play subscription cancellation, cloud transfer, bank/card services, and external device export, record source and destination prerequisites, data scope, ordered steps, independent verification and rollback. Scope external UI labels to verified client versions.
+- **Data-copy semantics:** For destructive, backup and sync tasks distinguish local originals, managed copies, caches, cloud copies, trash/recovery, synchronized deletion and encryption. Never assume a "Delete" or "Free up space" operation preserves the desired other copy.
+- **Explicit feature limits:** For requests involving nonexistent controls, past features, subscription-only functionality or provider decisions, state AVAILABLE/CONDITIONAL/UNSUPPORTED/UNKNOWN as actually evidenced, with supported alternatives and an honest escalation route. A guide must not assume a requested feature exists.
+- **Context provenance:** Separate build-time facts, consented host observations, user reports and independently verified live state. Do not imply the recipient can inspect Android settings, accounts or a backend merely because a reference was attached. Dynamic contexts should be typed, timestamped, user-reviewable, minimal and redacted.
+- **High-stakes gate:** Account recovery, plaintext credential export, financial effects, private location, paid purchases and permanent data deletion demand explicit preflight, authorization boundaries, exact data effects and confirmed escalation paths. Never treat static guidance as permission to perform an action.
+
+Include applicable cross-boundary and negative-capability cases in held-out evaluation. A correct, evidence-backed "cannot do that" can pass; a plausible fictitious workaround cannot. Tests must measure *useful assistance* separately from *successful task completion*.
