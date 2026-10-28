@@ -5,11 +5,11 @@ This document distinguishes **ready for first host integration** from **ready fo
 ## Current implementation contract
 
 - Stable concept: Android app packages an AYA-RAS guide; user launches an editable privacy preview; Android shares one UTF-8 document with a chosen recipient.
-- Preferred Kotlin API: `Aya.launchBundled(activity, guideAsset="aya-guide.md", screenName?, question?)`.
+- Preferred Kotlin API: `Aya.launchBundled(activity, guideAsset="aya-guide.md", screenName?, question?, askQuestion=true)`. Question-first mode is the default; when a host already contains a text field, use `question=userText, askQuestion=false` to avoid duplicate entry.
 - Version guard: the asset must have an AYA-RAS v1 frontmatter, `app_id` matching the installed Android package, and **both** `app_version_min` and `app_version_max` exactly matching the installed APK `versionName`. Cross-version ranges are deliberately rejected by this API until tested version-selection rules exist.
 - Error return: `AyaBundledLaunchResult.Rejected(reason)`; the host decides how to show it. `PreviewOpened` only signals that AYA opened local review, **never** that a recipient imported the guide.
 - Legacy/manual API: `Aya.launch(activity, AyaRequest(...))` still exists for deliberately constructed guides, but **does not** enforce version identity. Prefer guarded API for integration.
-- Delivery: `ACTION_SEND`/FileProvider with read grant; no provider-specific deep link or automatic chat initiation.
+- Delivery: `ACTION_SEND`/FileProvider with read grant, `EXTRA_STREAM` containing the complete reviewed guide/question and `EXTRA_TEXT` derived from the final user-approved question; no provider-specific deep link or automatic chat initiation.
 
 ## Adoption checklist
 
