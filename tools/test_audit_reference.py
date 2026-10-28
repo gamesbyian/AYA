@@ -55,6 +55,13 @@ class ReferenceAuditTests(unittest.TestCase):
         self.assertFalse(report["ok"])
         self.assertTrue(any("missing '- Evidence:'" in e for e in report["errors"]))
 
+    def test_malformed_inventory_reports_failure_not_crash(self):
+        changed = copy.deepcopy(self.inventory)
+        changed["items"] = "not a list"
+        report = audit(self.guide, changed)
+        self.assertFalse(report["ok"])
+        self.assertTrue(any("nonempty items array" in e for e in report["errors"]))
+
     def test_question_reference_must_exist(self):
         changed = copy.deepcopy(self.questions)
         changed["cases"][0]["evidence_ids"] = ["F-999"]
