@@ -42,6 +42,7 @@ Every uncertain or non-universal feature should carry one of these explicit stat
 - **PLANNED:** not shipping. Never give usage instructions as though it does.
 - **REMOVED:** used to exist; identify last supported version and migration alternative.
 - **UNKNOWN:** evidence is insufficient or conflicting. State how to verify or who can answer.
+- **UNSUPPORTED:** confidently confirmed absent in the specified released version/environment. Say what users can do instead. This is distinct from PLANNED (explicitly intended for a future release), REMOVED (previously available), and UNKNOWN (not established).
 
 Do not use "should", "usually", "apparently" to conceal missing evidence. Say which conditions are known and which are not. Unsupported is a useful answer.
 
