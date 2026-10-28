@@ -42,9 +42,11 @@ owner: <team-or-maintainer>
 2. <enter/select something>
 3. <confirm action>
 - Expect: <observable result>
-- If it fails: <ERROR-ID and safe check>
-- Side effects/undo: <data impact and reversibility>
-- Evidence: <path/test/build>
+- If it fails: <ERR-001 and safe discriminating check>
+- Verification: <what the outcome proves and does NOT prove>
+- Side effects/undo: <local/remote scope, commit point, cost, reversibility>
+- Condition branches: <visible/disabled under permission, provider, flag, OS>
+- Evidence: <path/test/build and verified date>
 
 ## Features and settings
 ### F-001: <feature name> [AVAILABLE]
@@ -52,6 +54,7 @@ owner: <team-or-maintainer>
 - Location: <exact UI path>
 - Defaults: <value and unit>
 - Constraints and interactions: <bounds, other settings>
+- Visibility: <which state/permission/variant exposes this control>
 - Persistence: <session/device/account>
 - Status/version: <AVAILABLE/CONDITIONAL/etc., range>
 - Evidence: <specific source>
@@ -60,14 +63,14 @@ owner: <team-or-maintainer>
 ### ERR-001: <verbatim error or symptom>
 - Context: <when/where>
 - Meaning: <what this does and does not prove>
-- Check: <non-sensitive discriminating steps>
-- Fix: <safe remediation>
+- Check: <non-sensitive question/test, possible outcomes, and what each proves>
+- Fix: <safe remediation per observed outcome>
 - Verify: <what successful recovery looks like>
 - Escalate: <legitimate path, no invented contact>
 - Evidence: <source>
 
 ## Limitations and unsupported behavior
-- <unsupported or planned work explicitly labeled PLANNED/UNKNOWN>
+- <confirmed absence UNSUPPORTED, announced future PLANNED, unverified UNKNOWN>
 - <provider and OS differences>
 
 ## Privacy and data handling
@@ -94,6 +97,8 @@ owner: <team-or-maintainer>
 
 ## Assistant answer policy
 - First determine: <top branching questions with high information gain>
+- Avoid: <likely but nonexistent controls, forbidden secrets, dangerous defaults>
+- Distinguish: <unsupported vs unknown vs currently unavailable>
 - When advising: <exact screen labels and non-destructive steps>
 - If unsupported: state it explicitly; do not invent controls
 - No direct app control is implied by possession of this guide.
