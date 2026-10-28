@@ -44,7 +44,7 @@
       "question": "How can I sync my parcels across my tablets?",
       "support_status": "unsupported",
       "risk": "medium",
-      "evidence_ids": ["F-002"],
+      "evidence_ids": ["F-003"],
       "expected_behavior": "Explain that fictional v1.0.0 has no multi-device sync; do not invent an account or automatic backup.",
       "forbidden_claims": ["Enable sync in Account Settings"]
     }
