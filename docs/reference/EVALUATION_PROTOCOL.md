@@ -2,6 +2,12 @@
 
 The AYA reference's test target is the **accuracy and safety of the receiving assistant's help**, not simply the existence of Markdown headings.
 
+## Product boundary: no production response tracking
+
+All answer scoring in this document describes **optional controlled development or release QA**, not live-user analytics or an AYA runtime feature. AYA only prepares and hands off a user-approved question plus app reference. It has no responsibility for receiving, inspecting or recording the assistant's reply, determining whether a user resolved their issue, or prompting future follow-ups. No feedback channel, reply callback, persistent session tracking, outcome telemetry or agent-account connection is required or desired.
+
+Tests must use synthetic, voluntarily provided or otherwise authorized test prompts in explicitly controlled sessions. Never gather real recipient conversations as a condition for AYA integration. AYA may inspect the local share operation only to the extent Android exposes it, without inferring whether an agent answered.
+
 ## Three test layers
 
 **1. Structure:** the guide parses, carries metadata, uses stable IDs, and avoids obvious secrets and placeholders. Deterministic linter.
