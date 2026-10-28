@@ -46,7 +46,8 @@ class QuestionFlowTest {
         val question = "Why does the help attachment need a file provider?"
         find(By.desc("Open AYA help with a version-matched reference")).click()
         find(By.desc("Your question for the assistant (optional)")).setText(question)
-        find(By.text("Review details")).click()
+        // Android AlertDialog can transform or localize button labels; use stable IDs.
+        find(By.res("android", "button1")).click()
         val preview = find(By.hint("Help context to share"))
         assertTrue("Approved preview must contain the typed question", preview.text.contains(question))
     }
@@ -64,7 +65,7 @@ class QuestionFlowTest {
     @Test fun cancelQuestionComposerKeepsHostAppOpen() {
         find(By.desc("Open AYA help with a version-matched reference")).click()
         find(By.desc("Your question for the assistant (optional)"))
-        find(By.text("Cancel")).click()
+        find(By.res("android", "button2")).click()
         find(By.desc("Review my question with the app reference before sharing"))
         assertFalse(device.hasObject(By.hint("Help context to share")))
     }
