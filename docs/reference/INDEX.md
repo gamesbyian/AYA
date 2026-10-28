@@ -11,9 +11,10 @@
 5. [Independent traceability](TRACEABILITY.md): inventory denominator, evidence, ID cross-checks.
 6. [Question-driven evaluation](EVALUATION_PROTOCOL.md) and [quality rubric](QA_RUBRIC.md): gold tests and explicit release blockers.
 7. [Question bank](QUESTION_BANK.md): starting scenarios, not a substitute for app-specific held-out cases.
-8. [Modular builds](MODULAR_BUILDS.md): deterministic, validated assembly of large guides.
-9. [Maintenance](MAINTENANCE.md): release drift and ownership.
-10. [Fictional sample](EXAMPLE_PARCELPAD.md): complete illustrative guide with [inventory](examples/parcelpad_inventory.json) and [gold cases](examples/parcelpad_questions.json). **Not evidence of a real app.**
+8. [90-question cross-category stress test](CROSS_CATEGORY_STRESS_TEST.md): real-world prompts that challenge cross-app journeys, upstream policy drift, negative capabilities and high-stakes answers (not verified facts about third-party apps).
+9. [Modular builds](MODULAR_BUILDS.md): deterministic, validated assembly of large guides.
+10. [Maintenance](MAINTENANCE.md): release drift and ownership.
+11. [Fictional sample](EXAMPLE_PARCELPAD.md): complete illustrative guide with [inventory](examples/parcelpad_inventory.json) and [gold cases](examples/parcelpad_questions.json). **Not evidence of a real app.**
 
 ## Automated contract
 
