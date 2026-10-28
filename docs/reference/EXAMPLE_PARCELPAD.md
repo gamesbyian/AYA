@@ -76,6 +76,12 @@ ParcelPad is a fictional offline inventory of packages. A *parcel* has a title, 
 ### F-002: Carrier tracking [PLANNED]
 
 No live tracking endpoint or notification exists in this fictional release. Do not instruct the user to enable it.
+- Evidence: fictional training scenario.
+
+### F-003: Multi-device sync [UNSUPPORTED]
+
+There is no multi-device synchronization or account-based backup in fictional ParcelPad 1.0.0. Local export is not automatic sync.
+- Evidence: fictional training scenario.
 
 ## Troubleshooting
 
