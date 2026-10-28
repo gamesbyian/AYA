@@ -25,7 +25,7 @@ REQUIRED_SECTIONS = (
     "Glossary and synonyms", "Evidence and provenance",
     "Unknowns and escalation", "Assistant answer policy"
 )
-STATUSES = ("AVAILABLE", "CONDITIONAL", "EXPERIMENTAL", "PLANNED", "REMOVED", "UNKNOWN")
+STATUSES = ("AVAILABLE", "CONDITIONAL", "EXPERIMENTAL", "PLANNED", "REMOVED", "UNKNOWN", "UNSUPPORTED")
 SECRET_ASSIGNMENT = re.compile(
     r"(?im)^\s*(?:api[_ -]?key|password|secret|access[_ -]?token|private[_ -]?key)"
     r"\s*[:=]\s*(?!<|redacted|not applicable|none|n/a)(\S.{5,})$"

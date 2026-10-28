@@ -1,22 +1,34 @@
 # The AYA reference-document system
 
-This is the **authoritative playbook for authors, maintainers and coding agents** preparing app-specific help for AYA. AYA's handoff quality is limited by the quality and freshness of the app reference. Treat the document as a tested product artifact, not a marketing brochure.
+**AYA-RAS** is a documentation-as-product discipline for app-specific AI support. Authors first discover what truly ships, model the states that change behavior, and build a versioned guide. Independent inventories and held-out questions verify breadth and accuracy. A downstream assistant sees a self-contained reference, not an assertion of authority or permission to control the app.
 
-Start in this order:
+## Core reading order
 
-1. [Authoring standard](AUTHORING_STANDARD.md): discovery, required coverage, truth model, writing rules and export strategy.
-2. [Copyable template](TEMPLATE.md): structure and metadata accepted by the validator.
-3. [QA rubric](QA_RUBRIC.md): measurable completeness criteria and release gates.
-4. [Question bank](QUESTION_BANK.md): adversarial and ordinary questions to test with and without an assistant.
-5. [Maintenance lifecycle](MAINTENANCE.md): update and ownership rules.
-6. [Modular builds](MODULAR_BUILDS.md): deterministic, validated assembly of large references from maintained source modules.\n7. [Example fictional application](EXAMPLE_PARCELPAD.md): a fully populated guide, not a claim about a real product.
+1. [Base authoring standard](AUTHORING_STANDARD.md): required envelope and 12-section structure.
+2. [Advanced authoring](ADVANCED_AUTHORING.md): partial state model, conditional capability, high-information diagnoses, provenance, accessibility, context budgets and hallucination traps.
+3. [Agent workflow](AGENT_WORKFLOW.md): reproducible instructions for taking an unfamiliar app repository through release-grade documentation.
+4. [Template](TEMPLATE.md): copyable guide envelope and procedures.
+5. [Independent traceability](TRACEABILITY.md): inventory denominator, evidence, ID cross-checks.
+6. [Question-driven evaluation](EVALUATION_PROTOCOL.md) and [quality rubric](QA_RUBRIC.md): gold tests and explicit release blockers.
+7. [Question bank](QUESTION_BANK.md): starting scenarios, not a substitute for app-specific held-out cases.
+8. [Modular builds](MODULAR_BUILDS.md): deterministic, validated assembly of large guides.
+9. [Maintenance](MAINTENANCE.md): release drift and ownership.
+10. [Fictional sample](EXAMPLE_PARCELPAD.md): complete illustrative guide with [inventory](examples/parcelpad_inventory.json) and [gold cases](examples/parcelpad_questions.json). **Not evidence of a real app.**
 
-Validate a candidate: `python3 tools/validate_guide.py path/to/aya-guide.md`. Run `python3 -m unittest discover -s tools -p 'test_*.py'` for validator tests.
+## Automated contract
 
-## Contract
+```sh
+python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
+python3 tools/audit_reference.py docs/reference/EXAMPLE_PARCELPAD.md \
+  --inventory docs/reference/examples/parcelpad_inventory.json \
+  --questions docs/reference/examples/parcelpad_questions.json --strict
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
 
-An app ships a **version-matched, UTF-8 Markdown or text guide**, which AYA includes verbatim within a separate help package identifying the installed app/version and user's starting question. AYA intentionally **does not invent documentation** or infer app internals from a screen name.
+The first check verifies syntax, the second checks independent declared coverage and references, and the last runs regression tests. **None proves the guide is truthful or the recipient assistant will behave correctly.** An independent release/binary audit and actual assistant question trials are release gates.
 
-A complete guide must allow an assistant to answer both "what can this app do?" and "how exactly do I perform/recover from this operation?" without fabricated controls. It needs task-level instructions, state-dependent behavior, real error strings, permissions, and version-qualified limitations.
+## Product contract
 
-Use a *safe, generic* static core guide for v0. Contextual runtime data requires separate opt-in disclosure and redaction before share.
+The host app ships **version-matched, non-personal, self-contained UTF-8 reference material** alongside the installed APK. AYA displays the export for user review before any third-party handoff. Do not assume the receiving assistant can browse, execute tools, access the app screen, or ingest a large attachment correctly.
+
+A useful reference explains what features exist, where the user finds them, how actions behave across states, what outcomes prove success, how to diagnose failures, what harms and tradeoffs matter, and what remains unknown. **Version truth, safe uncertainty and practical recoverability outrank length.**

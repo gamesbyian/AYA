@@ -1,0 +1,15 @@
+{
+  "schema_version": "aya-inventory/v1",
+  "app_id": "dev.example.parcelpad",
+  "app_version": "1.0.0",
+  "source_revision": "fictional-example-1",
+  "reviewed_at_utc": "2026-10-28T00:00:00Z",
+  "items": [
+    {"id": "TASK-001", "kind": "task", "title": "Add a parcel", "status": "AVAILABLE", "criticality": "high", "source_ref": "fictional-training-scenario"},
+    {"id": "TASK-002", "kind": "task", "title": "Export backup", "status": "AVAILABLE", "criticality": "high", "source_ref": "fictional-training-scenario"},
+    {"id": "F-001", "kind": "feature", "title": "Delivered checkbox", "status": "AVAILABLE", "criticality": "medium", "source_ref": "fictional-training-scenario"},
+    {"id": "F-002", "kind": "feature", "title": "Carrier tracking", "status": "PLANNED", "criticality": "medium", "source_ref": "fictional-training-scenario"},
+    {"id": "F-003", "kind": "feature", "title": "Multi-device sync", "status": "UNSUPPORTED", "criticality": "medium", "source_ref": "fictional-training-scenario"},
+    {"id": "ERR-001", "kind": "error", "title": "Title required", "status": "AVAILABLE", "criticality": "high", "source_ref": "fictional-training-scenario"}
+  ]
+}

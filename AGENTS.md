@@ -6,15 +6,15 @@ AYA is an Android BYO-assistant help handoff. The user selects a third-party ass
 
 ## Documentation is a release-critical feature
 
-**Read [docs/reference/INDEX.md](docs/reference/INDEX.md) and [docs/reference/AUTHORING_STANDARD.md](docs/reference/AUTHORING_STANDARD.md) before working on references.** Follow [TEMPLATE.md](docs/reference/TEMPLATE.md), [QA_RUBRIC.md](docs/reference/QA_RUBRIC.md), [QUESTION_BANK.md](docs/reference/QUESTION_BANK.md), and [MAINTENANCE.md](docs/reference/MAINTENANCE.md). The fictional ParcelPad reference illustrates structure but **never** provides real-app evidence.
+**Read [docs/reference/INDEX.md](docs/reference/INDEX.md) and [docs/reference/AUTHORING_STANDARD.md](docs/reference/AUTHORING_STANDARD.md) before working on references.** For release-bound integrations **also follow** [ADVANCED_AUTHORING.md](docs/reference/ADVANCED_AUTHORING.md), [AGENT_WORKFLOW.md](docs/reference/AGENT_WORKFLOW.md), [TRACEABILITY.md](docs/reference/TRACEABILITY.md) and [EVALUATION_PROTOCOL.md](docs/reference/EVALUATION_PROTOCOL.md). Follow [TEMPLATE.md](docs/reference/TEMPLATE.md), [QA_RUBRIC.md](docs/reference/QA_RUBRIC.md), [QUESTION_BANK.md](docs/reference/QUESTION_BANK.md), and [MAINTENANCE.md](docs/reference/MAINTENANCE.md). The fictional ParcelPad reference illustrates structure but **never** provides real-app evidence.
 
 When integrating AYA into another app:
 
 1. Recover its actual code, latest released binary/build variant, shipped features, UI strings, release notes, tests and real errors. Do not treat plans, prototypes or open PRs as shipping behavior.
 2. Make a full inventory of UI, tasks, settings, state-dependent behavior, permissions, provider variations, destructive effects, errors, accessibility and lifecycle.
 3. Produce a UTF-8 guide with AYA-RAS v1 envelope and all twelve required sections. Each important feature/task/error must have a stable ID, version/status, exact steps, real evidence and user-safe troubleshooting.
-4. Include UNKNOWN and PLANNED states honestly. No invented controls, support URLs, provider guarantees, external assistant powers or secrets.
-5. Run `python3 tools/validate_guide.py --strict path/to/guide.md`; complete a manual behavior/evidence audit and held-out question-bank evaluation.
+4. Differentiate UNSUPPORTED (confirmed absent), UNKNOWN (not established), PLANNED (future intention), and conditionally unavailable features. No invented controls, support URLs, provider guarantees, external assistant powers or secrets.
+5. Create a **separate, source-derived JSON inventory and held-out gold question set**; run `python3 tools/validate_guide.py --strict path/to/guide.md` plus `python3 tools/audit_reference.py path/to/guide.md --inventory path/to/inventory.json --questions path/to/questions.json --strict`; complete a manual behavior/evidence audit and held-out question-bank evaluation.
 6. For large apps, use [modular reference builds](docs/reference/MODULAR_BUILDS.md) so the exported reference is deterministic and self-contained. Ship the guide with the exact installed version and keep it updated in the same PRs that modify user-facing product behavior.
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
@@ -31,6 +31,7 @@ When integrating AYA into another app:
 
 ```sh
 python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
+python3 tools/audit_reference.py docs/reference/EXAMPLE_PARCELPAD.md --inventory docs/reference/examples/parcelpad_inventory.json --questions docs/reference/examples/parcelpad_questions.json --strict
 python3 -m unittest discover -s tools -p 'test_*.py'
 gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug
 ```

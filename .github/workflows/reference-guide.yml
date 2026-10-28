@@ -15,5 +15,12 @@ jobs:
           python-version: '3.12'
       - name: Validate complete fictional guide example
         run: python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
-      - name: Run validator regression tests
+      - name: Audit independent product inventory and gold question set
+        run: |
+          python3 tools/audit_reference.py \
+            docs/reference/EXAMPLE_PARCELPAD.md \
+            --inventory docs/reference/examples/parcelpad_inventory.json \
+            --questions docs/reference/examples/parcelpad_questions.json \
+            --strict
+      - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'

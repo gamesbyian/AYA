@@ -6,7 +6,7 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 
 ## Where to start
 
-- [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes complete [authoring standard](docs/reference/AUTHORING_STANDARD.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
+- [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes the [base authoring standard](docs/reference/AUTHORING_STANDARD.md), [advanced authoring techniques](docs/reference/ADVANCED_AUTHORING.md), [agent production workflow](docs/reference/AGENT_WORKFLOW.md), [independent inventory and traceability](docs/reference/TRACEABILITY.md), [assistant evaluation protocol](docs/reference/EVALUATION_PROTOCOL.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
 - [Android integration](docs/INTEGRATION.md) and [sample app](sample/): how to invoke and inspect AYA.
 - [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
@@ -38,6 +38,7 @@ AYA never gathers settings, logs, device IDs or credentials automatically. The h
 ```sh
 gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug
 python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
+python3 tools/audit_reference.py docs/reference/EXAMPLE_PARCELPAD.md --inventory docs/reference/examples/parcelpad_inventory.json --questions docs/reference/examples/parcelpad_questions.json --strict
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
@@ -45,7 +46,7 @@ GitHub Actions runs both suites and publishes the sample debug APK if the Androi
 
 ## Prototype status
 
-Source is implemented, but CI and physical-device verification are still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
+Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
 Known work: accessibility and lifecycle instrumentation, real-device assistant trials, host guide version selection, automatic redaction, and eventual stable distribution/API.
 

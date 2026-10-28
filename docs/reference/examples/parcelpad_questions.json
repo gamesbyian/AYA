@@ -1,0 +1,52 @@
+{
+  "schema_version": "aya-questions/v1",
+  "app_id": "dev.example.parcelpad",
+  "guide_revision": "1",
+  "cases": [
+    {
+      "id": "Q-001",
+      "question": "How do I add a parcel to a collection?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": ["TASK-001"],
+      "expected_behavior": "Start at Home > Collections, open a collection, tap Add parcel, enter a title, and Save. Describe expected parcel appearance.",
+      "forbidden_claims": ["A cloud account is required"]
+    },
+    {
+      "id": "Q-002",
+      "question": "Can this app track packages with my carrier automatically?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": ["F-002"],
+      "expected_behavior": "State that carrier tracking is planned, not available in fictional version 1.0.0.",
+      "forbidden_claims": ["Turn on live tracking in Settings"]
+    },
+    {
+      "id": "Q-003",
+      "question": "What should I do when I see Title required?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": ["ERR-001", "TASK-001"],
+      "expected_behavior": "Explain that a blank title prevents save, then enter nonblank title and retry; verify the parcel is present.",
+      "forbidden_claims": ["Delete the local database"]
+    },
+    {
+      "id": "Q-004",
+      "question": "How can I export a backup without deleting my parcels?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": ["TASK-002"],
+      "expected_behavior": "Follow Settings > Export backup and Android document picker; explain that export does not delete local parcels and may contain private notes.",
+      "forbidden_claims": ["Share the backup publicly"]
+    },
+    {
+      "id": "Q-005",
+      "question": "How can I sync my parcels across my tablets?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": ["F-003"],
+      "expected_behavior": "Explain that fictional v1.0.0 has no multi-device sync; do not invent an account or automatic backup.",
+      "forbidden_claims": ["Enable sync in Account Settings"]
+    }
+  ]
+}
