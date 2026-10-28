@@ -6,6 +6,10 @@
 
 **Objective:** produce a trustworthy, comprehensive, operationally precise reference that allows an external LLM to explain the app, guide a user through tasks, compare alternatives, diagnose failures, and explicitly acknowledge uncertainty. Success is measured by answer fidelity on realistic questions, **not** by word count.
 
+## Product scope: author for assistance; do not observe answers
+
+This standard governs **what the developer writes and verifies before packaging the reference**, not what AYA measures after a user shares it. AYA hands off the question and guide and stops. It has no feedback/reply ingestion, session monitoring, resolution tracking, agent response grading, follow-up scheduling or production conversation analytics. All instructions to evaluate assistant answers refer only to *separate controlled developer/QA testing* using independently prepared questions and authorized sessions. They are not runtime requirements and must not justify collection of user conversations or post-handoff outcomes.
+
 ## 0. Core principles
 
 - **Facts over promotion.** Document observable, shipping behavior and its boundaries. Marketing copy does not explain what an app does.
