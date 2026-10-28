@@ -19,5 +19,9 @@ android {
     kotlinOptions { jvmTarget = "17" }
 }
 dependencies {
-    implementation(project(":aya"))
+    if (providers.gradleProperty("aya.consumePublished").orNull == "true") {
+        implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")
+    } else {
+        implementation(project(":aya"))
+    }
 }
