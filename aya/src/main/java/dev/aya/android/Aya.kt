@@ -42,7 +42,13 @@ object AyaDocument {
         val index = lines.indexOfFirst { it.trim() == heading }
         if (index >= 0) {
             val question = lines.drop(index + 1)
-                .takeWhile { !it.startsWith("## ") }
+                // A user's multiline question may itself contain Markdown headings.
+                // Stop only at AYA's own next section, never at arbitrary "## ".
+                .takeWhile {
+                    val line = it.trim()
+                    line != "## Instructions for reading the reference" &&
+                        line != "## App-specific reference"
+                }
                 .joinToString("\n").trim()
             if (question.isNotBlank()) {
                 return if (question.length <= 4000) question
