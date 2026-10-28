@@ -7,6 +7,10 @@ on:
       - ".github/workflows/android-emulator.yml"
   workflow_dispatch:
 
+concurrency:
+  group: aya-emulator-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   instrumented-sharing:
     runs-on: ubuntu-latest
@@ -32,3 +36,14 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
+
+      - name: Preserve Android UI test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-device-test-evidence
+          path: |
+            aya/build/outputs/androidTest-results/connected/
+            sample/build/outputs/androidTest-results/connected/
+            sample/build/reports/androidTests/connected/
+          if-no-files-found: ignore
