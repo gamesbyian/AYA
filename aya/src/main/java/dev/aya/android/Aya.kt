@@ -216,30 +216,10 @@ object Aya {
 
     private fun share(activity: Activity, payload: String): Boolean {
         return try {
-            val directory = File(activity.cacheDir, "aya").apply {
-                if (!exists() && !mkdirs()) error("Unable to create cache directory")
-            }
-            val cutoff = System.currentTimeMillis() - RETAIN_CACHE_DAYS * 24 * 60 * 60 * 1000
-            directory.listFiles()?.filter {
-                it.isFile && it.name.startsWith("aya-") && it.name.endsWith(".txt") &&
-                    it.lastModified() < cutoff
-            }?.forEach { it.delete() }
-
-            // Unique files protect simultaneous shares from overwriting each other.
-            val file = File.createTempFile("aya-", ".txt", directory)
-            file.writeText(payload, Charsets.UTF_8)
-            val uri: Uri = FileProvider.getUriForFile(
-                activity, "${activity.packageName}.aya.files", file
-            )
-            val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                clipData = ClipData.newRawUri("AYA help context", uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
+            val sendIntent = AyaShareIntents.create(activity, payload)
             activity.startActivity(Intent.createChooser(sendIntent, "Share with an assistant"))
             true
-        } catch (error: Exception) {
+        } catch (_: Exception) {
             toast(activity, "Sharing failed. Use Copy to paste the text into your assistant.")
             false
         }
