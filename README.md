@@ -1,49 +1,54 @@
-# AYA: Ask Your Agent
+# AYA · Ask Your Agent
 
-**Bring-your-own-AI help for Android apps.** AYA lets an Android app create a version-aware help package and offer it to ChatGPT, Claude, or any other compatible share target, using the assistant the user already has.
+**A reusable Android bring-your-own-AI help component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
-## Status
+AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
-Early reusable Kotlin Android library prototype. **Not yet built or tested on a device.** The recipient app controls whether it accepts the attachment and starts a new conversation. AYA cannot guarantee either behavior.
+## Where to start
 
-## Integration
+- [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes complete [authoring standard](docs/reference/AUTHORING_STANDARD.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
+- [Android integration](docs/INTEGRATION.md) and [sample app](sample/): how to invoke and inspect AYA.
+- [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
-Add the `:aya` module to your Android project, then:
+**A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
+
+## Android usage
+
+Include `:aya` as a library module, bundle a version-matched Markdown reference file as an APK asset, and call from an Activity:
 
 ```kotlin
+val guide = assets.open("aya-guide.md").bufferedReader(Charsets.UTF_8).use { it.readText() }
 Aya.launch(this, AyaRequest(
-    appName = "Chunks",
-    appVersion = "1.0.0",
-    guide = assets.open("aya-guide.txt").bufferedReader().use { it.readText() },
+    appName = "My App",
+    appVersion = "1.0.0", // use real installed build version
+    guide = guide,
     screenName = "Connections",
-    question = "How do I configure this connection?"
+    question = "How can I configure this connection?"
 ))
 ```
 
-The user sees the full content before deciding to Cancel, Copy, or Share. Share sends one UTF-8 text attachment through Android Sharesheet. Copy permits manual pasting into a chat. The library includes a non-exported, narrowly scoped FileProvider.
+The preview shows the complete text and allows edits before **Share**, **Copy** or **Cancel**. Sharing uses Android `ACTION_SEND` with one UTF-8 text attachment and a temporary read-granted content URI. Copy gives a manual fallback. AYA includes a narrowly scoped AndroidX FileProvider.
 
-AYA does **not** require a hosted model, vendor API keys, developer inference bills, subscriptions, analytics, or any network access. The selected assistant may have its own limits and privacy terms.
+AYA never gathers settings, logs, device IDs or credentials automatically. The host is responsible for sanitizing explicit context. The receiver may store/upload the shared content. Clipboard copy is a separate privacy boundary.
 
-## Design
+## Run the sample
 
-- Host supplies the app guide and optional context. AYA collects no settings, logs, passwords, or device data.
-- Installed version and current screen appear in the package.
-- Use public Android share intents, not undocumented provider deep links.
-- No guarantee of automatic file ingestion, chat creation, or zero-tap sending.
-- Assistant must distinguish documented features from planned functionality.
+`:sample` is an Android Activity demonstrating the handoff with a **fictional ParcelPad reference**. No ParcelPad functionality is implemented. Build with JDK 17, Android SDK 35, Gradle 8.9:
 
-See [specification](docs/SPEC.md), [privacy and security](docs/SECURITY.md), and [verification plan](docs/TEST_PLAN.md).
+```sh
+gradle :aya:testDebugUnitTest :aya:assembleDebug :sample:assembleDebug
+python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
 
-## Build
+GitHub Actions runs both suites and publishes the sample debug APK if the Android build passes. Gradle wrapper is not yet checked in.
 
-Requires Android SDK, JDK 17, and Gradle compatible with AGP 8.7.3. No wrapper included yet. Try `gradle :aya:testDebugUnitTest`; build execution remains unverified.
+## Prototype status
 
-## Roadmap
+Source is implemented, but CI and physical-device verification are still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
-1. Prototype library, docs, sharing UX and tests.
-2. Demo app, accessibility and instrumentation acceptance, dated ChatGPT/Claude testing.
-3. Editable privacy preview, cache expiration, provider compatibility matrix and stable API.
+Known work: accessibility and lifecycle instrumentation, real-device assistant trials, host guide version selection, automatic redaction, and eventual stable distribution/API.
 
 ## License
 
-Not yet selected. Do not assume a redistribution license.
+Undecided. No redistribution license has been granted yet.
