@@ -17,12 +17,18 @@ A UI PR should answer: "Which guide sections and acceptance questions does this 
 1. Identify exact binary build and source revision.
 2. Update relevant task/feature/error IDs and cross-references; record status transitions (PLANNED → AVAILABLE only after acceptance).
 3. Review all version and provider constraints; update explicit deprecations.
-4. Run structural validation and differential coverage against changed UI/features.
-5. Execute regression question set for affected flows plus core smoke questions.
+4. Update the **independently discovered inventory** (not just guide headings), confirm changes to public UI/permissions/flags/errors/providers, and run structural and cross-document traceability audits.
+5. Update the **held-out gold question set** for affected state variants and execute regression cases plus high-risk smoke questions; independently review answers against the released app.
 6. Approve privacy review and attach provenance of manually checked behavior.
 7. Bundle guide with app binary; ensure host never selects future/incompatible version.
 8. Store the guide revision/hash in the build manifest or release notes.
 9. Preserve older version guides when shipping versions remain in use; do not overwrite history without a reproducible archive.
+
+## Change impact ledger
+
+For each PR note the changed screens, settings, task/error IDs, condition flags, data effects, provider dependencies and associated test cases. If behavior is unchanged, record that conclusion with evidence. A changed `source_revision` must be tied to a verified build; merely incrementing `last_verified_utc` does not constitute re-verification.
+
+Review **unsupported**, **unknown** and **planned** capability entries whenever a release implements, removes or gates a feature. Preserve old identifiers; do not recycle an ID because the label changed.
 
 ## Drift audit
 
