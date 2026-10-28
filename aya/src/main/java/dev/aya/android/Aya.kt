@@ -65,6 +65,12 @@ object AyaDocument {
     }
 }
 
+/** Indicates only local preview creation, never a successful third-party handoff. */
+sealed class AyaBundledLaunchResult {
+    object PreviewOpened : AyaBundledLaunchResult()
+    data class Rejected(val reason: String) : AyaBundledLaunchResult()
+}
+
 /**
  * AYA launches an editable preview, then Android's public Sharesheet.
  * The receiving app decides whether it can accept the text file and start a chat.
@@ -143,6 +149,69 @@ object Aya {
             }
         }
         dialog.show()
+    }
+
+    /**
+     * Preferred integration API. Loads an APK-bundled AYA-RAS guide and rejects it
+     * before any preview if its app ID or *exact* version differs from the
+     * installed package. Never falls back to an unrelated or stale guide.
+     *
+     * PreviewOpened only means the local review UI was shown. It says nothing
+     * about whether a recipient accepted the file or started a conversation.
+     */
+    @Suppress("DEPRECATION")
+    fun launchBundled(
+        activity: Activity,
+        guideAsset: String = "aya-guide.md",
+        screenName: String? = null,
+        question: String? = null
+    ): AyaBundledLaunchResult {
+        if (guideAsset.isBlank() || guideAsset.startsWith("/") || ".." in guideAsset) {
+            return AyaBundledLaunchResult.Rejected("Invalid guide asset path.")
+        }
+        return try {
+            val bytes = java.io.ByteArrayOutputStream()
+            activity.assets.open(guideAsset).use { source ->
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val n = source.read(buffer)
+                    if (n < 0) break
+                    if (bytes.size() + n > MAX_SHARE_BYTES) {
+                        return AyaBundledLaunchResult.Rejected("Bundled guide exceeds 2 MiB.")
+                    }
+                    bytes.write(buffer, 0, n)
+                }
+            }
+            val guide = Charsets.UTF_8.newDecoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(bytes.toByteArray()))
+                .toString()
+            val version = activity.packageManager
+                .getPackageInfo(activity.packageName, 0).versionName
+                ?: return AyaBundledLaunchResult.Rejected("Installed app version unavailable.")
+            when (val check = AyaReferenceVerifier.verify(guide, activity.packageName, version)) {
+                is AyaReferenceCheck.Rejected ->
+                    AyaBundledLaunchResult.Rejected(check.reason)
+                is AyaReferenceCheck.Accepted -> {
+                    val request = AyaRequest(
+                        appName = check.reference.appName,
+                        appVersion = version,
+                        guide = check.reference.guide,
+                        screenName = screenName,
+                        question = question
+                    )
+                    if (AyaDocument.render(request).toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
+                        AyaBundledLaunchResult.Rejected("Help package exceeds the 2 MiB sharing limit.")
+                    } else {
+                        launch(activity, request)
+                        AyaBundledLaunchResult.PreviewOpened
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            AyaBundledLaunchResult.Rejected("Unable to open bundled reference.")
+        }
     }
 
     private fun share(activity: Activity, payload: String): Boolean {
