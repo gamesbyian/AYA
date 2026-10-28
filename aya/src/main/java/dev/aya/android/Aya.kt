@@ -90,6 +90,7 @@ object AyaDocument {
 
 /** Indicates only local question/review UI opening, never a successful third-party handoff. */
 sealed class AyaBundledLaunchResult {
+    object QuestionOpened : AyaBundledLaunchResult()
     object PreviewOpened : AyaBundledLaunchResult()
     data class Rejected(val reason: String) : AyaBundledLaunchResult()
 }
@@ -245,8 +246,9 @@ object Aya {
      * before any preview if its app ID or *exact* version differs from the
      * installed package. Never falls back to an unrelated or stale guide.
      *
-     * PreviewOpened only means the local review UI was shown. It says nothing
-     * about whether a recipient accepted the file or started a conversation.
+     * QuestionOpened indicates the local question composer. PreviewOpened
+     * indicates the local review UI (when askQuestion=false). Neither result
+     * implies a successful recipient import or a new conversation.
      */
     @Suppress("DEPRECATION")
     fun launchBundled(
@@ -294,8 +296,13 @@ object Aya {
                     if (AyaDocument.render(request).toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
                         AyaBundledLaunchResult.Rejected("Help package exceeds the 2 MiB sharing limit.")
                     } else {
-                        if (askQuestion) ask(activity, request) else launch(activity, request)
-                        AyaBundledLaunchResult.PreviewOpened
+                        if (askQuestion) {
+                            ask(activity, request)
+                            AyaBundledLaunchResult.QuestionOpened
+                        } else {
+                            launch(activity, request)
+                            AyaBundledLaunchResult.PreviewOpened
+                        }
                     }
                 }
             }
