@@ -2,7 +2,7 @@
 
 ## Mission
 
-AYA is an Android BYO-assistant help handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
+AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
 ## Documentation is a release-critical feature
 
@@ -19,6 +19,10 @@ When integrating AYA into another app:
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
 ## Engineering constraints
+
+- Creative Handoff uses `Aya.launchCreativeBundled()` with `AyaCreativeTask` and `AyaImageRequirements`. Preserve the same guarded AYA-RAS reference, editable preview, final-review-derived message text, and no-return boundary as help. Consult [creative contract](docs/CREATIVE_HANDOFF.md) and [creative authoring extension](docs/reference/CREATIVE_AUTHORING.md).
+- For image generation, include a standalone explicit generation instruction in approved `EXTRA_TEXT`, not just an attachment, and never promise that a recipient will generate or save an image. Image import remains the host app's responsibility; AYA never watches or handles an assistant's output.
+- Do not autoattach artwork, images, metadata with secrets, paths or account IDs; optional reference-image support is **not implemented**. Guard typed image requirements and verify host import truth independently.
 
 - Prefer `Aya.launchBundled()` and an exact-version, real-package APK guide over manually assembled help context. The code must reject mismatched/missing guides before review; never silently fall back to stale data.
 - Public Android `ACTION_SEND`, one self-contained UTF-8 file, read-only content URI grant.

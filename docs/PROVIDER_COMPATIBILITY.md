@@ -10,6 +10,8 @@
 | Generic share targets | Not tested | Not tested | Unknown | N/A | UNVERIFIED |
 
 ## Manual test record template
+Creative Handoff adds a distinct **image-generation** acceptance axis; text/attachment support alone is insufficient. For each tested target and Android version, separately record: AYA's final approved prompt displayed in the destination, actual image-generation response (versus merely writing a prompt), requested ratio honored or nearest supported, the user's ability to save to device, and whether a saved file can be manually imported using the sample host's Android picker. Include negative cases (unsupported model, signed-out state, file ignored, text-only share, limited formats). These are developer-controlled trials only; AYA must never instrument production user conversations or outcomes. Until such tests exist, ChatGPT, Claude, Gemini and Grok creative compatibility is **UNVERIFIED**.
+
 
 Record UTC timestamp, device/Android version, target app package and release version, target signed-in/out, AYA guide revision/size, whether Sharesheet offers target, whether file appears, whether the target reads document contents, whether a chat is new, whether user must press Send, whether the separate `EXTRA_TEXT` question appears correctly, what error is shown, test result, screenshots redacted and tester identifier.
 
