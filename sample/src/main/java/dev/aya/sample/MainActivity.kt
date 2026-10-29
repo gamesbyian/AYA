@@ -33,17 +33,17 @@ class MainActivity : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 42 && resultCode == RESULT_OK) {
             val uri = data?.data ?: return
+            val type = contentResolver.getType(uri)
+            if (type !in setOf("image/png", "image/jpeg") || !showImportedArtwork(uri)) {
+                Toast.makeText(this, "Choose a valid PNG or JPEG image.", Toast.LENGTH_LONG).show()
+                return
+            }
             try {
                 contentResolver.takePersistableUriPermission(
                     uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
             } catch (_: SecurityException) {
                 // The picker may grant a transient permission only.
-            }
-            val type = contentResolver.getType(uri)
-            if (type !in setOf("image/png", "image/jpeg") || !showImportedArtwork(uri)) {
-                Toast.makeText(this, "Choose a valid PNG or JPEG image.", Toast.LENGTH_LONG).show()
-                return
             }
             artworkUri = uri
             Toast.makeText(this, "Image selected for this demo", Toast.LENGTH_SHORT).show()
@@ -57,9 +57,8 @@ class MainActivity : Activity() {
     private fun showImportedArtwork(uri: Uri): Boolean {
         return try {
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            contentResolver.openInputStream(uri)?.use {
-                BitmapFactory.decodeStream(it, null, bounds)
-            } ?: return false
+            val metadataStream = contentResolver.openInputStream(uri) ?: return false
+            metadataStream.use { BitmapFactory.decodeStream(it, null, bounds) }
             if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return false
             var sampleSize = 1
             while (bounds.outWidth / sampleSize > 1024 ||
