@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stable view IDs enable Android to save and restore both draft text fields
+         when the app is backgrounded, rotated or later recreated. -->
+    <item type="id" name="aya_sample_help_question" />
+    <item type="id" name="aya_sample_artwork_direction" />
+</resources>

@@ -10,6 +10,21 @@
 | Generic share targets | Not tested | Not tested | Unknown | N/A | UNVERIFIED |
 
 ## Manual test record template
+### Publicly documented image generation (research, not AYA compatibility tests)
+
+Snapshot as of **2026-10-29**. These sources establish *some product capability* but do **not** establish that a given Android app version accepts `ACTION_SEND`, consumes an AYA request, opens a new conversation, generates from that entry point, or saves a compatible file.
+
+| Assistant | Official documented image creation | Relevance / limitation |
+| --- | --- | --- |
+| ChatGPT | [Images in ChatGPT](https://help.openai.com/en/articles/11084440-images-in-chatgpt) describes generating, editing and saving images on mobile | Image generation is documented; **AYA outbound handoff unverified** |
+| Gemini | [Gemini Apps image generation](https://support.google.com/gemini/answer/14286560?co=GENIE.Platform%3DAndroid&hl=en) documents generating images and saving them from Android | Feature/age/region/account restrictions may apply; **AYA outbound handoff unverified** |
+| Grok | [xAI Imagine Image 2.0 announcement](https://x.ai/news/grok-imagine-image-2) describes image generation on Android and iOS | Feature support in Grok does not prove sharesheet integration; **AYA outbound handoff unverified** |
+| Claude | [Can Claude produce images?](https://support.claude.com/en/articles/9002504-can-claude-produce-images) says Claude does **not** generate photos or illustrations the way image-generation tools do | Claude may produce SVG/HTML diagrams, charts, designs or artifacts, but these are not equivalent to raster key-art generation. **Do not claim direct photographic/illustrative key-art capability** |
+
+**Compatibility policy:** Never block or force a recipient based on an AYA hardcoded provider list. People may have other models or tools available within those apps, and capabilities evolve. Only describe observed, dated compatibility in the tested matrix. If the chosen assistant cannot generate the requested image, it should say so, and the user can choose another target or manually use a generation tool. No AYA runtime monitoring, auto-switching or provider-account introspection.
+
+Creative Handoff adds a distinctRecord request-only and attached-guide delivery **separately** for every recipient; they can differ even on the same app release. Neither format is automatically assumed compatible.
+
 Creative Handoff adds a distinct **image-generation** acceptance axis; text/attachment support alone is insufficient. For each tested target and Android version, separately record: AYA's final approved prompt displayed in the destination, actual image-generation response (versus merely writing a prompt), requested ratio honored or nearest supported, the user's ability to save to device, and whether a saved file can be manually imported using the sample host's Android picker. Include negative cases (unsupported model, signed-out state, file ignored, text-only share, limited formats). These are developer-controlled trials only; AYA must never instrument production user conversations or outcomes. Until such tests exist, ChatGPT, Claude, Gemini and Grok creative compatibility is **UNVERIFIED**.
 
 

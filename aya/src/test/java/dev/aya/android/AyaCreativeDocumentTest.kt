@@ -32,7 +32,7 @@ class AyaCreativeDocumentTest {
         assertTrue(text.contains("1:1"))
         assertTrue(text.contains("2000 × 2000"))
         assertTrue(text.contains("image/png"))
-        assertTrue(text.contains("8% margin"))
+        assertTrue(text.contains("at least 8% away from every edge"))
         assertTrue(text.contains("Import from device"))
         assertFalse(text.contains("Reference"))
         assertTrue(payload.contains("## App-specific reference"))
@@ -87,6 +87,72 @@ class AyaCreativeDocumentTest {
     @Test(expected = IllegalArgumentException::class)
     fun missingImportWorkflowRejected() {
         task.copy(importInstructions = " ")
+    }
+
+    @Test fun approvedPromptCanBeSharedWithoutTheGuide() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Secret unrelated guide content", creativeTask = task,
+            question = "Bold red and blue."
+        ))
+        val text = AyaDocument.textOnlyMessageFromPayload(payload)!!
+        assertTrue(text.contains("Bold red and blue."))
+        assertTrue(text.contains("House, M.D."))
+        assertFalse(text.contains("Secret unrelated guide content"))
+    }
+
+    @Test fun textOnlyUsesEditedPromptNeverOriginalDirection() {
+        val initial = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", creativeTask = task,
+            question = "Remove this detail"
+        ))
+        val edited = initial.replace("Remove this detail", "Use a subtle gradient")
+        assertTrue(AyaDocument.textOnlyMessageFromPayload(edited)!!.contains("Use a subtle gradient"))
+        assertFalse(AyaDocument.textOnlyMessageFromPayload(edited)!!.contains("Remove this detail"))
+    }
+
+    @Test fun textOnlyRefusesLongPromptRatherThanOfferingInvalidAttachmentHint() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", creativeTask = task,
+            question = "x".repeat(4100)
+        ))
+        assertEquals(null, AyaDocument.textOnlyMessageFromPayload(payload))
+        assertEquals(
+            "My full question is in the attached AYA help document.",
+            AyaDocument.shareMessageFromPayload(payload)
+        )
+    }
+
+    @Test fun removingRequestHeadingDoesNotLeakTheReferenceAsPrompt() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", question = "Make a blue cover.", creativeTask = task
+        ))
+        val edited = payload.replace("## User's starting question", "## Request removed")
+        assertEquals(null, AyaDocument.textOnlyMessageFromPayload(edited))
+    }
+
+    @Test fun fullyRewrittenApprovedTextMayBeSharedDirectly() {
+        assertEquals("Make a purple cover.", AyaDocument.textOnlyMessageFromPayload("Make a purple cover."))
+    }
+
+    @Test fun promptFirstExpansionUsesApprovedEditsNotOriginalHostDirection() {
+        val request = AyaRequest(
+            "Chunks", "1.0", "Known guide reference",
+            question = "Old original direction",
+            creativeTask = task
+        )
+        val revisedPrompt = "Generate a square image with geometric lettering."
+        val expanded = AyaDocument.renderWithPrompt(request, revisedPrompt)
+        val extracted = AyaDocument.shareMessageFromPayload(expanded)
+        assertEquals(revisedPrompt, extracted)
+        assertTrue(expanded.contains("Known guide reference"))
+        assertFalse(expanded.contains("Old original direction"))
+    }
+
+    @Test fun expandedPromptCanRemainMultilineWithoutRegeneration() {
+        val request = AyaRequest("Chunks", "1.0", "Guide", creativeTask = task)
+        val prompt = "Generate my image.\nKeep faces centered.\nUse 16-bit colors."
+        val expanded = AyaDocument.renderWithPrompt(request, prompt)
+        assertEquals(prompt, AyaDocument.textOnlyMessageFromPayload(expanded))
     }
 
     @Test fun ordinaryHelpRemainsUnchanged() {

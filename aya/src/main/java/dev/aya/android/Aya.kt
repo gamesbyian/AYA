@@ -37,31 +37,56 @@ object AyaDocument {
      * edited preview. Never forward a pre-edit question removed by the user.
      * The complete, self-contained help package is in EXTRA_STREAM.
      */
-    fun shareMessageFromPayload(payload: String): String {
-        val heading = "## User's starting question"
+    private fun requestFromReviewedPayload(payload: String): String? {
         val lines = payload.lineSequence().toList()
-        val index = lines.indexOfFirst { it.trim() == heading }
-        if (index >= 0) {
-            val question = lines.drop(index + 1)
-                // A user's multiline question may itself contain Markdown headings.
-                // Stop only at AYA's own next section, never at arbitrary "## ".
-                .takeWhile {
-                    val line = it.trim()
-                    line != "## Instructions for reading the reference" &&
-                        line != "## App-specific reference"
-                }
-                .joinToString("\n").trim()
-            if (question.isNotBlank()) {
-                return if (question.length <= 4000) question
-                    else "My full question is in the attached AYA help document."
+        val index = lines.indexOfFirst { it.trim() == "## User's starting question" }
+        if (index < 0) return null
+        // The prompt may contain its own Markdown subheadings. Stop only at
+        // exact AYA envelope headings, not at arbitrary user-authored headings.
+        return lines.drop(index + 1)
+            .takeWhile {
+                val line = it.trim()
+                line != "## Instructions for reading the reference" &&
+                    line != "## App-specific reference"
             }
+            .joinToString("\n").trim().takeIf { it.isNotBlank() }
+    }
+
+    fun shareMessageFromPayload(payload: String): String {
+        val prompt = requestFromReviewedPayload(payload)
+        if (prompt != null) {
+            return if (prompt.length <= 4000) prompt
+                else "My full question is in the attached AYA help document."
         }
-        // Custom-edited text may not retain AYA's headings. Only share bytes
-        // the user actually approved; never reuse an earlier question.
+        // Derive fallback ONLY from final reviewed content, never pre-edit state.
         return payload.take(2400)
     }
 
-    fun render(request: AyaRequest): String {
+    /**
+     * Text-only share must be complete and self-contained. Never substitute the
+     * attachment-dependent long-question notice or silently truncate a prompt.
+     * If a user edited away the known heading, their entire new reviewed text
+     * can be shared as-is only when it fits the bounded text channel.
+     */
+    fun textOnlyMessageFromPayload(payload: String): String? {
+        val prompt = requestFromReviewedPayload(payload)
+        // The user may have removed the request heading or cleared its body.
+        // Never mislabel an intact AYA reference as a text-only creative request.
+        if (prompt == null && (
+                payload.contains("## Instructions for reading the reference") ||
+                payload.contains("## App-specific reference")
+            )) return null
+        val text = (prompt ?: payload.trim()).trim()
+        return text.takeIf { it.isNotBlank() && it.length <= 4000 }
+    }
+
+    fun render(request: AyaRequest): String = renderWithPrompt(request, null)
+
+    /**
+     * Compose a full reference after the user has edited the concise creative
+     * request. The full handoff never regenerates the original direction.
+     */
+    internal fun renderWithPrompt(request: AyaRequest, approvedPrompt: String?): String {
         require(request.appName.isNotBlank()) { "appName is required" }
         require(request.appVersion.isNotBlank()) { "appVersion is required" }
         require(request.guide.isNotBlank()) { "guide is required" }
@@ -74,7 +99,7 @@ object AyaDocument {
             }
             appendLine()
             appendLine("## User's starting question")
-            appendLine(clean(request.creativeTask?.let {
+            appendLine(clean(approvedPrompt ?: request.creativeTask?.let {
                 AyaCreativeDocument.prompt(it, request.question)
             } ?: request.question?.takeIf { it.isNotBlank() }
                 ?: "Help me understand and use this application."))
@@ -200,8 +225,122 @@ object Aya {
     }
 
     fun launch(activity: Activity, request: AyaRequest) {
-        val initial = AyaDocument.render(request)
+        if (request.creativeTask != null) {
+            launchCreativePrompt(activity, request)
+        } else {
+            launchWithInitial(activity, request, AyaDocument.render(request))
+        }
+    }
 
+    /**
+     * Prompt-first creative review. A text-only request is the default; no
+     * hidden app guide or private data is sent. The full, editable reference
+     * remains one explicit action away and uses the same consent path as help.
+     */
+    private fun launchCreativePrompt(activity: Activity, request: AyaRequest) {
+        val task = requireNotNull(request.creativeTask)
+        val root = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(activity, 16), dp(activity, 12), dp(activity, 16), 0)
+        }
+        root.addView(TextView(activity).apply {
+            text = "This sends only the request shown below to the assistant you select. " +
+                "You can also review and include the full app guide. " +
+                "The assistant may upload the text and cannot be guaranteed to create an image."
+            textSize = 14f
+        })
+        root.addView(TextView(activity).apply {
+            text = "For: ${task.subject}   •   ${task.assetRole}\n" +
+                task.image.describe()
+            textSize = 13f
+            contentDescription = text
+        })
+        val prompt = EditText(activity).apply {
+            hint = "Image generation request to share"
+            contentDescription = "Edit the image request before sharing"
+            setText(AyaCreativeDocument.prompt(task, request.question))
+            setSelection(0)
+            minLines = 7
+            gravity = Gravity.TOP or Gravity.START
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            isSingleLine = false
+            setHorizontallyScrolling(false)
+        }
+        root.addView(prompt, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f
+        ))
+        val copy = android.widget.Button(activity).apply {
+            text = "Copy request"
+            contentDescription = "Copy only the edited image request"
+            minHeight = dp(activity, 48)
+            setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank()) {
+                    toast(activity, "Enter an image request before copying.")
+                } else {
+                    copyToClipboard(activity, approved)
+                }
+            }
+        }
+        root.addView(copy)
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("Create with your agent")
+            .setView(root)
+            .setNegativeButton("Cancel", null)
+            .setNeutralButton("Full guide", null)
+            .setPositiveButton("Share request", null)
+            .create()
+        dialog.setOnShowListener {
+            val metrics = activity.resources.displayMetrics
+            dialog.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (metrics.heightPixels * 0.86f).toInt()
+            )
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank()) {
+                    toast(activity, "Enter an image request first.")
+                } else {
+                    val expanded = AyaDocument.renderWithPrompt(request, approved)
+                    if (expanded.toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
+                        toast(activity, "Full package exceeds 2 MiB. Shorten your request.")
+                    } else {
+                        dialog.dismiss()
+                        activity.window?.decorView?.post {
+                            if (!activity.isFinishing && !activity.isDestroyed) {
+                                launchWithInitial(activity, request, expanded)
+                            }
+                        }
+                    }
+                }
+            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank() || approved.length > 4000) {
+                    toast(activity, "Text-only request must be 1 to 4000 characters. " +
+                        "Shorten it or choose Full guide.")
+                } else if (shareDirectText(activity, approved)) {
+                    dialog.dismiss()
+                }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun shareDirectText(activity: Activity, approved: String): Boolean {
+        return try {
+            activity.startActivity(Intent.createChooser(
+                AyaShareIntents.createTextOnly(approved), "Share with an assistant"
+            ))
+            true
+        } catch (_: Exception) {
+            toast(activity, "Sharing failed. Use Copy to paste your request.")
+            false
+        }
+    }
+
+    private fun launchWithInitial(activity: Activity, request: AyaRequest, initial: String) {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             val inset = dp(activity, 16)
@@ -250,20 +389,44 @@ object Aya {
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
                 val edited = editor.text.toString()
                 if (edited.isBlank()) {
-                    toast(activity, "There is no help text to copy.")
+                    toast(activity, "There is no text to copy.")
+                } else if (request.creativeTask != null) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("Copy which text?")
+                        .setItems(arrayOf(
+                            "Image request only",
+                            "Complete request + app guide"
+                        )) { _, choice ->
+                            val toCopy = if (choice == 0) {
+                                AyaDocument.textOnlyMessageFromPayload(edited)
+                            } else edited
+                            if (toCopy == null) {
+                                toast(activity, "Request is over 4000 characters. Shorten it or copy the full guide.")
+                            } else {
+                                copyToClipboard(activity, toCopy)
+                            }
+                        }.show()
                 } else {
-                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE)
-                        as android.content.ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("AYA help context", edited))
-                    toast(activity, "Help text copied. Clipboard contents may be visible to other apps.")
+                    copyToClipboard(activity, edited)
                 }
             }
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val edited = editor.text.toString()
                 if (edited.isBlank()) {
-                    toast(activity, "There is no help text to share.")
+                    toast(activity, "There is no text to share.")
                 } else if (edited.toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
-                    toast(activity, "Help text exceeds the 2 MB prototype limit. Shorten it first.")
+                    toast(activity, "Text exceeds the 2 MiB prototype limit. Shorten it first.")
+                } else if (request.creativeTask != null) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("Share your image request")
+                        .setItems(arrayOf(
+                            "Request only (text, no attachment)",
+                            "Request + app reference (.txt attachment)"
+                        )) { _, choice ->
+                            if (share(activity, edited, textOnly = choice == 0)) {
+                                dialog.dismiss()
+                            }
+                        }.show()
                 } else if (share(activity, edited)) {
                     dialog.dismiss()
                 }
@@ -370,13 +533,28 @@ object Aya {
         }
     }
 
-    private fun share(activity: Activity, payload: String): Boolean {
+    private fun copyToClipboard(activity: Activity, text: String) {
+        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE)
+            as android.content.ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("AYA approved content", text))
+        toast(activity, "Copied. Clipboard contents may be visible to other apps.")
+    }
+
+    private fun share(activity: Activity, payload: String, textOnly: Boolean = false): Boolean {
         return try {
-            // EXTRA_TEXT comes only from the *edited, approved* payload. It
-            // cannot leak an original question the user deleted in review.
-            val sendIntent = AyaShareIntents.create(
-                activity, payload, AyaDocument.shareMessageFromPayload(payload)
-            )
+            // Both channels derive only from the final, user-edited preview.
+            val sendIntent = if (textOnly) {
+                val prompt = AyaDocument.textOnlyMessageFromPayload(payload)
+                if (prompt == null) {
+                    toast(activity, "Request is over 4000 characters. Shorten it or share with the guide.")
+                    return false
+                }
+                AyaShareIntents.createTextOnly(prompt)
+            } else {
+                AyaShareIntents.create(
+                    activity, payload, AyaDocument.shareMessageFromPayload(payload)
+                )
+            }
             activity.startActivity(Intent.createChooser(sendIntent, "Share with an assistant"))
             true
         } catch (_: Exception) {

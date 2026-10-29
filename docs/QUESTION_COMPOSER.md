@@ -16,6 +16,8 @@ This is a *two-stage consent flow*: writing a question does not send it, and pre
 The guarded return value is `AyaBundledLaunchResult.QuestionOpened` for the built-in composer and `PreviewOpened` for the direct-review mode. Both are local-only, not reports of assistant ingestion.
 
 ## Integration patterns
+Creative review follows the direction composer with a prompt-first editable view. Share request and Copy request use only visible edited text. Full guide opens the complete editable reference and retains the prompt's latest edits; no automatic attachment or output monitoring is introduced.
+
 
 **Creative artwork generation:** `Aya.launchCreativeBundled(activity, task, direction=hostDescription, askDirection=false)` takes creative direction already typed under a host's artwork grid. With `askDirection=true`, AYA asks “Describe the artwork you want” instead. The host's typed image specifications (subject, aspect, dimensions, formats, margin and manual import) augment rather than overwrite the person's creative intent. The reviewed generated prompt requests the actual image, not instructions; after the chosen assistant produces artwork, the user must save and manually import it through the host's ordinary image picker. AYA neither detects that transition nor tracks results.
 
@@ -37,7 +39,7 @@ The guarded return value is `AyaBundledLaunchResult.QuestionOpened` for the buil
 - Keep a distinct final **Share** action separate from **Review details**, never silently send because the user pressed Continue.
 - Avoid implicit diagnostic collection: screens and questions are supplied by host or user, never scraped from elsewhere.
 - Human acceptance: TalkBack labels, 320x700/412x892 portrait, rotation/Activity recreation, font scaling, keyboard overlap and repeated cancel/reopen.
-- Preview of the entire guide can be lengthy. Future polish may offer collapsible sections and a concise disclosure summary without hiding what will be shared.
+- The original Help preview contains the entire guide. Creative Handoff already uses a concise prompt-first editor with optional Full guide expansion; any future condensed Help preview must preserve an explicit, reviewable full disclosure.
 
 ## Observable tests
 

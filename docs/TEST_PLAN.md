@@ -16,6 +16,11 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 `AyaReferenceVerifierTest` exercises mismatched app IDs, old/new/ranged versions, duplicate metadata, missing sections and placeholders. `AyaShareIntentsTest` is a device/emulator instrumentation suite that tests UTF-8 bytes, scope, unique URIs and permissions; compiling tests **does not mean running them**.
 
 ## Android instrumentation and manual work remaining
+- Prompt-first creative review: user can edit the generation request without scrolling the full reference, Copy and Share request reflect edits exactly, no stream/URI grant is included, Cancel/Back never sends, and opening Full guide preserves edited prompt rather than regenerating stale direction.
+- Sample Android UI: Home controls remain visible without scrolling after adding the separate artwork screen; the new non-exported `ArtworkActivity` opens from Home, keeps its host-owned draft and accepts manual import. Verify the return journey with rotation/process recreation as feasible.
+- Apply the host acceptance contract in [CREATIVE_HOST_ACCEPTANCE.md](CREATIVE_HOST_ACCEPTANCE.md) to any production importer, including URI grants, MIME/magic mismatch, EXIF, cropping, dimensions, alpha/format handling, save/apply outcomes and undo.
+- Creative share-mode checks: choose request-only (no `EXTRA_STREAM`, `ClipData` or URI grants), versus complete guide (.txt read-only URI), and test both Copy choices, cancellation, edited prompts, missing headings and >4000-character requests. No silent truncation or stale pre-edit text.
+- Sample importer rejects unsupported MIME types/undecodable images and downscales oversized PNG/JPEG previews without saving permanent media artwork.
 - Creative pure Kotlin tests: required image-spec validation, consistent aspect/dimensions, accepted MIME type limits, multiline direction, real generation instruction, host manual-import steps in the text fallback, and final-review edit/delete invariants.
 - Creative UI: host direction via `askDirection=false`, built-in direction editor, confirm/cancel, 320×700 and 412×892 screenshots, keyboard, rotation and Share/Copy. Test that the sample's `ACTION_OPEN_DOCUMENT` picker can import a PNG/JPEG **after** manually returning from an AI app, independently of AYA.
 - Real target trials: distinguish target offered, text seen, guide read, **image actually generated**, image saved, and manual import; no automatic success callback exists. Record findings only in controlled QA, never user-runtime analytics.
@@ -32,6 +37,8 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 - Confirm no unexpected internet permission, credential collection, analytics, or background network calls.
 
 ## Recipient matrix
+Check image creation ability **separately** from Android `ACTION_SEND` ingestion and account eligibility, because a recipient can support the Sharesheet but not image creation (or vice versa). Include a documented non-image-generating recipient as a negative-case test; confirm that AYA never claims generation happened and that selecting the recipient remains the user's decision.
+
 
 Run Android 10, 13, 15, 16+ where devices are available, and current installed ChatGPT/Claude/Gemini clients in logged-in/out states. Record tested versions and dates in [compatibility ledger](PROVIDER_COMPATIBILITY.md), including whether file was actually ingested, new chat creation, and required extra user action. Do not advertise provider behavior until verified.
 

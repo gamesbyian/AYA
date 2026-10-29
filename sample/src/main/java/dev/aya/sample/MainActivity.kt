@@ -2,49 +2,19 @@ package dev.aya.sample
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ScrollView
 import android.text.InputType
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import dev.aya.android.Aya
 import dev.aya.android.AyaBundledLaunchResult
-import dev.aya.android.AyaCreativeTask
-import dev.aya.android.AyaImageRequirements
 
 /** First-party consumer of the version-guarded AYA library. No user data is read. */
 class MainActivity : Activity() {
-    private lateinit var artworkPreview: ImageView
-    private var artworkUri: Uri? = null
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        artworkUri?.let { outState.putString("artwork_uri", it.toString()) }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 42 && resultCode == RESULT_OK) {
-            val uri = data?.data ?: return
-            try {
-                contentResolver.takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            } catch (_: SecurityException) {
-                // The picker may grant a transient permission only.
-            }
-            artworkUri = uri
-            artworkPreview.setImageURI(uri)
-            Toast.makeText(this, "Image selected for this demo", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val padding = (20 * resources.displayMetrics.density).toInt()
@@ -83,6 +53,7 @@ class MainActivity : Activity() {
             }
         })
         val hostQuestion = EditText(this).apply {
+            id = R.id.aya_sample_help_question
             hint = "Or type your question here"
             contentDescription = "Type a question in the host app"
             minLines = 2
@@ -110,82 +81,11 @@ class MainActivity : Activity() {
                 }
             }
         })
-        column.addView(TextView(this).apply {
-            text = "Artwork generation demo"
-            textSize = 22f
-        })
-        column.addView(TextView(this).apply {
-            text = "Imagine an artwork picker whose recommended covers aren't right. " +
-                "Describe an image, hand it to your own AI app, save the result, " +
-                "then come back and import it here. This demo doesn't modify a media library."
-        })
-        val creativeDirection = EditText(this).apply {
-            hint = "Describe square cover artwork"
-            contentDescription = "Describe artwork in the sample host"
-            setText("Atmospheric science-fiction season art with a luminous space station and no text.")
-            minLines = 3
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
-        }
-        column.addView(creativeDirection, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ))
         column.addView(Button(this).apply {
-            text = "Generate artwork with my agent"
-            contentDescription = "Review the creative image request before sharing"
-            setOnClickListener {
-                val result = Aya.launchCreativeBundled(
-                    activity = this@MainActivity,
-                    task = AyaCreativeTask(
-                        subject = "Aurora Station (fictional series), Season 4",
-                        assetRole = "Square season key art",
-                        image = AyaImageRequirements(
-                            aspectWidth = 1,
-                            aspectHeight = 1,
-                            preferredWidthPx = 2000,
-                            preferredHeightPx = 2000,
-                            acceptedMimeTypes = listOf("image/png", "image/jpeg"),
-                            transparentBackground = false,
-                            safeMarginPercent = 8
-                        ),
-                        importInstructions = "Return to this AYA Sample screen, " +
-                            "tap Import saved image, then choose the downloaded artwork."
-                    ),
-                    screenName = "Artwork generation demo",
-                    direction = creativeDirection.text.toString(),
-                    askDirection = false
-                )
-                if (result is AyaBundledLaunchResult.Rejected) {
-                    Toast.makeText(
-                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
+            text = "Open artwork generation demo"
+            contentDescription = "Open artwork generation demo"
+            setOnClickListener { startActivity(Intent(this@MainActivity, ArtworkActivity::class.java)) }
         })
-        column.addView(Button(this).apply {
-            text = "Import saved image"
-            contentDescription = "Select a generated image from device storage"
-            setOnClickListener {
-                startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "image/*"
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                }, 42)
-            }
-        })
-        artworkPreview = ImageView(this).apply {
-            contentDescription = "Imported artwork preview for this demo"
-            adjustViewBounds = true
-            maxHeight = (320 * resources.displayMetrics.density).toInt()
-        }
-        column.addView(artworkPreview, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ))
-        savedInstanceState?.getString("artwork_uri")?.let {
-            artworkUri = Uri.parse(it)
-            artworkPreview.setImageURI(artworkUri)
-        }
-        setContentView(ScrollView(this).apply { addView(column) })
+        setContentView(column)
     }
 }

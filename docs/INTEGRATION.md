@@ -71,6 +71,12 @@ No application name or version string is manually trusted: AYA reads the install
 
 ## 4. Test your host integration
 ## 3a. Integrate an artwork-picker creative panel
+**Current API behavior:** creative launch presents an editable prompt-only review by default. **Share request** shares only the visible text with no file URI; **Copy request** copies it. **Full guide** opens the complete, still-editable version-matched AYA reference and offers either sharing mode. The optional expansion preserves the user's edits from the short view. The sample demo is in a separate, non-exported `ArtworkActivity` so existing help controls stay accessible.
+
+Before adopting this into an actual artwork picker, implement the [host integration acceptance contract](CREATIVE_HOST_ACCEPTANCE.md), particularly restoration of the selected artwork slot, authoritative image validation and format-aware handling.
+
+Creative Share and Copy now let the user send **just the approved image-generation request** (plain text, no attached guide), or include the full reference (.txt). The former rejects requests over 4000 characters instead of silently truncating them. Both routes are opt-in and use the final edited preview. No target is presumed to support either format until verified in real-device tests.
+
 
 Place an optional “Create with your agent” panel below your **existing** recommended artwork options while preserving normal “Choose from device” access. Take the user's typed description in the host and call:
 
@@ -97,7 +103,7 @@ if (result is AyaBundledLaunchResult.Rejected) {
 }
 ```
 
-The example's paths and limits are **illustrative**: obtain them from real shipped host code and tests. `askDirection=true` shows an editable AYA composer when the host has no text field. Both flows reach full local preview and require explicit Share or Copy. The host owns saving/importing the downloaded image through its standard picker; AYA never sees the result. The sample app includes a real `ACTION_OPEN_DOCUMENT` image chooser and a local image preview to demonstrate this return-by-user workflow. For validation/recipient limitations, consult [Creative Handoff](CREATIVE_HANDOFF.md), [creative reference authoring](reference/CREATIVE_AUTHORING.md) and [provider compatibility](PROVIDER_COMPATIBILITY.md).
+The example's paths and limits are **illustrative**: obtain them from real shipped host code and tests. `askDirection=true` shows an editable AYA composer when the host has no text field. Both flows reach a concise creative review and require explicit Share or Copy; full-reference preview is available through Full guide. The host owns saving/importing the downloaded image through its standard picker; AYA never sees the result. The sample app includes a real `ACTION_OPEN_DOCUMENT` image chooser and a local image preview to demonstrate this return-by-user workflow. For validation/recipient limitations, consult [Creative Handoff](CREATIVE_HANDOFF.md), [creative reference authoring](reference/CREATIVE_AUTHORING.md) and [provider compatibility](PROVIDER_COMPATIBILITY.md).
 
 
 - `python3 tools/validate_guide.py --strict app/src/main/assets/aya-guide.md`

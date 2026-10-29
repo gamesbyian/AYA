@@ -19,8 +19,10 @@ When integrating AYA into another app:
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
 ## Engineering constraints
+- Creative UX is **prompt-first**: Share request and Copy request transmit only the edited visible generation prompt; Full guide explicitly opens the complete editable reference and optional attachment path. Guide identity is still validated at launch. Never regenerate an old direction when expanding a modified prompt.
 
 - Creative Handoff uses `Aya.launchCreativeBundled()` with `AyaCreativeTask` and `AyaImageRequirements`. Preserve the same guarded AYA-RAS reference, editable preview, final-review-derived message text, and no-return boundary as help. Consult [creative contract](docs/CREATIVE_HANDOFF.md) and [creative authoring extension](docs/reference/CREATIVE_AUTHORING.md).
+- For image generation,- Creative requests may use text-only or full-reference sharing. Text-only must never silently truncate or refer to a nonexistent attachment; test final edited request extraction and the absence of file/URI grants. Preserve the same one-way user-controlled boundary.
 - For image generation, include a standalone explicit generation instruction in approved `EXTRA_TEXT`, not just an attachment, and never promise that a recipient will generate or save an image. Image import remains the host app's responsibility; AYA never watches or handles an assistant's output.
 - Do not autoattach artwork, images, metadata with secrets, paths or account IDs; optional reference-image support is **not implemented**. Guard typed image requirements and verify host import truth independently.
 

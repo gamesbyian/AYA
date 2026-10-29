@@ -3,6 +3,8 @@
 **Status:** v1 image generation. This extends, but does not replace, the [AYA-RAS v1 12-section guide](AUTHORING_STANDARD.md) and the version guard. The core reference remains a standalone, source-backed explanation of the actual installed app. The dynamic creative request supplies the currently selected asset, task and user direction; **do not generate a separate user-specific AYA guide for each item**.
 
 ## Two distinct contracts
+**User-facing review:** a short, editable image-generation request is shared by default. The complete app-specific reference is offered only after the user explicitly chooses Full guide. Even when not transmitted, that reference remains mandatory, version-checked, comprehensive and accurate. Do not document default creative sharing as attaching the guide automatically.
+
 
 1. **Static installed-version guide:** document the app's actual artwork picker, supported asset types and import behavior as verified in shipping code and tests. Include feature, task and error IDs, navigation, failure recovery, privacy, evidence/unknowns and exact build applicability in the usual 12 sections.
 2. **Dynamic per-handoff creative task:** `AyaCreativeTask(subject, assetRole, image, importInstructions, hostContext?)` plus user-authored `direction`, all visible in the review. Fields must represent the *actual active item and host import route* and must be tested independently. Dynamic request data is not evidence of what the app supports.
@@ -29,6 +31,8 @@ Use the library's types (see [Creative Handoff contract](../CREATIVE_HANDOFF.md)
 - `importInstructions`: navigation starting from the retained artwork picker, actual picker actions and save/apply controls. No fabricated one-tap back or deep-link instructions.
 - `hostContext`: compact, public, necessary facts only. Never automatically include current private image, local filesystem paths, URLs containing tokens, logs, installed app accounts, or extracted metadata from a sensitive library.
 - `direction`: preserve user text; do not quietly prepend aesthetic judgments, strip names or rewrite their intent. The assistant may need to honor its own image policies, which AYA does not override.
+
+**Request quality target:** Distinguish a recipient-friendly text-only creative request (4000-character bound, no attachment) from the complete AYA reference. The person selects between them after reviewing the payload, and AYA never tracks which produced artwork.
 
 **Request quality target:** a receiving assistant with only `EXTRA_TEXT` can understand what to generate, for which subject and target, intended composition/ratio, preferred resolution and supported import formats, and the manual save/import relationship. The full guide is supplemental. A receiver that only ingests the file receives all of it. The final approved preview must control both channels.
 

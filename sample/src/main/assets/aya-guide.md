@@ -6,9 +6,9 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 3
-source_revision: aya-sample-creative-handoff-v1
-last_verified_utc: 2026-10-29T00:00:00Z
+guide_revision: 5
+source_revision: aya-sample-prompt-first-artwork-v1
+last_verified_utc: 2026-10-29T12:00:00Z
 owner: AYA maintainers
 ---
 
@@ -26,11 +26,13 @@ This is a guide to the real AYA Sample *source implementation*. The Android appl
 
 ## Quick orientation
 
-The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. It also has a fictional Aurora Station artwork-generator example with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
+The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. It also has a separate fictional Aurora Station artwork editor, accessed with "Open artwork generation demo", with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
 
 The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
 
 ## Navigation map
+
+- Home > Open artwork generation demo: opens a dedicated ArtworkActivity; Android Back returns to the help screen.
 
 - Home: title "AYA: Ask Your Agent", explanation, "Ask your agent" button, "Or type your question here" field, and "Ask using my question" button.
 - Home > Ask your agent: question composer, "What do you need help with?" and multiline input; "Review details" moves to preview.
@@ -94,30 +96,30 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 ### TASK-004: Ask an external assistant to create fictional cover art [CONDITIONAL]
 
 - Applies to: AYA Sample 1.0.0, when a recipient can accept text and actually generate images. Specific third-party capabilities are UNKNOWN until tested.
-- Start: Home > Artwork generation demo.
+- Start: Home > Open artwork generation demo > Artwork generation demo.
 - Prerequisites: a valid bundled guide and a compatible third-party assistant; no AYA account required.
-1. In the "Describe square cover artwork" field, edit or replace the example visual direction.
+1. From Home tap "Open artwork generation demo"; on the artwork screen edit the "Describe square cover artwork" field.
 2. Tap "Generate artwork with my agent". This uses the **host's already typed direction**, so no duplicate AYA composer appears.
-3. Review/edit the complete self-contained prompt and installed-version-matched guide. The request asks for actual generation, not merely a prompt.
-4. Choose Copy or Share, select your AI app if offered, and send the request there as required.
-5. If the assistant generated an image, save it on device using that assistant's own controls; then return to Home and follow TASK-005.
+3. Review/edit the short image-generation request. Share request sends only this text; Copy request copies it. Full guide opens an editable complete reference with both sharing modes.
+4. Choose the external AI app, if offered, and send the request there as required; the short editor never adds a file attachment.
+5. If the assistant generated an image, save it on device using the assistant's controls; return manually to the artwork screen and follow TASK-005.
 - Expect: the outgoing prompt describes the fictional "Aurora Station (fictional series), Season 4", square season key art, preferred 2000 × 2000 pixels, PNG/JPEG import formats, opaque background and 8% edge margin. Exact generation, file size and format are NOT guaranteed.
-- Failure: see ERR-002 for share failure and ERR-003 for an assistant that cannot generate the image; use Copy to paste manually.
+- Failure: see ERR-002 for share failure and ERR-003 for an assistant that cannot generate the image; use Copy to paste manually. Text-only requests over 4000 characters are refused rather than silently truncated; shorten or use the reference attachment.
 - Side effects/undo: creating/reviewing text is local until Copy or Share. A recipient may retain/upload data; image generation and saving occur outside AYA. No response is read by AYA.
-- Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `Aya.kt`; source inspected; provider behavior unverified.
+- Evidence: `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`, `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `Aya.kt`; source inspected; provider behavior unverified.
 
 ### TASK-005: Import a saved image into the sample preview [AVAILABLE]
 
 - Applies to: AYA Sample 1.0.0 on Android 23+ with an accessible image from the Android document picker.
-- Start: Home > Artwork generation demo.
+- Start: Home > Open artwork generation demo > Artwork generation demo.
 - Prerequisites: an image stored in a location accessible to Android's document picker; the image can come from any source and does not require using AYA.
-1. Tap "Import saved image".
+1. On the separate artwork screen tap "Import saved image".
 2. Choose an image using Android's system `ACTION_OPEN_DOCUMENT` picker.
 3. Observe the selected image under "Imported artwork preview for this demo".
-- Expect: the sample shows that chosen image on screen. The selected URI is saved through Activity-instance recreation, and persistable read permission is requested where the provider supports it. This sample does **not** save the artwork into a media library or automatically retrieve it from the AI app.
-- Failure: if selection is canceled or no read access exists, no image is imported; choose a valid accessible file. The sample has not been device-verified for every documents provider.
+- Expect: the sample accepts only decodable PNG/JPEG and shows a downsampled image preview on screen. The selected URI is saved through Activity-instance recreation, and persistable read permission is requested where the provider supports it. This sample does **not** save the artwork into a media library or automatically retrieve it from the AI app.
+- Failure: if canceled, denied URI access, a non-PNG/JPEG MIME, or undecodable image, no image is imported. Choose a valid accessible PNG or JPEG. The sample has not been device-verified for every documents provider.
 - Side effects/undo: local preview only; choose another file to replace it. The picker grants URI access to the host, independently of AYA.
-- Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`; source inspected, device acceptance pending.
+- Evidence: `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`; source inspected, device acceptance pending.
 
 ## Features and settings
 
@@ -133,7 +135,7 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ### F-002: Editable review and user-controlled sharing [AVAILABLE]
 
-- What it does: shows a question-first composer or accepts the question already typed in the host; then shows full help text; Cancel, Copy and Share are separate actions.
+- What it does: Help has the full editable reference preview. Creative handoff first shows an editable prompt with Share request, Copy request, Full guide, and Cancel. Full guide opens the complete reference with optional attachment.
 - Location: Home > Ask your agent, or Home > Ask using my question.
 - Defaults: question-first for "Ask your agent"; host-owned question uses `askQuestion=false`; no automatic share. The help package includes the guide, installed version, current screen and user question.
 - Constraints and interactions: sharing disallows blank text and packages over 2 MiB; file is plain UTF-8 text. The final user-approved question is also shared as bounded `EXTRA_TEXT`, and can be edited in review.
@@ -143,10 +145,10 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ### F-003: Structured creative image generation [AVAILABLE]
 
-- Location: Home > Artwork generation demo > Generate artwork with my agent.
+- Location: Home > Open artwork generation demo > Generate artwork with my agent.
 - Runtime input: host-owned creative direction; subject and image requirements supplied explicitly by the sample. The version-checked guide is still mandatory.
-- Image specification: 1:1 ratio; preferred 2000 × 2000 pixels (not guaranteed); PNG/JPEG accepted by this demonstration's advertised request; opaque background; 8% margin. The actual Android picker uses `image/*`, and is a demo preview rather than an enforcing media-library importer.
-- Interaction: the complete image request and guide can be edited in review. The approved generation request is sent as bounded `EXTRA_TEXT` as well as in the attached text file.
+- Image specification: 1:1 ratio; preferred 2000 × 2000 pixels (not guaranteed); PNG/JPEG accepted by the sample picker (MIME filter and decode check); opaque background; 8% margin. The Android demo provides an image preview rather than an enforcing media-library importer.
+- Interaction: short creative review edits and sends only the text prompt; Full guide opens complete editable app documentation and optional attachment sharing. Text-only requests over 4000 characters are refused rather than truncated.
 - Persistence: no generation state or third-party output is stored by AYA; the selected image's URI is retained across Activity recreation while saved state exists, not guaranteed across process restart with no saved state.
 - Evidence: `AyaCreative.kt`, `Aya.kt`, `MainActivity.kt`.
 
@@ -191,6 +193,7 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 - AYA sends no reference image and receives no generated output. The image is saved externally and manually selected by the Android document picker. It is never automatically imported, installed, or monitored. [AVAILABLE]
 - The host's 2000 × 2000 preference is not a guarantee about any AI image generator's output. [UNKNOWN]
+- Text-only creative sharing does not include an attached guide or grant a read URI. [AVAILABLE]
 
 ## Privacy and data handling
 
@@ -212,11 +215,11 @@ No app settings, identities, files or logs are automatically gathered. The sourc
 
 ## Evidence and provenance
 
-- Source: `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
+- Source: `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`, `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
 - Findings above reflect inspected source and build configuration. Real recipient outcomes remain unverified until device testing.
 - This is a demo reference, not evidence of production security or accessibility acceptance.
 
-The host supplies fictional artwork metadata and a user-edited direction. The preview contains both plus the app guide; only Copy or Share sends them outside the app. The demo image importer uses Android's document picker with user action; it does not automatically inspect photos or read generated images from the agent. No AYA outcome telemetry, return channel or server exists.
+The host supplies fictional artwork metadata and a user-edited direction. The preview contains both plus the app guide; only Copy or Share sends them outside the app. The separate artwork Activity preserves its draft direction in normal Activity recreation and uses Android's document picker with user action, validates decodable PNG/JPEG, and shows a downsampled preview; it does not automatically inspect photos or read generated images from the agent. No AYA outcome telemetry, return channel or server exists.
 
 ## Unknowns and escalation
 

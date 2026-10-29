@@ -1,6 +1,6 @@
 # AYA · Ask Your Agent
 
-**Help Handoff + Creative Handoff.** AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
+**Help Handoff + Creative Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
 
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
@@ -15,10 +15,12 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
 
 ## Android usage
+**Creative UX:** users now see a concise editable generation prompt first. **Share request** sends only that text, **Copy request** copies it, and **Full guide** opens the full editable app-reference package with optional attachment. This version guard is enforced before either route. See the [artwork host-acceptance contract](docs/CREATIVE_HOST_ACCEPTANCE.md) before integrating into an existing picker.
+
 
 ### Creative artwork generation
 
-`Aya.launchCreativeBundled(activity, task, direction, askDirection=false)` is the version-guarded creative API; `AyaCreativeTask` supplies subject, artwork role, required manual import path and an `AyaImageRequirements` object (aspect ratio, optional preferred dimensions, verified accepted formats and optional composition limits). The user supplies editable creative direction in the host or AYA composer. The complete generation request appears in `EXTRA_TEXT` even if a recipient ignores the attached reference. The sample provides a working Android file picker to import a saved image afterward. See [API example](docs/CREATIVE_HANDOFF.md#host-api-and-required-data) and [integration guide](docs/INTEGRATION.md).
+`Aya.launchCreativeBundled(activity, task, direction, askDirection=false)` is the version-guarded creative API; `AyaCreativeTask` supplies subject, artwork role, required manual import path and an `AyaImageRequirements` object (aspect ratio, optional preferred dimensions, verified accepted formats and optional composition limits). The user supplies editable creative direction in the host or AYA composer. The complete generation request can be shared as plain text with no attachment, or alongside the full reference. The compact review offers text-only Share and Copy by default; Full guide exposes the full reference and its separate text-only/attachment choices. Text-only requests over 4000 characters are rejected rather than truncated. The sample provides a working Android file picker to import a saved image afterward. See [API example](docs/CREATIVE_HANDOFF.md#host-api-and-required-data) and [integration guide](docs/INTEGRATION.md).
 
 
 The recommended integration method **automatically checks the bundled reference against the installed app's package and exact version**, instead of trusting hardcoded strings:

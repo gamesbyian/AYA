@@ -7,6 +7,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
+import androidx.test.uiautomator.UiScrollable
+import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -30,8 +32,10 @@ class QuestionFlowTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.wakeUp()
         device.executeShellCommand("wm dismiss-keyguard")
-        // Reuse the Activity when possible while bringing it to the foreground.
-        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x24000000")
+        // CLEAR_TOP + NEW_TASK returns to the test's actual home Activity,
+        // clearing a previously visited artwork screen or its dialog.
+        device.pressHome()
+        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x14000000")
         // UiAutomator exposes contentDescription rather than displayed text for
         // these host controls: searching By.text() made every emulator test fail
         // even though the sample rendered the button correctly.
@@ -60,6 +64,29 @@ class QuestionFlowTest {
         assertTrue("Host question must appear in review", preview.text.contains(question))
         assertFalse("Host flow must not open a second question box",
             device.hasObject(By.desc("Your question for the assistant (optional)")))
+    }
+
+    @Test fun creativeEditorIsPromptFirstAndFullGuidePreservesEdits() {
+        find(By.desc("Open artwork generation demo")).click()
+        val scroller = UiScrollable(UiSelector().scrollable(true))
+        // On large devices this short example fits without a scrollable view;
+        // scroll only when Android exposes an actual scroll container.
+        if (scroller.exists()) {
+            scroller.scrollIntoView(
+                UiSelector().description("Review the creative image request before sharing")
+            )
+        }
+        find(By.desc("Review the creative image request before sharing")).click()
+        val shortRequest = find(By.desc("Edit the image request before sharing"))
+        assertTrue(shortRequest.text.contains("Aurora Station"))
+        val edited = "Generate a square poster with a luminous purple skyline."
+        shortRequest.setText(edited)
+        // Full guide is the neutral AlertDialog button, not the default share action.
+        find(By.res("android", "button3")).click()
+        val full = find(By.hint("Creative request to share"))
+        assertTrue("Expanded reference must retain exact short prompt", full.text.contains(edited))
+        assertFalse("Expanded reference must not regenerate the sample's original direction",
+            full.text.contains("Atmospheric science-fiction season art"))
     }
 
     @Test fun cancelQuestionComposerKeepsHostAppOpen() {

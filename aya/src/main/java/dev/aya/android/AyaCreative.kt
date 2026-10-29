@@ -52,7 +52,7 @@ data class AyaImageRequirements(
             null -> Unit
         }
         safeMarginPercent?.let {
-            append("; keep essential subjects and lettering within a ${it}% margin on every edge")
+            append("; keep essential subjects and lettering at least ${it}% away from every edge")
         }
     }
 }
