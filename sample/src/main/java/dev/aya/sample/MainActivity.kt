@@ -114,6 +114,7 @@ class MainActivity : Activity() {
             }
         })
         val hostQuestion = EditText(this).apply {
+            id = R.id.aya_sample_help_question
             hint = "Or type your question here"
             contentDescription = "Type a question in the host app"
             minLines = 2
@@ -151,6 +152,7 @@ class MainActivity : Activity() {
                 "then come back and import it here. This demo doesn't modify a media library."
         })
         val creativeDirection = EditText(this).apply {
+            id = R.id.aya_sample_artwork_direction
             hint = "Describe square cover artwork"
             contentDescription = "Describe artwork in the sample host"
             setText("Atmospheric science-fiction season art with a luminous space station and no text.")

@@ -70,6 +70,12 @@ object AyaDocument {
      */
     fun textOnlyMessageFromPayload(payload: String): String? {
         val prompt = requestFromReviewedPayload(payload)
+        // The user may have removed the request heading or cleared its body.
+        // Never mislabel an intact AYA reference as a text-only creative request.
+        if (prompt == null && (
+                payload.contains("## Instructions for reading the reference") ||
+                payload.contains("## App-specific reference")
+            )) return null
         val text = (prompt ?: payload.trim()).trim()
         return text.takeIf { it.isNotBlank() && it.length <= 4000 }
     }

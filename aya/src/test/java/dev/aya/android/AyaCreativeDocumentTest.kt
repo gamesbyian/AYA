@@ -122,6 +122,14 @@ class AyaCreativeDocumentTest {
         )
     }
 
+    @Test fun removingRequestHeadingDoesNotLeakTheReferenceAsPrompt() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", question = "Make a blue cover.", creativeTask = task
+        ))
+        val edited = payload.replace("## User's starting question", "## Request removed")
+        assertEquals(null, AyaDocument.textOnlyMessageFromPayload(edited))
+    }
+
     @Test fun fullyRewrittenApprovedTextMayBeSharedDirectly() {
         assertEquals("Make a purple cover.", AyaDocument.textOnlyMessageFromPayload("Make a purple cover."))
     }
