@@ -25,6 +25,8 @@
 **Evidence levels:** platform-supported is not provider-tested; historical third-party coverage is not current compatibility. Provider app versions and account states must be recorded in [PROVIDER_COMPATIBILITY.md](PROVIDER_COMPATIBILITY.md). Do not claim success from a Sharesheet icon alone.
 
 ## AYA's baseline strategy
+**Current distinction:** Help Handoff defaults to an approved question plus the complete TXT app reference. Creative Handoff defaults to approved **text only**, with a deliberate Full guide option for attaching reference documentation. Neither flow changes the user-owned choice of installed recipient. Android's share-target discovery does not verify that a provider ingests both text and files. See [recipient evidence model](RECIPIENT_CAPABILITIES.md), [portable host protocol](protocol/README.md) and [optional assistant context](ASSIST_CONTEXT.md).
+
 
 **One self-contained text document + one short message text.**
 

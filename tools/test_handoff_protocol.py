@@ -21,6 +21,13 @@ class HandoffProtocolFixturesTest(unittest.TestCase):
             self.assertIn(name, schema["required"])
         self.assertEqual(True, schema["properties"]["privacy"]["properties"]["noAgentResponseCollection"]["const"])
 
+    def test_package_id_pattern_requires_real_dots(self):
+        import re
+        schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+        pattern = schema["properties"]["host"]["properties"]["packageId"]["pattern"]
+        self.assertIsNotNone(re.fullmatch(pattern, "dev.aya.sample"))
+        self.assertIsNone(re.fullmatch(pattern, "devXayaXsample"))
+
     def test_sample_has_consistent_dimensions_and_no_sensitive_uri(self):
         data = json.loads(SAMPLE.read_text(encoding="utf-8"))
         self.assertEqual("aya-handoff/v1", data["protocol"])

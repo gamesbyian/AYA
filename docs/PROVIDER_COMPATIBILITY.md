@@ -1,6 +1,6 @@
 # Recipient-app compatibility ledger
 
-**All recipient behavior remains UNVERIFIED on devices.** Prior public reports of Gemini's TXT Sharesheet support are useful [research](ANDROID_SHARING_RESEARCH.md), not a substitute for tested AYA end-to-end ingestion. AYA uses documented Android `ACTION_SEND` / `EXTRA_STREAM` and temporary content-URI grants. Whether ChatGPT, Claude or another receiver imports the attachment and creates a new conversation is controlled by that receiver.
+**All recipient behavior remains UNVERIFIED on devices.** The local capability registry therefore has no verified real-provider entries. Prior public reports of Gemini's TXT Sharesheet support are useful [research](ANDROID_SHARING_RESEARCH.md), not a substitute for tested AYA end-to-end ingestion. AYA uses documented Android `ACTION_SEND` / `EXTRA_STREAM` and temporary content-URI grants. Whether ChatGPT, Claude or another receiver imports the attachment and creates a new conversation is controlled by that receiver.
 
 | Target | Tested Android version | Tested target version | Attachment ingested | New conversation | Result |
 | --- | --- | --- | --- | --- | --- |
