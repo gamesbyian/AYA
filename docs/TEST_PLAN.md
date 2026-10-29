@@ -34,6 +34,8 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 - Confirm no unexpected internet permission, credential collection, analytics, or background network calls.
 
 ## Recipient matrix
+Check image creation ability **separately** from Android `ACTION_SEND` ingestion and account eligibility, because a recipient can support the Sharesheet but not image creation (or vice versa). Include a documented non-image-generating recipient as a negative-case test; confirm that AYA never claims generation happened and that selecting the recipient remains the user's decision.
+
 
 Run Android 10, 13, 15, 16+ where devices are available, and current installed ChatGPT/Claude/Gemini clients in logged-in/out states. Record tested versions and dates in [compatibility ledger](PROVIDER_COMPATIBILITY.md), including whether file was actually ingested, new chat creation, and required extra user action. Do not advertise provider behavior until verified.
 

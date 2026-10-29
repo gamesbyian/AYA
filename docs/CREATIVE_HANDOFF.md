@@ -86,6 +86,8 @@ Sample host: `sample/src/main/java/dev/aya/sample/MainActivity.kt` has a fiction
 - **Sensitive artworks:** v1 sends *no reference-image attachments*. Future image-editing modes require a new consent/URI/size and multi-attachment compatibility design, not unannounced addition of existing private images.
 
 ## Compatibility and release evidence
+**Provider capability versus handoff behavior:** A recipient's general ability to draw illustrations is separate from whether its Android share target opens the prompt in an image-capable context. As of October 2026, OpenAI, Google and xAI describe mobile image generation, while Anthropic explicitly distinguishes Claude's diagrams and design artifacts from traditional generated photos/illustrations. See the [research snapshot](PROVIDER_COMPATIBILITY.md#publicly-documented-image-generation-research-not-aya-compatibility-tests). AYA must **not** silently filter user-selected apps by this changing information or promise generation in any target.
+
 
 Android's public Sharesheet supports text sharing and temporary URI grants; it does not impose a semantic *generate image* action on the recipient. Different apps interpret `EXTRA_STREAM` and `EXTRA_TEXT` differently. Do not hardcode proprietary deep links, package names or inferred capabilities. [Provider ledger](PROVIDER_COMPATIBILITY.md) tracks real observed ingestion and image generation separately.
 
