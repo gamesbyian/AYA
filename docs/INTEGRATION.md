@@ -103,7 +103,7 @@ if (result is AyaBundledLaunchResult.Rejected) {
 }
 ```
 
-The example's paths and limits are **illustrative**: obtain them from real shipped host code and tests. `askDirection=true` shows an editable AYA composer when the host has no text field. Both flows reach full local preview and require explicit Share or Copy. The host owns saving/importing the downloaded image through its standard picker; AYA never sees the result. The sample app includes a real `ACTION_OPEN_DOCUMENT` image chooser and a local image preview to demonstrate this return-by-user workflow. For validation/recipient limitations, consult [Creative Handoff](CREATIVE_HANDOFF.md), [creative reference authoring](reference/CREATIVE_AUTHORING.md) and [provider compatibility](PROVIDER_COMPATIBILITY.md).
+The example's paths and limits are **illustrative**: obtain them from real shipped host code and tests. `askDirection=true` shows an editable AYA composer when the host has no text field. Both flows reach a concise creative review and require explicit Share or Copy; full-reference preview is available through Full guide. The host owns saving/importing the downloaded image through its standard picker; AYA never sees the result. The sample app includes a real `ACTION_OPEN_DOCUMENT` image chooser and a local image preview to demonstrate this return-by-user workflow. For validation/recipient limitations, consult [Creative Handoff](CREATIVE_HANDOFF.md), [creative reference authoring](reference/CREATIVE_AUTHORING.md) and [provider compatibility](PROVIDER_COMPATIBILITY.md).
 
 
 - `python3 tools/validate_guide.py --strict app/src/main/assets/aya-guide.md`

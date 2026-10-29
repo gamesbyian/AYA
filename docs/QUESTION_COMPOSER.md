@@ -39,7 +39,7 @@ Creative review follows the direction composer with a prompt-first editable view
 - Keep a distinct final **Share** action separate from **Review details**, never silently send because the user pressed Continue.
 - Avoid implicit diagnostic collection: screens and questions are supplied by host or user, never scraped from elsewhere.
 - Human acceptance: TalkBack labels, 320x700/412x892 portrait, rotation/Activity recreation, font scaling, keyboard overlap and repeated cancel/reopen.
-- Preview of the entire guide can be lengthy. Future polish may offer collapsible sections and a concise disclosure summary without hiding what will be shared.
+- The original Help preview contains the entire guide. Creative Handoff already uses a concise prompt-first editor with optional Full guide expansion; any future condensed Help preview must preserve an explicit, reviewable full disclosure.
 
 ## Observable tests
 
