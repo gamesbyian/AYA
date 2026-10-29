@@ -32,10 +32,10 @@ class QuestionFlowTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.wakeUp()
         device.executeShellCommand("wm dismiss-keyguard")
-        // CLEAR_TOP + NEW_TASK returns to the test's actual home Activity,
-        // clearing a previously visited artwork screen or its dialog.
-        device.pressHome()
-        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x14000000")
+        // ActivityScenarioRule owns the Activity. Recreate it through the rule
+        // to clear old dialogs without an external am-start that destroys the
+        // rule's instance (CLEAR_TOP caused flaky lifecycle assertions).
+        scenario.scenario.recreate()
         // UiAutomator exposes contentDescription rather than displayed text for
         // these host controls: searching By.text() made every emulator test fail
         // even though the sample rendered the button correctly.
