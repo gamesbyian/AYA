@@ -134,6 +134,27 @@ class AyaCreativeDocumentTest {
         assertEquals("Make a purple cover.", AyaDocument.textOnlyMessageFromPayload("Make a purple cover."))
     }
 
+    @Test fun promptFirstExpansionUsesApprovedEditsNotOriginalHostDirection() {
+        val request = AyaRequest(
+            "Chunks", "1.0", "Known guide reference",
+            question = "Old original direction",
+            creativeTask = task
+        )
+        val revisedPrompt = "Generate a square image with geometric lettering."
+        val expanded = AyaDocument.renderWithPrompt(request, revisedPrompt)
+        val extracted = AyaDocument.shareMessageFromPayload(expanded)
+        assertEquals(revisedPrompt, extracted)
+        assertTrue(expanded.contains("Known guide reference"))
+        assertFalse(expanded.contains("Old original direction"))
+    }
+
+    @Test fun expandedPromptCanRemainMultilineWithoutRegeneration() {
+        val request = AyaRequest("Chunks", "1.0", "Guide", creativeTask = task)
+        val prompt = "Generate my image.\nKeep faces centered.\nUse 16-bit colors."
+        val expanded = AyaDocument.renderWithPrompt(request, prompt)
+        assertEquals(prompt, AyaDocument.textOnlyMessageFromPayload(expanded))
+    }
+
     @Test fun ordinaryHelpRemainsUnchanged() {
         val payload = AyaDocument.render(AyaRequest("App", "1", "Guide", question = "Help"))
         assertEquals("Help", AyaDocument.shareMessageFromPayload(payload))
