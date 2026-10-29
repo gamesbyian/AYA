@@ -71,6 +71,10 @@ No application name or version string is manually trusted: AYA reads the install
 
 ## 4. Test your host integration
 ## 3a. Integrate an artwork-picker creative panel
+**Current API behavior:** creative launch presents an editable prompt-only review by default. **Share request** shares only the visible text with no file URI; **Copy request** copies it. **Full guide** opens the complete, still-editable version-matched AYA reference and offers either sharing mode. The optional expansion preserves the user's edits from the short view. The sample demo is in a separate, non-exported `ArtworkActivity` so existing help controls stay accessible.
+
+Before adopting this into an actual artwork picker, implement the [host integration acceptance contract](CREATIVE_HOST_ACCEPTANCE.md), particularly restoration of the selected artwork slot, authoritative image validation and format-aware handling.
+
 Creative Share and Copy now let the user send **just the approved image-generation request** (plain text, no attached guide), or include the full reference (.txt). The former rejects requests over 4000 characters instead of silently truncating them. Both routes are opt-in and use the final edited preview. No target is presumed to support either format until verified in real-device tests.
 
 

@@ -15,6 +15,8 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
 
 ## Android usage
+**Creative UX:** users now see a concise editable generation prompt first. **Share request** sends only that text, **Copy request** copies it, and **Full guide** opens the full editable app-reference package with optional attachment. This version guard is enforced before either route. See the [artwork host-acceptance contract](docs/CREATIVE_HOST_ACCEPTANCE.md) before integrating into an existing picker.
+
 
 ### Creative artwork generation
 

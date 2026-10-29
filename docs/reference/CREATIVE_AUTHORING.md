@@ -3,6 +3,8 @@
 **Status:** v1 image generation. This extends, but does not replace, the [AYA-RAS v1 12-section guide](AUTHORING_STANDARD.md) and the version guard. The core reference remains a standalone, source-backed explanation of the actual installed app. The dynamic creative request supplies the currently selected asset, task and user direction; **do not generate a separate user-specific AYA guide for each item**.
 
 ## Two distinct contracts
+**User-facing review:** a short, editable image-generation request is shared by default. The complete app-specific reference is offered only after the user explicitly chooses Full guide. Even when not transmitted, that reference remains mandatory, version-checked, comprehensive and accurate. Do not document default creative sharing as attaching the guide automatically.
+
 
 1. **Static installed-version guide:** document the app's actual artwork picker, supported asset types and import behavior as verified in shipping code and tests. Include feature, task and error IDs, navigation, failure recovery, privacy, evidence/unknowns and exact build applicability in the usual 12 sections.
 2. **Dynamic per-handoff creative task:** `AyaCreativeTask(subject, assetRole, image, importInstructions, hostContext?)` plus user-authored `direction`, all visible in the review. Fields must represent the *actual active item and host import route* and must be tested independently. Dynamic request data is not evidence of what the app supports.

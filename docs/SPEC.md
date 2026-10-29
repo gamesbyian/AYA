@@ -18,6 +18,8 @@ AYA is a reusable Android **bring-your-own-AI help and creative handoff**. An ap
 No data is collected by AYA itself. Android library includes a non-exported FileProvider limited to `cacheDir/aya/`. AYA creates a unique text file with the edited payload and sends it using `ACTION_SEND`, `EXTRA_STREAM`, `ClipData`, and `FLAG_GRANT_READ_URI_PERMISSION`.
 
 ## User experience
+**Creative review:** show the concise editable generation request first, with Copy request, Share request and optional Full guide expansion. Only the explicit full-guide option exposes the entire app reference and attachment sharing. Both paths require a valid version-matched guide and preserve edits when expanded; neither observes agent results.
+
 
 1. Tap "Ask your agent" within a host app.
 2. AYA asks "What do you need help with?" in a multiline input, optionally prefilled by the host. If the host already has its own question field, `askQuestion=false` skips this extra screen.
