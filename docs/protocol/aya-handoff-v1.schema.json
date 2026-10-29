@@ -34,7 +34,7 @@
       "properties": {
         "packageId": {
           "type": "string",
-          "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\\\.[A-Za-z][A-Za-z0-9_]*)+$",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$",
           "maxLength": 200
         },
         "appName": {
