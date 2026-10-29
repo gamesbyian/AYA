@@ -32,7 +32,7 @@ class AyaCreativeDocumentTest {
         assertTrue(text.contains("1:1"))
         assertTrue(text.contains("2000 × 2000"))
         assertTrue(text.contains("image/png"))
-        assertTrue(text.contains("8% margin"))
+        assertTrue(text.contains("at least 8% away from every edge"))
         assertTrue(text.contains("Import from device"))
         assertFalse(text.contains("Reference"))
         assertTrue(payload.contains("## App-specific reference"))
