@@ -30,6 +30,8 @@ Use the library's types (see [Creative Handoff contract](../CREATIVE_HANDOFF.md)
 - `hostContext`: compact, public, necessary facts only. Never automatically include current private image, local filesystem paths, URLs containing tokens, logs, installed app accounts, or extracted metadata from a sensitive library.
 - `direction`: preserve user text; do not quietly prepend aesthetic judgments, strip names or rewrite their intent. The assistant may need to honor its own image policies, which AYA does not override.
 
+**Request quality target:** Distinguish a recipient-friendly text-only creative request (4000-character bound, no attachment) from the complete AYA reference. The person selects between them after reviewing the payload, and AYA never tracks which produced artwork.
+
 **Request quality target:** a receiving assistant with only `EXTRA_TEXT` can understand what to generate, for which subject and target, intended composition/ratio, preferred resolution and supported import formats, and the manual save/import relationship. The full guide is supplemental. A receiver that only ingests the file receives all of it. The final approved preview must control both channels.
 
 ## AYA-RAS authoring examples (illustrative only)

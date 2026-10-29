@@ -16,6 +16,8 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 `AyaReferenceVerifierTest` exercises mismatched app IDs, old/new/ranged versions, duplicate metadata, missing sections and placeholders. `AyaShareIntentsTest` is a device/emulator instrumentation suite that tests UTF-8 bytes, scope, unique URIs and permissions; compiling tests **does not mean running them**.
 
 ## Android instrumentation and manual work remaining
+- Creative share-mode checks: choose request-only (no `EXTRA_STREAM`, `ClipData` or URI grants), versus complete guide (.txt read-only URI), and test both Copy choices, cancellation, edited prompts, missing headings and >4000-character requests. No silent truncation or stale pre-edit text.
+- Sample importer rejects unsupported MIME types/undecodable images and downscales oversized PNG/JPEG previews without saving permanent media artwork.
 - Creative pure Kotlin tests: required image-spec validation, consistent aspect/dimensions, accepted MIME type limits, multiline direction, real generation instruction, host manual-import steps in the text fallback, and final-review edit/delete invariants.
 - Creative UI: host direction via `askDirection=false`, built-in direction editor, confirm/cancel, 320×700 and 412×892 screenshots, keyboard, rotation and Share/Copy. Test that the sample's `ACTION_OPEN_DOCUMENT` picker can import a PNG/JPEG **after** manually returning from an AI app, independently of AYA.
 - Real target trials: distinguish target offered, text seen, guide read, **image actually generated**, image saved, and manual import; no automatic success callback exists. Record findings only in controlled QA, never user-runtime analytics.

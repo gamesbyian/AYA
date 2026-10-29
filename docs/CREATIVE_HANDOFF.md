@@ -10,7 +10,7 @@ Creative Handoff lets a person describe an image in the host's existing artwork-
 
 ## Scope and state machine
 
-- v1 supports **creation of an image** by sending one reviewed UTF-8 text attachment, plus a self-contained bounded generation request in `Intent.EXTRA_TEXT`. The outbound intent remains `ACTION_SEND` with `text/plain`, `EXTRA_STREAM`, `ClipData`, and a temporary read-only `FileProvider` grant.
+- v1 supports **creation of an image** via either an approved plain-text request or a full UTF-8 text attachment with bounded `Intent.EXTRA_TEXT`. Both use `ACTION_SEND`; only the attached-guide mode uses `EXTRA_STREAM`, `ClipData`, and a temporary read-only `FileProvider` grant.
 - The existing `Aya.launchBundled()` help flow remains intact; `Aya.launchCreativeBundled()` is a distinct typed entry point sharing the verifier, composer, preview and share path.
 - Typical journey: host artwork selector → optional recommended grid → *Create with your agent* panel → creative direction field → Review export → user edits/removes context → Share → recipient AI (possibly additional manual Send) → save result locally → manually return to host → **host's regular image-import control** → optional crop/review/apply.
 - The host can prepopulate `direction` and leave `askDirection=true` to show an editable AYA composer. If it already has a field, use `askDirection=false` to skip the duplicate editor. Both paths lead to the same editable preview and explicit user Share or Copy choice.
@@ -59,7 +59,14 @@ This is an **illustrative** host integration: verify that actual app's picker pa
 
 ## Two-channel delivery contract
 
-The full attachment contains version, subject, role, direction, image requirements, downstream manual import steps, safety/ability caveats, and the AYA-RAS reference. The Android message text contains the same self-contained generation request derived from the **final edited review**. If the user changes or removes source text in the review, AYA must not resurface pre-edit text in `EXTRA_TEXT`; `AyaDocument.shareMessageFromPayload()` extracts only content in the current approved payload. A request longer than 4000 characters uses the existing attachment-summary fallback rather than a truncated instruction that could alter user intent. Recipients may ignore either channel or both.
+### Creative sharing modes
+
+Creative **Share** offers **Request only (text, no attachment)** or **Request + app reference (.txt attachment)**. The first uses plain Android `ACTION_SEND` with `text/plain` and `EXTRA_TEXT` only; it creates no file and grants no URI access. Use it when the recipient ignores file attachments or no guide is needed for the generation. The second retains the complete self-contained reviewed document, read-only `FileProvider` attachment and a bounded message. Creative **Copy** presents the same two choices. Help Handoff retains its original sharing behavior.
+
+Both formats derive *only from the final edited preview*. Text-only sharing refuses to silently clip requests exceeding **4000 characters**; the user may shorten the text or choose the full-reference mode (which retains the 2 MiB attachment cap). Full-reference mode may put an attachment-dependent notice into `EXTRA_TEXT` if the prompt is too long for the bounded message field. If the user removes the standard prompt heading during editing, the text-only option sends the entire final approved payload only if it fits the bound. These are intentional limitations, never evidence that an AI generated or imported artwork.
+
+
+The optional full attachment contains version, subject, role, direction, image requirements, downstream manual import steps, safety/ability caveats, and the AYA-RAS reference. The Android message text contains the same self-contained generation request derived from the **final edited review**. If the user changes or removes source text in the review, AYA must not resurface pre-edit text in `EXTRA_TEXT`; `AyaDocument.shareMessageFromPayload()` extracts only content in the current approved payload. A request longer than 4000 characters uses the existing attachment-summary fallback rather than a truncated instruction that could alter user intent. Recipients may ignore either channel or both.
 
 Preferred prompt semantics: *Generate the image itself, not simply a prompt; preserve the requested subject and aspect; prefer compatible formats; explain mismatched capabilities; make it available for device saving; never claim it was installed.* The host must never promise that any named provider supports generation, attaching guides, saving to device, or initiating a fresh chat without recorded real-device evidence.
 
@@ -67,7 +74,7 @@ Preferred prompt semantics: *Generate the image itself, not simply a prompt; pre
 
 Creative AYA is **secondary** to the host's recommended-artwork grid and standard import controls. A compact optional AYA panel beneath the grid is appropriate. Label the action “Create with your agent”; do not disguise the fact that it opens a third-party application. Maintain a visible normal **Choose from device** option, no AYA requirement, and avoid suggesting AYA will automatically retrieve generated artwork. Preserve the user-entered direction when the picker is backgrounded or recreated. Use ≥44dp touch targets, TalkBack labels, keyboard-safe layout and small-screen accessibility testing. No AI-provider sign-in inside AYA.
 
-Sample host: `sample/src/main/java/dev/aya/sample/MainActivity.kt` has a fictional Aurora Station artwork editor, handoff button and Android `ACTION_OPEN_DOCUMENT` import control. This shows a *real chooser and preview* but does not manage a media library or save permanent artwork in a content database. Sample preferences (1:1, 2000², JPEG/PNG, opaque, 8% safe margin) do not establish requirements for other applications.
+Sample host: `sample/src/main/java/dev/aya/sample/MainActivity.kt` has a fictional Aurora Station artwork editor, handoff button and Android `ACTION_OPEN_DOCUMENT` import control. It filters PNG/JPEG, checks actual image decodability and shows a memory-bounded preview. It does not manage a media library or save permanent artwork in a content database. Sample preferences (1:1, 2000², JPEG/PNG, opaque, 8% safe margin) do not establish requirements for other applications.
 
 ## Privacy, security, failure and recovery
 
@@ -86,7 +93,7 @@ v1 prototype evidence: pure Kotlin unit tests for request constraints, creative 
 
 ## Plan and release gates
 
-1. **Implemented in branch:** typed image spec, reused guarded launch, generation-focused text/attachment composition, default/host composer paths, editable consent, copy fallback, sample manual chooser, Kotlin regression tests.
+1. **Implemented in AYA:** typed image spec, reused guarded launch, generation-focused text/attachment composition, default/host composer paths, editable consent, copy fallback, sample manual chooser, Kotlin regression tests.
 2. **Build validation:** Android unit, library AAR, sample APK, existing reference-guide validator/audit, instrumentation compilation. CI must pass before merge.
 3. **Device QA (not yet proven):** 320×700/412×892 and larger screens, TalkBack, IME/back/rotation/relaunch, signed-in and signed-out clients, no share apps, real URI permissions, actual image import of PNG/JPEG, invalid image selection, failures.
 4. **Real integrations:** independently inspect host artwork screens/metadata, embed a release-matched AYA-RAS guide, add AYA beneath the artwork picker and **reuse** existing import flow, then acceptance-test manually on device. No claim that integration into Chunks/Plex/music apps already exists.

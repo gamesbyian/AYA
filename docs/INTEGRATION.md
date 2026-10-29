@@ -71,6 +71,8 @@ No application name or version string is manually trusted: AYA reads the install
 
 ## 4. Test your host integration
 ## 3a. Integrate an artwork-picker creative panel
+Creative Share and Copy now let the user send **just the approved image-generation request** (plain text, no attached guide), or include the full reference (.txt). The former rejects requests over 4000 characters instead of silently truncating them. Both routes are opt-in and use the final edited preview. No target is presumed to support either format until verified in real-device tests.
+
 
 Place an optional “Create with your agent” panel below your **existing** recommended artwork options while preserving normal “Choose from device” access. Take the user's typed description in the host and call:
 
