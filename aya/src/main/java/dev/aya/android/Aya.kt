@@ -80,7 +80,13 @@ object AyaDocument {
         return text.takeIf { it.isNotBlank() && it.length <= 4000 }
     }
 
-    fun render(request: AyaRequest): String {
+    fun render(request: AyaRequest): String = renderWithPrompt(request, null)
+
+    /**
+     * Compose a full reference after the user has edited the concise creative
+     * request. The full handoff never regenerates the original direction.
+     */
+    internal fun renderWithPrompt(request: AyaRequest, approvedPrompt: String?): String {
         require(request.appName.isNotBlank()) { "appName is required" }
         require(request.appVersion.isNotBlank()) { "appVersion is required" }
         require(request.guide.isNotBlank()) { "guide is required" }
@@ -93,7 +99,7 @@ object AyaDocument {
             }
             appendLine()
             appendLine("## User's starting question")
-            appendLine(clean(request.creativeTask?.let {
+            appendLine(clean(approvedPrompt ?: request.creativeTask?.let {
                 AyaCreativeDocument.prompt(it, request.question)
             } ?: request.question?.takeIf { it.isNotBlank() }
                 ?: "Help me understand and use this application."))
@@ -219,8 +225,122 @@ object Aya {
     }
 
     fun launch(activity: Activity, request: AyaRequest) {
-        val initial = AyaDocument.render(request)
+        if (request.creativeTask != null) {
+            launchCreativePrompt(activity, request)
+        } else {
+            launchWithInitial(activity, request, AyaDocument.render(request))
+        }
+    }
 
+    /**
+     * Prompt-first creative review. A text-only request is the default; no
+     * hidden app guide or private data is sent. The full, editable reference
+     * remains one explicit action away and uses the same consent path as help.
+     */
+    private fun launchCreativePrompt(activity: Activity, request: AyaRequest) {
+        val task = requireNotNull(request.creativeTask)
+        val root = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(activity, 16), dp(activity, 12), dp(activity, 16), 0)
+        }
+        root.addView(TextView(activity).apply {
+            text = "This sends only the request shown below to the assistant you select. " +
+                "You can also review and include the full app guide. " +
+                "The assistant may upload the text and cannot be guaranteed to create an image."
+            textSize = 14f
+        })
+        root.addView(TextView(activity).apply {
+            text = "For: ${task.subject}   •   ${task.assetRole}\n" +
+                task.image.describe()
+            textSize = 13f
+            contentDescription = text
+        })
+        val prompt = EditText(activity).apply {
+            hint = "Image generation request to share"
+            contentDescription = "Edit the image request before sharing"
+            setText(AyaCreativeDocument.prompt(task, request.question))
+            setSelection(0)
+            minLines = 7
+            gravity = Gravity.TOP or Gravity.START
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            isSingleLine = false
+            setHorizontallyScrolling(false)
+        }
+        root.addView(prompt, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f
+        ))
+        val copy = android.widget.Button(activity).apply {
+            text = "Copy request"
+            contentDescription = "Copy only the edited image request"
+            minHeight = dp(activity, 48)
+            setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank()) {
+                    toast(activity, "Enter an image request before copying.")
+                } else {
+                    copyToClipboard(activity, approved)
+                }
+            }
+        }
+        root.addView(copy)
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle("Create with your agent")
+            .setView(root)
+            .setNegativeButton("Cancel", null)
+            .setNeutralButton("Full guide", null)
+            .setPositiveButton("Share request", null)
+            .create()
+        dialog.setOnShowListener {
+            val metrics = activity.resources.displayMetrics
+            dialog.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (metrics.heightPixels * 0.86f).toInt()
+            )
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank()) {
+                    toast(activity, "Enter an image request first.")
+                } else {
+                    val expanded = AyaDocument.renderWithPrompt(request, approved)
+                    if (expanded.toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
+                        toast(activity, "Full package exceeds 2 MiB. Shorten your request.")
+                    } else {
+                        dialog.dismiss()
+                        activity.window?.decorView?.post {
+                            if (!activity.isFinishing && !activity.isDestroyed) {
+                                launchWithInitial(activity, request, expanded)
+                            }
+                        }
+                    }
+                }
+            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val approved = prompt.text.toString().trim()
+                if (approved.isBlank() || approved.length > 4000) {
+                    toast(activity, "Text-only request must be 1 to 4000 characters. " +
+                        "Shorten it or choose Full guide.")
+                } else if (shareDirectText(activity, approved)) {
+                    dialog.dismiss()
+                }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun shareDirectText(activity: Activity, approved: String): Boolean {
+        return try {
+            activity.startActivity(Intent.createChooser(
+                AyaShareIntents.createTextOnly(approved), "Share with an assistant"
+            ))
+            true
+        } catch (_: Exception) {
+            toast(activity, "Sharing failed. Use Copy to paste your request.")
+            false
+        }
+    }
+
+    private fun launchWithInitial(activity: Activity, request: AyaRequest, initial: String) {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             val inset = dp(activity, 16)
