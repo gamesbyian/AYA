@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/ask-your-agent-icon.svg" alt="Ask Your Agent icon" width="220">
+</p>
+
 # AYA · Ask Your Agent
 
 **Help Handoff + Creative Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
@@ -5,6 +9,14 @@
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
+
+## Why use AYA instead of opening an AI app yourself?
+
+You absolutely can open ChatGPT, Claude, or another assistant and type a question yourself. AYA is meant to make that familiar process **a little smoother**, especially when the question comes up while you are already using an app.
+
+Instead of leaving the app, switching to an assistant, explaining which app and screen you are using, and finding the relevant instructions, you can start with **Ask Your Agent** where the question arises. The host can offer a suggested question or let you write your own, then AYA lets you review a relevant, version-aware app reference and pass the approved question and context to your chosen assistant through Android sharing. Whether the receiving app accepts the attachment or opens a new conversation depends on that app.
+
+The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
 ## Where to start
 **Interoperability additions (October 2026):** [recipient capability evidence model](docs/RECIPIENT_CAPABILITIES.md), [portable handoff manifest schema](docs/protocol/README.md), optional [AssistContent adapter](docs/ASSIST_CONTEXT.md), and a [separate AppFunctions decision record](docs/APPFUNCTIONS_DECISION.md). The capability model holds only developer-supplied QA facts; it neither monitors user conversations nor learns from outcomes. The JSON manifest is a documented *host-side interchange format*, not a new wire format for AI recipients.
