@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "3",
+  "guide_revision": "4",
   "cases": [
     {
       "id": "Q-001",
@@ -178,6 +178,48 @@
       "expected_behavior": "No existing images attached and no output tracking; only reviewed text is sent; image import is manual via picker.",
       "forbidden_claims": [
         "AYA secretly collects image-generation results"
+      ]
+    },
+    {
+      "id": "Q-014",
+      "question": "My AI app refuses attached .txt files. Can I share just the art prompt?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-004",
+        "F-003"
+      ],
+      "expected_behavior": "In creative Share choose Request only (text, no attachment); this sends the approved prompt without a FileProvider grant, and does not guarantee generation.",
+      "forbidden_claims": [
+        "The reference attachment is mandatory in the receiving AI app",
+        "Plain text guarantees image generation"
+      ]
+    },
+    {
+      "id": "Q-015",
+      "question": "Will AYA silently cut my very long cover-art instructions?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-003",
+        "TASK-004"
+      ],
+      "expected_behavior": "Text-only rejects requests >4000 characters and suggests shortening or sharing the full guide attachment, which retains the untruncated text.",
+      "forbidden_claims": [
+        "AYA silently drops part of the approved prompt"
+      ]
+    },
+    {
+      "id": "Q-016",
+      "question": "Can I import a corrupted AVIF cover as artwork in the sample?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-005"
+      ],
+      "expected_behavior": "Sample only accepts decodable PNG or JPEG in the Android document picker. No permanent library art changes.",
+      "forbidden_claims": [
+        "The sample accepts any image/* file"
       ]
     }
   ]
