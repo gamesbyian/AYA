@@ -32,8 +32,10 @@ class QuestionFlowTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.wakeUp()
         device.executeShellCommand("wm dismiss-keyguard")
-        // Reuse the Activity when possible while bringing it to the foreground.
-        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x24000000")
+        // CLEAR_TOP + NEW_TASK returns to the test's actual home Activity,
+        // clearing a previously visited artwork screen or its dialog.
+        device.pressHome()
+        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x14000000")
         // UiAutomator exposes contentDescription rather than displayed text for
         // these host controls: searching By.text() made every emulator test fail
         // even though the sample rendered the button correctly.
@@ -66,8 +68,14 @@ class QuestionFlowTest {
 
     @Test fun creativeEditorIsPromptFirstAndFullGuidePreservesEdits() {
         find(By.desc("Open artwork generation demo")).click()
-        UiScrollable(UiSelector().scrollable(true))
-            .scrollIntoView(UiSelector().description("Review the creative image request before sharing"))
+        val scroller = UiScrollable(UiSelector().scrollable(true))
+        // On large devices this short example fits without a scrollable view;
+        // scroll only when Android exposes an actual scroll container.
+        if (scroller.exists()) {
+            scroller.scrollIntoView(
+                UiSelector().description("Review the creative image request before sharing")
+            )
+        }
         find(By.desc("Review the creative image request before sharing")).click()
         val shortRequest = find(By.desc("Edit the image request before sharing"))
         assertTrue(shortRequest.text.contains("Aurora Station"))
