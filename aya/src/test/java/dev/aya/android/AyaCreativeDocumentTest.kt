@@ -89,6 +89,43 @@ class AyaCreativeDocumentTest {
         task.copy(importInstructions = " ")
     }
 
+    @Test fun approvedPromptCanBeSharedWithoutTheGuide() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Secret unrelated guide content", creativeTask = task,
+            question = "Bold red and blue."
+        ))
+        val text = AyaDocument.textOnlyMessageFromPayload(payload)!!
+        assertTrue(text.contains("Bold red and blue."))
+        assertTrue(text.contains("House, M.D."))
+        assertFalse(text.contains("Secret unrelated guide content"))
+    }
+
+    @Test fun textOnlyUsesEditedPromptNeverOriginalDirection() {
+        val initial = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", creativeTask = task,
+            question = "Remove this detail"
+        ))
+        val edited = initial.replace("Remove this detail", "Use a subtle gradient")
+        assertTrue(AyaDocument.textOnlyMessageFromPayload(edited)!!.contains("Use a subtle gradient"))
+        assertFalse(AyaDocument.textOnlyMessageFromPayload(edited)!!.contains("Remove this detail"))
+    }
+
+    @Test fun textOnlyRefusesLongPromptRatherThanOfferingInvalidAttachmentHint() {
+        val payload = AyaDocument.render(AyaRequest(
+            "Host", "1", "Guide", creativeTask = task,
+            question = "x".repeat(4100)
+        ))
+        assertEquals(null, AyaDocument.textOnlyMessageFromPayload(payload))
+        assertEquals(
+            "My full question is in the attached AYA help document.",
+            AyaDocument.shareMessageFromPayload(payload)
+        )
+    }
+
+    @Test fun fullyRewrittenApprovedTextMayBeSharedDirectly() {
+        assertEquals("Make a purple cover.", AyaDocument.textOnlyMessageFromPayload("Make a purple cover."))
+    }
+
     @Test fun ordinaryHelpRemainsUnchanged() {
         val payload = AyaDocument.render(AyaRequest("App", "1", "Guide", question = "Help"))
         assertEquals("Help", AyaDocument.shareMessageFromPayload(payload))

@@ -37,28 +37,41 @@ object AyaDocument {
      * edited preview. Never forward a pre-edit question removed by the user.
      * The complete, self-contained help package is in EXTRA_STREAM.
      */
-    fun shareMessageFromPayload(payload: String): String {
-        val heading = "## User's starting question"
+    private fun requestFromReviewedPayload(payload: String): String? {
         val lines = payload.lineSequence().toList()
-        val index = lines.indexOfFirst { it.trim() == heading }
-        if (index >= 0) {
-            val question = lines.drop(index + 1)
-                // A user's multiline question may itself contain Markdown headings.
-                // Stop only at AYA's own next section, never at arbitrary "## ".
-                .takeWhile {
-                    val line = it.trim()
-                    line != "## Instructions for reading the reference" &&
-                        line != "## App-specific reference"
-                }
-                .joinToString("\n").trim()
-            if (question.isNotBlank()) {
-                return if (question.length <= 4000) question
-                    else "My full question is in the attached AYA help document."
+        val index = lines.indexOfFirst { it.trim() == "## User's starting question" }
+        if (index < 0) return null
+        // The prompt may contain its own Markdown subheadings. Stop only at
+        // exact AYA envelope headings, not at arbitrary user-authored headings.
+        return lines.drop(index + 1)
+            .takeWhile {
+                val line = it.trim()
+                line != "## Instructions for reading the reference" &&
+                    line != "## App-specific reference"
             }
+            .joinToString("\n").trim().takeIf { it.isNotBlank() }
+    }
+
+    fun shareMessageFromPayload(payload: String): String {
+        val prompt = requestFromReviewedPayload(payload)
+        if (prompt != null) {
+            return if (prompt.length <= 4000) prompt
+                else "My full question is in the attached AYA help document."
         }
-        // Custom-edited text may not retain AYA's headings. Only share bytes
-        // the user actually approved; never reuse an earlier question.
+        // Derive fallback ONLY from final reviewed content, never pre-edit state.
         return payload.take(2400)
+    }
+
+    /**
+     * Text-only share must be complete and self-contained. Never substitute the
+     * attachment-dependent long-question notice or silently truncate a prompt.
+     * If a user edited away the known heading, their entire new reviewed text
+     * can be shared as-is only when it fits the bounded text channel.
+     */
+    fun textOnlyMessageFromPayload(payload: String): String? {
+        val prompt = requestFromReviewedPayload(payload)
+        val text = (prompt ?: payload.trim()).trim()
+        return text.takeIf { it.isNotBlank() && it.length <= 4000 }
     }
 
     fun render(request: AyaRequest): String {
@@ -250,20 +263,44 @@ object Aya {
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
                 val edited = editor.text.toString()
                 if (edited.isBlank()) {
-                    toast(activity, "There is no help text to copy.")
+                    toast(activity, "There is no text to copy.")
+                } else if (request.creativeTask != null) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("Copy which text?")
+                        .setItems(arrayOf(
+                            "Image request only",
+                            "Complete request + app guide"
+                        )) { _, choice ->
+                            val toCopy = if (choice == 0) {
+                                AyaDocument.textOnlyMessageFromPayload(edited)
+                            } else edited
+                            if (toCopy == null) {
+                                toast(activity, "Request is over 4000 characters. Shorten it or copy the full guide.")
+                            } else {
+                                copyToClipboard(activity, toCopy)
+                            }
+                        }.show()
                 } else {
-                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE)
-                        as android.content.ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("AYA help context", edited))
-                    toast(activity, "Help text copied. Clipboard contents may be visible to other apps.")
+                    copyToClipboard(activity, edited)
                 }
             }
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val edited = editor.text.toString()
                 if (edited.isBlank()) {
-                    toast(activity, "There is no help text to share.")
+                    toast(activity, "There is no text to share.")
                 } else if (edited.toByteArray(Charsets.UTF_8).size > MAX_SHARE_BYTES) {
-                    toast(activity, "Help text exceeds the 2 MB prototype limit. Shorten it first.")
+                    toast(activity, "Text exceeds the 2 MiB prototype limit. Shorten it first.")
+                } else if (request.creativeTask != null) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("Share your image request")
+                        .setItems(arrayOf(
+                            "Request only (text, no attachment)",
+                            "Request + app reference (.txt attachment)"
+                        )) { _, choice ->
+                            if (share(activity, edited, textOnly = choice == 0)) {
+                                dialog.dismiss()
+                            }
+                        }.show()
                 } else if (share(activity, edited)) {
                     dialog.dismiss()
                 }
@@ -370,13 +407,28 @@ object Aya {
         }
     }
 
-    private fun share(activity: Activity, payload: String): Boolean {
+    private fun copyToClipboard(activity: Activity, text: String) {
+        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE)
+            as android.content.ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("AYA approved content", text))
+        toast(activity, "Copied. Clipboard contents may be visible to other apps.")
+    }
+
+    private fun share(activity: Activity, payload: String, textOnly: Boolean = false): Boolean {
         return try {
-            // EXTRA_TEXT comes only from the *edited, approved* payload. It
-            // cannot leak an original question the user deleted in review.
-            val sendIntent = AyaShareIntents.create(
-                activity, payload, AyaDocument.shareMessageFromPayload(payload)
-            )
+            // Both channels derive only from the final, user-edited preview.
+            val sendIntent = if (textOnly) {
+                val prompt = AyaDocument.textOnlyMessageFromPayload(payload)
+                if (prompt == null) {
+                    toast(activity, "Request is over 4000 characters. Shorten it or share with the guide.")
+                    return false
+                }
+                AyaShareIntents.createTextOnly(prompt)
+            } else {
+                AyaShareIntents.create(
+                    activity, payload, AyaDocument.shareMessageFromPayload(payload)
+                )
+            }
             activity.startActivity(Intent.createChooser(sendIntent, "Share with an assistant"))
             true
         } catch (_: Exception) {

@@ -43,6 +43,27 @@ class AyaShareIntentsTest {
         assertEquals(payload, context.contentResolver.openInputStream(uri)!!.bufferedReader().use { it.readText() })
     }
 
+    @Test fun textOnlyShareHasNoUriOrFilePermissions() {
+        val prompt = "Create square artwork with a bright blue palette."
+        val intent = AyaShareIntents.createTextOnly(prompt)
+        assertEquals(Intent.ACTION_SEND, intent.action)
+        assertEquals("text/plain", intent.type)
+        assertEquals(prompt, intent.getStringExtra(Intent.EXTRA_TEXT))
+        assertNull(intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM))
+        assertNull(intent.clipData)
+        assertTrue((intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun textOnlyRefusesBlankRequest() {
+        AyaShareIntents.createTextOnly(" ")
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun textOnlyRefusesLongRequestInsteadOfSilentlyTruncating() {
+        AyaShareIntents.createTextOnly("x".repeat(4001))
+    }
+
     @Test fun noExtraTextWhenNoneSupplied() {
         val intent = AyaShareIntents.create(context, "Full help package")
         assertNull(intent.getStringExtra(Intent.EXTRA_TEXT))

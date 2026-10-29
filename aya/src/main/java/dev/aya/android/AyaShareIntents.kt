@@ -9,6 +9,18 @@ import java.io.File
 /** Visible to Android instrumentation tests; consumers use Aya.launchBundled(). */
 internal object AyaShareIntents {
     private const val RETAIN_CACHE_DAYS = 7L
+
+    /** Recipient-friendly fallback; never opens or grants access to a file. */
+    fun createTextOnly(messageText: String): Intent {
+        require(messageText.isNotBlank() && messageText.length <= 4000) {
+            "Text-only request must be nonempty and at most 4000 characters"
+        }
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, messageText)
+            putExtra(Intent.EXTRA_SUBJECT, "Ask Your Agent")
+        }
+    }
     fun create(context: Context, payload: String, messageText: String? = null): Intent {
         require(payload.isNotBlank()) { "Cannot share an empty document" }
         require(payload.toByteArray(Charsets.UTF_8).size <= 2 * 1024 * 1024) {
