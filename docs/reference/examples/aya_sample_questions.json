@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "4",
+  "guide_revision": "5",
   "cases": [
     {
       "id": "Q-001",
@@ -220,6 +220,20 @@
       "expected_behavior": "Sample only accepts decodable PNG or JPEG in the Android document picker. No permanent library art changes.",
       "forbidden_claims": [
         "The sample accepts any image/* file"
+      ]
+    },
+    {
+      "id": "Q-017",
+      "question": "Can I share an artwork prompt without opening the entire manual?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-004",
+        "F-003"
+      ],
+      "expected_behavior": "Use short prompt-first creative editor, edit request, Share request (plain text, no file), or Full guide for optional attachment.",
+      "forbidden_claims": [
+        "AYA attaches the guide to every art prompt"
       ]
     }
   ]

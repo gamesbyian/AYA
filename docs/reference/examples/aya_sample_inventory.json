@@ -2,8 +2,8 @@
   "schema_version": "aya-inventory/v1",
   "app_id": "dev.aya.sample",
   "app_version": "1.0.0",
-  "source_revision": "aya-sample-creative-share-modes-v1",
-  "reviewed_at_utc": "2026-10-29T07:00:00Z",
+  "source_revision": "aya-sample-prompt-first-artwork-v1",
+  "reviewed_at_utc": "2026-10-29T12:00:00Z",
   "items": [
     {
       "id": "TASK-001",
@@ -67,7 +67,7 @@
       "title": "Hand off image-generation request",
       "status": "CONDITIONAL",
       "criticality": "high",
-      "source_ref": "sample/src/main/java/dev/aya/sample/MainActivity.kt;aya/src/main/java/dev/aya/android/AyaCreative.kt"
+      "source_ref": "sample/src/main/java/dev/aya/sample/ArtworkActivity.kt;aya/src/main/java/dev/aya/android/AyaCreative.kt"
     },
     {
       "id": "TASK-005",
@@ -75,7 +75,7 @@
       "title": "Manually import image into sample preview",
       "status": "AVAILABLE",
       "criticality": "high",
-      "source_ref": "sample/src/main/java/dev/aya/sample/MainActivity.kt"
+      "source_ref": "sample/src/main/java/dev/aya/sample/ArtworkActivity.kt"
     },
     {
       "id": "F-003",
