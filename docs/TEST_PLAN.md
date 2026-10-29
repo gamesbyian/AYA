@@ -37,6 +37,8 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 - Confirm no unexpected internet permission, credential collection, analytics, or background network calls.
 
 ## Recipient matrix
+In addition to recipient interoperability trials, test `AyaRecipientCapabilityRegistry`: unverified intent filters, published documentation, exact QA match, account state unknown, app/Android version mismatch, contradicting test observations and absence of entries. Do not let published feature claims become verified ingestion. Test `AyaAssistContext.populate()` in Android instrumentation for JSON-LD and absence of URI grants, and its conservative size limits in unit/device tests. Document real image-generation capability separately from ingestion.
+
 Check image creation ability **separately** from Android `ACTION_SEND` ingestion and account eligibility, because a recipient can support the Sharesheet but not image creation (or vice versa). Include a documented non-image-generating recipient as a negative-case test; confirm that AYA never claims generation happened and that selecting the recipient remains the user's decision.
 
 

@@ -1,0 +1,46 @@
+{
+  "protocol": "aya-handoff/v1",
+  "operation": "generate_image",
+  "host": {
+    "packageId": "dev.aya.sample",
+    "appName": "AYA Sample",
+    "appVersion": "1.0.0",
+    "screen": "Artwork demo"
+  },
+  "request": {
+    "text": "Atmospheric station artwork with blue lighting.",
+    "userReviewRequired": true
+  },
+  "reference": {
+    "schema": "aya-reference/v1",
+    "asset": "aya-guide.md",
+    "exactInstalledVersionRequired": true
+  },
+  "context": {
+    "visibleFeature": "Artwork picker",
+    "subject": "Aurora Station, Season 4"
+  },
+  "outputRequirements": {
+    "image": {
+      "aspectWidth": 1,
+      "aspectHeight": 1,
+      "preferredWidthPx": 2000,
+      "preferredHeightPx": 2000,
+      "acceptedMimeTypes": [
+        "image/png",
+        "image/jpeg"
+      ],
+      "manualImport": "Return to artwork demo and choose Import saved image.",
+      "safeMarginPercent": 8
+    }
+  },
+  "transportPreferences": [
+    "TEXT_ONLY",
+    "TEXT_AND_TXT_REFERENCE"
+  ],
+  "privacy": {
+    "explicitShareAction": true,
+    "noAgentResponseCollection": true,
+    "noAutomaticReturn": true
+  }
+}

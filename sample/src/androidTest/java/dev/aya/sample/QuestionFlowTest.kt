@@ -32,10 +32,10 @@ class QuestionFlowTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.wakeUp()
         device.executeShellCommand("wm dismiss-keyguard")
-        // CLEAR_TOP + NEW_TASK returns to the test's actual home Activity,
-        // clearing a previously visited artwork screen or its dialog.
-        device.pressHome()
-        device.executeShellCommand("am start -n dev.aya.sample/.MainActivity -f 0x14000000")
+        // ActivityScenarioRule owns the Activity. Recreate it through the rule
+        // to clear old dialogs without an external am-start that destroys the
+        // rule's instance (CLEAR_TOP caused flaky lifecycle assertions).
+        scenario.scenario.recreate()
         // UiAutomator exposes contentDescription rather than displayed text for
         // these host controls: searching By.text() made every emulator test fail
         // even though the sample rendered the button correctly.
@@ -93,7 +93,14 @@ class QuestionFlowTest {
         find(By.desc("Open AYA help with a version-matched reference")).click()
         find(By.desc("Your question for the assistant (optional)"))
         find(By.res("android", "button2")).click()
-        find(By.desc("Review my question with the app reference before sharing"))
+        // Cancellation must close the composer and leave the host Activity
+        // alive. The IME can still obscure a lower button on small emulators,
+        // so visibility of that button is not a reliable lifecycle assertion.
+        scenario.scenario.onActivity {
+            assertFalse("Cancelling AYA must not finish the host", it.isFinishing)
+            assertFalse("Cancelling AYA must not destroy the host", it.isDestroyed)
+        }
+        assertFalse(device.hasObject(By.desc("Your question for the assistant (optional)")))
         assertFalse(device.hasObject(By.hint("Help context to share")))
     }
 }
