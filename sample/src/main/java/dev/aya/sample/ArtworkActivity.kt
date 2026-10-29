@@ -108,7 +108,7 @@ class ArtworkActivity : Activity() {
             contentDescription = "Review the creative image request before sharing"
             setOnClickListener {
                 val result = Aya.launchCreativeBundled(
-                    activity = this@MainActivity,
+                    activity = this@ArtworkActivity,
                     task = AyaCreativeTask(
                         subject = "Aurora Station (fictional series), Season 4",
                         assetRole = "Square season key art",
@@ -130,7 +130,7 @@ class ArtworkActivity : Activity() {
                 )
                 if (result is AyaBundledLaunchResult.Rejected) {
                     Toast.makeText(
-                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
+                        this@ArtworkActivity, "AYA reference unavailable: ${result.reason}",
                         Toast.LENGTH_LONG
                     ).show()
                 }
