@@ -101,7 +101,7 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 3. Review/edit the complete self-contained prompt and installed-version-matched guide. The request asks for actual generation, not merely a prompt.
 4. Choose Copy or Share, select your AI app if offered, and send the request there as required.
 5. If the assistant generated an image, save it on device using that assistant's own controls; then return to Home and follow TASK-005.
-- Expected: the outgoing prompt describes the fictional "Aurora Station (fictional series), Season 4", square season key art, preferred 2000 × 2000 pixels, PNG/JPEG import formats, opaque background and 8% edge margin. Exact generation, file size and format are NOT guaranteed.
+- Expect: the outgoing prompt describes the fictional "Aurora Station (fictional series), Season 4", square season key art, preferred 2000 × 2000 pixels, PNG/JPEG import formats, opaque background and 8% edge margin. Exact generation, file size and format are NOT guaranteed.
 - Failure: see ERR-002 for share failure and ERR-003 for an assistant that cannot generate the image; use Copy to paste manually.
 - Side effects/undo: creating/reviewing text is local until Copy or Share. A recipient may retain/upload data; image generation and saving occur outside AYA. No response is read by AYA.
 - Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `Aya.kt`; source inspected; provider behavior unverified.
@@ -114,7 +114,7 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 1. Tap "Import saved image".
 2. Choose an image using Android's system `ACTION_OPEN_DOCUMENT` picker.
 3. Observe the selected image under "Imported artwork preview for this demo".
-- Expected: the sample shows that chosen image on screen. The selected URI is saved through Activity-instance recreation, and persistable read permission is requested where the provider supports it. This sample does **not** save the artwork into a media library or automatically retrieve it from the AI app.
+- Expect: the sample shows that chosen image on screen. The selected URI is saved through Activity-instance recreation, and persistable read permission is requested where the provider supports it. This sample does **not** save the artwork into a media library or automatically retrieve it from the AI app.
 - Failure: if selection is canceled or no read access exists, no image is imported; choose a valid accessible file. The sample has not been device-verified for every documents provider.
 - Side effects/undo: local preview only; choose another file to replace it. The picker grants URI access to the host, independently of AYA.
 - Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`; source inspected, device acceptance pending.
