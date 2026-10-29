@@ -1,5 +1,7 @@
 # Android-to-assistant handoff research and decision record
 
+**Creative handoff note (2026-10-29):** standard `ACTION_SEND` can carry AYA's generation request as `EXTRA_TEXT` and its guide as `EXTRA_STREAM`; a target may read only one of these. Android offers no generic intent meaning "start a new AI image-generation conversation and return generated artwork." Saving a generated image and importing it via the host's ordinary document/image picker are separate user-controlled actions. This is documented in [Creative Handoff](CREATIVE_HANDOFF.md) and must be verified per recipient on-device. Android's public [sharing guide](https://developer.android.com/develop/ui/compose/sharing/send) documents text/binary sharing and recommends its photo picker for selecting media; this is platform guidance, not a test of any specific assistant.
+
 **Reviewed:** 2026-10-28. **Scope:** Android applications sharing user questions and versioned reference documents with ChatGPT, Claude, Gemini or another app. Research establishes platform contracts and published examples; it does **not** replace tests on installed receiver versions.
 
 ## Established Android mechanisms

@@ -6,9 +6,9 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 2
-source_revision: aya-sample-question-first-v1
-last_verified_utc: 2026-10-28T00:00:00Z
+guide_revision: 3
+source_revision: aya-sample-creative-handoff-v1
+last_verified_utc: 2026-10-29T00:00:00Z
 owner: AYA maintainers
 ---
 
@@ -20,13 +20,13 @@ This is a guide to the real AYA Sample *source implementation*. The Android appl
 
 - App identifier: `dev.aya.sample`; APK `versionName` 1.0.0, `versionCode` 1.
 - Minimum Android API level 23, target 35. Behavior of individual recipient apps is UNKNOWN.
-- Only the published demo's Home screen and AYA preview/share flow are included.
+- Only the published demo's Home screen, fictional artwork demonstration and AYA preview/share flow are included.
 - No remote account, login, subscription or background service is implemented in the sample.
 - The library requires the exact app ID and version in this guide's metadata to match the installed application.
 
 ## Quick orientation
 
-The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
+The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. It also has a fictional Aurora Station artwork-generator example with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
 
 The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
 
@@ -91,6 +91,34 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - If it fails: see ERR-001.
 - Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt` and `aya/src/main/java/dev/aya/android/Aya.kt`; source-inspected, device behavior unverified.
 
+### TASK-004: Ask an external assistant to create fictional cover art [CONDITIONAL]
+
+- Applies to: AYA Sample 1.0.0, when a recipient can accept text and actually generate images. Specific third-party capabilities are UNKNOWN until tested.
+- Start: Home > Artwork generation demo.
+- Prerequisites: a valid bundled guide and a compatible third-party assistant; no AYA account required.
+1. In the "Describe square cover artwork" field, edit or replace the example visual direction.
+2. Tap "Generate artwork with my agent". This uses the **host's already typed direction**, so no duplicate AYA composer appears.
+3. Review/edit the complete self-contained prompt and installed-version-matched guide. The request asks for actual generation, not merely a prompt.
+4. Choose Copy or Share, select your AI app if offered, and send the request there as required.
+5. If the assistant generated an image, save it on device using that assistant's own controls; then return to Home and follow TASK-005.
+- Expected: the outgoing prompt describes the fictional "Aurora Station (fictional series), Season 4", square season key art, preferred 2000 × 2000 pixels, PNG/JPEG import formats, opaque background and 8% edge margin. Exact generation, file size and format are NOT guaranteed.
+- Failure: see ERR-002 for share failure and ERR-003 for an assistant that cannot generate the image; use Copy to paste manually.
+- Side effects/undo: creating/reviewing text is local until Copy or Share. A recipient may retain/upload data; image generation and saving occur outside AYA. No response is read by AYA.
+- Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `Aya.kt`; source inspected; provider behavior unverified.
+
+### TASK-005: Import a saved image into the sample preview [AVAILABLE]
+
+- Applies to: AYA Sample 1.0.0 on Android 23+ with an accessible image from the Android document picker.
+- Start: Home > Artwork generation demo.
+- Prerequisites: an image stored in a location accessible to Android's document picker; the image can come from any source and does not require using AYA.
+1. Tap "Import saved image".
+2. Choose an image using Android's system `ACTION_OPEN_DOCUMENT` picker.
+3. Observe the selected image under "Imported artwork preview for this demo".
+- Expected: the sample shows that chosen image on screen. The selected URI is saved through Activity-instance recreation, and persistable read permission is requested where the provider supports it. This sample does **not** save the artwork into a media library or automatically retrieve it from the AI app.
+- Failure: if selection is canceled or no read access exists, no image is imported; choose a valid accessible file. The sample has not been device-verified for every documents provider.
+- Side effects/undo: local preview only; choose another file to replace it. The picker grants URI access to the host, independently of AYA.
+- Evidence: `sample/src/main/java/dev/aya/sample/MainActivity.kt`; source inspected, device acceptance pending.
+
 ## Features and settings
 
 ### F-001: Version-checked bundled reference [AVAILABLE]
@@ -112,6 +140,15 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Visibility: the dialog appears only after a successfully validated guide.
 - Persistence: approved shares are cached temporarily and older AYA cache entries are pruned opportunistically after seven days on subsequent shares.
 - Evidence: `aya/src/main/java/dev/aya/android/Aya.kt`.
+
+### F-003: Structured creative image generation [AVAILABLE]
+
+- Location: Home > Artwork generation demo > Generate artwork with my agent.
+- Runtime input: host-owned creative direction; subject and image requirements supplied explicitly by the sample. The version-checked guide is still mandatory.
+- Image specification: 1:1 ratio; preferred 2000 × 2000 pixels (not guaranteed); PNG/JPEG accepted by this demonstration's advertised request; opaque background; 8% margin. The actual Android picker uses `image/*`, and is a demo preview rather than an enforcing media-library importer.
+- Interaction: the complete image request and guide can be edited in review. The approved generation request is sent as bounded `EXTRA_TEXT` as well as in the attached text file.
+- Persistence: no generation state or third-party output is stored by AYA; the selected image's URI is retained across Activity recreation while saved state exists, not guaranteed across process restart with no saved state.
+- Evidence: `AyaCreative.kt`, `Aya.kt`, `MainActivity.kt`.
 
 ## Troubleshooting
 
@@ -135,6 +172,14 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Escalate: report repeatable failures with Android and app versions, without including secrets.
 - Evidence: `aya/src/main/java/dev/aya/android/Aya.kt`; source-inspected.
 
+### ERR-003: AI app does not generate artwork [CONDITIONAL]
+
+- Symptom: the destination writes a prompt, ignores the text attachment, requires sign-in, or cannot create an image.
+- Interpretation: the recipient's generation capability or handoff behavior differs; AYA cannot command generation or verify success.
+- Safe fix: verify that the full request is visible in the destination, paste the reviewed text manually if needed, use an image-capable assistant if available, and save the result yourself.
+- Verification: a real generated image saved on the device, then manually chosen using TASK-005. Opening Android's chooser is not proof.
+- Evidence: `AyaCreative.kt` specifies requested behavior; actual provider outcomes are UNKNOWN.
+
 ## Limitations and unsupported behavior
 
 - The sample cannot read assistant responses or operate another app. [UNSUPPORTED]
@@ -142,11 +187,19 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - AYA cannot force another assistant to create a fresh conversation or ingest the attachment. [UNSUPPORTED]
 - ChatGPT and Claude attachment behavior has not been verified on physical devices. [UNKNOWN]
 - There is no built-in AI model, API subscription, provider login or device diagnostic collection. [UNSUPPORTED]
-- The sample does not edit or manage any real parcel, torrent or other user data. [UNSUPPORTED]
+- The sample does not edit or manage any real parcel, torrent or other user data. It can display a user-selected image locally but cannot persist media-library artwork. [UNSUPPORTED]
+
+- AYA sends no reference image and receives no generated output. The image is saved externally and manually selected by the Android document picker. It is never automatically imported, installed, or monitored. [AVAILABLE]
+- The host's 2000 × 2000 preference is not a guarantee about any AI image generator's output. [UNKNOWN]
 
 ## Privacy and data handling
 
 No app settings, identities, files or logs are automatically gathered. The source-controlled guide, simple screen label and any question the user types are explicitly supplied to AYA. The user can edit this package before sharing. Copy places full text on Android clipboard. Share creates a unique, private cache file and temporarily grants a selected external app read access. It also puts a bounded representation of the **approved** question in `EXTRA_TEXT`; the attached document retains the entire question and guide. That app may upload/store a copy. AYA has no mechanism to withdraw data already shared.
+
+- Creative handoff: one-way transfer of a user's image-generation request and current app import requirements, followed by user-controlled save/import.
+- Artwork direction: editable user-authored description in the demo field.
+- Image requirement: verified host-supplied target aspect/format constraints; a preferred size need not match actual output.
+- Import saved image: Android document picker for the demo preview, separate from an assistant's save controls.
 
 ## Glossary and synonyms
 
@@ -159,15 +212,19 @@ No app settings, identities, files or logs are automatically gathered. The sourc
 
 ## Evidence and provenance
 
-- Source: `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
+- Source: `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
 - Findings above reflect inspected source and build configuration. Real recipient outcomes remain unverified until device testing.
 - This is a demo reference, not evidence of production security or accessibility acceptance.
 
+The host supplies fictional artwork metadata and a user-edited direction. The preview contains both plus the app guide; only Copy or Share sends them outside the app. The demo image importer uses Android's document picker with user action; it does not automatically inspect photos or read generated images from the agent. No AYA outcome telemetry, return channel or server exists.
+
 ## Unknowns and escalation
 
-- UNKNOWN: Which versions of third-party clients process the document automatically and create a new chat.
+- UNKNOWN: Which versions of third-party clients process the document automatically, create a new chat, or generate/save an actual image from the request.
 - Safe verification: install sample and recipient on an Android device, share, inspect attachment, document target version and exact outcome.
 - Support: source repository issues at `https://github.com/gamesbyian/AYA/issues`; no in-app support channel exists.
+
+- For Creative Handoff, ask the recipient to generate the actual requested image if capable, never imply AYA or this sample already imported it, and direct the person to save the generated image and tap "Import saved image". Respect the fictional example and exact technical preferences without inventing provider support.
 
 ## Assistant answer policy
 

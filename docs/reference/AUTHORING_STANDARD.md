@@ -4,7 +4,9 @@
 
 **Audience:** app developers, technical writers, repo agents, QA agents and maintainers of any Android application integrating AYA.
 
-**Objective:** produce a trustworthy, comprehensive, operationally precise reference that allows an external LLM to explain the app, guide a user through tasks, compare alternatives, diagnose failures, and explicitly acknowledge uncertainty. Success is measured by answer fidelity on realistic questions, **not** by word count.
+**Objective:****Creative Handoff extension:** for apps offering agent-assisted image generation alongside their artwork picker, follow [CREATIVE_AUTHORING.md](CREATIVE_AUTHORING.md). Document the actual import constraints and manual return steps in the same version-checked guide, and supply selected-item specifics only through the reviewed typed creative request. No new top-level guide headings are required.
+
+ produce a trustworthy, comprehensive, operationally precise reference that allows an external LLM to explain the app, guide a user through tasks, compare alternatives, diagnose failures, and explicitly acknowledge uncertainty. Success is measured by answer fidelity on realistic questions, **not** by word count.
 
 ## Product scope: author for assistance; do not observe answers
 
