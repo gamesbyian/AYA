@@ -1,6 +1,7 @@
 package dev.aya.sample
 
 import android.app.Activity
+import android.graphics.BitmapFactory
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -39,9 +40,40 @@ class MainActivity : Activity() {
             } catch (_: SecurityException) {
                 // The picker may grant a transient permission only.
             }
+            val type = contentResolver.getType(uri)
+            if (type !in setOf("image/png", "image/jpeg") || !showImportedArtwork(uri)) {
+                Toast.makeText(this, "Choose a valid PNG or JPEG image.", Toast.LENGTH_LONG).show()
+                return
+            }
             artworkUri = uri
-            artworkPreview.setImageURI(uri)
             Toast.makeText(this, "Image selected for this demo", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Decode a bounded preview without loading a large source image at full
+     * resolution. The demo never changes or stores permanent media artwork.
+     */
+    private fun showImportedArtwork(uri: Uri): Boolean {
+        return try {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, bounds)
+            } ?: return false
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return false
+            var sampleSize = 1
+            while (bounds.outWidth / sampleSize > 1024 ||
+                bounds.outHeight / sampleSize > 1024) {
+                sampleSize *= 2
+            }
+            val options = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+            val bitmap = contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, options)
+            } ?: return false
+            artworkPreview.setImageBitmap(bitmap)
+            true
+        } catch (_: Exception) {
+            false
         }
     }
 
@@ -169,6 +201,7 @@ class MainActivity : Activity() {
                 startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "image/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/png", "image/jpeg"))
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 }, 42)
@@ -184,7 +217,7 @@ class MainActivity : Activity() {
         ))
         savedInstanceState?.getString("artwork_uri")?.let {
             artworkUri = Uri.parse(it)
-            artworkPreview.setImageURI(artworkUri)
+            artworkUri?.let { if (!showImportedArtwork(it)) artworkUri = null }
         }
         setContentView(ScrollView(this).apply { addView(column) })
     }
