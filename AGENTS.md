@@ -19,6 +19,10 @@ When integrating AYA into another app:
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
 ## Engineering constraints
+- AYA's evidence registry is **read-only** and initially empty. Device QA must match recipient package, app version, Android SDK, account state and exact transport. Published claims or intent filters are NOT verified ingestion. Do not introduce package sweeps, telemetry, success monitoring or automatic recipient selection.
+- The optional `AyaAssistContext` adapter is Android's separate system-assistant request surface, and must only be wired into a host after explicit host approval of the exact public context. Do not enable it implicitly, send private identifiers, or misrepresent Android JSON-LD as the AYA handoff format.
+- `aya-handoff/v1` JSON Schema documents host-to-AYA exchange for future adapters; the active Android SDK still uses typed Kotlin and reviewed `ACTION_SEND`, and **does not parse or send this JSON automatically**.
+- AppFunctions, ACTION_PROCESS_TEXT, and reference images remain separate opt-in design candidates, not dependencies of core AYA. Never add delegated actions or agent callbacks without their own security design.
 - Creative UX is **prompt-first**: Share request and Copy request transmit only the edited visible generation prompt; Full guide explicitly opens the complete editable reference and optional attachment path. Guide identity is still validated at launch. Never regenerate an old direction when expanding a modified prompt.
 
 - Creative Handoff uses `Aya.launchCreativeBundled()` with `AyaCreativeTask` and `AyaImageRequirements`. Preserve the same guarded AYA-RAS reference, editable preview, final-review-derived message text, and no-return boundary as help. Consult [creative contract](docs/CREATIVE_HANDOFF.md) and [creative authoring extension](docs/reference/CREATIVE_AUTHORING.md).

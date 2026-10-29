@@ -70,6 +70,30 @@ No application name or version string is manually trusted: AYA reads the install
 **Unsafe/legacy alternative:** `Aya.launch(this, AyaRequest(...))` takes arbitrary text and skips bundled-version checks. Keep that for intentional advanced workflows, not standard product help.
 
 ## 4. Test your host integration
+### Evidence-based recipient interoperability (optional)
+
+The `AyaRecipientCapabilityRegistry` is a read-only helper for developer-supplied observations. For instance:
+
+```kotlin
+val registry = AyaRecipientCapabilityRegistry(emptyList()) // truthful default
+val evidence = registry.assess(
+    packageName = "org.example.assistant",
+    appVersionName = "1.2.3",
+    androidSdk = 35,
+    accountState = null, // unknown must not inherit signed-in evidence
+    transport = AyaTransport.TEXT_ONLY
+)
+// evidence.confidence == AyaCapabilityConfidence.UNKNOWN
+```
+
+Do not hardcode assistant packages, guess app versions or override Android's chooser based on inferred intent filters. [Evidence and QA record contract](RECIPIENT_CAPABILITIES.md). The current SDK does **not** interrogate the selected target, learn outcomes, or choose a share path automatically.
+
+A portable [`aya-handoff/v1` host-side JSON manifest](protocol/README.md) describes a future, independently testable interchange; the supported integration today remains the Kotlin `AyaRequest` and guarded `Aya.launchBundled()` / `Aya.launchCreativeBundled()` methods.
+
+### Optional system assistant context
+
+Hosts that explicitly want Android's **separate system assistant integration** can override `Activity.onProvideAssistContent()` and call `AyaAssistContext.populate(outContent, AyaPublicAssistContext(...))` with deliberate public text. This is **not** invoked by AYA, does not attach a reference, and does not guarantee an assistant consumes it. [Privacy and JSON-LD guide](ASSIST_CONTEXT.md).
+
 ## 3a. Integrate an artwork-picker creative panel
 **Current API behavior:** creative launch presents an editable prompt-only review by default. **Share request** shares only the visible text with no file URI; **Copy request** copies it. **Full guide** opens the complete, still-editable version-matched AYA reference and offers either sharing mode. The optional expansion preserves the user's edits from the short view. The sample demo is in a separate, non-exported `ArtworkActivity` so existing help controls stay accessible.
 

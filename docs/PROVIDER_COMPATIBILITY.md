@@ -9,8 +9,7 @@
 | Gemini | Not tested | Not tested | Unknown | Unknown | UNVERIFIED |
 | Generic share targets | Not tested | Not tested | Unknown | N/A | UNVERIFIED |
 
-## Manual test record template
-### Publicly documented image generation (research, not AYA compatibility tests)
+## Published image generation capabilities (research, not AYA compatibility tests)
 
 Snapshot as of **2026-10-29**. These sources establish *some product capability* but do **not** establish that a given Android app version accepts `ACTION_SEND`, consumes an AYA request, opens a new conversation, generates from that entry point, or saves a compatible file.
 
@@ -23,7 +22,7 @@ Snapshot as of **2026-10-29**. These sources establish *some product capability*
 
 **Compatibility policy:** Never block or force a recipient based on an AYA hardcoded provider list. People may have other models or tools available within those apps, and capabilities evolve. Only describe observed, dated compatibility in the tested matrix. If the chosen assistant cannot generate the requested image, it should say so, and the user can choose another target or manually use a generation tool. No AYA runtime monitoring, auto-switching or provider-account introspection.
 
-Creative Handoff adds a distinctRecord request-only and attached-guide delivery **separately** for every recipient; they can differ even on the same app release. Neither format is automatically assumed compatible.
+Record request-only and attached-guide delivery **separately** for every recipient; they can differ even on the same app release. Neither format is automatically assumed compatible.
 
 Creative Handoff adds a distinct **image-generation** acceptance axis; text/attachment support alone is insufficient. For each tested target and Android version, separately record: AYA's final approved prompt displayed in the destination, actual image-generation response (versus merely writing a prompt), requested ratio honored or nearest supported, the user's ability to save to device, and whether a saved file can be manually imported using the sample host's Android picker. Include negative cases (unsupported model, signed-out state, file ignored, text-only share, limited formats). These are developer-controlled trials only; AYA must never instrument production user conversations or outcomes. Until such tests exist, ChatGPT, Claude, Gemini and Grok creative compatibility is **UNVERIFIED**.
 
@@ -33,3 +32,11 @@ Record UTC timestamp, device/Android version, target app package and release ver
 Test at minimum fresh install, target logged out, target logged in, long guide, app backgrounded, repeated shares and no compatible receiver.
 
 Do not change a row from UNVERIFIED until the real recipient was exercised, and document what was observed rather than extrapolating across versions.
+
+## Machine-readable developer QA evidence contract
+
+The SDK includes `AyaRecipientEvidence` and `AyaRecipientCapabilityRegistry`. The initial registry has **no verified providers**. A support claim is `VERIFIED_SUPPORTED` only if it comes from `DEVICE_QA` evidence for the **exact receiver package name, installed app version name, Android API level, recipient account state, and transport**. `DECLARED_INTENT_FILTER` and `PUBLISHED_DOCUMENTATION` records are helpful context but remain `UNKNOWN` for successful ingestion. Contradictory QA reports produce `CONFLICTING`, not automatic selection. An unknown signed-in state matches nothing. See [complete model](RECIPIENT_CAPABILITIES.md). No production user analytics populate this registry.
+
+## Manual test record template
+
+Record a reproducible QA fixture ID, UTC date, exact package name and `versionName`, Android API level, whether signed in/out or no account needed, and **one exact transport mode**, plus the assistant's observed behavior. Note whether text was received, attachment bytes were accessible, the user had to press Send, and image generation and saving were independently verified. Retest on each update rather than transferring a claim to newer app versions.

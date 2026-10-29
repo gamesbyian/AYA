@@ -39,6 +39,8 @@ AYA's job ends when the user invokes Share or Copy and control passes to the sel
 Quality evaluation of reference material belongs exclusively to **separate developer/QA fixtures or explicitly run testing**, not to runtime monitoring of real AYA users or their conversations. Developer testing may measure documentation usefulness in controlled samples; it must never be phrased as a requirement to observe production outcomes.
 
 ## Non-goals
+**Interop extension:** the library includes a host-supplied, read-only, exact-version [recipient capability model](RECIPIENT_CAPABILITIES.md), an optional [system-assistant JSON-LD adapter](ASSIST_CONTEXT.md), and a published [portable manifest schema](protocol/README.md) for future host integration. None replaces the existing reviewed one-way `ACTION_SEND` handoff. The registry does not rank, block, or inspect installed apps automatically; no third-party image generation capability has been verified end-to-end. AppFunctions are separately evaluated in [decision record](APPFUNCTIONS_DECISION.md).
+
 
 In Creative Handoff specifically: in-AYA image creation, reading AI output, automatic image return, automatically replacing host artwork, fetching private current artwork, assuming a model supports image generation, or silently adding images to the outgoing attachment.
 
