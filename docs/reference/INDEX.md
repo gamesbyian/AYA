@@ -4,6 +4,9 @@
 
 ## Core reading order
 
+Creative workflows additionally use [Creative authoring extension](CREATIVE_AUTHORING.md), which specifies source-backed artwork import documentation, per-slot technical constraints, dynamic generation requests, and held-out image-generation cases. Read it with the base AYA-RAS standard; it does not change the v1 guide envelope or twelve required sections.
+
+
 1. [Base authoring standard](AUTHORING_STANDARD.md): required envelope and 12-section structure.
 2. [Advanced authoring](ADVANCED_AUTHORING.md): partial state model, conditional capability, high-information diagnoses, provenance, accessibility, context budgets and hallucination traps.
 3. [Agent workflow](AGENT_WORKFLOW.md): reproducible instructions for taking an unfamiliar app repository through release-grade documentation.

@@ -16,6 +16,9 @@ A user choosing the recipient may still need to press Send inside the third-part
 
 ## Data minimization
 
+**Creative Handoff:** a typed `AyaCreativeTask` may include a media subject, intended cover role, image requirements and current manual import steps. These fields are supplied deliberately by the host, included in the editable preview, and treated as untrusted contextual data; they must never be populated by scraping private libraries, file paths, credentials or automatic diagnostics. `direction` is user authored. The full approved generation prompt is additionally sent as `EXTRA_TEXT`, so recipients that ignore attachments may still see it. Do not infer whether the recipient actually generates the image. **No reference images or binary user artwork leave the host through v1.** The user's later save/import happens outside AYA; there is no output callback, monitoring or post-handoff telemetry.
+
+
 No app settings, logs, screenshots, credentials, identifiers, tokens, URLs or personal information are automatically collected. The host developer is responsible for redacting all `AyaRequest` inputs before calling AYA. AYA has **no automatic redaction engine**. User edits can also contain sensitive details; review UI warns about downstream sharing.
 
 Copy places the complete edited text on the Android clipboard, a separate disclosure surface. Treat clipboard as potentially accessible to other apps.

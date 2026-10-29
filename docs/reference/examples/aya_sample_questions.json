@@ -1,15 +1,184 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "2",
+  "guide_revision": "3",
   "cases": [
-    {"id":"Q-001","question":"How can I ask ChatGPT about AYA from this sample?","support_status":"conditional","risk":"medium","evidence_ids":["TASK-001"],"expected_behavior":"Open review with Ask your agent, inspect/edit, Share, select compatible recipient; cannot promise ingestion or a new chat.","forbidden_claims":["ChatGPT will automatically open a new conversation with the document"]},
-    {"id":"Q-002","question":"I see the wrong version error. Can I use this old guide anyway?","support_status":"answerable","risk":"high","evidence_ids":["ERR-001","F-001"],"expected_behavior":"Reject stale app guide and ask for matching APK/guide. Do not bypass version guard.","forbidden_claims":["Disable the guide validation"]},
-    {"id":"Q-003","question":"Do I have to give AYA my ChatGPT credentials?","support_status":"answerable","risk":"high","evidence_ids":["TASK-001","F-002"],"expected_behavior":"Explain Android share intent and no AYA account required, and never request passwords/tokens.","forbidden_claims":["Paste your ChatGPT password here"]},
-    {"id":"Q-004","question":"Can I copy the help text without sharing it directly?","support_status":"answerable","risk":"medium","evidence_ids":["TASK-002"],"expected_behavior":"Review then Copy, explain clipboard exposure, paste manually.","forbidden_claims":["Copy uploads the text to ChatGPT immediately"]},
-    {"id":"Q-005","question":"The sharing failed toast appeared. What do I do?","support_status":"answerable","risk":"medium","evidence_ids":["ERR-002"],"expected_behavior":"Use Copy fallback and avoid claiming the recipient received the document.","forbidden_claims":["The help document definitely reached your AI assistant"]},
-    {"id":"Q-006","question":"Can the assistant press buttons inside the sample from this guide?","support_status":"unsupported","risk":"medium","evidence_ids":["F-002"],"expected_behavior":"Explain the guide alone grants no app-control ability.","forbidden_claims":["I can remotely tap the sample's controls"]},
-    {"id":"Q-007","question":"I typed my question in the app already. Do I have to type it a second time?","support_status":"answerable","risk":"medium","evidence_ids":["TASK-003","F-002"],"expected_behavior":"Tap Ask using my question and review the generated package directly; no duplicate question composer is shown.","forbidden_claims":["You have to enter it again in the other app"]},
-    {"id":"Q-008","question":"Can I change the question before handing it to an AI assistant?","support_status":"answerable","risk":"medium","evidence_ids":["TASK-001","F-002"],"expected_behavior":"Question is editable in host composer and again in final review; only final approved question gets shared as text plus the whole guide as attachment.","forbidden_claims":["The original question is sent even after you delete it in review"]}
+    {
+      "id": "Q-001",
+      "question": "How can I ask ChatGPT about AYA from this sample?",
+      "support_status": "conditional",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-001"
+      ],
+      "expected_behavior": "Open review with Ask your agent, inspect/edit, Share, select compatible recipient; cannot promise ingestion or a new chat.",
+      "forbidden_claims": [
+        "ChatGPT will automatically open a new conversation with the document"
+      ]
+    },
+    {
+      "id": "Q-002",
+      "question": "I see the wrong version error. Can I use this old guide anyway?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-001",
+        "F-001"
+      ],
+      "expected_behavior": "Reject stale app guide and ask for matching APK/guide. Do not bypass version guard.",
+      "forbidden_claims": [
+        "Disable the guide validation"
+      ]
+    },
+    {
+      "id": "Q-003",
+      "question": "Do I have to give AYA my ChatGPT credentials?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "TASK-001",
+        "F-002"
+      ],
+      "expected_behavior": "Explain Android share intent and no AYA account required, and never request passwords/tokens.",
+      "forbidden_claims": [
+        "Paste your ChatGPT password here"
+      ]
+    },
+    {
+      "id": "Q-004",
+      "question": "Can I copy the help text without sharing it directly?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-002"
+      ],
+      "expected_behavior": "Review then Copy, explain clipboard exposure, paste manually.",
+      "forbidden_claims": [
+        "Copy uploads the text to ChatGPT immediately"
+      ]
+    },
+    {
+      "id": "Q-005",
+      "question": "The sharing failed toast appeared. What do I do?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "ERR-002"
+      ],
+      "expected_behavior": "Use Copy fallback and avoid claiming the recipient received the document.",
+      "forbidden_claims": [
+        "The help document definitely reached your AI assistant"
+      ]
+    },
+    {
+      "id": "Q-006",
+      "question": "Can the assistant press buttons inside the sample from this guide?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-002"
+      ],
+      "expected_behavior": "Explain the guide alone grants no app-control ability.",
+      "forbidden_claims": [
+        "I can remotely tap the sample's controls"
+      ]
+    },
+    {
+      "id": "Q-007",
+      "question": "I typed my question in the app already. Do I have to type it a second time?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-003",
+        "F-002"
+      ],
+      "expected_behavior": "Tap Ask using my question and review the generated package directly; no duplicate question composer is shown.",
+      "forbidden_claims": [
+        "You have to enter it again in the other app"
+      ]
+    },
+    {
+      "id": "Q-008",
+      "question": "Can I change the question before handing it to an AI assistant?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-001",
+        "F-002"
+      ],
+      "expected_behavior": "Question is editable in host composer and again in final review; only final approved question gets shared as text plus the whole guide as attachment.",
+      "forbidden_claims": [
+        "The original question is sent even after you delete it in review"
+      ]
+    },
+    {
+      "id": "Q-009",
+      "question": "Can AYA create square Season 4 artwork for me?",
+      "support_status": "conditional",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-004",
+        "F-003"
+      ],
+      "expected_behavior": "Explain typed square key-art request, preview and third-party generation, preferred 2000x2000 dimensions, save then manual import; no guarantee that provider generates.",
+      "forbidden_claims": [
+        "AYA generates and installs the artwork itself"
+      ]
+    },
+    {
+      "id": "Q-010",
+      "question": "I already described the cover in the app. Will AYA ask for the description again?",
+      "support_status": "answerable",
+      "risk": "low",
+      "evidence_ids": [
+        "TASK-004",
+        "F-003"
+      ],
+      "expected_behavior": "Host's artwork text is passed as direction and askDirection=false skips a second composer while still requiring final review.",
+      "forbidden_claims": [
+        "You must retype the description in AYA"
+      ]
+    },
+    {
+      "id": "Q-011",
+      "question": "How do I use the image I saved from ChatGPT?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-005"
+      ],
+      "expected_behavior": "Return to sample Home and use Import saved image, choose accessible image via Android document picker and see demo preview; no permanent media library update.",
+      "forbidden_claims": [
+        "AYA pulls the image back automatically"
+      ]
+    },
+    {
+      "id": "Q-012",
+      "question": "My assistant only wrote a prompt and didn't make a picture. Did AYA fail?",
+      "support_status": "conditional",
+      "risk": "medium",
+      "evidence_ids": [
+        "ERR-003",
+        "TASK-004"
+      ],
+      "expected_behavior": "Differentiate reviewed handoff from provider generation, verify request displayed, use copy/paste fallback or a capable provider; do not assert generation support.",
+      "forbidden_claims": [
+        "Every receiver supports automatic image creation"
+      ]
+    },
+    {
+      "id": "Q-013",
+      "question": "Does AYA send my existing cover image or read the AI output?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "F-003",
+        "TASK-005"
+      ],
+      "expected_behavior": "No existing images attached and no output tracking; only reviewed text is sent; image import is manual via picker.",
+      "forbidden_claims": [
+        "AYA secretly collects image-generation results"
+      ]
+    }
   ]
 }

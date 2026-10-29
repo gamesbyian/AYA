@@ -1,5 +1,7 @@
 # AYA Android host integration readiness
 
+For an artwork-picker integration, additionally apply the [Creative Handoff acceptance contract](CREATIVE_HANDOFF.md) and [creative-specific reference authoring checklist](reference/CREATIVE_AUTHORING.md). A generated image is returned via the host's **normal import control**, never via an AYA callback. Actual third-party image generation remains an independently tested compatibility gate.
+
 This document distinguishes **ready for first host integration** from **ready for public production release**.
 
 ## Current implementation contract

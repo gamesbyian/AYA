@@ -17,6 +17,9 @@ The guarded return value is `AyaBundledLaunchResult.QuestionOpened` for the buil
 
 ## Integration patterns
 
+**Creative artwork generation:** `Aya.launchCreativeBundled(activity, task, direction=hostDescription, askDirection=false)` takes creative direction already typed under a host's artwork grid. With `askDirection=true`, AYA asks “Describe the artwork you want” instead. The host's typed image specifications (subject, aspect, dimensions, formats, margin and manual import) augment rather than overwrite the person's creative intent. The reviewed generated prompt requests the actual image, not instructions; after the chosen assistant produces artwork, the user must save and manually import it through the host's ordinary image picker. AYA neither detects that transition nor tracks results.
+
+
 **Standard question-first**: `Aya.launchBundled(activity, screenName="Connections")`. `askQuestion=true` is the default.
 
 **Host already has a question field**: `Aya.launchBundled(activity, question=userTypedText, askQuestion=false)`. This goes straight to the **privacy preview**, avoiding an unnecessary second question box. The host must preserve the user's exact question and avoid adding private data without review.

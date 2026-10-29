@@ -2,13 +2,16 @@
 
 ## Goal and operating principle
 
-AYA is a reusable Android **bring-your-own-AI help handoff**. An app provides version-matched, operationally rich documentation and optionally a user question/screen context. AYA previews the exact package and lets the user share it through the Android Sharesheet with a compatible assistant, without running or paying for an AI model.
+AYA is a reusable Android **bring-your-own-AI help and creative handoff**. An app provides version-matched, operationally rich documentation and optionally a user question/screen context. AYA previews the exact package and lets the user share it through the Android Sharesheet with a compatible assistant, without running or paying for an AI model.
 
 ## Key product component: trustworthy references
 
 **The quality of the app guide determines the help quality.** Every integration must follow [AYA Reference Authoring Standard](reference/AUTHORING_STANDARD.md), with full feature inventory, exact UI paths, task recipes, state and provider variations, troubleshooting, source evidence, unsupported functionality, privacy and upgrade guidance. Guides must match the installed app version. Maintain a quality rubric and held-out question trials. The full static reference is embedded in one plain-text package, not fetched by the recipient.
 
 ## Prototype API
+
+**Creative Handoff v1:** `Aya.launchCreativeBundled(activity, task, guideAsset?, screenName?, direction?, askDirection=true)` uses the **same installed-version guard**, editable consent and one-way Android sharing flow. A typed `AyaCreativeTask` carries subject, intended artwork role, manual import instructions, and an `AyaImageRequirements` object with a positive aspect ratio, optional consistent preferred pixel dimensions, accepted PNG/JPEG/WEBP MIME types, optional transparency and safe-margin rules. The host must verify the truth of these constraints. An optional user direction is entered in AYA or in the host, then previewed. AYA requests **actual image generation**, not merely advice, and uses a self-contained final-review-derived request as Android `EXTRA_TEXT` as well as the complete reference in its UTF-8 attachment. The person saves the output in the chosen AI app and imports it through the existing host picker. See [normative creative specification and plan](CREATIVE_HANDOFF.md).
+
 
 **Preferred host API:** `Aya.launchBundled(activity, guideAsset?, screenName?, question?, askQuestion=true)` loads an APK asset, verifies its app ID and exact installed `versionName`, and refuses stale or malformed references before opening review. `AyaBundledLaunchResult.QuestionOpened` means the question editor is on screen; `PreviewOpened` means the complete review dialog is on screen. Neither is an external handoff result. `Rejected(reason)` requires truthful host error handling. The legacy `Aya.launch(activity, AyaRequest(...))` remains for advanced/manual unverified input. Source-only import and staging Maven AAR/POM consumption are both tested by CI.
 
@@ -34,6 +37,9 @@ AYA's job ends when the user invokes Share or Copy and control passes to the sel
 Quality evaluation of reference material belongs exclusively to **separate developer/QA fixtures or explicitly run testing**, not to runtime monitoring of real AYA users or their conversations. Developer testing may measure documentation usefulness in controlled samples; it must never be phrased as a requirement to observe production outcomes.
 
 ## Non-goals
+
+In Creative Handoff specifically: in-AYA image creation, reading AI output, automatic image return, automatically replacing host artwork, fetching private current artwork, assuming a model supports image generation, or silently adding images to the outgoing attachment.
+
 
 Bundled chatbot, vendor lock-in, inference billing, automatically reading installed accounts, reading assistant responses, screen scraping, silently exporting diagnostics, editing the recipient conversation, unofficial deep links or pretending assistant can operate the host app.
 

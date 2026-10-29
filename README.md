@@ -1,6 +1,8 @@
 # AYA · Ask Your Agent
 
-**A reusable Android bring-your-own-AI help component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
+**Help Handoff + Creative Handoff.** AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
+
+**A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
@@ -13,6 +15,11 @@ AYA has no model API key, inference hosting, developer AI bill, telemetry or acc
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.
 
 ## Android usage
+
+### Creative artwork generation
+
+`Aya.launchCreativeBundled(activity, task, direction, askDirection=false)` is the version-guarded creative API; `AyaCreativeTask` supplies subject, artwork role, required manual import path and an `AyaImageRequirements` object (aspect ratio, optional preferred dimensions, verified accepted formats and optional composition limits). The user supplies editable creative direction in the host or AYA composer. The complete generation request appears in `EXTRA_TEXT` even if a recipient ignores the attached reference. The sample provides a working Android file picker to import a saved image afterward. See [API example](docs/CREATIVE_HANDOFF.md#host-api-and-required-data) and [integration guide](docs/INTEGRATION.md).
+
 
 The recommended integration method **automatically checks the bundled reference against the installed app's package and exact version**, instead of trusting hardcoded strings:
 
@@ -52,6 +59,9 @@ python3 -m unittest discover -s tools -p 'test_*.py'
 GitHub Actions runs reference checks, Kotlin unit tests and the sample build, compiles Android instrumentation tests, publishes a staging AAR/POM repository, and rebuilds the sample against the staged artifact. To build the Maven repository locally, use `gradle :aya:publishReleasePublicationToStagingRepository`. Its coordinates are `dev.aya:aya-android:0.1.0-SNAPSHOT`; **no Maven Central publication exists yet**. Gradle wrapper is not yet checked in.
 
 ## Prototype status
+
+Creative Handoff is a **prototype** with typed Kotlin implementation and sample image chooser; real AI-recipient generation, saving and manual-return behavior remain unverified. AYA does not generate images, monitor output, or automatically apply the result in the host. No Chunks, Plex or other real-world app integration is implied.
+
 
 Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
