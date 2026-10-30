@@ -10,6 +10,12 @@
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
+## Structured artifact handoffs
+
+AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**, such as a ROYGBIV wallpaper recipe in JSON. A version-matched schema and effect guide can accompany an editable natural-language brief and optional user-approved current artifact. The person manually saves and imports the agent's file into the original app. No callback, agent-response monitoring or automatic import is needed.
+
+The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) documents the browser/PWA reference integration under ROYGBIV's More menu and a future generic Android SDK extension. **The Android structured-artifact API is not implemented yet**, and receiving assistants have different attachment capabilities.
+
 ## Why use AYA instead of opening an AI app yourself?
 
 You absolutely can open ChatGPT, Claude, or another assistant and type a question yourself. AYA is meant to make that familiar process **a little smoother**, especially when the question comes up while you are already using an app.
