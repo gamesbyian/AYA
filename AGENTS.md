@@ -18,6 +18,14 @@ When integrating AYA into another app:
 6. For large apps, use [modular reference builds](docs/reference/MODULAR_BUILDS.md) so the exported reference is deterministic and self-contained. Ship the guide with the exact installed version and keep it updated in the same PRs that modify user-facing product behavior.
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
 
+## Optional Translation Kit integration
+
+- Read [Translation Kit module](docs/translation/README.md) and [developer authoring standard](docs/translation/AUTHORING.md) before introducing localization handoffs. Host language selection, import, validation, rollback, fallback and live UI updates remain host-owned. The AYA prompt card must be subordinate to normal language settings.
+- Source-derive every stable key, shipped source string, meaning, placeholder/plural type, risk label, technical glossary and Rosetta counterexample from the *exact installed* app build. Never substitute the fictional ParcelPad kit as evidence for a real app or invent a language importer.
+- Use `Aya.launchTranslationBundled()` and an exact-version `aya-guide.md` plus `aya-translation-kit.md`. AYA verifies identity/shape but not semantic correctness or valid returned packs. Keep model-produced notes distinct from developer-approved constraints; use explicit no-data-loss ambiguity rules.
+- Preserve the one-file reviewed UTF-8 Share path and derived final `EXTRA_TEXT`, 1 MiB kit and 2 MiB combined limits, no provider-specific API, no background response tracking and no automatic return/import. Do not promise a language pack was created simply because the Sharesheet opened.
+- Run `python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md --schema docs/translation/examples/parcelpad-output.schema.json --example docs/translation/examples/parcelpad-pirate.pack.json` plus unit/reference checks. Test bad placeholders, wrong versions, missing headings and high-risk copy.
+
 ## Engineering constraints
 - AYA's evidence registry is **read-only** and initially empty. Device QA must match recipient package, app version, Android SDK, account state and exact transport. Published claims or intent filters are NOT verified ingestion. Do not introduce package sweeps, telemetry, success monitoring or automatic recipient selection.
 - The optional `AyaAssistContext` adapter is Android's separate system-assistant request surface, and must only be wired into a host after explicit host approval of the exact public context. Do not enable it implicitly, send private identifiers, or misrepresent Android JSON-LD as the AYA handoff format.
