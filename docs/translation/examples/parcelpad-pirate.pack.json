@@ -1,0 +1,15 @@
+{
+  "format": "parcelpad-pack/v1",
+  "app_id": "dev.parcelpad.example",
+  "catalog_revision": "fictional-catalog-v1",
+  "kind": "personality",
+  "target": "pirate-en",
+  "base_locale": "en",
+  "entries": {
+    "parcel.status.ready": "Ready to sail",
+    "parcel.action.remove": "Remove from the list",
+    "parcel.action.delete_files": "Delete local parcel files",
+    "parcel.files.count": "{count, plural, one {# parcel aboard} other {# parcels aboard}}",
+    "parcel.a11y.delete_files": "Delete downloaded parcel files from this device"
+  }
+}
