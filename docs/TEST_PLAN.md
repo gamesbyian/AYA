@@ -9,6 +9,13 @@
 - For every integrating app, run validator and independent [AYA-RAS review](reference/AUTHORING_STANDARD.md); score against [QA rubric](reference/QA_RUBRIC.md) and [question bank](reference/QUESTION_BANK.md).
 - Structural checks are necessary but cannot prove that an app guide matches shipping behavior.
 
+## Optional Translation Kit checks
+
+- Run `python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md --schema docs/translation/examples/parcelpad-output.schema.json --example docs/translation/examples/parcelpad-pirate.pack.json` and `tools/test_validate_translation_kit.py` through Python discovery.
+- Kotlin `AyaTranslationKitTest` checks version/app rejection, required sections, duplicate metadata, invalid task values, preserved meaning and final-review prompt edits. Verify these through Android unit-test CI; fixture consistency is not proof of a real host's importer.
+- In an actual adopting host: verify kit content matches released string catalog, exact-version AYA-RAS guide, imported pack parser and user-visible manual import route. Test protected/destructive/permission/accessibility texts, invalid ICU placeholders/plurals, locale variants, RTL, size/UTF-8, unknown keys, incomplete overlays, fallback and rollback.
+- Device tests: ordinary Language settings do not require an assistant; the AYA card remains secondary; Copy/Cancel/Share correctly distinguish approved text and the single attachment; the chosen recipient may ignore attachments; user imports returned output manually. No background observation or inferred generation success.
+
 ## Android CI
 
 Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :sample:assembleDebug` with JDK 17, Gradle 8.9 and Android SDK 35. Next publish via `gradle :aya:publishReleasePublicationToStagingRepository` and build sample with `gradle :sample:assembleDebug -Paya.consumePublished=true`. CI preserves the sample APK and local Maven AAR/POM repository artifacts.
