@@ -2,6 +2,8 @@
 
 **AYA-RAS** is a documentation-as-product discipline for app-specific AI support. Authors first discover what truly ships, model the states that change behavior, and build a versioned guide. Independent inventories and held-out questions verify breadth and accuracy. A downstream assistant sees a self-contained reference, not an assertion of authority or permission to control the app.
 
+The optional [Translation Kit authoring extension](../translation/AUTHORING.md) covers source-derived string inventories, output JSON Schemas, Rosetta/glossary entries, semantic safety constraints, fictional examples and source-maintenance rules. AYA-RAS is still required for the exact-version host guide; this extension is only used by apps implementing their own pack import.
+
 ## Core reading order
 
 Creative workflows additionally use [Creative authoring extension](CREATIVE_AUTHORING.md), which specifies source-backed artwork import documentation, per-slot technical constraints, dynamic generation requests, and held-out image-generation cases. Read it with the base AYA-RAS standard; it does not change the v1 guide envelope or twelve required sections.
