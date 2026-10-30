@@ -67,7 +67,7 @@ object AyaTranslationKitVerifier {
         }
         val headings = lines.drop(end + 1).filter { it.startsWith("## ") }
             .map { it.removePrefix("## ").trim() }
-        if (requiredSections.any { section -> headings.count { it == section } != 1 }) {
+        if (headings != requiredSections) {
             return AyaTranslationKitCheck.Rejected("Translation kit is missing a required section.")
         }
         if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""").containsMatchIn(kit)) {
