@@ -10,6 +10,14 @@
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
+## Translation Kit: optional language and personality packs
+
+Apps can offer ordinary **Language** settings (device language, installed languages, Import pack) with a small optional **"Make a language pack with your AI"** AYA card. AYA now provides `Aya.launchTranslationBundled()`: an exact-version-guarded, one-way handoff carrying a host-authored translation schema, catalog, Rosetta/glossary, style and safety constraints, examples, and import instructions. Users can request French, Pirate, Cajun-flavoured, space-sage, technical terminology, or other creative voices. The recipient may produce a JSON pack; the user saves it and imports it through the **host's existing language importer**. AYA never sees the response or applies a pack.
+
+**Start here:** [Translation module and Kotlin usage](docs/translation/README.md), [app-specific kit authoring standard](docs/translation/AUTHORING.md), [fictional complete kit](docs/translation/examples/parcelpad-translation-kit.md), [output schema](docs/translation/examples/parcelpad-output.schema.json), and [Pirate pack example](docs/translation/examples/parcelpad-pirate.pack.json).
+
+**Implementation status:** the typed task/verifier and guarded Android handoff are implemented on this branch; no host language-pack runtime, generator, gallery or real-recipient acceptance is implemented or verified. This module is optional and does not require an AI account for normal language settings.
+
 ## Structured artifact handoffs
 
 AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**, such as a ROYGBIV wallpaper recipe in JSON. A version-matched schema and effect guide can accompany an editable natural-language brief and optional user-approved current artifact. The person manually saves and imports the agent's file into the original app. No callback, agent-response monitoring or automatic import is needed.
