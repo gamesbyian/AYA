@@ -1,3 +1,25 @@
+## Optional language and personality packs
+
+AYA includes `Aya.launchTranslationBundled(activity, task, kitAsset?, guideAsset?, screenName?, direction?, askDirection?)`, which uses the regular installed-version-verified AYA-RAS guide **plus** an independently exact-version-verified `aya-translation-kit.md`. This second asset describes the host's *actual* supported pack format, closed output schema, source strings, Rosetta meanings, technical terms, sensitive action distinctions, worked examples and manual import steps. The request and kit appear in one editable, reviewed UTF-8 handoff attachment. This flow does not require any new receiving-assistant integration.
+
+```kotlin
+val result = Aya.launchTranslationBundled(
+    activity = this,
+    task = AyaTranslationTask(
+        kind = AyaTranslationKind.LANGUAGE,
+        target = "es-MX",
+        importInstructions = "Settings > Language > Add language pack > choose the JSON file."
+    ),
+    direction = "Use contemporary Mexican Spanish.",
+    askDirection = false
+)
+if (result is AyaBundledLaunchResult.Rejected) {
+    // Inform the user; do not silently substitute an unverified kit.
+}
+```
+
+The host must first implement normal language selection and a working, safe pack importer. Put a small optional AYA prompt below those ordinary controls. `askDirection=true` offers a local direction editor; `false` skips that screen when the host already supplied the preference. The user manually saves the output from their chosen AI and imports it into the host. AYA does not monitor the recipient, handle the returned file or activate a locale. Full production preparation is in the [Translation Kit authoring guide](translation/AUTHORING.md) and [module overview](translation/README.md); use the fictional example only as a format demonstration.
+
 # Integrating AYA into an Android app
 
 **Preferred path:** use a version-matched bundled guide and `Aya.launchBundled()`, not a hand-assembled request string. See [integration readiness](INTEGRATION_READINESS.md) and the [AYA-RAS authoring system](reference/INDEX.md).
