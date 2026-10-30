@@ -10,6 +10,18 @@
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
+## An idea first, a toolkit second
+
+**You don't need to use AYA's code, processes, branding, or documentation to use the idea.** Think of **Ask Your Agent** as a familiar application convention, in the same spirit as **Save**, **Share**, or **Open with**: when someone wants help inside an app, give them a convenient way to ask their own AI assistant, with useful context about the app included.
+
+My hope is simply that developers adopt this idea wherever it benefits their users. Implement it independently, adapt it to your app, call it something else, or build a better version. There's no need to depend on this repository, use a particular AI provider, or follow AYA's workflow.
+
+What I maintain here is primarily a shortcut for **vibe coders, hobbyists, indie developers, and anyone who'd rather spend their energy building their app than re-engineering an AI handoff**. The sample code, integration patterns, documentation standards, templates, and examples are meant to make a thoughtful implementation easier if you want that help. Take as much or as little guidance as is useful.
+
+The central idea is deliberately small: **let users bring their own agent, and give that agent enough accurate, relevant information to help.** AYA's implementation keeps the handoff one-way; it does not follow the conversation or collect the answer.
+
+**Code licensing is separate from adopting the idea.** The repository does not currently grant a redistribution license for its code (see [License](#license)); the invitation to implement the concept independently is not a code license.
+
 ## Structured artifact handoffs
 
 AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**, such as a ROYGBIV wallpaper recipe in JSON. A version-matched schema and effect guide can accompany an editable natural-language brief and optional user-approved current artifact. The person manually saves and imports the agent's file into the original app. No callback, agent-response monitoring or automatic import is needed.
