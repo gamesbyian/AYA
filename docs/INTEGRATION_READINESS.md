@@ -4,6 +4,10 @@ For an artwork-picker integration, additionally apply the [Creative Handoff acce
 
 This document distinguishes **ready for first host integration** from **ready for public production release**.
 
+## Optional translation readiness
+
+The typed `Aya.launchTranslationBundled()` path requires the ordinary exact-version AYA-RAS guide **and** a second source-derived `aya-translation-kit.md`. See [module contract](translation/README.md) and [host authoring instructions](translation/AUTHORING.md). A host must already have normal language selection, file import, independent schema/ICU/semantic validation and live fallback before offering an AYA "Make a language pack" card. AYA does not supply the host importer or monitor agent output. The fictional ParcelPad schema is example-only. Device/recipient acceptance and a real host translation round trip remain **UNVERIFIED**.
+
 ## Current implementation contract
 
 - Stable concept: Android app packages an AYA-RAS guide; user launches an editable privacy preview; Android shares one UTF-8 document with a chosen recipient.
