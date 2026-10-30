@@ -70,7 +70,7 @@ object AyaTranslationKitVerifier {
         if (requiredSections.any { section -> headings.count { it == section } != 1 }) {
             return AyaTranslationKitCheck.Rejected("Translation kit is missing a required section.")
         }
-        if (Regex("""<[A-Za-z][^>\n]{2,80}>""").containsMatchIn(kit)) {
+        if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""").containsMatchIn(kit)) {
             return AyaTranslationKitCheck.Rejected("Translation kit contains unresolved placeholders.")
         }
         return AyaTranslationKitCheck.Accepted
