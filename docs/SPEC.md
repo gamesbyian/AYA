@@ -4,6 +4,12 @@
 
 AYA is a reusable Android **bring-your-own-AI help and creative handoff**. An app provides version-matched, operationally rich documentation and optionally a user question/screen context. AYA previews the exact package and lets the user share it through the Android Sharesheet with a compatible assistant, without running or paying for an AI model.
 
+## Optional Translation Kit handoff (prototype)
+
+Apps lead with ordinary language/localization settings, not AI. A small AYA card may offer creation of locale, personality or terminology packs as an optional side journey. The typed `Aya.launchTranslationBundled()` SDK path loads the installed-version-matched AYA-RAS reference and a second exact-version translation kit, then combines them into one **reviewed UTF-8 document** for the user's chosen assistant. The kit contains the host's output schema, source-string catalog, Rosetta/glossary, meaning and style constraints, examples, instructions and verified manual host import path. See [module](translation/README.md) and [authoring standard](translation/AUTHORING.md).
+
+This implementation is **handoff-only**. AYA does not implement a localization runtime, pack importer, live switching, provider inference, callbacks or automatic result collection. The host independently validates returned files, especially destructive-action meaning and formatting. The fictional example and current typed API do not establish real host or recipient compatibility.
+
 ## Key product component: trustworthy references
 
 **The quality of the app guide determines the help quality.** Every integration must follow [AYA Reference Authoring Standard](reference/AUTHORING_STANDARD.md), with full feature inventory, exact UI paths, task recipes, state and provider variations, troubleshooting, source evidence, unsupported functionality, privacy and upgrade guidance. Guides must match the installed app version. Maintain a quality rubric and held-out question trials. The full static reference is embedded in one plain-text package, not fetched by the recipient.
