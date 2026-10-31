@@ -39,7 +39,10 @@ def validate_aar(aar: Path, artifact: str) -> None:
         raise ValueError(f"AYA AAR exceeds inspection budget: {aar}")
     try:
         with zipfile.ZipFile(aar) as archive:
-            names = [entry.filename for entry in archive.infolist()]
+            members = archive.infolist()
+            if len(members) > 20_000 or sum(x.file_size for x in members) > 2 * MAX_AAR_BYTES:
+                raise ValueError(f"AAR archive expansion exceeds inspection budget: {aar}")
+            names = [entry.filename for entry in members]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate AAR entries: {aar}")
             if any(
@@ -59,7 +62,10 @@ def validate_aar(aar: Path, artifact: str) -> None:
             if not (0 < classes_info.file_size <= MAX_CLASSES_JAR_BYTES):
                 raise ValueError(f"Invalid AAR classes.jar length: {aar}")
             with zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) as classes:
-                class_names = [member.filename for member in classes.infolist()]
+                members = classes.infolist()
+                if len(members) > 20_000 or sum(x.file_size for x in members) > MAX_CLASSES_JAR_BYTES:
+                    raise ValueError(f"JAR expansion exceeds inspection budget: {aar}")
+                class_names = [member.filename for member in members]
                 if len(class_names) != len(set(class_names)):
                     raise ValueError(f"Duplicate compiled class entry: {aar}")
                 if classes.testzip() is not None:
