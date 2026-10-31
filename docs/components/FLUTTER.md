@@ -1,6 +1,6 @@
 # Flutter and FlutterFlow AYA integration: source preview
 
-Status (2026-10-31): the Android-only Flutter plugin, Dart card/action and Kotlin ActivityAware bridge have merged. Flutter analyze, widget/channel tests, and complete Flutter Android APK compilation with a staged native AAR passed [CI run 41233862629](https://github.com/gamesbyian/AYA/actions/runs/41233862629). Still not distributed through pub.dev or a public Maven repository; host guide/device/editor acceptance remains outstanding.
+Status (2026-10-31): Android-only Flutter Dart card/action and ActivityAware Kotlin bridge are implemented. Legacy host and modern AGP9 synthetic consumer APK builds have passed independently; the promoted `0.2.0-dev.1` source build is a separate CI acceptance gate. The adapter is still unpublished; independent host setup, physical-device UI, FlutterFlow Editor export and assistant ingestion remain unverified.
 
 References:
 - Flutter plugin authoring: https://docs.flutter.dev/packages-and-plugins/developing-packages
@@ -15,11 +15,11 @@ AyaFlutter.openHelp(guideAsset, screenName, question, askQuestion) is the headle
 
 The Kotlin AyaFlutterPlugin implements FlutterPlugin and ActivityAware, retaining activity only while attached, with the engine-scoped platform channel. It delegates to AyaComponentAction.Help, never a weaker manual API or custom share transport.
 
-## Flutter 3.47 / Android Gradle 9 migration experiment
+## Flutter 0.2 source-preview migration and legacy consumers
 
-An independent, **non-shipping** [AGP 9 built-in Kotlin migration trial](../../integrations/flutter/migration/README.md) exists alongside this legacy source package. It copies the same Dart/Kotlin bridge into a disposable CI consumer, substitutes a candidate plugin Gradle script without applying KGP, and configures a real Flutter 3.47.9 Android host for AGP 9.0.1, Gradle 9.1.0 and `android.builtInKotlin=true`. The host still uses its independently verified exact-version AYA-RAS guide, staged SDK and APK checks.
+The native source adapter now **targets Flutter >=3.44, Dart >=3.12** and the built-in Kotlin API. The required app-side configuration for an actual built-in Kotlin APK is **Flutter >=3.47, Android Gradle Plugin >=9**, with no `kotlin-android` application and a compatible Gradle wrapper. AYA's own pinned real-host test uses Flutter 3.47.9, AGP 9.0.1 and Gradle 9.1.0 with `android.builtInKotlin=true`, `android.newDsl=false`. The normal Flutter CI builds the actual checked-in plugin and independently audits the resulting APK's guide bytes, installed identity, merged native FileProvider/receiver and compiled bridge classes. A [separate trial](../../integrations/flutter/migration/README.md) already passed [AGP9 verification CI 41248634708](https://github.com/gamesbyian/AYA/actions/runs/41248634708); do not infer the promoted source passed until its own CI is green.
 
-The legacy `aya_flutter` package has **not** been retargeted or version-bumped. Flutter's official migration minimum (3.44/Dart 3.12) would exclude some previously declared consumers; only a separately reviewed new source-preview version should make that compatibility change. Until the trial and baseline both pass, do not advertise AGP 9 built-in Kotlin compatibility. See [Flutter plugin-author guidance](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors).
+**Compatibility break is explicit:** the old `0.1.0-dev.1` source preview declared Flutter >=3.19 and Dart >=3.3 and applied legacy KGP. Developers unable to migrate must pin the pre-upgrade Git revision `fb5e004eea766261ed50194e8013b11fd9ade583`; the new `0.2.0-dev.1` changes toolchain requirements, not AYA's guarded handoff semantics. Neither version is on pub.dev or public Maven. Flutter 3.44 with AGP9 and built-in Kotlin disabled is a transitional *upstream* compatibility mode, not a tested AYA consumer. See [the exact compatibility table and verification](../../integrations/flutter/migration/README.md), [Flutter's plugin author guidance](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors) and [package changelog](../../integrations/flutter/aya_flutter/CHANGELOG.md).
 
 ## Native Android dependency is a release blocker
 
