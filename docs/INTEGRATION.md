@@ -1,7 +1,7 @@
 # Integrating AYA into an Android app
 
 
-> **Using a visual builder, node system or coding agent?** Start with [Drop-in Component specification](components/README.md) and the [phased implementation plan](components/ROADMAP.md). The initial `aya-component/v1` manifest and Kotlin snippet generator cover **help only**. FlutterFlow, Flutter, React Native/Expo, Godot, Unity and no-code plugins are not shipped. For native Android, `AyaCardView` and guarded `AyaComponentAction` are reusable entry points; the user still reviews what is shared.
+> **Using a visual builder, node system or coding agent?** Start with [Drop-in Component specification](components/README.md) and [current adapter evidence](components/STATUS.md). The initial `aya-component/v1` manifest and Kotlin snippet generator cover **help only**. Flutter, React Native/Expo, Godot and Unity have varying degrees of merged **source-preview integration**; FlutterFlow has unverified editor templates, and no-code extensions remain planned. None is a published universal editor plugin or proof of assistant ingestion. For native Android, `AyaCardView` and guarded `AyaComponentAction` remain reusable entry points with user-reviewed sharing.
 
 ## Optional language and personality packs
 
@@ -25,7 +25,7 @@ if (result is AyaBundledLaunchResult.Rejected) {
 
 The host must first implement normal language selection and a working, safe pack importer. Put a small optional AYA prompt below those ordinary controls. `askDirection=true` offers a local direction editor; `false` skips that screen when the host already supplied the preference. The user manually saves the output from their chosen AI and imports it into the host. AYA does not monitor the recipient, handle the returned file or activate a locale. Full production preparation is in the [Translation Kit authoring guide](translation/AUTHORING.md) and [module overview](translation/README.md); use the fictional example only as a format demonstration.
 
-**Preferred path:** use a version-matched bundled guide and `Aya.launchBundled()`, not a hand-assembled request string. See [integration readiness](INTEGRATION_READINESS.md) and the [AYA-RAS authoring system](reference/INDEX.md).
+**Preferred path:** use a version-matched bundled guide and `Aya.launchBundled()`, not a hand-assembled request string. For legacy/manual entry points, API stability, versioned release obligations and multi-locale/variant asset selection, follow the [native API compatibility policy](API_COMPATIBILITY.md). See [integration readiness](INTEGRATION_READINESS.md) and the [AYA-RAS authoring system](reference/INDEX.md).
 
 ## Optional file-manager automation recipes
 
