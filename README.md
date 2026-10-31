@@ -99,4 +99,6 @@ Known work: actually executing instrumentation tests on emulator/device, accessi
 
 ## License
 
-Undecided. No redistribution license has been granted yet.
+AYA is released under [the Unlicense](UNLICENSE), a public-domain dedication with a permissive fallback where applicable. The project maintainer contributes concepts and direction; the implementation code is generated with AI assistance. The maintainer does not claim personal authorship or exclusive ownership of that generated code, and dedicates any copyright interest they may hold in the repository's original material to the public domain.
+
+Anyone may use, copy, change, distribute, or sell the material without attribution or permission, subject to any independently applicable third-party rights. The Unlicense cannot waive rights belonging to others; third-party dependencies retain their own licenses.
