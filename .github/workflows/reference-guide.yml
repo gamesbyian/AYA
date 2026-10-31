@@ -33,5 +33,17 @@ jobs:
           python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md \
             --schema docs/translation/examples/parcelpad-output.schema.json \
             --example docs/translation/examples/parcelpad-pirate.pack.json
+      - name: Compile all four AYA packet profiles and bounded brief
+        run: |
+          for module in help creative structured translation; do
+            python3 tools/packet_compiler.py \
+              --source docs/packet/examples/parcelpad-facts.json \
+              --inventory docs/packet/examples/parcelpad-inventory.json \
+              --profiles docs/packet/examples/parcelpad-profiles.json \
+              --profile "$module" --as-of 2026-10-30T00:00:00Z \
+              --output "/tmp/aya-$module-packet.md" \
+              --brief-output "/tmp/aya-$module-brief.txt" \
+              --report "/tmp/aya-$module-report.json"
+          done
       - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
