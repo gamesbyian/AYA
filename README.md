@@ -42,6 +42,10 @@ AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) 
 
 **Scope:** this is **build-time authoring infrastructure**, not a new on-device model, dynamic host-state reader, assistant integration, or automatic reply/import mechanism. The verified packet must be deliberately packaged into the existing version-matched AYA handoff. AYA still ends at the user-controlled Share/Copy boundary.
 
+## Standard host-app AYA card
+
+The [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md) defines the thin-outline, host-themed card with the monochrome AYA mark, contextual explanation, honest file-sharing disclosure, optional question field, and **Ask Your Agent** action. The Android SDK now includes `AyaCardView`, a reusable View implementation demonstrated in the sample. Blank questions are welcome; pressing the button opens the existing version-checked **local review**, not automatic sharing. The host controls corner radius and contextual copy. A compact density is specified but not yet supplied as a separate widget.
+
 ## Where to start
 **Interoperability additions (October 2026):** [recipient capability evidence model](docs/RECIPIENT_CAPABILITIES.md), [portable handoff manifest schema](docs/protocol/README.md), optional [AssistContent adapter](docs/ASSIST_CONTEXT.md), and a [separate AppFunctions decision record](docs/APPFUNCTIONS_DECISION.md). The capability model holds only developer-supplied QA facts; it neither monitors user conversations nor learns from outcomes. The JSON manifest is a documented *host-side interchange format*, not a new wire format for AI recipients.
 
