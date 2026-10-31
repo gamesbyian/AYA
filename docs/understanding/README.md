@@ -55,6 +55,8 @@ python3 tools/validate_understanding.py \
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
+For packet compilation, pass `--understanding <model.json> --director-decisions <decisions.json>` together to `tools/packet_compiler.py`. It validates the consultation records and refuses to compile from an AUF model whose app ID, exact version or source revision conflicts with the fact source. The flags are optional for existing consumers; any adoption claiming AUF coverage should use them in CI.
+
 This validator checks provenance, identities, relationships, unresolved ambiguities and decision references, not the truth or completeness of a model. A separate reviewer must check the actual app, confirm director responses, and challenge the model with novel user scenarios.
 
 ## Output contract
