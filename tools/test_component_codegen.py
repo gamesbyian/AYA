@@ -78,7 +78,7 @@ class ComponentCodegenTest(unittest.TestCase):
     def test_compose_card_codegen_preserves_stable_id_and_output_contract(self):
         source = compose_snippet(self.manifest)
         self.assertIn("import dev.aya.compose.AyaCard", source)
-        self.assertIn("componentId = \\"sample.help.home\\"", source)
+        self.assertIn('componentId = "sample.help.home"', source)
         self.assertIn("outputInstructions = ", source)
         self.assertIn("AyaCardDensity.STANDARD", source)
         self.assertNotIn("Aya.launch(", source)
