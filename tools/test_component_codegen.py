@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, android_xml_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
+from component_codegen import ComponentError, android_xml_snippet, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -112,6 +112,21 @@ class ComponentCodegenTest(unittest.TestCase):
             self.manifest["presentation"]["description"] = description
             with self.assertRaises(ComponentError):
                 android_xml_snippet(self.manifest)
+
+    def test_compose_card_uses_optional_adapter_and_original_view_card(self):
+        code = compose_snippet(self.manifest)
+        self.assertIn("import dev.aya.compose.AyaCard", code)
+        self.assertIn("@Composable", code)
+        self.assertIn("outputInstructions = ", code)
+        self.assertNotIn("Aya.launch(", code)
+
+    def test_compose_action_preserves_manual_review_and_local_status(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": False}
+        code = compose_snippet(self.manifest)
+        self.assertIn("rememberAyaLauncher(", code)
+        self.assertIn("AyaComponentAction.Help(", code)
+        self.assertIn("askQuestion = false", code)
+        self.assertNotIn("ACTION_SEND", code)
 
     def test_bad_action_boolean_rejected(self):
         self.manifest["presentation"] = {"kind": "action", "askQuestion": "false"}

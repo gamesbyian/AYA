@@ -138,6 +138,55 @@ def kotlin_snippet(m: dict[str, Any]) -> str:
     )
 
 
+def compose_snippet(m: dict[str, Any]) -> str:
+    """Emit a source-only Compose wrapper without changing SDK handoff semantics."""
+    m = validate(m)
+    p = m["presentation"]
+    function = kotlin_function_name("compose", m["id"])
+    screen = f",\n        screenName = {kotlin_quote(m['screenName'])}" if "screenName" in m else ""
+    if p["kind"] == "card":
+        return (
+            "// AYA Compose component: " + m["id"] + "\n"
+            "import android.app.Activity\n"
+            "import androidx.compose.runtime.Composable\n"
+            "import androidx.compose.ui.Modifier\n"
+            "import dev.aya.android.AyaCardDensity\n"
+            "import dev.aya.compose.AyaCard\n\n"
+            "@Composable\n"
+            "fun " + function + "(activity: Activity, modifier: Modifier = Modifier) {\n"
+            "    AyaCard(\n"
+            "        activity = activity,\n"
+            "        modifier = modifier,\n"
+            "        guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\n"
+            "        title = " + kotlin_quote(p["title"]) + ",\n"
+            "        description = " + kotlin_quote(p["description"]) + ",\n"
+            "        attachmentDisclosure = " + kotlin_quote(p["attachmentDisclosure"]) + ",\n"
+            "        outputInstructions = " + kotlin_quote(p["outputInstructions"]) + ",\n"
+            "        densityMode = AyaCardDensity." + p["density"].upper() + "\n"
+            "    )\n"
+            "}\n"
+        )
+    return (
+        "// AYA Compose component: " + m["id"] + "\n"
+        "import android.app.Activity\n"
+        "import androidx.compose.runtime.Composable\n"
+        "import dev.aya.android.AyaComponentAction\n"
+        "import dev.aya.compose.AyaLauncher\n"
+        "import dev.aya.compose.rememberAyaLauncher\n\n"
+        "@Composable\n"
+        "fun " + function + "(activity: Activity, onRejected: ((String) -> Unit)? = null): AyaLauncher {\n"
+        "    return rememberAyaLauncher(\n"
+        "        activity = activity,\n"
+        "        action = AyaComponentAction.Help(\n"
+        "            guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\n"
+        "            askQuestion = " + str(p["askQuestion"]).lower() + "\n"
+        "        ),\n"
+        "        onRejected = onRejected\n"
+        "    )\n"
+        "}\n"
+    )
+
+
 def android_xml_snippet(m: dict[str, Any]) -> str:
     """Generate an Android Studio layout element with stable, unique view IDs."""
     m = validate(m)
@@ -185,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("manifest", type=Path, help="static component JSON configuration")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="validate configuration without generating code")
-    group.add_argument("--format", choices=("kotlin", "android-xml"), help="emit deterministic Android Kotlin source")
+    group.add_argument("--format", choices=("kotlin", "compose", "android-xml"), help="emit deterministic Android Kotlin source")
     args = parser.parse_args(argv)
     try:
         config = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -198,6 +247,8 @@ def main(argv: list[str] | None = None) -> int:
             print(kotlin_snippet(config), end="")
         elif args.format == "android-xml":
             print(android_xml_snippet(config), end="")
+        elif args.format == "compose":
+            print(compose_snippet(config), end="")
         else:
             print(f"Valid AYA component/v1: {config['id']} ({config['presentation']['kind']})")
     except ComponentError as exc:

@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "7",
+  "guide_revision": "8",
   "cases": [
     {
       "id": "Q-001",
@@ -278,6 +278,21 @@
       "expected_behavior": "Read the agent answer and follow its advice manually. The Home AYA card states the return/use instructions; this sample does not import or automatically apply help responses. Artwork has a separate saved-image picker.",
       "forbidden_claims": [
         "AYA automatically imports the answer into the sample"
+      ]
+    },
+    {
+      "id": "Q-021",
+      "question": "How can I ask for help from the Compose demo instead of the ordinary Home card?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-006",
+        "F-004"
+      ],
+      "expected_behavior": "From Home choose Open Compose drop-in demo. Use its optional question field or the prefilled existing Compose button. Both open local guarded, editable review before Copy or Share. Applying agent advice remains manual.",
+      "forbidden_claims": [
+        "The Compose component sends the question without review",
+        "The Compose component receives the agent reply"
       ]
     }
   ]
