@@ -12,6 +12,7 @@ import dev.aya.android.AyaImportRegistry
 import dev.aya.android.AyaImportRoute
 import dev.aya.android.AyaImportValidation
 import dev.aya.android.AyaShareTargetHints
+import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,8 +23,11 @@ class AyaOutputImportTest {
     private fun route(routeId: String, marker: String, valid: Boolean = true) = object : AyaImportRoute {
         override val id: String = routeId
         override val title: String = routeId
-        override fun recognizes(file: AyaImportFile): Boolean =
-            file.utf8Text()?.contains(marker) == true
+        override fun recognizes(file: AyaImportFile): Boolean = try {
+            val obj = JSONObject(file.utf8Text() ?: "")
+            val payload = obj.optJSONObject("payload") ?: obj
+            payload.optString("kind") == marker
+        } catch (_: Exception) { false }
         override fun validate(file: AyaImportFile): AyaImportValidation =
             if (valid) AyaImportValidation.Valid("Ready for preview: $routeId")
             else AyaImportValidation.Invalid("Wrong schema version")
@@ -65,13 +69,13 @@ class AyaOutputImportTest {
 
     @Test fun invalidAndUnrecognizedFilesNeverBecomeReady() {
         val registry = AyaImportRegistry("dev.aya.sample", listOf(route("language", "language-pack", valid = false)))
-        assertTrue(registry.inspect(AyaImportFile.fromBytes("language-pack".toByteArray())) is AyaImportDecision.Unusable)
-        assertTrue(registry.inspect(AyaImportFile.fromBytes("unrelated".toByteArray())) is AyaImportDecision.Unrecognized)
+        assertTrue(registry.inspect(AyaImportFile.fromBytes("""{"kind":"language-pack"}""".toByteArray())) is AyaImportDecision.Unusable)
+        assertTrue(registry.inspect(AyaImportFile.fromBytes("""{"kind":"unrelated"}""".toByteArray())) is AyaImportDecision.Unrecognized)
     }
 
     @Test fun ambiguousContentRequiresExplicitChoiceAndRevalidation() {
         val routes = listOf(route("language", "shared"), route("wallpaper", "shared"))
-        val file = AyaImportFile.fromBytes("shared".toByteArray())
+        val file = AyaImportFile.fromBytes("""{"kind":"shared"}""".toByteArray())
         val registry = AyaImportRegistry("dev.aya.sample", routes)
         assertTrue(registry.inspect(file) is AyaImportDecision.Ambiguous)
         val chosen = registry.inspectAs(file, "language") as AyaImportDecision.Ready
