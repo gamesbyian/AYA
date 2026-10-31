@@ -32,7 +32,7 @@ Developer and director
        | Flutter/FlutterFlow    -> source Flutter plugin + unverified editor templates
        | React Native/Expo      -> Android source bridge + React Native card (APK pending)
        | Godot                  -> Android v2 addon + card (export/device unverified)
-       | Unity                  -> future Android plugin + Visual Scripting unit
+       | Unity                  -> Kotlin Android source bridge + inspector action (Unity export unverified)
        | App Inventor/Kodular   -> future compatible .aix extension
   -> canonical installed-version-checked Android SDK
   -> user question and editable review
@@ -124,7 +124,7 @@ This import standard is **design work only**; it does not imply AYA has a genera
 | FlutterFlow | Reusable custom widget/action | Flutter plugin + editor distribution; test custom-code restrictions | Source templates only; editor import/export unverified |
 | React Native / Expo | npm component and function | Kotlin-backed Android Expo Modules source bridge and separate guide plugin | Source/TypeScript tests passed; APK integration and distribution pending |
 | Godot | AYA node with inspector inputs/signals | Godot 4 Android v2 plugin + GDScript addon | Merged source/headless checks; exported APK and device acceptance pending |
-| Unity | Inspector component + Visual Scripting unit | Android Java/Kotlin plugin + UPM wrapper | Planned |
+| Unity | Inspector-configurable Button action and callable C# API | Android Kotlin bridge and source UPM wrapper | Source preview; Gradle CI required; Unity Editor/export unverified |
 | App Inventor / Kodular | Designer block with properties | Compatible .aix extension, build target constraints tested | Research/planned |
 
 CI and samples must make installation/removal, minSdk/AndroidX compatibility, runtime packaging and Android manifest merges visible. Generic node metadata is insufficient: actual editor UI integration must be tested in that specific tool.
