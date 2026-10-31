@@ -60,7 +60,11 @@ export async function openAyaHelp(
   try {
     const value = await nativeModule.openHelp(
       guideAsset, options.screenName ?? null,
-      options.question ?? '', options.askQuestion ?? false
+      options.question ?? '',
+      // Bare actions are question-first; an explicitly supplied question
+      // (including an intentionally empty host-owned field) already has a
+      // composer. A caller can override either behavior deliberately.
+      options.askQuestion ?? (options.question === undefined)
     );
     if (typeof value !== 'object' || value === null || !('status' in value)) {
       return reject('Unexpected response from AYA Android module.');
