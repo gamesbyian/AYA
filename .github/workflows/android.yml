@@ -2,7 +2,38 @@ name: Android library and consumer integration
 on:
   push:
     branches: [main]
+    paths:
+      - 'aya/**'
+      - 'aya-compose/**'
+      - 'sample/**'
+      - 'tools/component_codegen.py'
+      - 'tools/component_scaffold.py'
+      - 'tools/test_component_codegen.py'
+      - 'tools/test_component_scaffold.py'
+      - 'docs/components/examples/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
   pull_request:
+    paths:
+      - 'aya/**'
+      - 'aya-compose/**'
+      - 'sample/**'
+      - 'tools/component_codegen.py'
+      - 'tools/component_scaffold.py'
+      - 'tools/test_component_codegen.py'
+      - 'tools/test_component_scaffold.py'
+      - 'docs/components/examples/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   android:
     runs-on: ubuntu-latest
