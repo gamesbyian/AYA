@@ -55,6 +55,25 @@ test('guarded native open means local review only, not recipient success', async
     'How do I open an app?', false]]);
 });
 
+test('bare headless help opens AYA question composer by default', async () => {
+  const {openAyaHelp, calls} = loadNative({response: {status: 'question_opened'}});
+  const result = await openAyaHelp();
+  assert.equal(result.status, 'question_opened');
+  assert.deepEqual(calls, [['aya-guide.md', null, '', true]]);
+});
+
+test('a host-supplied question uses local review without a duplicate composer', async () => {
+  const {openAyaHelp, calls} = loadNative();
+  assert.equal((await openAyaHelp({question: 'How do I use it?'})).status, 'review_opened');
+  assert.deepEqual(calls, [['aya-guide.md', null, 'How do I use it?', false]]);
+});
+
+test('an explicit composer override is respected even with a host field', async () => {
+  const {openAyaHelp, calls} = loadNative({response: {status: 'question_opened'}});
+  assert.equal((await openAyaHelp({question: '', askQuestion: true})).status, 'question_opened');
+  assert.deepEqual(calls, [['aya-guide.md', null, '', true]]);
+});
+
 test('missing native module cannot fake success or use unguarded sharing', async () => {
   const {openAyaHelp, calls} = loadNative({missing: true});
   assert.equal((await openAyaHelp()).status, 'rejected');
