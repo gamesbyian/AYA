@@ -1,0 +1,25 @@
+name: Flutter AYA source-preview checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: integrations/flutter/aya_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve Flutter source package
+        run: flutter pub get
+      - name: Analyze Dart widget and bridge API
+        run: flutter analyze
+      - name: Verify mocked native channel and review-first card
+        run: flutter test
