@@ -4,6 +4,10 @@
 
 AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
+## Cross-module packet authoring
+
+Read [Common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md), [module profiles](docs/packet/PROFILES.md) and [compiler usage](docs/packet/README.md) when changing or adding any host-to-agent information packet. Keep independent source-derived inventory, atomic host facts with source evidence and profile dependencies, actual output contracts, contextual examples/negative examples and source freshness. Run the compiler and regression tests, verify high-risk facts against the installed binary, and reject silent truncation or missing protective dependencies. A structural green check does not establish truth or provider ingestion. Never infer receiver success or monitor production agent responses.
+
 ## Documentation is a release-critical feature
 
 **Read [docs/reference/INDEX.md](docs/reference/INDEX.md) and [docs/reference/AUTHORING_STANDARD.md](docs/reference/AUTHORING_STANDARD.md) before working on references.** For release-bound integrations **also follow** [ADVANCED_AUTHORING.md](docs/reference/ADVANCED_AUTHORING.md), [AGENT_WORKFLOW.md](docs/reference/AGENT_WORKFLOW.md), [TRACEABILITY.md](docs/reference/TRACEABILITY.md) and [EVALUATION_PROTOCOL.md](docs/reference/EVALUATION_PROTOCOL.md). Follow [TEMPLATE.md](docs/reference/TEMPLATE.md), [QA_RUBRIC.md](docs/reference/QA_RUBRIC.md), [QUESTION_BANK.md](docs/reference/QUESTION_BANK.md), and [MAINTENANCE.md](docs/reference/MAINTENANCE.md). The fictional ParcelPad reference illustrates structure but **never** provides real-app evidence.
