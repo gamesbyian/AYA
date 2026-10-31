@@ -37,6 +37,10 @@ The offline APK verifier checks that the final APK includes the exact reference 
 
 The fixture exists only at `integrations/flutter/aya_flutter/ci-host/` and should not be reused as a reference for third-party apps. Real hosts must build their own vetted guides.
 
+## Independent host-reference evidence
+
+The CI host includes a source-derived [inventory](../../integrations/flutter/aya_flutter/ci-host/inventory.json) and independent [held-out questions](../../integrations/flutter/aya_flutter/ci-host/questions.json) for its own demo screen. `tools/audit_reference.py --strict` checks structural coverage, guide statuses and source claims against that inventory. This remains a static consistency audit and is **not proof** that a receiving assistant answers the questions or that the UI is usable on every Android device.
+
 ## Release gates
 
 1. Flutter analyzer and mocked platform-channel tests pass: user click only, unknown status refusal, invalid guide path, honest local state.

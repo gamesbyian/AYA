@@ -1,0 +1,41 @@
+{
+  "schema_version": "aya-inventory/v1",
+  "app_id": "com.example.aya_flutter_ci_host",
+  "app_version": "1.0.0",
+  "source_revision": "flutter-ci-host-v1",
+  "reviewed_at_utc": "2026-10-31T19:00:00Z",
+  "items": [
+    {
+      "id": "TASK-001",
+      "kind": "task",
+      "title": "Use the host AYA card to compose and review a question",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/flutter/aya_flutter/ci-host/main.dart;integrations/flutter/aya_flutter/lib/aya_flutter.dart"
+    },
+    {
+      "id": "F-001",
+      "kind": "feature",
+      "title": "Source-declared AYA host-themed help card",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/flutter/aya_flutter/ci-host/main.dart;integrations/flutter/aya_flutter/lib/aya_flutter.dart"
+    },
+    {
+      "id": "ERR-001",
+      "kind": "error",
+      "title": "Missing or incompatible native APK guide",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt;integrations/flutter/aya_flutter/android/src/main/kotlin/dev/aya/flutter/AyaFlutterPlugin.kt"
+    },
+    {
+      "id": "ERR-002",
+      "kind": "error",
+      "title": "Unknown or incompatible external receiver",
+      "status": "CONDITIONAL",
+      "criticality": "medium",
+      "source_ref": "aya/src/main/java/dev/aya/android/Aya.kt"
+    }
+  ]
+}

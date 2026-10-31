@@ -57,6 +57,7 @@ jobs:
         working-directory: .
         run: |
           python3 tools/validate_guide.py --strict integrations/flutter/aya_flutter/ci-host/aya-guide.md
+          python3 tools/audit_reference.py integrations/flutter/aya_flutter/ci-host/aya-guide.md --inventory integrations/flutter/aya_flutter/ci-host/inventory.json --questions integrations/flutter/aya_flutter/ci-host/questions.json --strict
           python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
       - name: Generate throwaway Flutter Android host with staged AYA SDK
         run: |
