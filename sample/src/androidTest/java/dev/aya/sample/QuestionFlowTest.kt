@@ -52,7 +52,7 @@ class QuestionFlowTest {
         find(By.desc("Your question for the assistant (optional)")).setText(question)
         // Android AlertDialog can transform or localize button labels; use stable IDs.
         find(By.res("android", "button1")).click()
-        val preview = find(By.hint("Help context to share"))
+        val preview = find(By.desc("Reviewed AYA help document"))
         assertTrue("Approved preview must contain the typed question", preview.text.contains(question))
     }
 
@@ -60,7 +60,7 @@ class QuestionFlowTest {
         val question = "How can I verify the share?"
         find(By.desc("Type a question in the host app")).setText(question)
         find(By.desc("Review my question with the app reference before sharing")).click()
-        val preview = find(By.hint("Help context to share"))
+        val preview = find(By.desc("Reviewed AYA help document"))
         assertTrue("Host question must appear in review", preview.text.contains(question))
         assertFalse("Host flow must not open a second question box",
             device.hasObject(By.desc("Your question for the assistant (optional)")))
@@ -83,7 +83,7 @@ class QuestionFlowTest {
         shortRequest.setText(edited)
         // Full guide is the neutral AlertDialog button, not the default share action.
         find(By.res("android", "button3")).click()
-        val full = find(By.hint("Creative request to share"))
+        val full = find(By.desc("Reviewed AYA creative document"))
         assertTrue("Expanded reference must retain exact short prompt", full.text.contains(edited))
         assertFalse("Expanded reference must not regenerate the sample's original direction",
             full.text.contains("Atmospheric science-fiction season art"))
@@ -103,6 +103,6 @@ class QuestionFlowTest {
             assertFalse("Cancelling AYA must not destroy the host", it.isDestroyed)
         }
         assertFalse(device.hasObject(By.desc("Your question for the assistant (optional)")))
-        assertFalse(device.hasObject(By.hint("Help context to share")))
+        assertFalse(device.hasObject(By.desc("Reviewed AYA help document")))
     }
 }
