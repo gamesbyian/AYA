@@ -2,6 +2,10 @@
 
 The [cross-module trial ledger](packet/EVALUATION.md) must bind results to the exact compiled packet, record actual attachment ingestion and independently checked host outcomes. The offline tool `tools/validate_packet_trials.py` rejects fabricated-incomplete *metadata* claims, but human proof is still necessary. Unit tests use explicitly synthetic fixtures only.
 
+## Application Understanding and director consultation checks
+
+Run `python3 tools/validate_understanding.py docs/understanding/examples/parcelpad-understanding.json --decisions docs/understanding/examples/parcelpad-decisions.json` and the associated unit tests. For real hosts independently confirm the conceptual model with relevant source/QA and, where necessary, a scoped director interview. Reject unknown references, unsupported approval claims, interpretation drift, and any confusion of intentions with implemented or observed states. No project director was consulted for the fictional fixture.
+
 ## Shared Packet Authoring checks
 
 Run the [Packet compiler](packet/README.md) on the fictional four-profile fixture, then independently test against real host builds before release:

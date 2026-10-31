@@ -1,0 +1,25 @@
+{
+  "schema_version": "aya-director-decisions/v1",
+  "app_id": "dev.parcelpad.example",
+  "source_revision": "fictional-fixture-1",
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "ambiguity_id": "AMB-001",
+      "status": "deferred",
+      "question": "Should style packs alter destructive action labels?",
+      "observed_evidence": "No approved style policy is supplied in this fictional example",
+      "provisional_interpretation": "Keep actions semantically explicit",
+      "response": "No director response has been recorded; this decision remains open.",
+      "actor": "No director consulted (fictional fixture)",
+      "actor_role": "unanswered",
+      "recorded_at_utc": "2026-10-30T00:00:00Z",
+      "source_ref": "fictional example only",
+      "scope": "Parcel action terminology",
+      "affected_ids": [
+        "PRINCIPLE-001"
+      ],
+      "review_trigger": "Director clarification before a real app's release"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "schema_version": "aya-understanding/v1",
+  "host": {
+    "app_id": "dev.parcelpad.example",
+    "app_version": "1.0.0",
+    "source_revision": "fictional-fixture-1"
+  },
+  "thesis": {
+    "statement": "A fictional parcel-listing app intended to let users manage a local list without confusing list removal with permanent file deletion.",
+    "source_ref": "fictional sample product brief",
+    "truth_kind": "intention",
+    "status": "provisional"
+  },
+  "concepts": [
+    {
+      "id": "CONCEPT-001",
+      "name": "Parcel entry",
+      "definition": "A record shown in the local list, distinct from any file.",
+      "related_concept_ids": [
+        "CONCEPT-002"
+      ],
+      "evidence_ref": "fictional operation fixture"
+    },
+    {
+      "id": "CONCEPT-002",
+      "name": "Downloaded parcel file",
+      "definition": "A file stored on the device, not deleted by list-only removal.",
+      "related_concept_ids": [
+        "CONCEPT-001"
+      ],
+      "evidence_ref": "fictional operation fixture"
+    }
+  ],
+  "goals": [
+    {
+      "id": "GOAL-001",
+      "intention": "Remove an item from the visible list while retaining its files",
+      "concept_ids": [
+        "CONCEPT-001",
+        "CONCEPT-002"
+      ],
+      "evidence_ref": "fictional workflow fixture",
+      "success_evidence": "Entry absent and files remain present"
+    }
+  ],
+  "principles": [
+    {
+      "id": "PRINCIPLE-001",
+      "statement": "Removing an entry must not be mistaken for deleting downloaded files",
+      "scope": "Parcel list operations",
+      "source_ref": "fictional sample design",
+      "truth_kind": "intention",
+      "decision_ids": []
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLAIM-001",
+      "statement": "List removal preserves local files",
+      "truth_kind": "implemented",
+      "status": "AVAILABLE",
+      "applies_to": "Fictional build only",
+      "source_ref": "fictional operation fixture",
+      "concept_ids": [
+        "CONCEPT-001",
+        "CONCEPT-002"
+      ],
+      "goal_ids": [
+        "GOAL-001"
+      ],
+      "decision_ids": []
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-001",
+      "question": "Should style packs ever alter the label of the destructive file deletion action?",
+      "impact": "high",
+      "status": "unresolved",
+      "consultation_needed": true,
+      "affected_ids": [
+        "PRINCIPLE-001"
+      ],
+      "source_ref": "fictional design question"
+    }
+  ]
+}

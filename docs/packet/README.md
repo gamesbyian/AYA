@@ -4,6 +4,10 @@
 
 The [Packet Authoring Standard](AUTHORING_STANDARD.md) governs how every AYA module obtains real host facts, models the task, compiles a concise and semantically complete context packet, and proves its quality before release. Read it alongside [module profiles](PROFILES.md).
 
+## Prior step: the Host Concept Model
+
+Use [AYA-AUF](../understanding/README.md) to recover the app's purpose and conceptual relationships before compiling fact packets. Directors can clarify intended semantics through the [Director Consultation Protocol](../understanding/CONSULTATION.md). AUF validation is independent of the compiler and cannot convert director wishes into verified implementation facts.
+
 ## Contract and architecture
 
 AYA's **host developer** owns authoring and approval. The user's preferred assistant receives an explicitly reviewed packet and task. AYA does not access the app's secrets, scrape its UI, observe agent replies or import the result.

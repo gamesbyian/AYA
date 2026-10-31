@@ -2,6 +2,10 @@
 
 This runbook is for a coding/documentation agent handed an unfamiliar Android repository and asked to prepare a **release-grade** AYA reference. Read [AYA-RAS v1](AUTHORING_STANDARD.md), [advanced authoring](ADVANCED_AUTHORING.md), and [traceability](TRACEABILITY.md) before beginning.
 
+## Upstream product-comprehension pass
+
+Begin with [AYA-AUF](../understanding/README.md) to model purpose, user intentions, core objects, interaction philosophy, mental-model discrepancies and intended versus observed behavior. When an unsettled product decision would change the packet's meaning, use the [adaptive director interview](../understanding/CONSULTATION.md) rather than guessing. Record answers with source, scope, status and review trigger; do not treat silence or a deferred question as approval. Maintain separate AYA-RAS evidence for released behavior.
+
 ## The deliverable contract
 
 Deliver a **usable, version-pinned reference**, not just a speculative report:

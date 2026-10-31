@@ -41,9 +41,16 @@ jobs:
               --inventory docs/packet/examples/parcelpad-inventory.json \
               --profiles docs/packet/examples/parcelpad-profiles.json \
               --profile "$module" --as-of 2026-10-30T00:00:00Z \
+              --understanding docs/understanding/examples/parcelpad-understanding.json \
+              --director-decisions docs/understanding/examples/parcelpad-decisions.json \
               --output "/tmp/aya-$module-packet.md" \
               --brief-output "/tmp/aya-$module-brief.txt" \
               --report "/tmp/aya-$module-report.json"
           done
+      - name: Validate AYA Application Understanding and director records
+        run: |
+          python3 tools/validate_understanding.py \
+            docs/understanding/examples/parcelpad-understanding.json \
+            --decisions docs/understanding/examples/parcelpad-decisions.json
       - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'

@@ -4,6 +4,10 @@
 
 AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
+## Application understanding before packet authoring
+
+Read [AYA-AUF](docs/understanding/README.md), [concept modelling](docs/understanding/MODEL.md) and [Director Consultation Protocol](docs/understanding/CONSULTATION.md) before drafting host packet content. Recover purpose, user goals, ontology, intended automation/control, misconceptions, disputed semantics and four distinct truth categories. Investigate evidence before asking the director; request only consequential missing direction through context-rich questions, and preserve deferral/delegation/unknowns. Validate AUF models and decisions with `tools/validate_understanding.py`. A director statement proves only scoped **intention**, never shipping or successful behavior. The protocol operates in the developer workflow, not in AYA's user-facing handoff.
+
 ## Cross-module packet authoring
 
 Read [Common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md), [module profiles](docs/packet/PROFILES.md) and [compiler usage](docs/packet/README.md) when changing or adding any host-to-agent information packet. Keep independent source-derived inventory, atomic host facts with source evidence and profile dependencies, actual output contracts, contextual examples/negative examples and source freshness. Run the compiler and regression tests, verify high-risk facts against the installed binary, and reject silent truncation or missing protective dependencies. A structural green check does not establish truth or provider ingestion. Never infer receiver success or monitor production agent responses.
