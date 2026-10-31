@@ -129,6 +129,24 @@ class QuestionFlowTest {
             .check(doesNotExist())
     }
 
+    @Test fun typedFilesystemActionRequiresRealBundledKitWithoutWeakerFallback() {
+        scenario.scenario.onActivity { activity ->
+            val action = AyaComponentAction.Filesystem(
+                task = dev.aya.android.AyaFilesystemTask(
+                    recipePurpose = "file cleanup recipe",
+                    importInstructions = "Automation > Import recipe > Review"
+                ),
+                kitAsset = "nonexistent-filesystem-kit.md",
+                guideAsset = "aya-guide.md",
+                askDirection = false
+            )
+            val result = action.launch(activity, text = "List possible duplicate files")
+            assertTrue("Missing host kit must not open review or downgrade to Help",
+                result is AyaBundledLaunchResult.Rejected)
+        }
+        onView(withContentDescription("Reviewed AYA help document")).check(doesNotExist())
+    }
+
     @Test fun typedComponentActionRejectsMissingBundledGuideWithoutOpeningReview() {
         scenario.scenario.onActivity { activity ->
             val result = AyaComponentAction.Help(
