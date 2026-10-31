@@ -114,7 +114,9 @@ def validate_inputs(source: dict, inventory: dict, profiles: dict,
                                 "fresh_until")
             if expiry < as_of:
                 raise PacketError("Externally sourced claim is stale: " + identifier)
-        if SECRET_PATTERN.search(json.dumps(fact)):
+        if any(SECRET_PATTERN.search(text) for text in
+               (fact["title"], fact["summary"], fact["details"],
+                fact["applies_to"], evidence["ref"])):
             raise PacketError("Possible secret-shaped fact: " + identifier)
         by_id[identifier] = fact
     # Require an independent inventory enumerating *all* declared source facts,
@@ -152,6 +154,9 @@ def validate_inputs(source: dict, inventory: dict, profiles: dict,
             raise PacketError("Profile definition must be object: " + name)
         for k in ("purpose", "request", "output_contract", "examples"):
             nonempty(spec.get(k), name + "." + k)
+        if any(SECRET_PATTERN.search(spec[key]) for key in
+               ("purpose", "request", "output_contract", "examples")):
+            raise PacketError("Possible credential in profile: " + name)
         always = spec.get("always_include")
         if not isinstance(always, list):
             raise PacketError("Profile always_include list missing: " + name)
