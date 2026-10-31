@@ -162,9 +162,15 @@ object AyaDocument {
             if (request.filesystemTask != null && request.filesystemSnapshot != null) {
                 appendLine()
                 appendLine("### Optional Filesystem Snapshot (host supplied, potentially stale)")
-                appendLine("```json")
-                appendLine(clean(request.filesystemSnapshot))
-                appendLine("```")
+                val snapshot = clean(request.filesystemSnapshot)
+                // A path can contain Markdown fences. Keep it inside one data block
+                // rather than allowing filename text to create new instructions.
+                val longestRun = Regex("`+").findAll(snapshot)
+                    .maxOfOrNull { it.value.length } ?: 0
+                val fence = "`".repeat(maxOf(3, longestRun + 1))
+                appendLine(fence + "json")
+                appendLine(snapshot)
+                appendLine(fence)
             }
         }
     }
