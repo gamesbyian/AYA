@@ -28,7 +28,7 @@ Developer and director
   -> version-matched assets packaged into host APK
   -> aya-component/v1 (declarative, build-time help wiring)
        | Android Studio/Views    -> AyaCardView or AyaComponentAction.Help
-       | Compose                -> AndroidView wrapper (dedicated composable planned)
+       | Compose                -> optional aya-compose adapter (source/CI acceptance pending)
        | Flutter/FlutterFlow    -> future Dart plugin + visual widget/action
        | React Native/Expo      -> future native module + JS component/action
        | Godot                  -> future Android v2 addon + inspector node/signals
@@ -62,8 +62,6 @@ See [JSON Schema](aya-component-v1.schema.json) and [sample fixture](examples/sa
 
 A `card` includes its own optional editable question and launches local review. An `action` is headless: its host may supply `question` at invocation time. Neither offers a runtime field that bypasses review, bypasses guide validation, forces a recipient, or automatically attaches additional user files.
 
-The generator can also emit Compose wrappers with `--format kotlin-compose` when the optional Compose adapter is installed.
-
 Example generator:
 
 ```sh
@@ -93,9 +91,7 @@ if (result is AyaBundledLaunchResult.Rejected) {
 // No result from any assistant is available here.
 ```
 
-A first optional [Compose adapter](COMPOSE.md) now wraps the real View and provides `AyaCard` plus `rememberAyaLauncher` for native Compose hosts. It has its own library/consumer tests and keeps the core free of Compose dependencies. Compose is under integration testing, not publicly published.
-
-For a simple embedded card, use `AyaCardView(context, activity, outputInstructions = "...")` as documented in [Card UI Standard](../CARD_UI_STANDARD.md). Compose can currently wrap that View with `AndroidView`. Avoid adding Compose as a transitive dependency of the core runtime.
+For a simple embedded card, use `AyaCardView(context, activity, outputInstructions = "...")` as documented in [Card UI Standard](../CARD_UI_STANDARD.md). Compose hosts can use the optional [AyaCard and rememberAyaLauncher adapter](COMPOSE.md), which wraps the established Android card without adding Compose as a dependency of the core runtime. The same help-only manifest can generate Compose snippets with `--format compose`.
 
 ## Adapter compatibility contract
 
@@ -144,3 +140,7 @@ Coding-agent skills/templates should be offered as an optional convenience. No a
 A project may describe its **behaviour** as AYA-compatible without importing AYA code, provided an independent compatibility suite verifies the essentials: informed one-way user-controlled transfer, source-verified installed-version reference, review/edit and Copy fallback, safe URI grants, no response monitoring, truthful output-use instructions, accessibility, explicit exclusions and provider-neutral semantics. Use "AYA-compatible (self-implemented)" separately from "AYA SDK integrated"; neither label implies assistant ingestion. Never award a certification solely from manifest validation.
 
 See [implementation roadmap and acceptance matrix](ROADMAP.md).
+
+The generator can also emit Compose wrappers with `--format kotlin-compose` when the optional Compose adapter is installed.
+
+A first optional [Compose adapter](COMPOSE.md) now wraps the real View and provides `AyaCard` plus `rememberAyaLauncher` for native Compose hosts. It has its own library/consumer tests and keeps the core free of Compose dependencies. Compose is under integration testing, not publicly published.

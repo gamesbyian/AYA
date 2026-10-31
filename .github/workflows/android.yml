@@ -29,12 +29,35 @@ jobs:
         run: |
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComponent.kt
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedAction.kt
-      - name: Compile generated Compose card and headless action in the sample
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeCard.kt
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeAction.kt
+      - name: Compile generated Compose card and action in sample
         run: |
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin-compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeCard.kt
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin-compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeAction.kt
+      - name: Compile a generated XML card in the real sample app
+        run: python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format android-xml > sample/src/main/res/layout/aya_generated_xml_card.xml
+      - name: Safely scaffold Kotlin and XML cards in the consuming sample
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path('docs/components/examples/sample-help-card.json').read_text())
+          m['id'] = 'sample.help.scaffolder.smoke'
+          Path('/tmp/aya-scaffold-smoke.json').write_text(json.dumps(m))
+          PY
+          python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-smoke.json --mode kotlin --package dev.aya.sample --apply
+          python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-smoke.json --mode android-xml --apply
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path('docs/components/examples/sample-help-card.json').read_text())
+          m['id'] = 'sample.help.scaffolder.compose.smoke'
+          Path('/tmp/aya-scaffold-compose-smoke.json').write_text(json.dumps(m))
+          PY
+          python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-compose-smoke.json --mode compose --package dev.aya.sample --apply
       - name: Unit tests and module-based consumer
-        run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :aya-compose:testDebugUnitTest :aya-compose:assembleDebug :sample:assembleDebug --no-daemon
+        run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :aya-compose:assembleDebug :sample:assembleDebug --no-daemon
       - name: Produce Maven-style library distribution
         run: gradle :aya:publishReleasePublicationToStagingRepository :aya-compose:publishReleasePublicationToStagingRepository --no-daemon
       - name: Verify sample consumes published AAR and POM dependencies

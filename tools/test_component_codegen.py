@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
+from component_codegen import ComponentError, compose_snippet, android_xml_snippet, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -75,6 +75,21 @@ class ComponentCodegenTest(unittest.TestCase):
         with self.assertRaises(ComponentError):
             validate(self.manifest)
 
+    def test_kotlin_strings_never_interpolate_or_break_syntax(self):
+        quoted = kotlin_quote('hello $token "quote" \\ next\nline')
+        self.assertIn("\\$token", quoted)
+        self.assertIn('\\"quote\\"', quoted)
+        self.assertIn("\\\\ next", quoted)
+        self.assertIn("\\nline", quoted)
+
+    def test_multiple_cards_have_unique_stable_function_names(self):
+        a = kotlin_function_name("install", "screen.a")
+        b = kotlin_function_name("install", "screen-a")
+        self.assertNotEqual(a, b)
+        self.assertEqual(a, kotlin_function_name("install", "screen.a"))
+        self.assertTrue(a.startswith("installAyaComponent_"))
+        self.assertIn(a, kotlin_snippet({**self.manifest, "id": "screen.a"}))
+
     def test_compose_card_codegen_preserves_stable_id_and_output_contract(self):
         source = compose_snippet(self.manifest)
         self.assertIn("import dev.aya.compose.AyaCard", source)
@@ -91,20 +106,43 @@ class ComponentCodegenTest(unittest.TestCase):
         self.assertIn("askQuestion = false", source)
         self.assertNotIn("ACTION_SEND", source)
 
-    def test_kotlin_strings_never_interpolate_or_break_syntax(self):
-        quoted = kotlin_quote('hello $token "quote" \\ next\nline')
-        self.assertIn("\\$token", quoted)
-        self.assertIn('\\"quote\\"', quoted)
-        self.assertIn("\\\\ next", quoted)
-        self.assertIn("\\nline", quoted)
+    def test_xml_card_is_parseable_and_has_unique_stable_ids(self):
+        import xml.etree.ElementTree as ET
+        xml = android_xml_snippet(self.manifest)
+        root = ET.fromstring(xml)
+        self.assertTrue(root.tag.endswith("AyaXmlCardView"))
+        ids = [v for k, v in root.attrib.items() if k.endswith("id") or k.endswith("ayaQuestionInputId")]
+        self.assertEqual(len(ids), 2)
+        self.assertNotEqual(ids[0], ids[1])
+        self.assertEqual(xml, android_xml_snippet(self.manifest))
+        other = copy.deepcopy(self.manifest)
+        other["id"] = "sample.help-other"
+        self.assertNotEqual(xml, android_xml_snippet(other))
 
-    def test_multiple_cards_have_unique_stable_function_names(self):
-        a = kotlin_function_name("install", "screen.a")
-        b = kotlin_function_name("install", "screen-a")
-        self.assertNotEqual(a, b)
-        self.assertEqual(a, kotlin_function_name("install", "screen.a"))
-        self.assertTrue(a.startswith("installAyaComponent_"))
-        self.assertIn(a, kotlin_snippet({**self.manifest, "id": "screen.a"}))
+    def test_xml_rejects_action_and_ambiguous_copy(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": True}
+        with self.assertRaises(ComponentError):
+            android_xml_snippet(self.manifest)
+        self.manifest = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        for description in ("@resource", "first" + chr(10) + "second", "path" + chr(92) + "name"):
+            self.manifest["presentation"]["description"] = description
+            with self.assertRaises(ComponentError):
+                android_xml_snippet(self.manifest)
+
+    def test_compose_card_uses_optional_adapter_and_original_view_card(self):
+        code = compose_snippet(self.manifest)
+        self.assertIn("import dev.aya.compose.AyaCard", code)
+        self.assertIn("@Composable", code)
+        self.assertIn("outputInstructions = ", code)
+        self.assertNotIn("Aya.launch(", code)
+
+    def test_compose_action_preserves_manual_review_and_local_status(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": False}
+        code = compose_snippet(self.manifest)
+        self.assertIn("rememberAyaLauncher(", code)
+        self.assertIn("AyaComponentAction.Help(", code)
+        self.assertIn("askQuestion = false", code)
+        self.assertNotIn("ACTION_SEND", code)
 
     def test_bad_action_boolean_rejected(self):
         self.manifest["presentation"] = {"kind": "action", "askQuestion": "false"}
