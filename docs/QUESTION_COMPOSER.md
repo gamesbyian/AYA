@@ -2,6 +2,10 @@
 
 An app's Help action should be a natural continuation of what the user is doing, not a demand to understand files or AI import formats.
 
+## Host card journey
+
+The optional [standard host card](CARD_UI_STANDARD.md) has its **own** multiline question field. It calls `Aya.launchBundled(question = questionInput.text.toString(), askQuestion = false)` and goes directly to the editable privacy review when **Ask Your Agent** is tapped. A blank question is allowed. This avoids two successive question fields while preserving the explicit Share or Copy boundary. The default journey below still applies when a host uses a plain Help button instead of embedding a card.
+
 ## Default journey
 
 1. User taps **Ask your agent** from the host app.
