@@ -1,0 +1,33 @@
+// Candidate only: CI copies this into a synthetic consumer's source package.
+// Do NOT ship in place of aya_flutter/android/build.gradle until built-in
+// Kotlin AGP 9 host verification and an explicit min-SDK/version migration.
+// Plugin versions belong to the consuming Flutter Android host.
+plugins {
+    id 'com.android.library'
+}
+
+group = 'dev.aya.flutter'
+version = '0.2.0-dev.1'
+
+android {
+    namespace 'dev.aya.flutter'
+    compileSdk 35
+    defaultConfig { minSdk 23 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// AGP 9's built-in Kotlin creates this extension without applying KGP.
+// Flutter 3.47+ enables built-in Kotlin with android.builtInKotlin=true.
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    // No silent missing dependency or network-only binary assumption.
+    implementation 'dev.aya:aya-android:0.1.0-SNAPSHOT'
+}
