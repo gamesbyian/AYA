@@ -101,7 +101,7 @@ Creative Handoff is a **prototype** with typed Kotlin implementation and sample 
 
 Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
-Known work: actually executing instrumentation tests on emulator/device, accessibility and lifecycle acceptance, real-device assistant trials, comprehensive privacy review, and stable license/distribution/API policy. The guarded API supports **exact** version-matched guides; multi-version guide resolution is deliberately unsupported.
+Known work: actually executing instrumentation tests on emulator/device, accessibility and lifecycle acceptance, real-device assistant trials, comprehensive privacy review, and stable distribution/API policy. The guarded API supports **exact** version-matched guides; multi-version guide resolution is deliberately unsupported.
 
 ## License
 
