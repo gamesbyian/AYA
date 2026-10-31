@@ -25,9 +25,11 @@ python3 tools/packet_compiler.py \
   --profiles docs/packet/examples/parcelpad-profiles.json \
   --profile creative --select FACT-003 \
   --as-of 2026-10-30T00:00:00Z \
-  --output build/aya-creative-packet.md --report build/aya-creative-report.json
+  --output build/aya-creative-packet.md --brief-output build/aya-creative-brief.txt --report build/aya-creative-report.json
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
+
+The optional `--brief-output` creates a **complete**, at-most-4000-UTF-16-unit text request containing selected facts, dependencies and constraints. It fails instead of truncating for larger tasks; attach the full reviewed packet in that case. Host integration must still use only the final user-approved text and independently test the receiving app.
 
 Changing `--profile` to `help`, `structured`, or `translation` uses the same verified facts without competing hand-written descriptions. Omit `--select` to include the full profile. Specify more than one `--select` for multiple facts. The compiler walks transitive dependencies and mandatory facts; if a packet is too large it **fails**, instead of clipping the safety context. Set a smaller selection or revise the source. `--fragment` makes a Markdown fragment that can be incorporated into an existing APK-bundled AYA-RAS guide using its modular build process.
 
