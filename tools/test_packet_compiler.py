@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from packet_compiler import PacketError, compile_packet, read_json
+from packet_compiler import PacketError, compile_packet, compile_brief, read_json
 
 ROOT = Path(__file__).resolve().parents[1] / "docs" / "packet" / "examples"
 NOW = dt.datetime(2026, 10, 30, tzinfo=dt.timezone.utc)
@@ -114,6 +114,28 @@ class PacketCompilerTests(unittest.TestCase):
             symlink.symlink_to(source)
             with self.assertRaises(PacketError):
                 read_json(symlink)
+
+
+    def test_text_only_brief_contains_constraints_and_is_bounded(self):
+        src, inv, prof = sources()
+        text = compile_brief(src, inv, prof, "creative", ["FACT-004"], NOW)
+        self.assertIn("1:1 square", text)
+        self.assertIn("Import from device", text)
+        self.assertIn("FACT-003", text)
+        self.assertLessEqual(len(text.encode("utf-16-le")) // 2, 4000)
+
+    def test_text_only_fails_closed_instead_of_truncating(self):
+        src, inv, prof = copy.deepcopy(sources())
+        src["facts"][2]["details"] = "Important constraint. " * 1000
+        with self.assertRaisesRegex(PacketError, "never truncate constraints"):
+            compile_brief(src, inv, prof, "creative", ["FACT-004"], NOW)
+
+    def test_inventory_evidence_must_match_source(self):
+        src, inv, prof = copy.deepcopy(sources())
+        inv["items"][0]["source_ref"] = "completely unrelated source"
+        with self.assertRaisesRegex(PacketError, "evidence disagree"):
+            self.compile(inputs=(src, inv, prof))
+
 
 
 if __name__ == "__main__":
