@@ -1,5 +1,9 @@
 # AYA product/engineering specification (draft 1)
 
+## Shared packet authoring
+
+Developer-side [AYA Packet Authoring System](packet/README.md) standardizes how host-specific evidence becomes assistant-readable context. The typed fact source, independent coverage inventory, task profiles, dependency-safe scoped exports and checked compilation are build-time tools. The existing AYA-RAS guide and user-approved Android sharing remain canonical; no runtime packet router, agent API, output watcher or importer is implied. Evidence-based quality and actual recipient ingestion remain separate release gates.
+
 ## Goal and operating principle
 
 AYA is a reusable Android **bring-your-own-AI help and creative handoff**. An app provides version-matched, operationally rich documentation and optionally a user question/screen context. AYA previews the exact package and lets the user share it through the Android Sharesheet with a compatible assistant, without running or paying for an AI model.
