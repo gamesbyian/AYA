@@ -6,9 +6,9 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 6
-source_revision: aya-sample-standard-help-card-v1
-last_verified_utc: 2026-10-31T01:30:00Z
+guide_revision: 7
+source_revision: aya-sample-card-return-instructions-v1
+last_verified_utc: 2026-10-31T03:00:00Z
 owner: AYA maintainers
 ---
 
@@ -26,9 +26,9 @@ This is a guide to the real AYA Sample *source implementation*. The Android appl
 
 ## Quick orientation
 
-The Home screen includes a standardized, thin-outline AYA card with a monochrome logo, explanation, proposed-reference disclosure, optional multiline question field and an "Ask Your Agent" button. It also has a separate fictional Aurora Station artwork editor, accessed with "Open artwork generation demo", with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The card button loads this guide, verifies the installed app version, and opens the local editable privacy review directly, whether a question was entered or left blank. There is no duplicate question composer on the sample Home screen. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
+The Home screen includes a standardized, thin-outline AYA card with a monochrome logo, explanation, proposed-reference disclosure, optional multiline question field, a visible reminder to return and use the answer manually, and an "Ask Your Agent" button. It also has a separate fictional Aurora Station artwork editor, accessed with "Open artwork generation demo", with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The card button loads this guide, verifies the installed app version, and opens the local editable privacy review directly, whether a question was entered or left blank. There is no duplicate question composer on the sample Home screen. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
 
-The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
+After receiving the agent's answer, the user reads it and manually applies any useful advice; the sample has no help-response importer or automatic application. The creative artwork screen separately offers an image picker for saved generated artwork. The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
 
 ## Navigation map
 
