@@ -131,6 +131,8 @@ def validate_inputs(source: dict, inventory: dict, profiles: dict,
             raise PacketError("Inventory duplicate or unknown fact: " + str(identifier))
         if item.get("profiles") != by_id[identifier]["profiles"]:
             raise PacketError("Profile mismatch between independent inventory and facts: " + identifier)
+        if item.get("source_ref") != by_id[identifier]["evidence"]["ref"]:
+            raise PacketError("Inventory and source evidence disagree: " + identifier)
         if item.get("criticality") not in ("low", "medium", "high"):
             raise PacketError("Invalid criticality: " + identifier)
         nonempty(item.get("source_ref"), identifier + ".inventory.source_ref")
@@ -224,7 +226,7 @@ def compile_packet(source: dict, inventory: dict, profiles: dict, profile: str,
         (len(x.group(0)) for x in re.finditer(re.escape(chr(96)) + "+",
                                               json_data + json_manifest)),
         default=0)))
-    heading = "###" if fragment else "##"
+    heading = "####" if fragment else "##"
     parts = []
     if not fragment:
         parts += ["---", "schema_version: aya-packet/v1",
@@ -271,6 +273,42 @@ def compile_packet(source: dict, inventory: dict, profiles: dict, profile: str,
     return result, report
 
 
+def compile_brief(source: dict, inventory: dict, profiles: dict,
+                  profile: str, selected: list[str] | None = None,
+                  as_of: dt.datetime | None = None) -> str:
+    """Fail-closed, text-only essential-constraints brief (Android 4k UTF-16 units).
+
+    No selected/dependent fact is silently omitted. For large profiles use the
+    full reviewed attachment instead of a misleading partial text-only prompt.
+    """
+    stamp = as_of or dt.datetime.now(dt.timezone.utc)
+    by_id, _, specs = validate_inputs(source, inventory, profiles, stamp)
+    if profile not in PROFILES:
+        raise PacketError("Unknown profile")
+    facts, omitted = select_facts(by_id, profile, specs[profile], selected or [])
+    spec = specs[profile]
+    host = source["host"]
+    lines = [
+        f"Task for {host['app_name']} ({host['app_id']} v{host['app_version']}):",
+        spec["request"], "", "Host-verified facts and required constraints:"
+    ]
+    for fact in facts:
+        lines.append(f"- {fact['id']} [{fact['status']}, {fact['applies_to']}]: "
+                     f"{fact['summary']} {fact['details']}")
+    lines += ["", "Required output:", spec["output_contract"], "",
+              "Do not invent missing host behavior, request secrets, or claim "
+              "to have installed/imported a result."]
+    if omitted:
+        lines.append("Some other host facts were not included in this scoped "
+                     "brief. Their omission does not mean unsupported.")
+    result = "\n".join(lines).strip()
+    utf16_units = len(result.encode("utf-16-le")) // 2
+    if utf16_units > 4000:
+        raise PacketError(f"Text-only brief is {utf16_units} UTF-16 units; "
+                          "use full reviewed attachment, never truncate constraints")
+    return result
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
@@ -282,6 +320,8 @@ def main(argv=None) -> int:
     parser.add_argument("--fragment", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--brief-output", type=Path,
+                        help="Write complete text-only brief; fail if over 4000 UTF-16 units")
     parser.add_argument("--as-of", help="Fixed UTC date for reproducible freshness testing")
     args = parser.parse_args(argv)
     try:
@@ -290,8 +330,15 @@ def main(argv=None) -> int:
             read_json(args.source), read_json(args.inventory),
             read_json(args.profiles), args.profile, args.select,
             args.max_bytes, args.fragment, stamp)
+        brief = (compile_brief(read_json(args.source), read_json(args.inventory),
+                               read_json(args.profiles), args.profile, args.select,
+                               stamp) if args.brief_output else None)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(data, encoding="utf-8", newline="\n")
+        if args.brief_output:
+            args.brief_output.parent.mkdir(parents=True, exist_ok=True)
+            args.brief_output.write_text(brief + "\n", encoding="utf-8", newline="\n")
+            report["brief_utf16_units"] = len(brief.encode("utf-16-le")) // 2
         if args.report:
             args.report.parent.mkdir(parents=True, exist_ok=True)
             args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
