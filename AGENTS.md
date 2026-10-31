@@ -90,3 +90,7 @@ Prefer an integrated working handoff, truthful app-specific docs and real-device
 ## Expo host-guide prebuild helper
 
 The optional source-preview [Expo guide plugin](docs/components/EXPO.md) is solely a safe build-time Android asset copier. A real Expo app must author its own guide, match configured Android package and version, and preserve native developer review and Share/Copy. The plugin must reject symlink/traversal escapes, unsafe foreign-file replacements, mismatched AYA-RAS references and ambiguous provenance; update its negative tests with any path/ownership changes. This does not provide a React Native native module, Expo Go support, or proof of compiled APK/recipient behavior.
+
+## Expo typed Android bridge and React Native card
+
+See [Expo native module source-preview](docs/components/EXPO_MODULE.md). Never use a custom Sharesheet, skip native AYA-RAS guide checks, infer assistant activity from `question_opened`/`review_opened`, or substitute Expo Go for a native Android host. The module must call `AyaComponentAction.Help` through an active Android Activity, and its JS wrapper must reject unsupported platform, missing native linkage, unsafe asset paths, malformed input and unknown statuses. The source-only TypeScript tests do not certify an Android APK until a matching staged AYA AAR, native reference, merged manifest and installed UI are verified.
