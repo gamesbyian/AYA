@@ -84,7 +84,10 @@ def check_case(scenario: str, events: list[str]) -> None:
         raise TraceValidationError(scenario + " claimed share failure before request")
     if "review_edited" in events:
         _ordered(events, ("review_opened", "review_edited"), scenario)
-        if "review_approved" in events and events.index("review_edited") > events.index("review_approved"):
+        if "review_approved" in events and any(
+            i > events.index("review_approved") for i, event in enumerate(events)
+            if event == "review_edited"
+        ):
             raise TraceValidationError(scenario + " edit after approval")
     if "review_cancelled" in events and any(
         e in events for e in ("review_approved", "share_requested", "copy_requested",
