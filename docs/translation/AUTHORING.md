@@ -1,5 +1,7 @@
 # Translation Kit v1: host developer authoring guide
 
+**Shared authoring:** follow the [Common Packet Authoring Standard](../packet/AUTHORING_STANDARD.md) and [Translation profile](../packet/PROFILES.md#translation-kit). Use a single source-backed fact registry and independently inventoried host semantics to inform both Help and Translation Kit, rather than keeping contradictory descriptions of destructive actions.
+
 This is the normative procedure for an **app-specific, exact-version** AI-facing translation kit. It extends, but never replaces, the mandatory [AYA reference authoring standard](../reference/INDEX.md). AYA-RAS explains the actual app; this kit describes how an agent may generate a **data file** that its own importer will understand. The kit's existence does not establish that an app supports import.
 
 ## 1. Inventory shipped localizable text
