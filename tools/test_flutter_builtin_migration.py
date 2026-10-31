@@ -27,7 +27,7 @@ class BuiltinKotlinHostTest(unittest.TestCase):
         for rel in ("android/app/src/main", "android/gradle/wrapper", "lib"):
             (self.host / rel).mkdir(parents=True)
         (self.host / "pubspec.yaml").write_text(
-            "name: example\nversion: 1.0.0+1\ndependencies:\n  flutter:\n    sdk: flutter\n"
+            "name: example\nversion: 1.0.0+1\ndependencies:\n  flutter:\n    sdk: flutter\ndev_dependencies:\n  flutter_test:\n    sdk: flutter\n"
         )
         (self.host / "android/settings.gradle.kts").write_text(
             'plugins {\n  id("com.android.application") version "8.11.1" apply false\n}\n'
@@ -57,7 +57,10 @@ class BuiltinKotlinHostTest(unittest.TestCase):
         self.assertNotIn("kotlinOptions", app)
         self.assertIn("kotlin {", app)
         self.assertIn("JvmTarget.JVM_17", app)
-        self.assertIn("path: ..", (self.host / "pubspec.yaml").read_text())
+        pubspec = (self.host / "pubspec.yaml").read_text()
+        self.assertIn("path: ..", pubspec)
+        self.assertEqual(pubspec.count("  aya_flutter:"), 1)
+        self.assertIn("dev_dependencies:", pubspec)
         self.assertEqual((self.host / "android/app/src/main/assets/aya-guide.md").read_text(),
                          "fixture guide")
         props = (self.host / "android/gradle.properties").read_text()
