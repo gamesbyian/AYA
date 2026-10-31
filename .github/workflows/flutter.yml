@@ -37,6 +37,7 @@ jobs:
           gradle-version: '8.9'
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.9'
           channel: stable
           cache: true
       - name: Resolve Flutter source package
@@ -59,66 +60,16 @@ jobs:
           python3 tools/validate_guide.py --strict integrations/flutter/aya_flutter/ci-host/aya-guide.md
           python3 tools/audit_reference.py integrations/flutter/aya_flutter/ci-host/aya-guide.md --inventory integrations/flutter/aya_flutter/ci-host/inventory.json --questions integrations/flutter/aya_flutter/ci-host/questions.json --strict
           python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
-      - name: Generate throwaway Flutter Android host with staged AYA SDK
-        run: |
-          flutter create --project-name aya_flutter_ci_host --platforms android example
-          python3 - <<'PY'
-          from pathlib import Path
-
-          import re
-          from shutil import copyfile
-
-          host = Path("example")
-          pub = host / "pubspec.yaml"
-          data = pub.read_text()
-          # Detect changes in generated host identity rather than accidentally
-          # packaging a stale reference for a different Flutter template.
-          if not re.search(r"(?m)^version:\s*1\.0\.0\+1\s*$", data):
-              raise RuntimeError("CI host version changed; update and re-review aya-guide.md")
-          src = Path("ci-host")
-          target = host / "android" / "app" / "src" / "main" / "assets"
-          target.mkdir(parents=True, exist_ok=True)
-          copyfile(src / "aya-guide.md", target / "aya-guide.md")
-          copyfile(src / "main.dart", host / "lib" / "main.dart")
-          needle = "dependencies:\n"
-          assert needle in data
-          data = data.replace(needle,
-              needle + "  aya_flutter:\n    path: ..\n", 1)
-          pub.write_text(data)
-
-          settings_kts = host / "android" / "settings.gradle.kts"
-          settings_groovy = host / "android" / "settings.gradle"
-          if settings_kts.is_file():
-              with settings_kts.open("a") as f:
-                  f.write("""
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-              repositories {
-                  google()
-                  mavenCentral()
-                  maven { url = uri(rootDir.resolve("../../../../../aya/build/staging-maven")) }
-                  maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
-              }
-          }
-          """)
-          elif settings_groovy.is_file():
-              with settings_groovy.open("a") as f:
-                  f.write("""
-          dependencyResolutionManagement {
-              repositoriesMode = RepositoriesMode.PREFER_SETTINGS
-              repositories {
-                  google()
-                  mavenCentral()
-                  maven { url uri(file("../../../../../aya/build/staging-maven")) }
-                  maven { url uri("https://storage.googleapis.com/download.flutter.io") }
-              }
-          }
-          """)
-          else:
-              raise RuntimeError("Flutter Android host settings missing")
-          PY
+      - name: Generate actual source-package Flutter Android consumer
+        run: flutter create --project-name aya_flutter_ci_host --platforms android example
+      - name: Configure AGP 9 built-in Kotlin and exact versioned APK guide
+        working-directory: .
+        run: python3 integrations/flutter/migration/prepare_host.py configure --host integrations/flutter/aya_flutter/example --source integrations/flutter/aya_flutter
       - name: Compile actual Flutter Android APK with AYA native bridge
         working-directory: integrations/flutter/aya_flutter/example
+        env:
+          AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
+          CI: '1'
         run: |
           flutter pub get
           flutter build apk --debug --no-pub
@@ -131,3 +82,18 @@ jobs:
             --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk \
             --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md \
             --aapt "$AAPT"
+          python3 tools/verify_android_adapter_apk.py --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver
+      - name: Confirm Flutter retained AGP 9 built-in Kotlin after build
+        working-directory: .
+        run: |
+          HOST=integrations/flutter/aya_flutter/example/android
+          grep -qx 'android.builtInKotlin=true' "$HOST/gradle.properties"
+          grep -qx 'android.newDsl=false' "$HOST/gradle.properties"
+          if grep -Eq '^[[:space:]]*id\\("(kotlin-android|org.jetbrains.kotlin.android)"\\)' "$HOST/app/build.gradle.kts"; then
+            echo 'Legacy Kotlin plugin reintroduced into AGP 9 application' >&2
+            exit 1
+          fi
+          if grep -Eq "apply plugin: ['\\\"](kotlin-android|org.jetbrains.kotlin.android)['\\\"]" integrations/flutter/aya_flutter/android/build.gradle; then
+            echo 'Legacy Kotlin plugin reintroduced into source package' >&2
+            exit 1
+          fi
