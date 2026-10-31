@@ -41,7 +41,7 @@ Compile a full profile or select stable IDs with `--select`; the compiler recurs
 
 The default export budget is 2 MiB, matching AYA's existing one-file prototype ceiling, **not** a guarantee of recipient context capacity. Measure actual provider ingestion. If a packet exceeds budget, shrink scope explicitly and report omissions, rather than silently truncating, summarizing away a warning or assuming the assistant can fetch another file.
 
-For a runtime-host integration, assemble the generated module fragment into the same version-correct AYA-RAS guide via the documented modular guide builder, or use the module's verified dedicated kit asset. AYA does not yet automatically select fact subsets at runtime. A host must not substitute an unvalidated newly generated packet for a known-good installed guide.
+For an APK-bundled host, use `tools/build_reference.py --packet-source ... --packet-inventory ... --packet-profiles ... --packet-profile help` to assemble the typed, version-exact fragment into the 12-section AYA-RAS guide. The builder rejects app ID, exact-version or source-revision mismatches and checks assembled size and guide structure. For other modules, use their dedicated reviewed kit or verified task context as appropriate. AYA does not yet automatically select fact subsets at runtime. A host must not substitute an unvalidated newly generated packet for a known-good installed guide.
 
 ## 6. Examples and counterexamples
 
