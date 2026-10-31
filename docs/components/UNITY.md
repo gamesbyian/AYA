@@ -1,6 +1,6 @@
 # Unity Android AYA Help Bridge (source preview)
 
-**Status:** An optional Android Kotlin AAR, an unpublished source-only Unity Package Manager folder, a host-configurable `MonoBehaviour` button/action and a custom Inspector. A native Gradle build is a CI gate. No Unity Editor import, Unity game APK export, accessibility/device testing, or third-party assistant ingestion is yet verified. This is **not** a marketplace release.
+**Status:** An optional Android Kotlin AAR, an unpublished source-only Unity Package Manager folder, a host-configurable `MonoBehaviour` button/action and a custom Inspector. A native Gradle build and managed C# compilation against *explicit test-only Unity API stubs* are CI gates. No Unity Editor import, Unity game APK export, accessibility/device testing, or third-party assistant ingestion is yet verified. This is **not** a marketplace release.
 
 ## What a Unity developer can add
 
@@ -26,7 +26,7 @@ Unity's official [C# to Java plug-in documentation](https://docs.unity.cn/Manual
 
 ## Release acceptance still required
 
-1. First-party Kotlin/Gradle AAR build; inspect staged artifacts and Java-visible `AyaUnityBridge.openHelp` method. Static C# contract tests are supplemental, **not** a Unity C# compilation claim.
+1. First-party Kotlin/Gradle AAR build; inspect staged artifacts and Java-visible `AyaUnityBridge.openHelp` method. C# source builds in two conditional-compilation lanes against tiny stand-in Unity API signatures as a syntax/contract smoke. This **does not** establish actual Unity Editor assembly compatibility or exported-player behavior.
 2. Test an actual Unity 2022.3+ project with this UPM source folder and the exact matched AARs, AndroidX dependencies and host guide. Check both Mono and IL2CPP; Unity Player/Activity APIs may differ by Unity engine version.
 3. Export and inspect the APK's exact guide bytes, Android installed identity/version, scoped FileProvider/receiver, and compiled bridge class; reject stale guide builds before opening local review.
 4. Exercise real Android Activity lifecycle, cancellation, Copy fallback, multiple instances, duplicate taps, Unity main-thread callback, no recipient, IME, gamepad, 200% text, TalkBack and narrow portrait layouts.

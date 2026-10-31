@@ -6,6 +6,7 @@ on:
       - 'aya-unity/**'
       - 'integrations/unity/**'
       - 'tools/test_unity_adapter.py'
+      - 'tools/unity-managed-syntax/**'
       - '.github/workflows/unity.yml'
       - 'settings.gradle.kts'
       - 'aya/**'
@@ -19,6 +20,22 @@ on:
       - 'aya/**'
 
 jobs:
+  managed-csharp-source-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile and run managed API with testing-only Unity signatures (Editor lane)
+        run: dotnet run --project tools/unity-managed-syntax/SourceSmoke.csproj --configuration Release -p:DefineConstants=UNITY_EDITOR
+      - name: Compile and run managed API with testing-only Unity signatures (Android lane)
+        run: dotnet run --project tools/unity-managed-syntax/SourceSmoke.csproj --configuration Release -p:DefineConstants=UNITY_ANDROID
+      - name: Document limitation
+        run: echo 'These stubs verify C# syntax, basic signatures and local rejection; they are NOT actual Unity engine assemblies or editor/export acceptance.'
+
   android-native-bridge:
     runs-on: ubuntu-latest
     permissions:
