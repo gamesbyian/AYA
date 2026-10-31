@@ -8,6 +8,8 @@
 
 **For Android developers:** AYA is a reusable Kotlin/Android SDK and a documented design pattern for bringing your own AI (BYOAI) to in-app help, AI-powered customer support handoffs, app-aware troubleshooting, creative requests, and optional user-generated translation packs. It requires **no AI API key, backend, paid model integration, or reply tracking**.
 
+**New to app development?** Start with the [AYA builder quickstart](docs/components/START_HERE.md), which explains where a card or workflow action belongs in Android Studio, Compose, Godot, Flutter and FlutterFlow, including which integrations still need manual setup.
+
 [**Android integration guide**](docs/INTEGRATION.md) · [**Quick explanation and use cases**](docs/DISCOVERABILITY.md) · [**Reference packet authoring**](docs/reference/INDEX.md) · [**Privacy and security**](docs/SECURITY.md)
 
 **Help, Creative, Translation Kit, and optional Filesystem Automation Handoffs.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
