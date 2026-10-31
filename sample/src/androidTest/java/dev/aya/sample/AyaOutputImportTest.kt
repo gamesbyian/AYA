@@ -93,6 +93,15 @@ class AyaOutputImportTest {
         assertEquals(digest, file.sha256)
     }
 
+    @Test fun oversizedDirectArtifactIsRejectedBeforeCopying() {
+        try {
+            AyaImportFile.fromBytes(ByteArray(AyaImportPicker.HARD_MAX_BYTES + 1))
+            fail("Expected a hard size bound")
+        } catch (_: IllegalArgumentException) {
+            // Direct callers cannot bypass the capped in-memory snapshot contract.
+        }
+    }
+
     @Test fun pickerUsesSafAndRejectsUnselectedFilePaths() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val intent = AyaImportPicker.openDocumentIntent(listOf("application/json", "text/plain"))
