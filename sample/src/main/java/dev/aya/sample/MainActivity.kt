@@ -5,14 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
-import android.text.InputType
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
-import dev.aya.android.Aya
 import dev.aya.android.AyaCardView
-import dev.aya.android.AyaBundledLaunchResult
 
 /** First-party consumer of the version-guarded AYA library. No user data is read. */
 class MainActivity : Activity() {
@@ -59,6 +55,11 @@ class MainActivity : Activity() {
             contentDescription = "Open artwork generation demo"
             setOnClickListener { startActivity(Intent(this@MainActivity, ArtworkActivity::class.java)) }
         })
-        setContentView(column)
+        // The host scrolls when large fonts or the keyboard exceed the viewport;
+        // the AYA card itself does not introduce a nested scroll container.
+        setContentView(ScrollView(this).apply {
+            isFillViewport = true
+            addView(column)
+        })
     }
 }
