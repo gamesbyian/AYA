@@ -42,6 +42,21 @@ void main() {
     expect(response.rejected, isTrue);
   });
 
+  testWidgets('missing host output guidance never exposes an AYA button',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: AyaHelpCard(
+          description: 'Help',
+          attachmentDisclosure: 'A guide may be offered.',
+          outputInstructions: '',
+        ),
+      ),
+    ));
+    expect(find.textContaining('AYA is unavailable'), findsOneWidget);
+    expect(find.text('Ask Your Agent'), findsNothing);
+  });
+
   testWidgets('host card discloses output path and only sends on user tap',
       (tester) async {
     var calls = 0;

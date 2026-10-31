@@ -82,7 +82,7 @@ class AyaHelpCard extends StatefulWidget {
     this.initialQuestion = '',
     this.restorationId,
     this.onLocalResult,
-  }) : assert(outputInstructions.length > 0);
+  });
 
   final String title;
   final String description;
