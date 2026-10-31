@@ -4,7 +4,7 @@
 
 ## API and visible card
 
-The host can call `openAyaHelp({question, screenName, guideAsset, askQuestion})`, which returns only `question_opened`, `review_opened` or `rejected`. These are **local** results and do not indicate that an AI recipient accepted any content. The native Kotlin `AyaExpoModule` invokes the existing exact-version guarded `AyaComponentAction.Help` on the foreground Android Activity. No alternative share transport, AI provider, reply callback, hidden data collection or importer exists.
+The host can call `openAyaHelp({question, screenName, guideAsset, askQuestion})`. A headless call with no `question` argument defaults to the native AYA question composer; when the host supplies `question` (even an intentionally empty host-owned field), it defaults to direct editable review to avoid duplicate question boxes. `askQuestion` explicitly overrides the default. The action returns only `question_opened`, `review_opened` or `rejected`. These are **local** results and do not indicate that an AI recipient accepted any content. The native Kotlin `AyaExpoModule` invokes the existing exact-version guarded `AyaComponentAction.Help` on the foreground Android Activity. No alternative share transport, AI provider, reply callback, hidden data collection or importer exists.
 
 ```tsx
 import { AyaHelpCard, openAyaHelp } from 'aya-expo';
