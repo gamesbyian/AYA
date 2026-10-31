@@ -1,0 +1,67 @@
+{
+  "schema": "aya-interaction-trace/v1",
+  "host": {
+    "app_id": "org.example.lantern",
+    "app_version": "1.2.3",
+    "source_revision": "lantern-123ab",
+    "platform": "android"
+  },
+  "cases": [
+    {
+      "scenario": "review_share",
+      "events": [
+        "reference_validated",
+        "question_opened",
+        "review_opened",
+        "review_edited",
+        "review_approved",
+        "share_requested",
+        "chooser_opened"
+      ]
+    },
+    {
+      "scenario": "review_copy",
+      "events": [
+        "reference_validated",
+        "review_opened",
+        "review_approved",
+        "copy_requested",
+        "copy_succeeded"
+      ]
+    },
+    {
+      "scenario": "cancel",
+      "events": [
+        "reference_validated",
+        "review_opened",
+        "review_cancelled"
+      ]
+    },
+    {
+      "scenario": "version_mismatch",
+      "events": [
+        "reference_rejected",
+        "local_rejected"
+      ]
+    },
+    {
+      "scenario": "no_receiver",
+      "events": [
+        "reference_validated",
+        "review_opened",
+        "review_approved",
+        "share_requested",
+        "share_unavailable",
+        "copy_requested",
+        "copy_succeeded"
+      ]
+    },
+    {
+      "scenario": "no_activity",
+      "events": [
+        "activity_detached",
+        "local_rejected"
+      ]
+    }
+  ]
+}
