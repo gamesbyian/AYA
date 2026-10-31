@@ -1,8 +1,28 @@
 name: Godot Android v2 adapter build
 on:
-  pull_request:
   push:
     branches: [main]
+    paths:
+      - 'aya-godot/**'
+      - 'integrations/godot/**'
+      - 'aya/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/godot.yml'
+  pull_request:
+    paths:
+      - 'aya-godot/**'
+      - 'integrations/godot/**'
+      - 'aya/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/godot.yml'
+
+concurrency:
+  group: godot-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   godot-android:
