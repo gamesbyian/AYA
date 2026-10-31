@@ -26,7 +26,7 @@ class AyaFlutter {
     String question = '',
     bool askQuestion = false,
   }) async {
-    if (defaultTargetPlatform != TargetPlatform.android) {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       return const AyaLocalResult(AyaLocalStatus.rejected,
           reason: 'AYA handoff is available in Android builds only.');
     }
@@ -137,6 +137,14 @@ class _AyaHelpCardState extends State<AyaHelpCard> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.description.trim().isEmpty ||
+        widget.attachmentDisclosure.trim().isEmpty ||
+        widget.outputInstructions.trim().isEmpty) {
+      return const Text(
+        'AYA is unavailable: this app has not configured its help disclosure '
+        'and output-use instructions.',
+      );
+    }
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
