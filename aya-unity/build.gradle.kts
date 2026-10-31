@@ -22,10 +22,22 @@ dependencies {
 tasks.register<Copy>("stageUnityPlugin") {
     dependsOn("assembleDebug", "assembleRelease", ":aya:assembleDebug", ":aya:assembleRelease")
     into(layout.buildDirectory.dir("unity-plugin/Plugins/Android"))
+    // Keep build variants physically separate: copying all four AARs into
+    // one Unity Assets/Plugins/Android folder would duplicate the same classes.
     from(layout.buildDirectory.dir("outputs/aar")) {
-        include("aya-unity-debug.aar", "aya-unity-release.aar")
+        include("aya-unity-debug.aar")
+        into("debug")
     }
     from(project(":aya").layout.buildDirectory.dir("outputs/aar")) {
-        include("aya-debug.aar", "aya-release.aar")
+        include("aya-debug.aar")
+        into("debug")
+    }
+    from(layout.buildDirectory.dir("outputs/aar")) {
+        include("aya-unity-release.aar")
+        into("release")
+    }
+    from(project(":aya").layout.buildDirectory.dir("outputs/aar")) {
+        include("aya-release.aar")
+        into("release")
     }
 }
