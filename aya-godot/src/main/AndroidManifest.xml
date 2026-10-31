@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <meta-data
+            android:name="org.godotengine.plugin.v2.AYA"
+            android:value="dev.aya.godot.AyaGodotPlugin" />
+    </application>
+</manifest>
