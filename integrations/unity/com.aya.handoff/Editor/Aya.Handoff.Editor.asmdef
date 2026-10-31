@@ -1,0 +1,13 @@
+{
+  "name": "Aya.Handoff.Editor",
+  "rootNamespace": "Aya.Handoff.Editor",
+  "references": ["Aya.Handoff"],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
