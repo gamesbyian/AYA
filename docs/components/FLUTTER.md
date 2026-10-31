@@ -15,6 +15,12 @@ AyaFlutter.openHelp(guideAsset, screenName, question, askQuestion) is the headle
 
 The Kotlin AyaFlutterPlugin implements FlutterPlugin and ActivityAware, retaining activity only while attached, with the engine-scoped platform channel. It delegates to AyaComponentAction.Help, never a weaker manual API or custom share transport.
 
+## Flutter 3.47 / Android Gradle 9 migration experiment
+
+An independent, **non-shipping** [AGP 9 built-in Kotlin migration trial](../../integrations/flutter/migration/README.md) exists alongside this legacy source package. It copies the same Dart/Kotlin bridge into a disposable CI consumer, substitutes a candidate plugin Gradle script without applying KGP, and configures a real Flutter 3.47.9 Android host for AGP 9.0.1, Gradle 9.1.0 and `android.builtInKotlin=true`. The host still uses its independently verified exact-version AYA-RAS guide, staged SDK and APK checks.
+
+The legacy `aya_flutter` package has **not** been retargeted or version-bumped. Flutter's official migration minimum (3.44/Dart 3.12) would exclude some previously declared consumers; only a separately reviewed new source-preview version should make that compatibility change. Until the trial and baseline both pass, do not advertise AGP 9 built-in Kotlin compatibility. See [Flutter plugin-author guidance](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors).
+
 ## Native Android dependency is a release blocker
 
 The Android package currently requests dev.aya:aya-android:0.1.0-SNAPSHOT, which is **not a publicly available Maven dependency**. This repository can stage its AAR and POM using Gradle, but an external Flutter host needs an explicit, compatible repository for that staged publication. Therefore this source preview is NOT directly installable as a working FlutterFlow custom dependency. No build should silently omit the real native SDK or pretend it shipped.
