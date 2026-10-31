@@ -22,7 +22,7 @@ Deliver:
 ## Phase 1: mature Android drop-in UX (P0/P1)
 
 Deliver:
-- Optional `aya-compose` artifact providing `AyaCard` and `rememberAyaLauncher` backed by the core SDK. Verify Compose 2.x and activity lifecycle; preserve a non-Compose core.
+- Optional `aya-compose` artifact providing `AyaCard` and `rememberAyaLauncher` backed by the core SDK. Initial module and real sample are on the Compose development branch; CI/emulator/release acceptance is pending. Preserve a non-Compose core.
 - Configurable existing-button action and Standard/Compact card templates; optional menu icon, but **no intrusive overlay permission**.
 - Android Studio installation examples for Gradle/Maven and source module; reusable project wizard snippet; package via tagged builds/artifact verification.
 - Host-specific output-use/import guidance, honest attachment modes and explicit fallback. Reconcile the separately developed output-return PR before changes to shared UI.

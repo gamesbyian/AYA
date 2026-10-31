@@ -38,6 +38,10 @@ Instead of leaving the app, switching to an assistant, explaining which app and 
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
+## Optional Jetpack Compose drop-in
+
+An optional [AYA Compose adapter](docs/components/COMPOSE.md) is being implemented, supplying an embedded help card and a guarded action launcher for existing Compose buttons. It keeps Compose dependencies out of the core Android library. A matching sample Activity exercises both features. **This is source code under review, not a published marketplace plugin.**
+
 ## Drop-in components for visual builders and coding agents
 
 AYA is intended to become a **drop-in part of development workflows**: a configurable Android card, a headless action/node, and an optional adapter for the app-building tools developers already use. You do not need to adopt AYA's code to adopt the interaction convention.
