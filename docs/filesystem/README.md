@@ -41,6 +41,30 @@ when (val result = Aya.launchFilesystemBundled(
 
 Use the [AYA Card UI Standard](../CARD_UI_STANDARD.md) for a contextual, outlined host-themed card. A generic `AyaCardView` currently launches the ordinary Help route. A filesystem automation card must call `launchFilesystemBundled`, disclose the extra kit and optional snapshot and preserve the same full editable review. Do not overwrite a Help card's expectations.
 
+## Optional typed snapshot builder
+
+AYA supplies `AyaFilesystemSnapshotBuilder.build(input)` to serialize **already collected, sanitized host metadata** into the standardized JSON; it does not scan or query any storage. The builder rejects impossible complete-with-errors states, silent truncation, negative counts and oversized or invalid entry sets. Call it only after host scanning and disclosure choices, then display the resulting text for user approval:
+
+```kotlin
+val json = AyaFilesystemSnapshotBuilder.build(
+    AyaFilesystemSnapshotInput(
+        appId = packageName, appVersion = installedVersion,
+        generatedAtUtc = capturedUtc,
+        backend = "sftp", scopeRoot = approvedRedactedRoot,
+        recursive = true, symlinks = "not_followed",
+        status = AyaFilesystemScanStatus.PARTIAL,
+        directoriesVisited = scannedDirectoryCount,
+        filesSeen = null, directoriesSeen = scannedDirectoryCount.toLong(),
+        matchingFilesSeen = matchingFileCount,
+        entries = approvedRelevantEntries,
+        errors = scanFailures
+    )
+)
+// Let the user review/redact or decline this JSON before passing it as snapshotJson.
+```
+
+The values in this sketch are **host-provided** and must represent the real scan and its uncertainty; no backend is scanned by AYA. For enormous trees, calculate aggregates in the host and deliberately send selected entries only, marking truncation with a reason.
+
 ## Contract boundaries
 
 - **Build-time static:** the host-specific kit documents the exact released parser schema, supported operators, backend variants, exception policies and actual import steps. Structural AYA verification does not certify that documentation.
