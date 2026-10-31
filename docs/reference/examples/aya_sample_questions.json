@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "6",
+  "guide_revision": "7",
   "cases": [
     {
       "id": "Q-001",
@@ -264,6 +264,20 @@
       "forbidden_claims": [
         "The card immediately uploads your files",
         "The recipient is guaranteed to read the attachment"
+      ]
+    },
+    {
+      "id": "Q-020",
+      "question": "After asking my agent for help, how do I use the answer in this sample?",
+      "support_status": "answerable",
+      "risk": "low",
+      "evidence_ids": [
+        "TASK-003",
+        "F-002"
+      ],
+      "expected_behavior": "Read the agent answer and follow its advice manually. The Home AYA card states the return/use instructions; this sample does not import or automatically apply help responses. Artwork has a separate saved-image picker.",
+      "forbidden_claims": [
+        "AYA automatically imports the answer into the sample"
       ]
     }
   ]
