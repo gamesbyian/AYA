@@ -38,6 +38,8 @@ class AyaCardView(
     outputInstructions: String,
     cornerRadiusDp: Float = 12f,
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
+    questionHint: String = "What would you like help with? (optional)",
+    private val onAskRequested: ((String) -> Unit)? = null,
     private val onImportRequested: (() -> Unit)? = null,
     private val onRejected: (String) -> Unit = {
         Toast.makeText(context, "AYA unavailable: $it", Toast.LENGTH_LONG).show()
@@ -102,7 +104,7 @@ class AyaCardView(
         addView(returnDetails)
 
         questionInput.apply {
-            hint = "What would you like help with? (optional)"
+            hint = questionHint
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             minLines = if (compact) 1 else 2
             setHorizontallyScrolling(false)
@@ -118,14 +120,21 @@ class AyaCardView(
             contentDescription = "Review your question and app reference before sharing"
             minHeight = dp(48)
             setOnClickListener {
-                val result = Aya.launchBundled(
-                    activity = activity,
-                    guideAsset = guideAsset,
-                    screenName = screenName,
-                    question = questionInput.text.toString(),
-                    askQuestion = false
-                )
-                if (result is AyaBundledLaunchResult.Rejected) onRejected(result.reason.toString())
+                val message = questionInput.text.toString()
+                if (onAskRequested != null) {
+                    // Host must use its actual version-guarded creative, translation
+                    // or structured-artifact API and surface any rejection.
+                    onAskRequested.invoke(message)
+                } else {
+                    val result = Aya.launchBundled(
+                        activity = activity,
+                        guideAsset = guideAsset,
+                        screenName = screenName,
+                        question = message,
+                        askQuestion = false
+                    )
+                    if (result is AyaBundledLaunchResult.Rejected) onRejected(result.reason.toString())
+                }
             }
         }, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
             topMargin = dp(if (compact) 4 else 8)
