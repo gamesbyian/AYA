@@ -43,7 +43,7 @@ def validate_aar(aar: Path, artifact: str) -> None:
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate AAR entries: {aar}")
             if any(
-                name.startswith("/") or "\\\\" in name or
+                name.startswith("/") or chr(92) in name or
                 ".." in name.split("/") or "" in name.split("/")[:-1]
                 for name in names
             ):
