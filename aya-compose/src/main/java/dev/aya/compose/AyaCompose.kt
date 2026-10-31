@@ -41,9 +41,9 @@ fun AyaCard(
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
     onRejected: ((String) -> Unit)? = null
 ) {
-    // Compose is the sole state owner. AndroidView may be reconstructed on host
-    // state or configuration changes; the user's unsent question is preserved.
-    var draft by rememberSaveable { mutableStateOf("") }
+    // Compose is the sole state owner. Preserve a draft during recreation but
+    // never carry a private question into a different reference/screen scope.
+    var draft by rememberSaveable(guideAsset, screenName) { mutableStateOf("") }
     val latestRejection = rememberUpdatedState(onRejected)
 
     key(activity, guideAsset, screenName, title, description, densityMode) {
