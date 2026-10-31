@@ -52,6 +52,12 @@ jobs:
         run: |
           python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version "$VERSION" --checksum-output aya-staging-sha256.txt
           gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version="$VERSION" --no-daemon --refresh-dependencies
+      - name: Bind preview checksums to the actual checked-out source revision
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 -m unittest discover -s tools -p 'test_write_maven_preview_manifest.py'
+          python3 tools/write_maven_preview_manifest.py --root aya/build/staging-maven --checksums aya-staging-sha256.txt --version "$VERSION" --source-commit "$(git rev-parse HEAD)" --output aya-preview-manifest.json
       - name: Upload unpublished versioned Maven repository and checksums
         uses: actions/upload-artifact@v4
         with:
@@ -59,4 +65,5 @@ jobs:
           path: |
             aya/build/staging-maven/
             aya-staging-sha256.txt
+            aya-preview-manifest.json
           if-no-files-found: error
