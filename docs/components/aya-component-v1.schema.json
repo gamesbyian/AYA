@@ -25,7 +25,7 @@
     },
     "guideAsset": {
       "type": "string",
-      "pattern": "^(?!/)(?!.*\\\\.\\\\.)(?!.*\\\\\\\\)[A-Za-z0-9_./-]+\\\\.md$",
+      "pattern": "^(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\\.md$",
       "maxLength": 160
     },
     "screenName": {

@@ -25,6 +25,10 @@ jobs:
           echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
           "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+      - name: Compile a generated AYA component in the real Android sample
+        run: |
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComponent.kt
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedAction.kt
       - name: Unit tests and module-based consumer
         run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :sample:assembleDebug --no-daemon
       - name: Produce Maven-style library distribution

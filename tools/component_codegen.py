@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.-]{1,79}$")
-ASSET = re.compile(r"^[A-Za-z0-9_./-]+\.md$")
+ASSET = re.compile(r"^(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.md$")
 ROOT_KEYS = {"component", "id", "operation", "guideAsset", "screenName", "presentation"}
 CARD_KEYS = {"kind", "title", "description", "attachmentDisclosure", "outputInstructions", "density"}
 ACTION_KEYS = {"kind", "askQuestion"}

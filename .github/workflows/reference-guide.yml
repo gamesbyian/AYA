@@ -52,5 +52,9 @@ jobs:
           python3 tools/validate_understanding.py \
             docs/understanding/examples/parcelpad-understanding.json \
             --decisions docs/understanding/examples/parcelpad-decisions.json
+      - name: Validate drop-in help component manifests
+        run: |
+          python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --check
+          python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --check
       - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'

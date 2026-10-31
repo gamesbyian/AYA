@@ -54,6 +54,22 @@ class ComponentCodegenTest(unittest.TestCase):
             with self.subTest(asset=asset), self.assertRaises(ComponentError):
                 validate(m)
 
+    def test_schema_asset_pattern_matches_generator(self):
+        import re
+        schema = json.loads(
+            (ROOT / "docs/components/aya-component-v1.schema.json").read_text(encoding="utf-8")
+        )
+        pattern = re.compile(schema["properties"]["guideAsset"]["pattern"])
+        for good in ("aya-guide.md", "references/aya-help.md"):
+            self.assertIsNotNone(pattern.fullmatch(good))
+            self.manifest["guideAsset"] = good
+            validate(self.manifest)
+        for bad in ("../guide.md", "a//guide.md", "a\\\\file.md", "a.foo.md"):
+            self.assertIsNone(pattern.fullmatch(bad))
+            self.manifest["guideAsset"] = bad
+            with self.assertRaises(ComponentError):
+                validate(self.manifest)
+
     def test_mandatory_output_guidance(self):
         self.manifest["presentation"]["outputInstructions"] = "  "
         with self.assertRaises(ComponentError):

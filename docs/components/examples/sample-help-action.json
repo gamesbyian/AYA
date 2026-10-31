@@ -1,0 +1,11 @@
+{
+  "component": "aya-component/v1",
+  "id": "sample.help.action",
+  "operation": "help",
+  "guideAsset": "aya-guide.md",
+  "screenName": "Home",
+  "presentation": {
+    "kind": "action",
+    "askQuestion": true
+  }
+}
