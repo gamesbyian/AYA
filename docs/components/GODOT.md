@@ -33,8 +33,8 @@ This prototype does not silently edit an unknown Godot build template or invent 
 ## Acceptance before release
 
 - Android Gradle module compiles and staged addon contains all four debug/release AARs and editor scripts.
-- Headless Godot 4.5.1 plugin parser and scene smoke checks include the multiline question editor, Unicode/newline draft preservation, missing output-use instructions, and non-Android rejection. Actual result depends on current CI;
-- Manual editor QA still required: manual GUI editor import on 4.5 and 4.6 still required: preview and inspector render, GDScript parses, no editor handoff, Android export registration loads.
+- Headless Godot 4.5.1 parser and scene smoke must verify multiline question input, Unicode/newline draft preservation, missing output-use instructions, and non-Android rejection (new checks pending CI).
+- Manual GUI editor import is still required for Godot 4.5 and 4.6: preview and inspector should render, scripts should parse, editor should not initiate a handoff, and Android export registration should load.
 - Exported APK has the correct AYA-RAS guide as a raw APK asset and matches installed app version. A missing/incorrect guide is rejected without fallback.
 - Multi-card request ID isolation, dismissal, rotation, unavailable engine singleton and no share-target behaviour are tested without claiming AI ingestion.
 - Large fonts, gamepad focus, screen readers, narrow phones, and IME behaviour satisfy the host's UX/accessibility requirements.
