@@ -1,6 +1,6 @@
 # Flutter and FlutterFlow AYA integration: source preview
 
-Status: an Android-only Flutter plugin, Dart help card/headless API and Kotlin ActivityAware bridge are under independent CI in the AYA repository. Not on pub.dev or a FlutterFlow marketplace, and not yet proven by a complete Flutter Android APK export.
+Status (2026-10-31): the Android-only Flutter plugin, Dart card/action and Kotlin ActivityAware bridge have merged. Flutter analyze, widget/channel tests, and complete Flutter Android APK compilation with a staged native AAR passed [CI run 41233862629](https://github.com/gamesbyian/AYA/actions/runs/41233862629). Still not distributed through pub.dev or a public Maven repository; host guide/device/editor acceptance remains outstanding.
 
 References:
 - Flutter plugin authoring: https://docs.flutter.dev/packages-and-plugins/developing-packages

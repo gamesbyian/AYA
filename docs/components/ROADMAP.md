@@ -1,6 +1,6 @@
 # Drop-in integration program: detailed build and release plan
 
-**Owner intent:** reduce integration to an IDE dependency, visual component, logical node or one coding-agent instruction; preserve AYA as an Unlicensed convention rather than a compulsory service.
+**Owner intent:** reduce integration to an IDE dependency, visual component, logical node or one coding-agent instruction; preserve AYA as an Unlicensed convention rather than a compulsory service. Refer to [the status ledger](STATUS.md) for merged source, CI verification and remaining release gates; earlier phase descriptions are historical.
 
 ## Evidence/status legend
 - **Existing:** verified in inspected main source, but any Android/recipient success still requires device acceptance.
@@ -23,7 +23,7 @@ Deliver:
 
 Deliver:
 - Optional `aya-compose` artifact providing `AyaCard` and `rememberAyaLauncher` backed by the core SDK. Initial module and sample implemented; CI and cross-device accessibility acceptance are separate gates. Preserve a non-Compose core.
-- XML-inflatable layout-editor View adapter added in dependent PR #24 (CI pending), with stable question view ID, required output instructions and fail-closed configuration.
+- XML-inflatable layout-editor View adapter merged in PR #24 (CI passed), with stable question view ID, required output instructions and fail-closed configuration.
 - Configurable existing-button action and Standard/Compact card templates; optional menu icon, but **no intrusive overlay permission**.
 - Android Studio installation examples for Gradle/Maven and source module; reusable project wizard snippet; package via tagged builds/artifact verification.
 - Host-specific output-use/import guidance, honest attachment modes and explicit fallback. Reconcile the separately developed output-return PR before changes to shared UI.
@@ -34,8 +34,8 @@ Deliver:
 
 ## Phase 2: Flutter and FlutterFlow (P1)
 
-- Build a first-party Flutter Android plugin, strong-typed Dart API, Dart widget and headless call. Map to `AyaComponentAction` and forward *local* status only.
-- FlutterFlow-specific custom widget and custom action templates; prove plugin import, tree shaking, Android manifest merge, minSdk, rebuild and review UX on exported builds. If marketplace distribution is unavailable, publish a reproducible custom-code import path with that limitation stated.
+- Flutter Android plugin, typed Dart API, widget and headless call merged in PR #29; real Android APK compilation with staged AAR passed CI. Public distribution and physical-device acceptance remain outstanding. Map to `AyaComponentAction` and forward *local* status only.
+- FlutterFlow Custom Widget and Action body templates merged in PR #32. Actual editor import/export, native artifact resolution, manifest merge and real Android device acceptance remain outstanding. If marketplace distribution is unavailable, publish a reproducible custom-code import path with that limitation stated.
 - Use static asset build or an explicit native Android asset packaging step; validate guide identity against the **actual Android application ID and installed versionName**, not Flutter pubspec version guesses.
 - Test lifecycle: rotation, multi-window, Flutter navigation, Android chooser cancellation, duplicate taps, process death.
 
