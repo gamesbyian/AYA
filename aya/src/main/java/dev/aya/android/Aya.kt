@@ -383,6 +383,9 @@ object Aya {
             hint = if (request.translationTask != null) "Translation Kit and request to share"
                 else if (request.creativeTask == null) "Help context to share"
                 else "Creative request to share"
+            contentDescription = if (request.translationTask != null) "Reviewed AYA translation kit"
+                else if (request.creativeTask == null) "Reviewed AYA help document"
+                else "Reviewed AYA creative document"
             gravity = Gravity.TOP or Gravity.START
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             isSingleLine = false
