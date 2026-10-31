@@ -1,65 +1,62 @@
-# Structured Artifact Handoff · JSON recipe profile
+# Structured Artifact Handoff · portable schema-driven output profile
 
-**Shared authoring:** use the [Common Packet Authoring Standard](packet/AUTHORING_STANDARD.md) and [Structured profile](packet/PROFILES.md#structured-artifact) to derive schema, field semantics, dependencies and examples from actual importers. A compiled packet is build-time reference material, not a new implemented Android structured-task API.
+**Shared authoring:** use the [Common Packet Authoring Standard](packet/AUTHORING_STANDARD.md), [Structured profile](packet/PROFILES.md#structured-artifact) and [Module Portability Standard](MODULE_PORTABILITY.md). The host supplies its own verified schema, field semantics, dependencies, actual import route and version constraints. AYA's profile does not know any host-specific recipe format.
 
-**Status 2026-10-30:** browser/PWA implementation reference exists in the companion `gamesbyian/wallgen` branch `feature/aya-recipe-handoff-20261030`; AYA's Android library **does not yet expose a generic structured-artifact Kotlin entry point**. Do not claim native Android recipient compatibility. This document specifies the portable handoff profile and its future typed SDK extension.
+**Implementation status:** this document specifies the portable handoff contract and a future generic Android typed entry point. The Android library **does not yet provide** a dedicated `AyaStructuredTask` launcher. Browser/PWA developers may implement the pattern using their platform's existing share/copy/save APIs; no particular browser integration is asserted or supported by this document. Neither route guarantees third-party assistant file ingestion.
 
-## Purpose
+## Purpose and suitable hosts
 
-Some hosts need a model to generate a structured file, **not** a bitmap. For example, ROYGBIV needs a canonical, importable `.json` design recipe based on a user brief and a version-aware description of controls, dependencies, ranges and effect interactions. AYA should provide the user's chosen agent with that reference plus the request, then stop.
+Any app that imports machine-readable files can give a user its verified file contract so a chosen agent can prepare a compatible artifact. Examples include procedural graphics presets, animation timelines, editor layouts, chart configurations, scene descriptions, audio-effect presets, and application configuration files. These are **feature categories**, not bundled products or adapters. Every host defines its own actual format and semantics.
 
-Existing commitments remain immutable:
-- user-supplied agent, no inference, billing, cloud account or new backend;
-- explicit preview, consent and one-way transfer;
-- no return callback, assistant output tracking or answer grading; **user-invoked file import** may be offered by the host, separately from agent handoff;
-- host owns final import validation, transaction, rendering and Undo;
-- recipient attachment acceptance depends on the target app.
+A typical flow is: host feature → optional AYA card → editable brief and approved reference → user chooses their assistant or Copy → assistant proposes data → user saves file → user explicitly returns to the host importer → host validates, previews and applies with appropriate confirmation. AYA ends at the controlled handoff.
 
-## Portable structured-artifact task contract (future Kotlin API)
+The host must have an operational, safe importer. If it cannot parse, validate or apply the requested output, it must not advertise that workflow merely because the agent could produce JSON. An AYA-generated packet is documentation, not an import implementation.
 
-A future `AyaStructuredTask` can hold:
-- `artifactRole`, `extension`, exact `mimeType` and `schemaVersion`, verified against the receiving host's ordinary picker;
-- `importInstructions` containing the real manual import flow;
-- `prompt` (user editable) and bounded user-reviewed `hostContext`;
-- `reference` (version-matched, source-derived guide), including a schema, defaults, preconditions, valid examples, coupled ranges, and documented unknowns;
-- optional `currentArtifact` with an explicit, unchecked-by-default, user-controlled inclusion toggle.
+## Portable structured task contract (future SDK)
 
-Validate size and identity before sharing, keep the user's approved final text and attachment consistent, and expose Copy/Save fallbacks. Structured-artifact support must **not** be implemented by misusing `AyaImageRequirements` or claiming the assistant will create an image.
+A future `AyaStructuredTask` could carry:
+- `artifactRole`, file extension, exact MIME type and `schemaVersion`, taken from the shipped host importer;
+- truthful `importInstructions` and expected apply/preview/undo behavior;
+- a user-editable `prompt` and bounded, user-reviewed `hostContext`;
+- a source-derived version-matched reference defining top-level shape, typed fields, defaults, bounds, conditional fields, interaction rules, expected output and negative examples;
+- optionally the current artifact **only with a separate, unchecked-by-default user consent choice**.
 
-## PWA reference implementation: ROYGBIV
+Do not implement structured tasks by misusing image-generation requirements. Do not invent `AyaStructuredTask` calls in samples before the API actually exists. Enforce host/build identity, byte limits, user-approved final text consistency and truthful Copy/Save/manual-paste fallbacks.
 
-`More → Files & sharing → Ask Your Agent` launches a native browser dialog. A bundled generator reads the exact running app's canonical defaults and fields from `src/model.js` and `src/agent-api.js`, and combines them with source-informed conditional rendering notes. It includes a current full design **only with explicit opt-in**, then offers:
-- **Share guide** as a single `text/plain` File via Web Share Level 2 file support where `navigator.canShare` allows it;
-- **Copy guide** for paste into chat;
-- **Save guide** for explicit manual attachment.
+## Required developer-authored schema and semantics
 
-The recipient should return a JSON file with a canonical root recipe, required seed/structure, bounded enum/numeric values and no undocumented keys. The user saves the result and imports it through ROYGBIV's existing JSON importer. A conforming host can expose the optional **Import agent output** card action, backed by the [Output Return & Import module](OUTPUT_RETURN_IMPORT.md); the current ROYGBIV integration must not be claimed to provide that Android helper unless separately implemented.
+The host integration must document:
+1. The authoritative real importer/parser revision, extension, MIME and accepted top-level shape. Include a JSON Schema where applicable; XML, YAML and other formats retain their *actual* native contracts.
+2. Required and optional fields, types, enums, defaults, exact numeric bounds, quantization, units, normalization, unknown-field and duplicate-field policy.
+3. Activation conditions and unsupported combinations. A syntactically valid field may be ignored when its feature or mode is inactive.
+4. Interactions and precedence: controls that compose, override, mask, inherit, lock, interpolate or constrain other controls, including order-sensitive behavior.
+5. Effect scale and meaning, not merely numeric slider ranges. Do not claim linear or calibrated perceptual behavior without repeatable evidence.
+6. Minimal valid and realistic complex examples accepted by the *shipped* importer, plus intentionally invalid examples and the expected rejection reason.
+7. Preservation rules for existing unknown/unchanged fields, embedded assets, IDs, external references and version migration. No automatic dropping of state.
+8. Save/import instructions, preview, rejection messaging, transactional application, recovery and undo limitations.
+9. Independently tested sample user briefs, expected artifact semantics and parser/renderer results.
+10. Explicit privacy consent for any current document, design, media, asset metadata or user-specific context. No hidden source assets, tokens or private data.
 
-Browser file-share and Android `ACTION_SEND` have different compatibility surfaces. Do not extrapolate tested browser targets to the native Android SDK; verify each target independently.
+A strict-root native format must be returned unchanged: do **not** wrap it in an AYA envelope or append explanation fields unless the verified importer specifically permits that. Any agent-side caveats belong outside the import file. The host must treat all generated content as untrusted and must never execute arbitrary generated code or destructive operations solely because a schema accepts the file.
 
-## AYA authoring standard extension
+## Transport-agnostic authoring and delivery
 
-For structured-result hosts, the reference author must include:
-1. Authoritative machine-readable schema or a runtime-derived field list with a version identifier.
-2. Types, defaults, full accepted numeric bounds and quantization; enum values from source, not paraphrases.
-3. Activation prerequisites, disabled states and field applicability for every mode. Explain that an inactive field can be valid JSON but visually ineffective.
-4. Interactions and ordering: where controls combine, override, mask or geometrically constrain one another.
-5. Effect scale distinctions: numeric 0–100 is **not** necessarily linear perceptual response. Only claim calibrated response curves if reproduced on actual output fixtures; record source revision and measured uncertainty.
-6. Minimum valid output example and top-level artifact shape; no envelope, fenced prose or explanatory fields inside the resulting `.json` file. An optional AYA envelope is only appropriate for formats that explicitly allow one; the native ROYGBIV recipe must retain its canonical root and be recognized by its real importer.
-7. Modification guarantees: preserve all unrequested existing fields, locks and self-contained embedded assets.
-8. Safe, reproducible import instructions with warnings that normalization may discard unknown/invalid fields.
-9. Sample briefs, acceptable artifacts, invalid artifacts and independently tested expected visual properties.
-10. Privacy boundary: omit current document/recipe unless the user opts in, never include secrets, credentials or private source assets by default.
+Use a platform-appropriate, user-approved path:
+- **Android:** review and Copy or `ACTION_SEND` with disclosed URI permissions. Core AYA's existing launcher types do not constitute a specialized structured-artifact API.
+- **Browser/PWA:** user-initiated Share with `navigator.canShare` checks where supported, or Copy/Save for manual attachment. Browser file-sharing availability does not imply Android Sharesheet compatibility.
+- **Other integrations:** preserve the same editable preview, version consistency, consent and manual return boundary, without claiming unimplemented platform support.
 
-Host-specific reference files remain the canonical holders of effects and schema details. AYA must not turn into a ROYGBIV-specific renderer, optimizer or schema registry.
+The receiving agent might reply in prose, include code fences, omit the attachment, or generate invalid data. The host's own parser and import preview are authoritative; the user must not be told a file is compatible before validation.
 
-## Implementation plan
+## Required acceptance gates
 
-1. **Completed in ROYGBIV feature branch:** PWA handoff generator, source-derived capability and semantics document, compact More composer, recolored AYA SVG, Share/Copy/Save actions and source-level tests.
-2. **Next:** independently test real Android browser file-sharing and assistant ingestion, 320×700 / 412×892 single-screen geometry, focus/IME and host-side JSON imports.
-3. **Later reusable SDK work:** add a typed structured-artifact entry point alongside `launchCreativeBundled`, not as an incompatible change; update template, Android sample and reference validators with genuine structured examples.
-4. **Advanced:** source-driven calibration of visual effect interactions in hosts. These measurements are developer QA fixtures only; they must never introduce runtime monitoring of user conversations.
+- Independently derive a feature inventory and schema from a *real* host build. Never copy a hypothetical fixture into a shipping packet.
+- Test minimal, maximal, nested, conditional, inactive and interdependent fields; unsupported ranges; migrations; malformed, oversized, stale and foreign files; and unchanged-property preservation.
+- Verify the reviewed packet includes all essential semantic constraints and the exact user-approved optional current artifact.
+- Verify host import is user-invoked and separately validates content, permissions, side effects and recoverability.
+- Test each OS/browser/assistant transport combination directly. Record unknowns; do not infer that share success means recipient ingestion or artifact production.
+- Confirm the module's vocabulary and operations remain applicable to at least two unrelated classes of structured-file hosts, without carrying an external project's UI, repository paths, naming conventions or schema.
 
-## Acceptance and non-goals
+## Future work
 
-Passing a source/unit test does not guarantee recipient ingestion or artistic fidelity. AYA's success event ends at user-initiated transfer, not assistant reply or import. Every recipient capability must be labeled verified, conditional or unknown, and manual fallback remains available.
+A reusable typed Android structured-artifact launcher, a fictional demonstration fixture, and associated compiler/parser/recipient QA may be added as independent changes. No host-specific branches, branded menus, format implementations or integration-status promises belong in this portable module.

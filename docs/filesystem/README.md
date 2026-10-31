@@ -1,6 +1,6 @@
 # Filesystem Automation Handoff (optional AYA module)
 
-**Audience:** developers of file managers, FTP/FTPS/SFTP clients, SAF/Android storage browsers, WebDAV/SMB/cloud file explorers and similar hosts. **No Expository-specific dependencies or assumptions.**
+**Audience:** developers of file managers, FTP/FTPS/SFTP clients, SAF/Android storage browsers, WebDAV/SMB/cloud file explorers and similar hosts. **The module has no dependency on any particular file manager or repository.**
 
 A host app offers a normal **Automation > Import recipe** workflow and optionally an **Ask Your Agent** card. The host creates a source-verified Filesystem Automation Kit and, with separate explicit user consent, may attach a minimized and dated filesystem snapshot. AYA opens a user-editable one-way handoff to the user's preferred Android assistant. The assistant clarifies consequential user intent and proposes a recipe **in the host's own documented schema**. The person saves that file and manually imports it. The host validates, enumerates, previews, revalidates and executes approved operations. AYA never scans files, executes commands, observes the response, or installs recipes.
 

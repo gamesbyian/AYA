@@ -7,7 +7,7 @@ import org.junit.Test
 
 class AyaDocumentTest {
     @Test fun hasVersionGuideAndSourceHint() {
-        val result = AyaDocument.render(AyaRequest("Chunks", "0.3", "Feature X", "Settings"))
+        val result = AyaDocument.render(AyaRequest("ExampleHost", "0.3", "Feature X", "Settings"))
         assertTrue(result.contains("Installed version: 0.3"))
         assertTrue(result.contains("Current screen (host supplied): Settings"))
         assertTrue(result.contains("Feature X"))
