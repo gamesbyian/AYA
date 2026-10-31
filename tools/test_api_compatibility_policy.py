@@ -23,9 +23,7 @@ class NativeApiPolicyTest(unittest.TestCase):
         ):
             with self.subTest(api=api):
                 self.assertRegex(source, rf"\bfun\s+{api}\s*\(")
-                self.assertIn(f"`Aya.{api}`", POLICY.read_text() if
-                              api in ("ask", "launch", "launchBundled") else
-                              "`Aya." + api + "`" + POLICY.read_text())
+                self.assertIn(f"`Aya.{api}`", POLICY.read_text())
         for result in ("QuestionOpened", "PreviewOpened", "Rejected"):
             self.assertIn(result, source)
         self.assertIn("AyaComponentAction.Help", ACTIONS.read_text() +
@@ -50,7 +48,7 @@ class NativeApiPolicyTest(unittest.TestCase):
         self.assertIn("does not", docs)
         self.assertIn("locale", docs)
         self.assertIn("explicitly", docs)
-        self.assertIn("Aya-RAS".lower().split("-")[0], docs.lower())
+        self.assertIn("AYA-RAS v1", docs)
 
 
 if __name__ == "__main__":
