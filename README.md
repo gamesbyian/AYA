@@ -44,6 +44,9 @@ An optional [AYA Compose adapter](docs/components/COMPOSE.md) is being implement
 
 ## Drop-in components for visual builders and coding agents
 
+A [safe Android host scaffolder](docs/components/INSTALLER.md) can create Kotlin and XML component files with a default dry run, no overwrites and host-owned documentation. Use `--apply` only after reviewing the planned paths and providing a real host-specific manifest.
+
+
 AYA is intended to become a **drop-in part of development workflows**: a configurable Android card, a headless action/node, and an optional adapter for the app-building tools developers already use. You do not need to adopt AYA's code to adopt the interaction convention.
 
 The new [Drop-in Component specification](docs/components/README.md) and [implementation roadmap](docs/components/ROADMAP.md) cover Android Studio/Views/Compose, Flutter/FlutterFlow, React Native/Expo, Godot, Unity and beginner no-code tools. **These cross-platform adapters are proposals, not currently published or installed plugins.**
