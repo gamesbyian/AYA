@@ -33,7 +33,7 @@ A packet has seven consistent sections: Task brief, Host identity, Coverage mani
 
 Make a **task-first quick reference** (short enough to fit a recipient's ordinary text channel when a text-only path is required), then full facts and examples. Prefer stable IDs, semantic definitions, specific conditions and reproducible cases over lengthy marketing language. If a task requires a parameter, constraint or destructive caveat, include it in the user-visible brief or guarantee that the relevant full packet is included. Never offer a short variant that silently loses a required constraint.
 
-**Important implementation boundary:** the current compiler builds the complete fact-based Markdown artifact. It does not automatically derive the `EXTRA_TEXT` channel, choose a model, or strip source content from a sent attachment. Host authors must independently test the actual Android final-review payload for each module and recipient. Do not claim that putting a reference in a ZIP or a repository URL means the assistant read it.
+**Important implementation boundary:** the compiler can also produce a size-checked text-only brief using `--brief-output`, with all selected facts and dependencies (failure on >4000 Android UTF-16 code units). It does not automatically populate the Android `EXTRA_TEXT` channel, choose a model, or strip source content from a sent attachment. Host authors must independently test the actual Android final-review payload for each module and recipient. Do not claim that putting a reference in a ZIP or a repository URL means the assistant read it.
 
 ## 5. Preserve meaning, dependencies and limits
 
