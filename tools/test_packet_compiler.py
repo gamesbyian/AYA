@@ -94,6 +94,18 @@ class PacketCompilerTests(unittest.TestCase):
         with self.assertRaisesRegex(PacketError, "Circular"):
             self.compile(inputs=(src, inv, profiles))
 
+    def test_obvious_secret_assignments_in_source_are_rejected(self):
+        src, inv, profiles = copy.deepcopy(sources())
+        src["facts"][0]["details"] += "\npassword: lengthy-real-secret"
+        with self.assertRaisesRegex(PacketError, "secret-shaped fact"):
+            self.compile(inputs=(src, inv, profiles))
+
+    def test_obvious_secret_assignments_in_profile_are_rejected(self):
+        src, inv, profiles = copy.deepcopy(sources())
+        profiles["profiles"]["creative"]["request"] += "\napi_key: lengthy-real-secret"
+        with self.assertRaisesRegex(PacketError, "credential in profile"):
+            self.compile(inputs=(src, inv, profiles))
+
     def test_unknown_evidence_and_impact_rejected(self):
         src, inv, profiles = copy.deepcopy(sources())
         src["facts"][0]["impacts"] = ["magic"]
