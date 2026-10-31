@@ -3,11 +3,13 @@ package dev.aya.android
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -86,7 +88,9 @@ class AyaXmlCardView @JvmOverloads constructor(
             output.isBlank() -> "AYA requires real, host-specific instructions for using the answer."
             else -> null
         }
-        if (problem != null) {
+        if (isInEditMode) {
+            showEditorPreview(heading, description, disclosure, output, cornerRadius)
+        } else if (problem != null) {
             addView(TextView(context).apply {
                 text = "$heading\n$description\n$problem"
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
@@ -120,6 +124,51 @@ class AyaXmlCardView @JvmOverloads constructor(
                 ))
             }
         }
+    }
+
+    private fun showEditorPreview(
+        heading: String,
+        description: String,
+        disclosure: String,
+        output: String,
+        cornerRadius: Float
+    ) {
+        val outline = 0xff777777.toInt()
+        background = GradientDrawable().apply {
+            setColor(0x00ffffff)
+            setStroke(dp(1), outline)
+            this.cornerRadius = cornerRadius * resources.displayMetrics.density
+        }
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+
+        val header = LinearLayout(context).apply { orientation = HORIZONTAL }
+        header.addView(ImageView(context).apply {
+            setImageResource(R.drawable.aya_card_mark)
+            contentDescription = null
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        }, LayoutParams(dp(48), dp(48)))
+        header.addView(TextView(context).apply {
+            text = "$heading\\n$description"
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        }, LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        addView(header)
+        addView(TextView(context).apply {
+            text = disclosure
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        })
+        addView(TextView(context).apply {
+            text = if (output.isNotBlank()) "After your agent replies: $output"
+                else "Output-use instructions required before runtime sharing"
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        })
+        addView(TextView(context).apply {
+            text = "Optional question (layout preview)"
+            setPadding(0, dp(8), 0, dp(8))
+        })
+        addView(TextView(context).apply {
+            text = "Ask Your Agent (preview only)"
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+        })
     }
 
     fun setAttachmentDisclosure(value: String) {
