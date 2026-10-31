@@ -1,0 +1,62 @@
+name: Versioned AYA Maven preview (manual, unpublished)
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Non-SNAPSHOT semantic preview version (for example 0.1.0-preview.1)"
+        required: true
+        default: "0.1.0-preview.1"
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Validate chosen preview version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          value = os.environ["VERSION"]
+          assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?", value)
+          assert not value.endswith("-SNAPSHOT")
+          PY
+      - name: Install Android SDK
+        run: |
+          SDKROOT=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+      - name: Run native unit tests and sample build
+        env:
+          VERSION: ${{ inputs.version }}
+        run: gradle :aya:testDebugUnitTest :aya:assembleRelease :aya-compose:assembleRelease :sample:assembleDebug -Paya.version="$VERSION" --no-daemon
+      - name: Stage both matching Maven artifacts
+        env:
+          VERSION: ${{ inputs.version }}
+        run: gradle :aya:publishReleasePublicationToStagingRepository :aya-compose:publishReleasePublicationToStagingRepository -Paya.version="$VERSION" --no-daemon
+      - name: Validate AAR, POM and inter-module version constraints
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version "$VERSION" --checksum-output aya-staging-sha256.txt
+          gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version="$VERSION" --no-daemon --refresh-dependencies
+      - name: Upload unpublished versioned Maven repository and checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-maven-preview
+          path: |
+            aya/build/staging-maven/
+            aya-staging-sha256.txt
+          if-no-files-found: error
