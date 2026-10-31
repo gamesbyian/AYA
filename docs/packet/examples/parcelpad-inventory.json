@@ -14,7 +14,7 @@
         "translation"
       ],
       "criticality": "low",
-      "source_ref": "source_code"
+      "source_ref": "README fictional fixture"
     },
     {
       "id": "FACT-002",
@@ -25,7 +25,7 @@
         "translation"
       ],
       "criticality": "high",
-      "source_ref": "acceptance_test"
+      "source_ref": "sample fictional operation contract"
     },
     {
       "id": "FACT-003",
@@ -33,7 +33,7 @@
         "creative"
       ],
       "criticality": "low",
-      "source_ref": "source_code"
+      "source_ref": "fictional artwork slot example"
     },
     {
       "id": "FACT-004",
@@ -41,7 +41,7 @@
         "creative"
       ],
       "criticality": "low",
-      "source_ref": "source_code"
+      "source_ref": "fictional import flow fixture"
     },
     {
       "id": "FACT-005",
@@ -49,7 +49,7 @@
         "structured"
       ],
       "criticality": "low",
-      "source_ref": "official_contract"
+      "source_ref": "fictional schema fixture"
     },
     {
       "id": "FACT-006",
@@ -57,7 +57,7 @@
         "structured"
       ],
       "criticality": "low",
-      "source_ref": "acceptance_test"
+      "source_ref": "fictional recipe acceptance fixture"
     },
     {
       "id": "FACT-007",
@@ -65,7 +65,7 @@
         "translation"
       ],
       "criticality": "low",
-      "source_ref": "source_code"
+      "source_ref": "fictional string resource fixture"
     },
     {
       "id": "FACT-008",
@@ -73,7 +73,7 @@
         "translation"
       ],
       "criticality": "medium",
-      "source_ref": "acceptance_test"
+      "source_ref": "fictional importer fixture"
     },
     {
       "id": "FACT-009",
@@ -81,7 +81,7 @@
         "help"
       ],
       "criticality": "low",
-      "source_ref": "acceptance_test"
+      "source_ref": "fictional support QA fixture"
     }
   ]
 }
