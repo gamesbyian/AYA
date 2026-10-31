@@ -1,6 +1,6 @@
 # AYA Drop-in Components and Visual Builder Integration
 
-**Status (2026-10-30):** integration architecture and first incremental implementation. The canonical Android SDK already supports version-checked help, creative image and translation handoffs, and a Standard/Compact View card. The portable component manifest **v1 is help-only**; a local generator and typed Kotlin action dispatcher are the first deliverables. FlutterFlow, Flutter, Expo, React Native, Godot, Unity and no-code extensions are **planned adapters, not shipped plugins**. A schema passing is not proof of app documentation quality or assistant ingestion.
+**Status (2026-10-31):** Android Views/XML, Compose, Flutter source plugin and Godot Android v2 source addon are integrated with different levels of CI evidence. FlutterFlow body templates are available, while React Native/Expo, Unity and no-code extensions remain planned. See [current adapter status and release blockers](STATUS.md). The portable component manifest **v1 remains help-only**; passing structural checks does not prove correct host instructions or assistant ingestion.
 
 ## Purpose
 
@@ -28,10 +28,10 @@ Developer and director
   -> version-matched assets packaged into host APK
   -> aya-component/v1 (declarative, build-time help wiring)
        | Android Studio/Views    -> AyaCardView or AyaComponentAction.Help
-       | Compose                -> optional aya-compose adapter (source/CI acceptance pending)
-       | Flutter/FlutterFlow    -> future Dart plugin + visual widget/action
+       | Compose                -> merged optional aya-compose source adapter
+       | Flutter/FlutterFlow    -> source Flutter plugin + unverified editor templates
        | React Native/Expo      -> future native module + JS component/action
-       | Godot                  -> future Android v2 addon + inspector node/signals
+       | Godot                  -> Android v2 addon + card (export/device unverified)
        | Unity                  -> future Android plugin + Visual Scripting unit
        | App Inventor/Kodular   -> future compatible .aix extension
   -> canonical installed-version-checked Android SDK
