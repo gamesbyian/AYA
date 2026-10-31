@@ -93,10 +93,13 @@ class BuiltinKotlinHostTest(unittest.TestCase):
         pub = (ROOT / "integrations/flutter/migration/modern.pubspec.yaml").read_text()
         self.assertIn('sdk: ">=3.12.0 <4.0.0"', pub)
         self.assertIn('flutter: ">=3.44.0"', pub)
-        # Retained legacy plugin remains exactly source-controlled and
-        # independently buildable until migration acceptance.
-        legacy = (ROOT / "integrations/flutter/aya_flutter/pubspec.yaml").read_text()
-        self.assertIn('flutter: ">=3.19.0"', legacy)
+        # Promoted source preview deliberately bumps the Flutter/Dart floor;
+        # historical 0.1.0-dev.1 remains available at its pinned Git revision.
+        current = (ROOT / "integrations/flutter/aya_flutter/pubspec.yaml").read_text()
+        self.assertIn('flutter: ">=3.44.0"', current)
+        self.assertIn('sdk: ">=3.12.0 <4.0.0"', current)
+        modern = (ROOT / "integrations/flutter/migration/modern.pubspec.yaml").read_text()
+        self.assertEqual(current, modern)
 
 
 if __name__ == "__main__":
