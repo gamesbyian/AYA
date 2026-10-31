@@ -8,7 +8,7 @@ The design follows the official Godot Android v2 plugin documentation (https://d
 
 The optional aya-godot Gradle Android library supplies a GodotPlugin whose exposed openHelp(...) method calls the canonical, installed-version-checked AyaComponentAction.Help on Android's UI thread. Nothing is sent before the user's editable local privacy review and deliberate Copy/Share.
 
-The source addon in integrations/godot/addons/AYA contains an EditorExportPlugin and a tool-mode scene component. The AYACard script can be attached to a VBoxContainer; inspector fields expose app-specific guide path, screen hint, task description, attachment disclosure, output-use instructions and optional question. The button is disabled in the editor or when the Android singleton is absent. No mock-success state is shown.
+The source addon in integrations/godot/addons/AYA contains an EditorExportPlugin and a tool-mode scene component. The AYACard script can be attached to a VBoxContainer; inspector fields expose app-specific guide path, screen hint, task description, attachment disclosure, output-use instructions and optional multiline, Unicode-preserving question in a host-scroll-owned TextEdit. The field grows with its contents instead of adding an internal scrollbar. The button is disabled in the editor or when the Android singleton is absent. No mock-success state is shown.
 
 The sole emitted signal aya_local_status has three strings: request ID, local state (question_opened, review_opened, rejected) and local reason. Each card filters by request ID. This signal does NOT indicate assistant receipt, processing, output generation or import. No model API, external app detection, filesystem watch or network service is introduced.
 
@@ -33,7 +33,8 @@ This prototype does not silently edit an unknown Godot build template or invent 
 ## Acceptance before release
 
 - Android Gradle module compiles and staged addon contains all four debug/release AARs and editor scripts.
-- Headless Godot 4.5.1 plugin parser and scene smoke test pass; manual GUI editor import on 4.5 and 4.6 still required: preview and inspector render, GDScript parses, no editor handoff, Android export registration loads.
+- Headless Godot 4.5.1 parser and scene smoke must verify multiline question input, Unicode/newline draft preservation, missing output-use instructions, and non-Android rejection (new checks pending CI).
+- Manual GUI editor import is still required for Godot 4.5 and 4.6: preview and inspector should render, scripts should parse, editor should not initiate a handoff, and Android export registration should load.
 - Exported APK has the correct AYA-RAS guide as a raw APK asset and matches installed app version. A missing/incorrect guide is rejected without fallback.
 - Multi-card request ID isolation, dismissal, rotation, unavailable engine singleton and no share-target behaviour are tested without claiming AI ingestion.
 - Large fonts, gamepad focus, screen readers, narrow phones, and IME behaviour satisfy the host's UX/accessibility requirements.

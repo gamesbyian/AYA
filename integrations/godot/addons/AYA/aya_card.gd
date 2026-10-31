@@ -15,7 +15,7 @@ signal local_status_changed(state: String, detail: String)
 @export_multiline var output_instructions: String = "Read the advice and follow it in the game yourself; nothing is applied automatically."
 @export var question_hint: String = "Your question (optional)"
 
-var _input: LineEdit
+var _input: TextEdit
 var _button: Button
 var _request_id: String
 
@@ -38,9 +38,14 @@ func _ready() -> void:
         detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
         add_child(detail)
 
-    _input = LineEdit.new()
+    _input = TextEdit.new()
     _input.name = "AYAQuestion"
     _input.placeholder_text = question_hint
+    _input.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+    # Let the host screen own overflow instead of a second internal viewport.
+    # Long multiline questions must remain readable before user review.
+    _input.scroll_fit_content_height = true
+    _input.custom_minimum_size.y = 72.0
     add_child(_input)
 
     _button = Button.new()
