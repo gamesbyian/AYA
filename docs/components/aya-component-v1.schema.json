@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gamesbyian/AYA/blob/main/docs/components/aya-component-v1.schema.json",
+  "title": "AYA build-time drop-in component manifest v1 (help only)",
+  "description": "Static developer configuration, not a runtime context scanner or assistant transport. Validity does not prove an installed-version guide or recipient ingestion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "component",
+    "id",
+    "operation",
+    "guideAsset",
+    "presentation"
+  ],
+  "properties": {
+    "component": {
+      "const": "aya-component/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{1,79}$"
+    },
+    "operation": {
+      "const": "help"
+    },
+    "guideAsset": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*\\\\.\\\\.)(?!.*\\\\\\\\)[A-Za-z0-9_./-]+\\\\.md$",
+      "maxLength": 160
+    },
+    "screenName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "presentation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "title",
+            "description",
+            "attachmentDisclosure",
+            "outputInstructions",
+            "density"
+          ],
+          "properties": {
+            "kind": {
+              "const": "card"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "attachmentDisclosure": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "outputInstructions": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 600
+            },
+            "density": {
+              "enum": [
+                "standard",
+                "compact"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "askQuestion"
+          ],
+          "properties": {
+            "kind": {
+              "const": "action"
+            },
+            "askQuestion": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
