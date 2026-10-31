@@ -4,6 +4,12 @@
 
 # AYA · Ask Your Agent
 
+**Open-source Android AI assistant integration without an API key.** Add an **Ask Your Agent** help button to an Android app so people can ask ChatGPT, Claude, Gemini, or another compatible assistant for help with that app. AYA packages the user's question with developer-authored, version-matched app documentation, offers review and edit controls, and hands the approved context to Android's share system. Assistant attachment support varies, and the user remains in control.
+
+**For Android developers:** AYA is a reusable Kotlin/Android SDK and a documented design pattern for bringing your own AI (BYOAI) to in-app help, AI-powered customer support handoffs, app-aware troubleshooting, creative requests, and optional user-generated translation packs. It requires **no AI API key, backend, paid model integration, or reply tracking**.
+
+[**Android integration guide**](docs/INTEGRATION.md) · [**Quick explanation and use cases**](docs/DISCOVERABILITY.md) · [**Reference packet authoring**](docs/reference/INDEX.md) · [**Privacy and security**](docs/SECURITY.md)
+
 **Help Handoff + Creative Handoff + optional Translation Kit Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
 
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
