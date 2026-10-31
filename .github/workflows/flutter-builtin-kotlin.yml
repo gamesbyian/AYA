@@ -2,8 +2,15 @@ name: Flutter AGP 9 built-in Kotlin migration experiment
 on:
   pull_request:
     paths:
-      - 'integrations/flutter/migration/**'
-      - 'integrations/flutter/aya_flutter/**'
+      - 'integrations/flutter/aya_flutter/android/**'
+      - 'integrations/flutter/aya_flutter/lib/**'
+      - 'integrations/flutter/aya_flutter/test/**'
+      - 'integrations/flutter/aya_flutter/ci-host/**'
+      - 'integrations/flutter/aya_flutter/pubspec.yaml'
+      - 'integrations/flutter/aya_flutter/analysis_options.yaml'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'integrations/flutter/migration/modern.android.gradle'
+      - 'integrations/flutter/migration/modern.pubspec.yaml'
       - '.github/workflows/flutter-builtin-kotlin.yml'
       - 'aya/**'
       - 'tools/verify_flutter_host_apk.py'
@@ -12,10 +19,20 @@ on:
   push:
     branches: [main]
     paths:
-      - 'integrations/flutter/migration/**'
-      - 'integrations/flutter/aya_flutter/**'
+      - 'integrations/flutter/aya_flutter/android/**'
+      - 'integrations/flutter/aya_flutter/lib/**'
+      - 'integrations/flutter/aya_flutter/test/**'
+      - 'integrations/flutter/aya_flutter/ci-host/**'
+      - 'integrations/flutter/aya_flutter/pubspec.yaml'
+      - 'integrations/flutter/aya_flutter/analysis_options.yaml'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'integrations/flutter/migration/modern.android.gradle'
+      - 'integrations/flutter/migration/modern.pubspec.yaml'
       - '.github/workflows/flutter-builtin-kotlin.yml'
       - 'aya/**'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+      - 'tools/test_flutter_builtin_migration.py'
 
 concurrency:
   group: aya-flutter-builtinkotlin-${{ github.ref }}
