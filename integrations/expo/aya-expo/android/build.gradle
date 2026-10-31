@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'dev.aya.expo'
+version = '0.1.0-dev.1'
+
+android {
+    namespace 'dev.aya.expo'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 23
+    }
+}
+
+// Source preview only. Resolve from an explicit local/staging Maven
+// repository with the same native AYA version; never silently fetch a
+// different SDK or fall back to an unguarded custom Sharesheet.
+dependencies {
+    def ayaVersion = findProperty('aya.version') ?: '0.1.0-SNAPSHOT'
+    implementation "dev.aya:aya-android:${ayaVersion}"
+}
