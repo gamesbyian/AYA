@@ -60,6 +60,33 @@ class AyaCardUiTest {
         }
     }
 
+    @Test fun specializedCardDelegatesToTypedHostHandoffWithoutDuplicateComposer() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val activity = instrumentation.startActivitySync(
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        ) as MainActivity
+        try {
+            var captured: String? = null
+            instrumentation.runOnMainSync {
+                val card = AyaCardView(
+                    context, activity,
+                    title = "Ask for artwork",
+                    outputInstructions = "Save the generated image and import it here.",
+                    questionHint = "Describe your image",
+                    onAskRequested = { captured = it }
+                )
+                card.questionInput.setText("Purple skyline")
+                assertEquals("Describe your image", card.questionInput.hint.toString())
+                val button = card.getChildAt(card.childCount - 1) as android.widget.Button
+                button.performClick()
+            }
+            assertEquals("Purple skyline", captured)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     @Test fun compactCardPreservesOptionalEditorAndAction() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
