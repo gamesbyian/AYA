@@ -32,6 +32,12 @@ Instead of leaving the app, switching to an assistant, explaining which app and 
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
+## Packet authoring across modules
+
+AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) and [four module profiles](docs/packet/PROFILES.md) covering Help, Creative, Structured Artifact and Translation Kit. Developers define source-backed atomic host facts, an independent inventory, module-specific output contracts and negative examples. The offline [packet compiler](tools/packet_compiler.py) deterministically creates scoped, provenance-marked, dependency-complete context packets and explicitly reports omitted facts; it refuses stale external claims and oversized exports. See [quickstart and fictional fixtures](docs/packet/README.md).
+
+**Scope:** this is **build-time authoring infrastructure**, not a new on-device model, dynamic host-state reader, assistant integration, or automatic reply/import mechanism. The verified packet must be deliberately packaged into the existing version-matched AYA handoff. AYA still ends at the user-controlled Share/Copy boundary.
+
 ## Where to start
 **Interoperability additions (October 2026):** [recipient capability evidence model](docs/RECIPIENT_CAPABILITIES.md), [portable handoff manifest schema](docs/protocol/README.md), optional [AssistContent adapter](docs/ASSIST_CONTEXT.md), and a [separate AppFunctions decision record](docs/APPFUNCTIONS_DECISION.md). The capability model holds only developer-supplied QA facts; it neither monitors user conversations nor learns from outcomes. The JSON manifest is a documented *host-side interchange format*, not a new wire format for AI recipients.
 
