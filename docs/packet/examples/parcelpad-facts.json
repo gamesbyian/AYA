@@ -21,7 +21,8 @@
         "help",
         "creative",
         "structured",
-        "translation"
+        "translation",
+        "filesystem"
       ],
       "depends_on": [],
       "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
@@ -45,7 +46,8 @@
         "help",
         "creative",
         "structured",
-        "translation"
+        "translation",
+        "filesystem"
       ],
       "depends_on": [
         "FACT-001"
@@ -212,6 +214,55 @@
       "evidence": {
         "kind": "acceptance_test",
         "ref": "fictional support QA fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-010",
+      "title": "Filesystem automation recipe contract (fictional)",
+      "summary": "File-manager recipe output must match a host parser contract and be manually imported.",
+      "details": "Teaching-only imaginary importer; no released ParcelPad filesystem execution is claimed. Real hosts must ship and prove an authoritative parser, schema and review flow.",
+      "status": "CONDITIONAL",
+      "impacts": [
+        "security",
+        "destructive"
+      ],
+      "profiles": [
+        "filesystem"
+      ],
+      "depends_on": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 teaching profile only",
+      "evidence": {
+        "kind": "official_contract",
+        "ref": "fictional filesystem schema fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-011",
+      "title": "Snapshot is not execution authority",
+      "summary": "A directory snapshot may be stale or partial; destructive actions cannot trust it as the live file set.",
+      "details": "Teaching contract: host-side discovery, complete scan, user review and independent revalidation. No model execution or assumed rollback.",
+      "status": "CONDITIONAL",
+      "impacts": [
+        "security",
+        "destructive",
+        "privacy"
+      ],
+      "profiles": [
+        "filesystem"
+      ],
+      "depends_on": [
+        "FACT-010",
+        "FACT-002"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 teaching profile only",
+      "evidence": {
+        "kind": "acceptance_test",
+        "ref": "fictional snapshot safety fixture",
         "verified_at": "2026-10-30T00:00:00Z"
       }
     }

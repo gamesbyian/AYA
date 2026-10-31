@@ -24,7 +24,8 @@
         "help",
         "creative",
         "structured",
-        "translation"
+        "translation",
+        "filesystem"
       ],
       "properties": {
         "help": {
@@ -136,6 +137,42 @@
           }
         },
         "translation": {
+          "type": "object",
+          "required": [
+            "purpose",
+            "request",
+            "output_contract",
+            "examples",
+            "always_include"
+          ],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "examples": {
+              "type": "string",
+              "minLength": 1
+            },
+            "always_include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^FACT-[0-9]{3,}$"
+              }
+            }
+          }
+        },
+        "filesystem": {
           "type": "object",
           "required": [
             "purpose",

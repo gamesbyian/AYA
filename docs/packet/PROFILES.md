@@ -1,6 +1,6 @@
 # Shared AYA Packet profiles
 
-All four profiles consume the app-specific understanding developed with [AYA-AUF](../understanding/README.md). Recover purpose, user goals, concept distinctions and director-approved intent first; then verify runtime facts with the existing packet source and inventory. Do not regenerate conflicting semantic definitions independently for each module.
+All five profiles consume the app-specific understanding developed with [AYA-AUF](../understanding/README.md). Recover purpose, user goals, concept distinctions and director-approved intent first; then verify runtime facts with the existing packet source and inventory. Do not regenerate conflicting semantic definitions independently for each module.
 
 Every profile uses [the same authoring standard](AUTHORING_STANDARD.md) and typed fact source. Its `always_include` list names the app-specific facts required in every packet of that kind, while the dependency graph includes additional constraints for a selected action.
 
@@ -10,6 +10,7 @@ Every profile uses [the same authoring standard](AUTHORING_STANDARD.md) and type
 | **creative** | Generate compatible image/assets | Asset role, dimensions/ratio, accepted formats, cropping/transparency, actual manual importer | Compatible outputs, honest size/format limitation, no installation claim |
 | **structured** | Generate a valid machine-readable host file | Schema/parser contract, ranges, dependencies, inactive settings, defaults, examples, import/Undo | Host importer and semantic acceptance, preservation of unrequested fields |
 | **translation** | Generate language, style and terminology packs | Source catalog, Rosetta, placeholders, locales, protected actions, genuine importer | Keys and placeholders preserved, accurate destructive semantics, grammatical tests |
+| **filesystem** | Create a manually imported file automation recipe | Exact parser schema, backend matrix, scope, destructive safeguards, clarification policy, optional consented snapshot | Correct host-compatible recipe and explicit user safeguards; no presumed execution |
 
 ## Help
 
@@ -23,6 +24,10 @@ Preserve `AyaCreativeTask` typed fields and prompt-first UX. Ensure the essentia
 
 This profile currently has a documented [portable contract](../STRUCTURED_ARTIFACT_HANDOFF.md), but the generic Android structured-artifact entry point is not implemented. A packet should document true parser schema, field interactions, lock precedence, quantization, accepted extension/MIME and expected top-level shape. Include one valid minimal example, one realistic complex example and destructive invalid examples. The user returns through the ordinary host importer. Never fake a new Android API by misusing image requirements.
 
+## Filesystem Automation
+
+Use [Filesystem Automation Kit authoring](../filesystem/AUTHORING.md) and [snapshot context specification](../filesystem/SNAPSHOTS.md). Compile source-backed capabilities, schema, exclusion rules, import and approval semantics with all destructive safeguards included as dependencies. The agent clarifies consequential ambiguity before creating a recipe. The snapshot is optional, redacted where appropriate, and can be partial or stale. The app must have a real safe recipe importer and executor; AYA does not provide either and never receives a generated file back. Verify outcome against an independently tested host parser and dry-run/approval flow.
+
 ## Translation Kit
 
 Use the [Translation Kit developer authoring guide](../translation/AUTHORING.md) and the exact-version `aya-translation-kit.md`. Its output schema must be generated from the real pack importer, with a source catalog, Rosetta meanings and counterexamples. If there is no importer, the app must not display the AYA generation card. The typed packet compiler can supply reusable semantic facts, but does not replace the seven-section kit. Keep ordinary Language UI primary.
@@ -33,6 +38,6 @@ For all profiles, run a [controlled agent trial ledger](EVALUATION.md) on the ex
 
 The compiler can emit a bounded full-context `--brief-output` for request-only paths, but the host must explicitly use it and preserve final user edits. If this fails its length check, use full reviewed attachment and do not silently omit facts.
 
-The currently shipped SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative Handoff has its own typed task. Translation Kit's proposed/branch SDK adds a guarded, second kit asset. The packet compiler and optional `build_reference.py` fragment injection are developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
+The currently shipped SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative, Translation and Filesystem Handoffs have typed requests with guarded static kits where applicable. The packet compiler and optional `build_reference.py` fragment injection are developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
 
 Do not claim recipient interoperability or release readiness without dated, independent QA.

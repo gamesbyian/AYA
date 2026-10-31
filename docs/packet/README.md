@@ -60,3 +60,7 @@ See [controlled cross-module evaluation](EVALUATION.md) and the offline `tools/v
 - Mark untested integrations **unverified**. The fictional fixture is not proof of a working ParcelPad app.
 
 The build-time compiler and JSON Schema are complementary. Neither can infer actual behavior merely from code shape, attest the completeness of a shallow independent inventory, or guarantee an LLM obeys its instructions.
+
+## Filesystem packet profile
+
+The optional `filesystem` profile compiles source-backed recipe-parser facts, backend-specific capabilities, exclusions, preconditions, host import/preview/approval semantics and safety dependencies. Combine it with the [eight-section Filesystem Automation Kit](../filesystem/AUTHORING.md) and optional [snapshot](../filesystem/SNAPSHOTS.md). Compiler facts are build-time; actual filesystem snapshots are supplied only at runtime by the host with user consent. Run the [filesystem fixture validator](../filesystem/README.md). AYA does not provide a universal executable recipe parser.

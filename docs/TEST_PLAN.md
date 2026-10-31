@@ -75,3 +75,7 @@ Run Android 10, 13, 15, 16+ where devices are available, and current installed C
 ## Stable release gate
 
 Passing static/Gradle checks; tested sample APK; true reference coverage for at least one real app; security/privacy review; assistant answer evaluation and P0/P1-free behavior; physical-device provider matrix; accessibility acceptance.
+
+## Optional Filesystem Automation module
+
+Validate exact-version host kit and optional bounded JSON snapshot, final user-approved review, manual save/import and no automatic response monitoring. Separately run importer/executor negative controls for incomplete scans, stale snapshots, path escapes, account changes, protected basename absence, destructive preview, confirmation and concurrency. See [filesystem-specific QA matrix](filesystem/TEST_PLAN.md); static handoff tests alone do not establish safe file modification.

@@ -33,9 +33,15 @@ jobs:
           python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md \
             --schema docs/translation/examples/parcelpad-output.schema.json \
             --example docs/translation/examples/parcelpad-pirate.pack.json
-      - name: Compile all four AYA packet profiles and bounded brief
+      - name: Validate the fictional Filesystem Automation Kit
         run: |
-          for module in help creative structured translation; do
+          python3 tools/validate_filesystem_kit.py docs/filesystem/examples/harborfiles-kit.md \
+            --schema docs/filesystem/examples/harborfiles-recipe.schema.json \
+            --example docs/filesystem/examples/harborfiles-delete.recipe.json \
+            --snapshot docs/filesystem/examples/harborfiles-snapshot.json
+      - name: Compile all five AYA packet profiles and bounded brief
+        run: |
+          for module in help creative structured translation filesystem; do
             python3 tools/packet_compiler.py \
               --source docs/packet/examples/parcelpad-facts.json \
               --inventory docs/packet/examples/parcelpad-inventory.json \
