@@ -26,6 +26,7 @@ class AyaFlutterPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel?.setMethodCallHandler(null)
         channel = null
+        activity = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -54,6 +55,14 @@ class AyaFlutterPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             result.success(rejected("Invalid AYA request parameters."))
             return
         }
+        if ((args.containsKey("guideAsset") && args["guideAsset"] !is String) ||
+            (args.containsKey("question") && args["question"] !is String) ||
+            (args.containsKey("screenName") && args["screenName"] != null &&
+                args["screenName"] !is String) ||
+            (args.containsKey("askQuestion") && args["askQuestion"] !is Boolean)) {
+            result.success(rejected("Invalid AYA request parameter types."))
+            return
+        }
         val asset = args["guideAsset"] as? String ?: "aya-guide.md"
         val question = args["question"] as? String ?: ""
         val screen = args["screenName"] as? String
@@ -64,6 +73,10 @@ class AyaFlutterPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activit
             return
         }
         host.runOnUiThread {
+            if (activity !== host || host.isFinishing || host.isDestroyed) {
+                result.success(rejected("Android host screen is no longer active."))
+                return@runOnUiThread
+            }
             val local = try {
                 AyaComponentAction.Help(
                     guideAsset = asset,
