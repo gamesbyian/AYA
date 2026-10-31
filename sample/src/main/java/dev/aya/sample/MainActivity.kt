@@ -35,6 +35,7 @@ class MainActivity : Activity() {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
         column.addView(Button(this).apply {
+            id = R.id.aya_sample_open_help
             text = "Ask your agent"
             contentDescription = "Open AYA help with a version-matched reference"
             setOnClickListener {
@@ -63,6 +64,7 @@ class MainActivity : Activity() {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
         column.addView(Button(this).apply {
+            id = R.id.aya_sample_review_host_question
             text = "Ask using my question"
             contentDescription = "Review my question with the app reference before sharing"
             setOnClickListener {
@@ -82,6 +84,7 @@ class MainActivity : Activity() {
             }
         })
         column.addView(Button(this).apply {
+            id = R.id.aya_sample_open_artwork
             text = "Open artwork generation demo"
             contentDescription = "Open artwork generation demo"
             setOnClickListener { startActivity(Intent(this@MainActivity, ArtworkActivity::class.java)) }
