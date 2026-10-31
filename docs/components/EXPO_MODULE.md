@@ -1,6 +1,6 @@
 # AYA Expo Modules Android bridge (source preview)
 
-**Status:** Android-only typed Expo Modules API/Kotlin bridge and React Native card in a source-preview PR. TypeScript compiler and mocked local-status checks are CI gates. This is not yet a published npm module, tested Expo Android APK, validated Expo editor export, or physical-device acceptance.
+**Status:** Android-only typed Expo Modules API/Kotlin bridge and React Native card merged as source previews in PR #41. An actual generated Expo Android host APK is being verified separately in PR #42; do not claim successful packaging until those checks pass. TypeScript compiler and mocked local-status checks are CI gates. This is not yet a published npm module, tested Expo Android APK, validated Expo editor export, or physical-device acceptance.
 
 ## API and visible card
 
