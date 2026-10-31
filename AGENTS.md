@@ -94,3 +94,7 @@ Prefer an integrated working handoff, truthful app-specific docs and real-device
 ## Expo host-guide prebuild helper
 
 The optional source-preview [Expo guide plugin](docs/components/EXPO.md) is solely a safe build-time Android asset copier. A real Expo app must author its own guide, match configured Android package and version, and preserve native developer review and Share/Copy. The plugin must reject symlink/traversal escapes, unsafe foreign-file replacements, mismatched AYA-RAS references and ambiguous provenance; update its negative tests with any path/ownership changes. This does not provide a React Native native module, Expo Go support, or proof of compiled APK/recipient behavior.
+
+## Flutter synthetic host packaging evidence
+
+The CI-only Flutter host fixture at `integrations/flutter/aya_flutter/ci-host/` must be an accurate guide to its own checked-in Flutter screen, not a generic template for production apps. Keep its `app_id` and exact `app_version_min/max` synchronized with the **actual generated APK**. The independent `tools/verify_flutter_host_apk.py` checks native APK assets, package/version, AYA FileProvider and share receiver; it does not verify the assistant recipient. If the Flutter generated project, plugin, or CI host changes, update source guide provenance and negative tests in the same PR. Never mark a Dart analyzer pass as native APK asset acceptance.
