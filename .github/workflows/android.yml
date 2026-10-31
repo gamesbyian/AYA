@@ -89,6 +89,11 @@ jobs:
         run: gradle :aya:publishReleasePublicationToStagingRepository :aya-compose:publishReleasePublicationToStagingRepository --no-daemon
       - name: Verify sample consumes published AAR and POM dependencies
         run: gradle :sample:assembleDebug -Paya.consumePublished=true --no-daemon --refresh-dependencies
+      - name: Exercise non-SNAPSHOT staged Maven coordinates
+        run: |
+          gradle :aya:publishReleasePublicationToStagingRepository :aya-compose:publishReleasePublicationToStagingRepository -Paya.version=0.1.0-preview.1 --no-daemon
+          python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version 0.1.0-preview.1
+          gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version=0.1.0-preview.1 --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: aya-sample-debug-apk

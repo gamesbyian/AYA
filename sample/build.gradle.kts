@@ -23,8 +23,8 @@ android {
 }
 dependencies {
     if (providers.gradleProperty("aya.consumePublished").orNull == "true") {
-        implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")
-        implementation("dev.aya:aya-compose:0.1.0-SNAPSHOT")
+        implementation("dev.aya:aya-android:${providers.gradleProperty("aya.version").orNull ?: "0.1.0-SNAPSHOT"}")
+        implementation("dev.aya:aya-compose:${providers.gradleProperty("aya.version").orNull ?: "0.1.0-SNAPSHOT"}")
     } else {
         implementation(project(":aya"))
         implementation(project(":aya-compose"))

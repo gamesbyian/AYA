@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "dev.aya"
-version = "0.1.0-SNAPSHOT"
+version = providers.gradleProperty("aya.version").orNull ?: "0.1.0-SNAPSHOT"
 
 android {
     namespace = "dev.aya.compose"
