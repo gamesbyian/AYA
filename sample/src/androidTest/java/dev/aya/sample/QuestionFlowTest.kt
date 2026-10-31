@@ -1,5 +1,7 @@
 package dev.aya.sample
 
+import android.widget.Button
+import android.widget.EditText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -36,19 +38,32 @@ class QuestionFlowTest {
         // to clear old dialogs without an external am-start that destroys the
         // rule's instance (CLEAR_TOP caused flaky lifecycle assertions).
         scenario.scenario.recreate()
-        // UiAutomator exposes contentDescription rather than displayed text for
-        // these host controls: searching By.text() made every emulator test fail
-        // even though the sample rendered the button correctly.
-        find(By.desc("Review my question with the app reference before sharing"))
+        // Verify the consuming Activity is alive using its stable view IDs.
+        // UiAutomator foreground discovery is unreliable immediately after
+        // ActivityScenario recreation and can fail before testing any AYA UI.
+        scenario.scenario.onActivity {
+            assertTrue("Sample host action must exist",
+                it.findViewById<Button>(R.id.aya_sample_open_help) != null)
+        }
+        device.waitForIdle()
     }
 
     private fun find(selector: BySelector): UiObject2 =
         device.wait(Until.findObject(selector), 15000)
             ?: throw AssertionError("UI not found: $selector")
 
+    private fun tapHost(id: Int) {
+        scenario.scenario.onActivity {
+            val control = it.findViewById<Button>(id)
+                ?: throw AssertionError("Missing consuming host control: $id")
+            assertTrue("Host control should be enabled", control.isEnabled)
+            control.performClick()
+        }
+    }
+
     @Test fun builtInComposerFeedsTheActualReviewedDocument() {
         val question = "Why does the help attachment need a file provider?"
-        find(By.desc("Open AYA help with a version-matched reference")).click()
+        tapHost(R.id.aya_sample_open_help)
         find(By.desc("Your question for the assistant (optional)")).setText(question)
         // Android AlertDialog can transform or localize button labels; use stable IDs.
         find(By.res("android", "button1")).click()
@@ -58,8 +73,10 @@ class QuestionFlowTest {
 
     @Test fun hostProvidedQuestionSkipsDuplicateComposer() {
         val question = "How can I verify the share?"
-        find(By.desc("Type a question in the host app")).setText(question)
-        find(By.desc("Review my question with the app reference before sharing")).click()
+        scenario.scenario.onActivity {
+            it.findViewById<EditText>(R.id.aya_sample_help_question).setText(question)
+        }
+        tapHost(R.id.aya_sample_review_host_question)
         val preview = find(By.desc("Reviewed AYA help document"))
         assertTrue("Host question must appear in review", preview.text.contains(question))
         assertFalse("Host flow must not open a second question box",
@@ -67,7 +84,7 @@ class QuestionFlowTest {
     }
 
     @Test fun creativeEditorIsPromptFirstAndFullGuidePreservesEdits() {
-        find(By.desc("Open artwork generation demo")).click()
+        tapHost(R.id.aya_sample_open_artwork)
         val scroller = UiScrollable(UiSelector().scrollable(true))
         // On large devices this short example fits without a scrollable view;
         // scroll only when Android exposes an actual scroll container.
@@ -90,7 +107,7 @@ class QuestionFlowTest {
     }
 
     @Test fun cancelQuestionComposerKeepsHostAppOpen() {
-        find(By.desc("Open AYA help with a version-matched reference")).click()
+        tapHost(R.id.aya_sample_open_help)
         find(By.desc("Your question for the assistant (optional)"))
         find(By.res("android", "button2")).click()
         assertTrue("Cancel dialog should disappear",
