@@ -19,13 +19,13 @@ import org.junit.runner.RunWith
 /** Independent format probes intentionally ignore the optional AYA hint. */
 @RunWith(AndroidJUnit4::class)
 class AyaOutputImportTest {
-    private fun route(id: String, marker: String, valid: Boolean = true) = object : AyaImportRoute {
-        override val id: String = id
-        override val title: String = id
+    private fun route(routeId: String, marker: String, valid: Boolean = true) = object : AyaImportRoute {
+        override val id: String = routeId
+        override val title: String = routeId
         override fun recognizes(file: AyaImportFile): Boolean =
             file.utf8Text()?.contains(marker) == true
         override fun validate(file: AyaImportFile): AyaImportValidation =
-            if (valid) AyaImportValidation.Valid("Ready for preview: $id")
+            if (valid) AyaImportValidation.Valid("Ready for preview: $routeId")
             else AyaImportValidation.Invalid("Wrong schema version")
     }
 
