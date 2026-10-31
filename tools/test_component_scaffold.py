@@ -53,6 +53,16 @@ class ScaffoldTests(unittest.TestCase):
         apply_plan(self.project, files)
         self.assertEqual(len(list(self.project.rglob("*.xml"))), 1)
 
+    def test_compose_scaffold_emits_guarded_composable(self):
+        files = plan(self.project, "app", self.manifest, "compose", "dev.aya.host")
+        source = next(body for path, body in files.items() if path.suffix == ".kt")
+        self.assertIn("@Composable", source)
+        self.assertIn("AyaCard(", source)
+        self.assertIn("outputInstructions = ", source)
+        self.assertNotIn("Aya.launch(", source)
+        paths = apply_plan(self.project, files)
+        self.assertTrue(any(p.endswith(".kt") for p in paths))
+
     def test_wrong_module_or_package_rejected_without_side_effect(self):
         for module in ("../elsewhere", "app/../../bad", "."):
             with self.subTest(module=module), self.assertRaises(ComponentError):

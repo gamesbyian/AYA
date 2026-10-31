@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from component_codegen import ComponentError, android_xml_snippet, kotlin_snippet, validate
+from component_codegen import ComponentError, android_xml_snippet, compose_snippet, kotlin_snippet, validate
 
 MODULE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
 PACKAGE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+$")
@@ -57,12 +57,12 @@ def plan(
         raise ComponentError("Expected an existing Android module with src/main; no files written")
     stem = component_stem(config["id"])
 
-    if mode == "kotlin":
+    if mode in ("kotlin", "compose"):
         if not package or not PACKAGE.fullmatch(package):
             raise ComponentError("Kotlin mode needs a valid dotted --package")
         relative = Path(*package.split("."))
-        output = src / "java" / relative / f"AyaComponent_{stem}.kt"
-        body = f"package {package}\n\n" + kotlin_snippet(config)
+        output = src / "java" / relative / f"AyaComponent_{'Compose_' if mode == 'compose' else ''}{stem}.kt"
+        body = f"package {package}\n\n" + (compose_snippet(config) if mode == "compose" else kotlin_snippet(config))
     elif mode == "android-xml":
         if config["presentation"]["kind"] != "card":
             raise ComponentError("Android XML supports visible cards only, not headless actions")
@@ -110,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--project-dir", type=Path, required=True)
     parser.add_argument("--module", default="app")
     parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--mode", choices=("kotlin", "android-xml"), required=True)
+    parser.add_argument("--mode", choices=("kotlin", "compose", "android-xml"), required=True)
     parser.add_argument("--package", help="Kotlin package for the generated source")
     parser.add_argument("--apply", action="store_true", help="create non-conflicting files; default is dry-run")
     args = parser.parse_args(argv)

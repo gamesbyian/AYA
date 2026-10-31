@@ -4,7 +4,7 @@
 
 ## Why
 
-Coding agents and casual developers can generate consistent, uniquely named drop-in components without editing a project's existing files. This complements the [component architecture](README.md), [XML layout adapter](XML.md), and future [Compose adapter](COMPOSE.md). For now it handles **Android Views/Kotlin and Android XML only**, since a Compose source generator requires the optional Compose SDK to be merged and tested first.
+Coding agents and casual developers can generate consistent, uniquely named drop-in components without editing a project's existing files. This complements the [component architecture](README.md), [XML layout adapter](XML.md), and future [Compose adapter](COMPOSE.md). For now it handles **Android Views/Kotlin, Compose (when the optional `aya-compose` library is installed), and Android XML**, since a Compose source generator requires the optional Compose SDK to be merged and tested first.
 
 ## Use
 
@@ -41,7 +41,7 @@ The generated configuration record is a reproducibility aid, never automatically
 - Structural generation only: no semantic verification or release acceptance.
 - A missing guide fails at runtime in the guarded SDK; the scaffolder intentionally refuses to invent one.
 - It never overwrites a pre-existing file with different contents. On interrupted multi-file creation, newly created files are rolled back where possible; an OS crash can still leave partial output and should be inspected.
-- Kotlin namespace is explicitly supplied. XML output is card-only; headless actions require the Kotlin entry point.
+- A Kotlin namespace is explicitly supplied for Kotlin or Compose source. XML output is card-only; headless actions require the Kotlin entry point.
 - Android module directories and generated paths are constrained, with symlinks rejected on output paths.
 - The tool does not automatically wire the generated element into a UI screen; host agent/developer must integrate, test, and keep it accurate.
 - Build/dev QA requires real Android emulator/device testing; cross-toolchain adoption remains separately tracked in [#21](https://github.com/gamesbyian/AYA/issues/21).

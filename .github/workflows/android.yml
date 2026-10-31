@@ -44,6 +44,14 @@ jobs:
           PY
           python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-smoke.json --mode kotlin --package dev.aya.sample --apply
           python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-smoke.json --mode android-xml --apply
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path('docs/components/examples/sample-help-card.json').read_text())
+          m['id'] = 'sample.help.scaffolder.compose.smoke'
+          Path('/tmp/aya-scaffold-compose-smoke.json').write_text(json.dumps(m))
+          PY
+          python3 tools/component_scaffold.py --project-dir . --module sample --manifest /tmp/aya-scaffold-compose-smoke.json --mode compose --package dev.aya.sample --apply
       - name: Unit tests and module-based consumer
         run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :aya-compose:assembleDebug :sample:assembleDebug --no-daemon
       - name: Produce Maven-style library distribution
