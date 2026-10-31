@@ -34,6 +34,10 @@ When integrating AYA into another app:
 - Preserve the one-file reviewed UTF-8 Share path and derived final `EXTRA_TEXT`, 1 MiB kit and 2 MiB combined limits, no provider-specific API, no background response tracking and no automatic return/import. Do not promise a language pack was created simply because the Sharesheet opened.
 - Run `python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md --schema docs/translation/examples/parcelpad-output.schema.json --example docs/translation/examples/parcelpad-pirate.pack.json` plus unit/reference checks. Test bad placeholders, wrong versions, missing headings and high-risk copy.
 
+## Host card integration
+
+Follow [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md). Prefer `AyaCardView` as the host-native Standard layout or implement an equivalent custom card with the same content and two-stage review semantics. Logo tint follows host foreground; outline/corners follow host theme; question is optional. Always disclose the actual intended attachment without promising receiver ingestion. Do not introduce a Compose dependency in the core Android SDK merely to render the card. Validate layout and TalkBack on narrow/mobile screens.
+
 ## Engineering constraints
 - AYA's evidence registry is **read-only** and initially empty. Device QA must match recipient package, app version, Android SDK, account state and exact transport. Published claims or intent filters are NOT verified ingestion. Do not introduce package sweeps, telemetry, success monitoring or automatic recipient selection.
 - The optional `AyaAssistContext` adapter is Android's separate system-assistant request surface, and must only be wired into a host after explicit host approval of the exact public context. Do not enable it implicitly, send private identifiers, or misrepresent Android JSON-LD as the AYA handoff format.
