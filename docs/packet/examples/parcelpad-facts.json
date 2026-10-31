@@ -1,0 +1,219 @@
+{
+  "schema_version": "aya-packet-source/v1",
+  "host": {
+    "app_id": "dev.parcelpad.example",
+    "app_name": "ParcelPad (fictional)",
+    "app_version": "1.0.0",
+    "source_revision": "fictional-fixture-1",
+    "build_variant": "training fixture only"
+  },
+  "facts": [
+    {
+      "id": "FACT-001",
+      "title": "ParcelPad terminology",
+      "summary": "ParcelPad is a fictional package-list sample; demo values are not real delivery states.",
+      "details": "A parcel card is local UI data. No external shipping service is connected.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "ordinary"
+      ],
+      "profiles": [
+        "help",
+        "creative",
+        "structured",
+        "translation"
+      ],
+      "depends_on": [],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "source_code",
+        "ref": "README fictional fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-002",
+      "title": "Remove versus delete",
+      "summary": "Remove from list preserves local files; Delete local files permanently erases them.",
+      "details": "Removal and deletion are separate user operations. A style pack must preserve their meaning, and a support answer must not conflate them.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "destructive",
+        "accessibility"
+      ],
+      "profiles": [
+        "help",
+        "creative",
+        "structured",
+        "translation"
+      ],
+      "depends_on": [
+        "FACT-001"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "acceptance_test",
+        "ref": "sample fictional operation contract",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-003",
+      "title": "Artwork target",
+      "summary": "ParcelPad's example card artwork requires a square image.",
+      "details": "Artwork is a 1:1 square; PNG accepted. This is a teaching assumption, not an Android production importer.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "technical"
+      ],
+      "profiles": [
+        "creative"
+      ],
+      "depends_on": [
+        "FACT-001"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "source_code",
+        "ref": "fictional artwork slot example",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-004",
+      "title": "Artwork manual import",
+      "summary": "Artwork can only be applied by the example host's ordinary import picker.",
+      "details": "Hypothetical path: Parcel > Artwork > Import from device > Save. AYA cannot apply or fetch generated art.",
+      "status": "CONDITIONAL",
+      "impacts": [
+        "privacy"
+      ],
+      "profiles": [
+        "creative"
+      ],
+      "depends_on": [
+        "FACT-003"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "source_code",
+        "ref": "fictional import flow fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-005",
+      "title": "Recipe JSON shape",
+      "summary": "A recipe must contain a title and a bounded itemCount.",
+      "details": "Fictional accepted structure: {title: string, itemCount: integer 0..20}; no other keys, no side-effect instructions.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "technical"
+      ],
+      "profiles": [
+        "structured"
+      ],
+      "depends_on": [
+        "FACT-001"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "official_contract",
+        "ref": "fictional schema fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-006",
+      "title": "Recipe constraints",
+      "summary": "Do not alter unrequested recipe fields during edits.",
+      "details": "A valid JSON file could have no visible effect if the feature is disabled; preserve existing fields and document preconditions.",
+      "status": "CONDITIONAL",
+      "impacts": [
+        "technical"
+      ],
+      "profiles": [
+        "structured"
+      ],
+      "depends_on": [
+        "FACT-005",
+        "FACT-002"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "acceptance_test",
+        "ref": "fictional recipe acceptance fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-007",
+      "title": "Localized source meaning",
+      "summary": "Translate parcel technical terms by meaning, not just source words.",
+      "details": "Ready means waiting for action, not delivered. Remove item retains files. All placeholders must survive.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "technical",
+        "accessibility"
+      ],
+      "profiles": [
+        "translation"
+      ],
+      "depends_on": [
+        "FACT-001",
+        "FACT-002"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "source_code",
+        "ref": "fictional string resource fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-008",
+      "title": "Language pack import",
+      "summary": "Language packs are plain JSON data imported from Language settings.",
+      "details": "Hypothetical import: Settings > Language > Add language pack > select JSON; reject malformed placeholders and unknown keys.",
+      "status": "CONDITIONAL",
+      "impacts": [
+        "security",
+        "privacy"
+      ],
+      "profiles": [
+        "translation"
+      ],
+      "depends_on": [
+        "FACT-007"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "acceptance_test",
+        "ref": "fictional importer fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    },
+    {
+      "id": "FACT-009",
+      "title": "Distinguish local status from delivery",
+      "summary": "A local Ready status does not establish remote delivery.",
+      "details": "When users ask whether a package arrived, state the app has no access to authoritative shipment data.",
+      "status": "AVAILABLE",
+      "impacts": [
+        "ordinary"
+      ],
+      "profiles": [
+        "help"
+      ],
+      "depends_on": [
+        "FACT-001"
+      ],
+      "applies_to": "Fictional ParcelPad 1.0.0 training fixture only",
+      "evidence": {
+        "kind": "acceptance_test",
+        "ref": "fictional support QA fixture",
+        "verified_at": "2026-10-30T00:00:00Z"
+      }
+    }
+  ]
+}
