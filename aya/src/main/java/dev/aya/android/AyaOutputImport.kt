@@ -107,13 +107,28 @@ class AyaImportRegistry(
 
     /** A wrong-card match is rerouted in the UI; no import is attempted automatically. */
     fun inspect(file: AyaImportFile, cardRouteId: String? = null): AyaImportDecision {
-        // An untrusted hint cannot force routing. Validators decide by content.
+        // Metadata alone cannot force a route. Content-based probes decide.
         val candidates = routes.filter { route ->
             try { route.recognizes(file) } catch (_: Exception) { false }
         }
         if (candidates.isEmpty()) return AyaImportDecision.Unrecognized
         if (candidates.size > 1) return AyaImportDecision.Ambiguous(candidates)
-        val route = candidates.single()
+        return validateChosen(candidates.single(), file, cardRouteId)
+    }
+
+    /**
+     * For Ambiguous outcomes, let the user choose a suggested route first.
+     * This still repeats content recognition and validation, so no selection
+     * can bypass the host's format guard.
+     */
+    fun inspectAs(file: AyaImportFile, routeId: String, cardRouteId: String? = null): AyaImportDecision {
+        val route = routes.firstOrNull { it.id == routeId } ?: return AyaImportDecision.Unrecognized
+        val recognized = try { route.recognizes(file) } catch (_: Exception) { false }
+        if (!recognized) return AyaImportDecision.Unrecognized
+        return validateChosen(route, file, cardRouteId)
+    }
+
+    private fun validateChosen(route: AyaImportRoute, file: AyaImportFile, cardRouteId: String?): AyaImportDecision {
         val validation = try { route.validate(file) } catch (_: Exception) {
             AyaImportValidation.Invalid("This file could not be validated.")
         }
