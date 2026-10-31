@@ -33,7 +33,7 @@ class AyaImportFile private constructor(
     } catch (_: Exception) { null }
 
     /** Metadata is an untrusted routing hint, not proof of provenance or validity. */
-    fun hints(): AyaArtifactHints? = try {
+    fun hints(): AyaArtifactHints? { return try {
         val obj = JSONObject(utf8Text() ?: return null)
         val raw = obj.optString("aya_artifact", "")
         if (raw != "v1") return null
@@ -44,6 +44,7 @@ class AyaImportFile private constructor(
             requestId = obj.optString("request_id", "").takeIf { it.isNotBlank() }
         )
     } catch (_: Exception) { null }
+    }
 
     companion object {
         fun fromBytes(bytes: ByteArray, displayName: String? = null, mimeType: String? = null): AyaImportFile =
