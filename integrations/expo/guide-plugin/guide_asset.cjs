@@ -157,6 +157,22 @@ function installGuide({
   rejectSymlinks(android, provenance);
   const expectedHash = sha256(bytes);
 
+  // The provenance filename is namespaced to this plugin, but still refuse
+  // to overwrite a preexisting marker that cannot be proven to be ours.
+  if (fs.existsSync(provenance)) {
+    let oldMarker;
+    try {
+      if (!fs.statSync(provenance).isFile()) fail('provenance is not a regular file');
+      oldMarker = JSON.parse(fs.readFileSync(provenance, 'utf8'));
+    } catch (_) {
+      fail('refusing to replace unrelated or damaged prebuild provenance');
+    }
+    if (oldMarker.format !== 'aya-expo-guide/v1' ||
+        oldMarker.sourcePath !== guidePath) {
+      fail('refusing to replace unrelated prebuild provenance');
+    }
+  }
+
   if (fs.existsSync(destination)) {
     const previous = fs.readFileSync(destination);
     if (!fs.statSync(destination).isFile()) fail('guide destination must be a regular file');
@@ -185,8 +201,6 @@ function installGuide({
     packageName,
     versionName,
   }, null, 2) + '\n', 'utf8');
-  if (fs.existsSync(provenance) &&
-      !fs.statSync(provenance).isFile()) fail('provenance must be a regular file');
   atomicWrite(provenance, record);
   return { destination, packageName, versionName, sha256: expectedHash };
 }
