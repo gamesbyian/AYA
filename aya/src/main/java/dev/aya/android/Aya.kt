@@ -634,7 +634,7 @@ object Aya {
                     activity, payload, AyaDocument.shareMessageFromPayload(payload)
                 )
             }
-            activity.startActivity(Intent.createChooser(sendIntent, "Share with an assistant"))
+            activity.startActivity(AyaShareTargetHints.createChooser(activity, sendIntent))
             true
         } catch (_: Exception) {
             toast(activity, "Sharing failed. Use Copy to paste the text into your assistant.")
