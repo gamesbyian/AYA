@@ -6,9 +6,9 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 7
-source_revision: aya-sample-card-return-instructions-v1
-last_verified_utc: 2026-10-31T03:00:00Z
+guide_revision: 8
+source_revision: aya-sample-compose-drop-in-v1
+last_verified_utc: 2026-10-31T03:40:00Z
 owner: AYA maintainers
 ---
 
@@ -33,6 +33,7 @@ After receiving the agent's answer, the user reads it and manually applies any u
 ## Navigation map
 
 - Home > Open artwork generation demo: opens a dedicated ArtworkActivity; Android Back returns to the help screen.
+- Home > Open Compose component demo: opens a separate ComposeDemoActivity with a compact AYA card and an independent Compose action button; Android Back returns Home.
 
 - Home: title "AYA: Ask Your Agent", explanation, and a bordered AYA card with an optional question field, proposed attachment disclosure, and "Ask Your Agent" button. The Home screen scrolls when necessary for large fonts or keyboard.
 - Home > AYA card > Ask Your Agent: validates the bundled reference, then opens the editable "Ask your agent" review dialog directly. Blank input gives a generic help request.
@@ -118,6 +119,21 @@ After receiving the agent's answer, the user reads it and manually applies any u
 - Side effects/undo: local preview only; choose another file to replace it. The picker grants URI access to the host, independently of AYA.
 - Evidence: `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`; source inspected, device acceptance pending.
 
+### TASK-006: Use the sample Compose card or headless action [AVAILABLE]
+
+- Applies to: AYA Sample 1.0.0 on Android 23+ with the optional Compose adapter installed in this sample build.
+- Start: Home > Open Compose component demo.
+- Prerequisites: exact-version bundled guide and the sample's own Compose demo screen.
+1. From Home, tap "Open Compose component demo".
+2. On the Compose screen, type an optional question in the compact "Ask Your Agent" card and tap its action to open the same editable AYA help review, or type in the separate "Question for headless action" field and tap "Review headless AYA action".
+3. Review and edit the complete app reference. Select Copy or Share only if you intend to give its contents to another app.
+4. Return manually from an external assistant and use its advice yourself. The Compose demo does not auto-import agent replies.
+- Expect: the visible card reuses the core View's guarded help path; the independent Compose action uses the guarded `AyaComponentAction.Help` API and skips duplicate question entry.
+- Verification: a local preview can open for a version-matched reference; Share does not prove recipient ingestion.
+- Side effects/undo: typing/review are local, while Copy/Share have the same privacy effects as TASK-001/002.
+- If it fails: see ERR-001/ERR-002. The Compose adapter does not bypass invalid or missing documentation.
+- Evidence: `aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt`, `sample/src/main/java/dev/aya/sample/ComposeDemoActivity.kt`; source-inspected, external recipient acceptance unverified.
+
 ## Features and settings
 
 ### F-001: Version-checked bundled reference [AVAILABLE]
@@ -148,6 +164,15 @@ After receiving the agent's answer, the user reads it and manually applies any u
 - Interaction: short creative review edits and sends only the text prompt; Full guide opens complete editable app documentation and optional attachment sharing. Text-only requests over 4000 characters are refused rather than truncated.
 - Persistence: no generation state or third-party output is stored by AYA; the selected image's URI is retained across Activity recreation while saved state exists, not guaranteed across process restart with no saved state.
 - Evidence: `AyaCreative.kt`, `Aya.kt`, `MainActivity.kt`.
+
+### F-004: Optional Compose drop-in [AVAILABLE]
+
+- Location: Home > Open Compose component demo.
+- Purpose: embeds the existing Android AYA card inside Compose and provides a separate headless Compose action binding.
+- Defaults: Compact card, optional question; shared version-checked `aya-guide.md`; no implicit user files, recipient selection, output monitoring or auto-import.
+- State: Compose saves a local draft using its saveable-state mechanism while the screen state remains restorable; the separate headless question uses the host's own saveable state.
+- Version boundary: this is the sample's optional Compose adapter. It does not add Compose dependencies to AYA's core Android library.
+- Evidence: `aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt`, `sample/src/main/java/dev/aya/sample/ComposeDemoActivity.kt`; build/device acceptance tracked separately.
 
 ## Troubleshooting
 
@@ -212,7 +237,7 @@ No app settings, identities, files or logs are automatically gathered. The sourc
 
 ## Evidence and provenance
 
-- Source: `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`, `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
+- Source: `aya/src/main/java/dev/aya/android/AyaCreative.kt`, `sample/src/main/java/dev/aya/sample/ArtworkActivity.kt`, `sample/src/main/java/dev/aya/sample/MainActivity.kt`, `sample/src/main/java/dev/aya/sample/ComposeDemoActivity.kt`, `aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt`, `sample/build.gradle.kts`, `sample/src/main/AndroidManifest.xml`, `aya/src/main/java/dev/aya/android/Aya.kt`, and `aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt`.
 - Findings above reflect inspected source and build configuration. Real recipient outcomes remain unverified until device testing.
 - This is a demo reference, not evidence of production security or accessibility acceptance.
 

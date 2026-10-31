@@ -42,7 +42,7 @@ The benefit is deliberately modest: **one less point of inertia between wanting 
 
 AYA is intended to become a **drop-in part of development workflows**: a configurable Android card, a headless action/node, and an optional adapter for the app-building tools developers already use. You do not need to adopt AYA's code to adopt the interaction convention.
 
-The new [Drop-in Component specification](docs/components/README.md) and [implementation roadmap](docs/components/ROADMAP.md) cover Android Studio/Views/Compose, Flutter/FlutterFlow, React Native/Expo, Godot, Unity and beginner no-code tools. **These cross-platform adapters are proposals, not currently published or installed plugins.**
+The new [Drop-in Component specification](docs/components/README.md), [Compose integration guide](docs/components/COMPOSE.md) and [implementation roadmap](docs/components/ROADMAP.md) cover Android Studio/Views/Compose, Flutter/FlutterFlow, React Native/Expo, Godot, Unity and beginner no-code tools. **These cross-platform adapters are proposals, not currently published or installed plugins.**
 
 **First incremental developer kit:** a help-only `aya-component/v1` JSON manifest, [example card configuration](docs/components/examples/sample-help-card.json), Kotlin snippet generator (`python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin`) and an Android `AyaComponentAction` dispatcher for existing guarded help/image/translation handoffs. Native Android `AyaCardView` remains the real shipped embedded card. Every real integration still needs its own evidence-based exact-version guide, truthful output-use guidance, review and device QA. Static manifest validation does not prove assistant ingestion.
 

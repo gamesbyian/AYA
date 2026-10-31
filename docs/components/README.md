@@ -91,6 +91,8 @@ if (result is AyaBundledLaunchResult.Rejected) {
 // No result from any assistant is available here.
 ```
 
+A first optional [Compose adapter](COMPOSE.md) now wraps the real View and provides `AyaCard` plus `rememberAyaLauncher` for native Compose hosts. It has its own library/consumer tests and keeps the core free of Compose dependencies. Compose is under integration testing, not publicly published.
+
 For a simple embedded card, use `AyaCardView(context, activity, outputInstructions = "...")` as documented in [Card UI Standard](../CARD_UI_STANDARD.md). Compose can currently wrap that View with `AndroidView`. Avoid adding Compose as a transitive dependency of the core runtime.
 
 ## Adapter compatibility contract

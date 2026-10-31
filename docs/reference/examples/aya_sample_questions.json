@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "7",
+  "guide_revision": "8",
   "cases": [
     {
       "id": "Q-001",
@@ -278,6 +278,35 @@
       "expected_behavior": "Read the agent answer and follow its advice manually. The Home AYA card states the return/use instructions; this sample does not import or automatically apply help responses. Artwork has a separate saved-image picker.",
       "forbidden_claims": [
         "AYA automatically imports the answer into the sample"
+      ]
+    },
+    {
+      "id": "Q-021",
+      "question": "How do I use AYA from the sample's Compose screen?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-006",
+        "F-004"
+      ],
+      "expected_behavior": "Use Home > Open Compose component demo, enter optional question in the compact AYA card or separate headless action field, then review and Copy/Share manually; no assistant response monitoring.",
+      "forbidden_claims": [
+        "Compose automatically sends or reads assistant replies"
+      ]
+    },
+    {
+      "id": "Q-022",
+      "question": "Does the Compose button bypass AYA's review or attach anything secretly?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "TASK-006",
+        "F-004",
+        "F-001"
+      ],
+      "expected_behavior": "No; both Compose paths delegate to guarded exact-version help review, with no automatic private data collection, and explicit user Copy/Share.",
+      "forbidden_claims": [
+        "Compose directly invokes the chosen AI app without user review"
       ]
     }
   ]
