@@ -138,8 +138,9 @@ class AyaXmlCardView @JvmOverloads constructor(
     private fun findActivity(context: Context): Activity? {
         var current = context
         repeat(32) {
-            if (current is Activity) return current
-            val parent = (current as? ContextWrapper)?.baseContext ?: return null
+            val candidate = current
+            if (candidate is Activity) return candidate
+            val parent = (candidate as? ContextWrapper)?.baseContext ?: return null
             if (parent === current) return null
             current = parent
         }
