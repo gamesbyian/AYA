@@ -93,6 +93,8 @@ class QuestionFlowTest {
         find(By.desc("Open AYA help with a version-matched reference")).click()
         find(By.desc("Your question for the assistant (optional)"))
         find(By.res("android", "button2")).click()
+        assertTrue("Cancel dialog should disappear",
+            device.wait(Until.gone(By.desc("Your question for the assistant (optional)")), 5000))
         // Cancellation must close the composer and leave the host Activity
         // alive. The IME can still obscure a lower button on small emulators,
         // so visibility of that button is not a reliable lifecycle assertion.
