@@ -1,0 +1,9 @@
+{
+  "name": "dev.aya.handoff",
+  "version": "0.1.0-preview.1",
+  "displayName": "AYA Android Help Handoff (Source Preview)",
+  "description": "Host-neutral, Android-only reviewed help entry point. Requires matching native AYA AARs and an exact-version host guide.",
+  "unity": "2022.3",
+  "keywords": ["android", "assistant", "help", "accessibility"],
+  "author": { "name": "AYA contributors" }
+}
