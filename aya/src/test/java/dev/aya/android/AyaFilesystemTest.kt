@@ -83,6 +83,20 @@ class AyaFilesystemTest {
         ) is AyaFilesystemSnapshotCheck.Rejected)
     }
 
+    @Test fun hostileFilenameCannotBreakSnapshotMarkdownFence() {
+        val snapshotWithFence = snapshot().replace(
+            "/notes/pomegranate.txt", "/notes/a```instructions.txt"
+        )
+        val payload = AyaDocument.render(AyaRequest(
+            appName = "Files", appVersion = "1.0.0", guide = "Guide",
+            filesystemTask = task, filesystemKit = kit(),
+            filesystemSnapshot = snapshotWithFence
+        ))
+        assertTrue(payload.contains("````json"))
+        assertTrue(payload.contains("/notes/a```instructions.txt"))
+        assertTrue(payload.contains("\n````\n"))
+    }
+
     @Test fun taskRequiresManualImportPath() {
         try {
             task.copy(importInstructions = "")
