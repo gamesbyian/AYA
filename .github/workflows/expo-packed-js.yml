@@ -1,0 +1,64 @@
+name: Expo packed React Native JavaScript bundle
+on:
+  pull_request:
+    paths:
+      - 'integrations/expo/aya-expo/**'
+      - 'integrations/expo/guide-plugin/**'
+      - '.github/workflows/expo-packed-js.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/expo/aya-expo/**'
+      - 'integrations/expo/guide-plugin/**'
+      - '.github/workflows/expo-packed-js.yml'
+
+jobs:
+  packed-android-js:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Package actual unpublished AYA Expo npm modules
+        run: |
+          mkdir -p "$RUNNER_TEMP/aya-packs"
+          npm pack --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/aya-expo
+          npm pack --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/guide-plugin
+          test -s "$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz"
+          test -s "$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz"
+      - name: Install tarballs in standalone Metro consumer outside source checkout
+        run: |
+          HOST="$RUNNER_TEMP/aya-expo-js-consumer"
+          cp -R integrations/expo/aya-expo/ci-host "$HOST"
+          cd "$HOST"
+          npm pkg set "dependencies.aya-expo=file:$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz" "dependencies.aya-expo-guide=file:$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz"
+          npm install --no-fund --no-audit
+          npm ls aya-expo aya-expo-guide
+          node - <<'NODE'
+          const path = require('node:path');
+          for (const name of ['aya-expo', 'aya-expo-guide']) {
+            const json = require.resolve(name + '/package.json');
+            if (!json.startsWith(process.cwd() + path.sep + 'node_modules' + path.sep)) {
+              throw Error('Package is not installed within standalone host: ' + json);
+            }
+          }
+          NODE
+      - name: Export actual production Android JavaScript from the packaged adapter
+        env:
+          CI: '1'
+        run: |
+          cd "$RUNNER_TEMP/aya-expo-js-consumer"
+          npx expo export --platform android --output-dir "$RUNNER_TEMP/aya-expo-android-js" --no-bytecode --no-minify
+          find "$RUNNER_TEMP/aya-expo-android-js" -type f | sort
+          if ! find "$RUNNER_TEMP/aya-expo-android-js" -type f -name '*.js' | grep -q .; then
+            echo 'No compiled Android JavaScript bundle was exported' >&2
+            exit 1
+          fi
+          if ! grep -R -F -q 'AYA native module is missing' "$RUNNER_TEMP/aya-expo-android-js"; then
+            echo 'The packed AYA JS bridge appears absent from Metro output' >&2
+            exit 1
+          fi
+          echo 'Scope: Metro JS source/asset bundling only; native Activity, exact APK guide, assistant ingestion and device behavior are separate tests.'
