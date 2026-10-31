@@ -39,6 +39,23 @@ when (val result = Aya.launchFilesystemBundled(
 
 **This is an integration sketch.** `approvedFilesystemSnapshotJson`, `automationTextField` and `showError` belong to the host. They are intentionally not AYA scanner APIs. `QuestionOpened` and `PreviewOpened` describe only local UI. They do not signal that a third-party assistant opened a chat, read attachments or created a recipe.
 
+For a headless Android Studio or Compose action/node, use the **guarded** `AyaComponentAction.Filesystem` wrapper rather than bypassing version checks. It delegates to `Aya.launchFilesystemBundled()` and reports only local review/question/rejection:
+
+```kotlin
+val local = AyaComponentAction.Filesystem(
+    task = AyaFilesystemTask(
+        recipePurpose = "file cleanup recipe",
+        importInstructions = "Automation > Import recipe > Review > Approve"
+    ),
+    kitAsset = "aya-filesystem-kit.md",
+    askDirection = false,
+    approvedSnapshotJson = reviewedUserApprovedJson // optional, host-controlled
+).launch(activity, text = userTypedOperation)
+if (local is AyaBundledLaunchResult.Rejected) showError(local.reason)
+```
+
+The field `reviewedUserApprovedJson` is a host variable, not an AYA scanner. AYA does not receive the agent's completed recipe, execute filesystem mutations or claim any resulting deletion is safe.
+
 Use the [AYA Card UI Standard](../CARD_UI_STANDARD.md) for a contextual, outlined host-themed card. A generic `AyaCardView` currently launches the ordinary Help route. A filesystem automation card must call `launchFilesystemBundled`, disclose the extra kit and optional snapshot and preserve the same full editable review. Do not overwrite a Help card's expectations.
 
 ## Optional typed snapshot builder

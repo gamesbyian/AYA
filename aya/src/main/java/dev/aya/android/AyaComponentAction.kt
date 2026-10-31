@@ -70,4 +70,30 @@ sealed class AyaComponentAction {
                 askDirection = askDirection
             )
     }
+    /**
+     * Filesystem recipe-authoring handoff for hosts with a REAL importer.
+     * The optional snapshot is host-scanned, explicitly approved by the user,
+     * identity-checked, and never interpreted or executed by AYA.
+     */
+    data class Filesystem(
+        val task: AyaFilesystemTask,
+        val kitAsset: String = "aya-filesystem-kit.md",
+        val guideAsset: String = "aya-guide.md",
+        val screenName: String? = "Automation",
+        val askDirection: Boolean = true,
+        val approvedSnapshotJson: String? = null
+    ) : AyaComponentAction() {
+        override fun launch(activity: Activity, text: String?): AyaBundledLaunchResult =
+            Aya.launchFilesystemBundled(
+                activity = activity,
+                task = task,
+                kitAsset = kitAsset,
+                guideAsset = guideAsset,
+                screenName = screenName,
+                direction = text,
+                askDirection = askDirection,
+                snapshotJson = approvedSnapshotJson
+            )
+    }
+
 }

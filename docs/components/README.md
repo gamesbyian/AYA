@@ -76,7 +76,7 @@ The generated Kotlin is an **integration snippet** to paste or adapt, not an aut
 
 ### Runtime action API (first slice)
 
-`AyaComponentAction.Help`, `AyaComponentAction.GenerateImage`, and `AyaComponentAction.Translation` are typed Kotlin action configurations. Their `launch(activity, text)` methods delegate directly to the existing guarded `Aya.launch*Bundled()` entry points; they report only `AyaBundledLaunchResult` (local UI opened or rejected). The image and translation **Kotlin actions** are available independently of the help-only manifest v1; a future manifest revision must specify their complete verified task contracts before enabling automatic generation.
+`AyaComponentAction.Help`, `AyaComponentAction.GenerateImage`, `AyaComponentAction.Translation`, and `AyaComponentAction.Filesystem` are typed Kotlin action configurations. Their `launch(activity, text)` methods delegate directly to the existing guarded `Aya.launch*Bundled()` entry points; they report only `AyaBundledLaunchResult` (local UI opened or rejected). The image, translation and filesystem **Kotlin actions** are available independently of the help-only manifest v1; a future manifest revision must specify their complete verified task contracts before enabling automatic generation.
 
 ```kotlin
 val action = AyaComponentAction.Help(
