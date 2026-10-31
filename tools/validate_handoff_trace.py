@@ -82,6 +82,14 @@ def check_case(scenario: str, events: list[str]) -> None:
         raise TraceValidationError(scenario + " claimed copy before explicit request")
     if "share_unavailable" in events and not _after(events, "share_requested", "share_unavailable"):
         raise TraceValidationError(scenario + " claimed share failure before request")
+    if "question_opened" in events and "review_opened" in events and not _after(
+        events, "question_opened", "review_opened"
+    ):
+        raise TraceValidationError(scenario + " question composer opened after review")
+    if "review_approved" in events and not _after(
+        events, "review_opened", "review_approved"
+    ):
+        raise TraceValidationError(scenario + " approved before review")
     if "review_edited" in events:
         _ordered(events, ("review_opened", "review_edited"), scenario)
         if "review_approved" in events and any(
@@ -89,6 +97,11 @@ def check_case(scenario: str, events: list[str]) -> None:
             if event == "review_edited"
         ):
             raise TraceValidationError(scenario + " edit after approval")
+        if "review_cancelled" in events and any(
+            i > events.index("review_cancelled") for i, event in enumerate(events)
+            if event == "review_edited"
+        ):
+            raise TraceValidationError(scenario + " edit after cancellation")
     if "review_cancelled" in events and any(
         e in events for e in ("review_approved", "share_requested", "copy_requested",
                              "chooser_opened", "copy_succeeded")
