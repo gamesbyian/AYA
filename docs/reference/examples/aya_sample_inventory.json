@@ -2,7 +2,7 @@
   "schema_version": "aya-inventory/v1",
   "app_id": "dev.aya.sample",
   "app_version": "1.0.0",
-  "source_revision": "aya-sample-compose-dropin-v1",
+  "source_revision": "aya-sample-compose-drop-in-v1",
   "reviewed_at_utc": "2026-10-31T03:40:00Z",
   "items": [
     {
@@ -96,15 +96,15 @@
     {
       "id": "TASK-006",
       "kind": "task",
-      "title": "Use Compose AYA card or existing-button action",
+      "title": "Use the Compose card and headless action",
       "status": "AVAILABLE",
       "criticality": "medium",
-      "source_ref": "aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt;sample/src/main/java/dev/aya/sample/ComposeDemoActivity.kt"
+      "source_ref": "sample/src/main/java/dev/aya/sample/ComposeDemoActivity.kt;aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt"
     },
     {
       "id": "F-004",
       "kind": "feature",
-      "title": "Compose AYA drop-in and headless action",
+      "title": "Optional Compose drop-in and saveable draft",
       "status": "AVAILABLE",
       "criticality": "medium",
       "source_ref": "aya-compose/src/main/java/dev/aya/compose/AyaCompose.kt"

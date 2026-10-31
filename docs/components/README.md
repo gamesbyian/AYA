@@ -140,3 +140,7 @@ Coding-agent skills/templates should be offered as an optional convenience. No a
 A project may describe its **behaviour** as AYA-compatible without importing AYA code, provided an independent compatibility suite verifies the essentials: informed one-way user-controlled transfer, source-verified installed-version reference, review/edit and Copy fallback, safe URI grants, no response monitoring, truthful output-use instructions, accessibility, explicit exclusions and provider-neutral semantics. Use "AYA-compatible (self-implemented)" separately from "AYA SDK integrated"; neither label implies assistant ingestion. Never award a certification solely from manifest validation.
 
 See [implementation roadmap and acceptance matrix](ROADMAP.md).
+
+The generator can also emit Compose wrappers with `--format kotlin-compose` when the optional Compose adapter is installed.
+
+A first optional [Compose adapter](COMPOSE.md) now wraps the real View and provides `AyaCard` plus `rememberAyaLauncher` for native Compose hosts. It has its own library/consumer tests and keeps the core free of Compose dependencies. Compose is under integration testing, not publicly published.

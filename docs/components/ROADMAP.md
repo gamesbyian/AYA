@@ -104,3 +104,5 @@ Deliver:
 - A platform-neutral serialized run request for advanced modules: not necessary for help v1, design only after real adapter needs are measured.
 
 **Current cut:** build the minimal truthful Android/configurable foundation rather than publishing placeholder plugins. Expand distribution surfaces only after core acceptance.
+
+- **Initial source and sample added (CI pending):** optional `aya-compose` artifact providing `AyaCard` and `rememberAyaLauncher` backed by the core SDK. Verify Compose 2.x and activity lifecycle; preserve a non-Compose core.

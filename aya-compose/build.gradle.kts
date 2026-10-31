@@ -13,7 +13,10 @@ version = "0.1.0-SNAPSHOT"
 android {
     namespace = "dev.aya.compose"
     compileSdk = 35
-    defaultConfig { minSdk = 23 }
+    defaultConfig {
+        minSdk = 23
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
     buildFeatures { compose = true }
     publishing { singleVariant("release") { withSourcesJar() } }
     compileOptions {
@@ -25,9 +28,12 @@ android {
 
 dependencies {
     api(project(":aya"))
-    api("androidx.compose.ui:ui:1.7.8")
-    api("androidx.compose.runtime:runtime:1.7.8")
-    implementation("androidx.compose.runtime:runtime-saveable:1.7.8")
+    // Pinned to a Compose generation compatible with this repository's
+    // Android Gradle Plugin 8.7.3 / compileSdk 35 baseline.
+    api(platform("androidx.compose:compose-bom:2024.12.01"))
+    api("androidx.compose.ui:ui")
+    api("androidx.compose.runtime:runtime-saveable")
+    testImplementation("junit:junit:4.13.2")
 }
 
 afterEvaluate {
@@ -43,6 +49,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "Staging"
+                // Both AYA artifacts must be consumable from one local Maven repository.
                 url = uri(rootDir.resolve("aya/build/staging-maven"))
             }
         }

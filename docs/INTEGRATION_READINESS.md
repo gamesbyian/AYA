@@ -56,13 +56,3 @@ Choose one app with a known, reproducible public release and reviewable UI. Prod
 ## Standard host-card acceptance
 
 When a host embeds `AyaCardView`, apply [Card UI Standard v1](CARD_UI_STANDARD.md): verified host-specific explanation, host-styled border/corners/text, official monochrome icon, truthful proposed attachment disclosure, optional question entry, no duplicated composer, and an independent final privacy review. Verify Standard and Compact densities at 320 dp / 412 dp, with landscape, 200% font scaling, TalkBack, the IME, blank questions and Activity recreation. The host should scroll its containing screen when needed. This is an acceptance gate, not a claim that recipient ingestion has been verified.
-
-## Agent output import (when supported)
-
-- [ ] Host AYA card has a functional, optional **Import agent output** button and return instructions naming a real importer.
-- [ ] User chooses the file explicitly via SAF/host picker; no guessed provider folders, broad scans or unsolicited file reads.
-- [ ] Host validates bounded bytes against actual schema and version; metadata markers alone never authorize import.
-- [ ] Wrong-card file shows the verified correct destination, with explicit choice; ambiguous, invalid and foreign files have safe fallbacks.
-- [ ] Import preview and appropriate confirmation occur **before** applying; destructive/remote operations provide dry-run, environment and ownership checks, journal/rollback or recovery.
-- [ ] Optional chooser-target hint is off by default, opt-in, private to host and clearable; no recipient ingestion/saved-path claims.
-- [ ] Import UI and file lifecycle are tested independently of AI-agent outputs. See [module contract](OUTPUT_RETURN_IMPORT.md).

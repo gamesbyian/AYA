@@ -11,7 +11,7 @@ Some hosts need a model to generate a structured file, **not** a bitmap. For exa
 Existing commitments remain immutable:
 - user-supplied agent, no inference, billing, cloud account or new backend;
 - explicit preview, consent and one-way transfer;
-- no return callback, assistant output tracking or answer grading; **user-invoked file import** may be offered by the host, separately from agent handoff;
+- no return callback, assistant output tracking, answer grading or automatic re-import;
 - host owns final import validation, transaction, rendering and Undo;
 - recipient attachment acceptance depends on the target app.
 
@@ -33,7 +33,7 @@ Validate size and identity before sharing, keep the user's approved final text a
 - **Copy guide** for paste into chat;
 - **Save guide** for explicit manual attachment.
 
-The recipient should return a JSON file with a canonical root recipe, required seed/structure, bounded enum/numeric values and no undocumented keys. The user saves the result and imports it through ROYGBIV's existing JSON importer. A conforming host can expose the optional **Import agent output** card action, backed by the [Output Return & Import module](OUTPUT_RETURN_IMPORT.md); the current ROYGBIV integration must not be claimed to provide that Android helper unless separately implemented.
+The recipient should return a JSON file with a canonical root recipe, required seed/structure, bounded enum/numeric values and no undocumented keys. The user saves the result and manually imports into ROYGBIV's existing JSON importer.
 
 Browser file-share and Android `ACTION_SEND` have different compatibility surfaces. Do not extrapolate tested browser targets to the native Android SDK; verify each target independently.
 
@@ -45,7 +45,7 @@ For structured-result hosts, the reference author must include:
 3. Activation prerequisites, disabled states and field applicability for every mode. Explain that an inactive field can be valid JSON but visually ineffective.
 4. Interactions and ordering: where controls combine, override, mask or geometrically constrain one another.
 5. Effect scale distinctions: numeric 0–100 is **not** necessarily linear perceptual response. Only claim calibrated response curves if reproduced on actual output fixtures; record source revision and measured uncertainty.
-6. Minimum valid output example and top-level artifact shape; no envelope, fenced prose or explanatory fields inside the resulting `.json` file. An optional AYA envelope is only appropriate for formats that explicitly allow one; the native ROYGBIV recipe must retain its canonical root and be recognized by its real importer.
+6. Minimum valid output example and top-level artifact shape; no envelope, fenced prose or explanatory fields inside the resulting `.json` file.
 7. Modification guarantees: preserve all unrequested existing fields, locks and self-contained embedded assets.
 8. Safe, reproducible import instructions with warnings that normalization may discard unknown/invalid fields.
 9. Sample briefs, acceptable artifacts, invalid artifacts and independently tested expected visual properties.

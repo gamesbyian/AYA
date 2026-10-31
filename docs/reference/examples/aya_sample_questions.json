@@ -282,17 +282,31 @@
     },
     {
       "id": "Q-021",
-      "question": "How can I ask for help from the Compose demo instead of the ordinary Home card?",
+      "question": "How do I use AYA from the sample's Compose screen?",
       "support_status": "answerable",
       "risk": "medium",
       "evidence_ids": [
         "TASK-006",
         "F-004"
       ],
-      "expected_behavior": "From Home choose Open Compose drop-in demo. Use its optional question field or the prefilled existing Compose button. Both open local guarded, editable review before Copy or Share. Applying agent advice remains manual.",
+      "expected_behavior": "Use Home > Open Compose component demo, enter optional question in the compact AYA card or separate headless action field, then review and Copy/Share manually; no assistant response monitoring.",
       "forbidden_claims": [
-        "The Compose component sends the question without review",
-        "The Compose component receives the agent reply"
+        "Compose automatically sends or reads assistant replies"
+      ]
+    },
+    {
+      "id": "Q-022",
+      "question": "Does the Compose button bypass AYA's review or attach anything secretly?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "TASK-006",
+        "F-004",
+        "F-001"
+      ],
+      "expected_behavior": "No; both Compose paths delegate to guarded exact-version help review, with no automatic private data collection, and explicit user Copy/Share.",
+      "forbidden_claims": [
+        "Compose directly invokes the chosen AI app without user review"
       ]
     }
   ]

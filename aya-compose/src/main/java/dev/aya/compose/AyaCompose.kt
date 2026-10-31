@@ -6,11 +6,9 @@ import android.text.TextWatcher
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -20,33 +18,41 @@ import dev.aya.android.AyaCardView
 import dev.aya.android.AyaComponentAction
 
 /**
- * A thin, first-party Compose adapter. The host retains all packet authoring,
- * installed-version truth, review, sharing and final artifact import obligations.
- * The visible card uses the exact same Android View implementation as classic
- * host apps. Neither this library nor its callbacks can read assistant replies.
+ * An actual Compose drop-in for the host-themed, accessible AYA SDK card.
+ * The core SDK remains free of Compose dependencies, and the guarded review
+ * and Android Share logic stay in AyaCardView. No agent replies are observed.
  *
- * Host must provide Activity and arrange one sensible scrolling parent.
- * Use Compose key(stableHostCardId) when rendering cards in changing lists.
+ * [componentId] is a stable, nonblank key for the integration location.
+ * For repeated items in a LazyColumn, surround calls with Compose key(item.id).
+ * [initialQuestion] seeds a new draft; Compose saves/restores subsequent edits.
  */
 @Composable
 fun AyaCard(
     activity: Activity,
+    componentId: String,
     outputInstructions: String,
     modifier: Modifier = Modifier,
     guideAsset: String = "aya-guide.md",
     screenName: String? = null,
     title: String = "Ask Your Agent",
-    description: String = "Ask for help with this app. Review its reference before sharing.",
+    description: String = "Ask for help with this app. You can review the app reference before sharing it.",
     attachmentDisclosure: String = "App reference offered for sharing; your AI app may not accept files.",
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
+    cornerRadiusDp: Float = 12f,
+    initialQuestion: String = "",
+    onQuestionChanged: (String) -> Unit = {},
     onRejected: ((String) -> Unit)? = null
 ) {
-    // Compose is the sole state owner. Preserve a draft during recreation but
-    // never carry a private question into a different reference/screen scope.
-    var draft by rememberSaveable(guideAsset, screenName) { mutableStateOf("") }
-    val latestRejection = rememberUpdatedState(onRejected)
+    require(componentId.isNotBlank()) { "A stable componentId is required" }
+    require(outputInstructions.isNotBlank()) { "Host-specific output instructions are required" }
 
-    key(activity, guideAsset, screenName, title, description, densityMode) {
+    val draft = rememberSaveable(componentId) { mutableStateOf(initialQuestion) }
+    val currentQuestionChanged = rememberUpdatedState(onQuestionChanged)
+    val currentRejected = rememberUpdatedState(onRejected)
+
+    // Configuration changes recreate the native View, while the typed draft
+    // persists through Compose state. Dynamic copy is updated without rebuild.
+    key(activity, componentId, guideAsset, screenName, title, description, densityMode, cornerRadiusDp) {
         AndroidView(
             modifier = modifier,
             factory = { context ->
@@ -59,68 +65,52 @@ fun AyaCard(
                     description = description,
                     attachmentDisclosure = attachmentDisclosure,
                     outputInstructions = outputInstructions,
+                    cornerRadiusDp = cornerRadiusDp,
                     densityMode = densityMode,
                     onRejected = { reason ->
-                        val callback = latestRejection.value
-                        if (callback != null) callback(reason)
-                        else Toast.makeText(activity, "AYA unavailable: " + reason, Toast.LENGTH_LONG).show()
+                        val handler = currentRejected.value
+                        if (handler != null) handler(reason)
+                        else Toast.makeText(activity, "AYA unavailable: $reason", Toast.LENGTH_LONG).show()
                     }
                 ).apply {
-                    questionInput.setText(draft)
+                    questionInput.setText(draft.value)
                     questionInput.addTextChangedListener(object : TextWatcher {
-                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                            val updated = s?.toString().orEmpty()
-                            if (updated != draft) draft = updated
+                        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                        override fun afterTextChanged(s: Editable?) {
+                            val next = s?.toString().orEmpty()
+                            if (draft.value != next) {
+                                draft.value = next
+                                currentQuestionChanged.value(next)
+                            }
                         }
-                        override fun afterTextChanged(s: Editable?) {}
                     })
                 }
             },
             update = { card ->
                 card.setAttachmentDisclosure(attachmentDisclosure)
                 card.setOutputInstructions(outputInstructions)
-                // Avoid resetting cursor, selection or active IME composition
-                // during an ordinary recomposition.
-                if (card.questionInput.text.toString() != draft) card.questionInput.setText(draft)
+                if (card.questionInput.text.toString() != draft.value) {
+                    card.questionInput.setText(draft.value)
+                }
             }
         )
     }
 }
 
 /**
- * Headless action for an existing Compose button/menu item or visual workflow.
- * Call launch() only in a user event handler, never from a composable effect.
- * Result means local AYA UI opened/rejected, NOT recipient ingestion.
+ * Headless action for any Compose Button, menu item or graph trigger.
+ * Exposes ONLY local question/review opening or rejection, never recipient
+ * processing, assistant replies, or host-file import.
  */
-class AyaLauncher internal constructor(
-    private val dispatch: (String?) -> AyaBundledLaunchResult
-) {
-    fun launch(text: String? = null): AyaBundledLaunchResult = dispatch(text)
-}
-
 @Composable
 fun rememberAyaLauncher(
     activity: Activity,
-    action: AyaComponentAction,
-    onRejected: ((String) -> Unit)? = null
-): AyaLauncher {
-    val latestAction = rememberUpdatedState(action)
-    val latestRejection = rememberUpdatedState(onRejected)
-
-    return remember(activity) {
-        AyaLauncher { text ->
-            val result = if (activity.isFinishing || activity.isDestroyed) {
-                AyaBundledLaunchResult.Rejected("Host activity is no longer available.")
-            } else {
-                latestAction.value.launch(activity, text)
-            }
-            if (result is AyaBundledLaunchResult.Rejected) {
-                val callback = latestRejection.value
-                if (callback != null) callback(result.reason)
-                else Toast.makeText(activity, "AYA unavailable: " + result.reason, Toast.LENGTH_LONG).show()
-            }
-            result
-        }
+    action: AyaComponentAction
+): (String?) -> AyaBundledLaunchResult {
+    val currentActivity = rememberUpdatedState(activity)
+    val currentAction = rememberUpdatedState(action)
+    return remember {
+        { text: String? -> currentAction.value.launch(currentActivity.value, text) }
     }
 }

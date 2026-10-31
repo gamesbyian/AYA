@@ -82,3 +82,5 @@ On GitHub, use the provided Actions workflows. Do not claim tests were run witho
 ## Prioritization
 
 Prefer an integrated working handoff, truthful app-specific docs and real-device acceptance over additional speculative features or untested compatibility layers. Treat hallucinated user instructions and accidental sensitive disclosures as release-blocking defects.
+
+The optional [Compose adapter](docs/components/COMPOSE.md) must keep Android/Compose state correctly synchronized, use the existing native review, and require a truthful host-output instruction. Test both module consumption and staged AAR/POM consumption; do not introduce Compose dependencies into core `aya`.

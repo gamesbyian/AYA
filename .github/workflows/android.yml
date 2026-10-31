@@ -31,6 +31,10 @@ jobs:
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedAction.kt
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeCard.kt
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeAction.kt
+      - name: Compile generated Compose card and action in sample
+        run: |
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin-compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeCard.kt
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin-compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeAction.kt
       - name: Compile a generated XML card in the real sample app
         run: python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format android-xml > sample/src/main/res/layout/aya_generated_xml_card.xml
       - name: Safely scaffold Kotlin and XML cards in the consuming sample
