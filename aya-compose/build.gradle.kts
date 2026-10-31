@@ -43,7 +43,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "Staging"
-                url = uri(layout.buildDirectory.dir("staging-maven").get().asFile)
+                url = uri(rootDir.resolve("aya/build/staging-maven"))
             }
         }
     }
