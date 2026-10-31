@@ -30,7 +30,7 @@ class AyaCardUiTest {
             assertTrue(question.hint.toString().contains("optional"))
             instrumentation.runOnMainSync { question.setText("What does this sample demonstrate?") }
             assertEquals("What does this sample demonstrate?", question.text.toString())
-            assertTrue(card.childCount >= 3)
+            assertTrue(card.childCount >= 4)
         } finally {
             instrumentation.runOnMainSync { activity.finish() }
         }
@@ -45,7 +45,7 @@ class AyaCardUiTest {
         try {
             lateinit var card: AyaCardView
             instrumentation.runOnMainSync {
-                card = AyaCardView(context, activity, densityMode = AyaCardDensity.COMPACT)
+                card = AyaCardView(context, activity, outputInstructions = "Return to the sample and use the answer manually.", densityMode = AyaCardDensity.COMPACT)
             }
             assertEquals(1, card.questionInput.minLines)
             assertTrue(card.childCount >= 3)
