@@ -144,11 +144,12 @@ class AyaXmlCardView @JvmOverloads constructor(
         val header = LinearLayout(context).apply { orientation = HORIZONTAL }
         header.addView(ImageView(context).apply {
             setImageResource(R.drawable.aya_card_mark)
+            imageTintList = android.content.res.ColorStateList.valueOf(TextView(context).currentTextColor)
             contentDescription = null
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LayoutParams(dp(48), dp(48)))
+        }, LayoutParams(dp(48), dp(48)).apply { rightMargin = dp(8) })
         header.addView(TextView(context).apply {
-            text = "$heading\\n$description"
+            text = "$heading\n$description"
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
         }, LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         addView(header)
