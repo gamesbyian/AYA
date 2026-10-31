@@ -1,0 +1,93 @@
+name: Flutter AGP 9 built-in Kotlin migration experiment
+on:
+  pull_request:
+    paths:
+      - 'integrations/flutter/migration/**'
+      - 'integrations/flutter/aya_flutter/**'
+      - '.github/workflows/flutter-builtin-kotlin.yml'
+      - 'aya/**'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/flutter/migration/**'
+      - 'integrations/flutter/aya_flutter/**'
+      - '.github/workflows/flutter-builtin-kotlin.yml'
+      - 'aya/**'
+
+concurrency:
+  group: aya-flutter-builtinkotlin-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  builtin-kotlin-actual-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Confirm Flutter and Dart versions
+        run: flutter --version
+      - name: Stage canonical unpublished AYA Android AAR
+        run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
+      - name: Independently validate exact-version Flutter CI host reference
+        run: |
+          python3 tools/validate_guide.py --strict integrations/flutter/aya_flutter/ci-host/aya-guide.md
+          python3 tools/audit_reference.py integrations/flutter/aya_flutter/ci-host/aya-guide.md --inventory integrations/flutter/aya_flutter/ci-host/inventory.json --questions integrations/flutter/aya_flutter/ci-host/questions.json --strict
+          python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
+      - name: Prepare trial package without modifying legacy Flutter plugin
+        run: python3 integrations/flutter/migration/prepare_host.py prepare
+      - name: Generate actual Flutter Android host
+        working-directory: integrations/flutter/migration/generated/aya_flutter
+        run: flutter create --project-name aya_flutter_ci_host --platforms android example
+      - name: Configure AGP 9 host and exact APK-native guide
+        run: python3 integrations/flutter/migration/prepare_host.py configure
+      - name: Build actual Flutter Android APK with built-in Kotlin enabled
+        working-directory: integrations/flutter/migration/generated/aya_flutter/example
+        env:
+          AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
+          CI: '1'
+        run: |
+          flutter pub get
+          flutter build apk --debug
+      - name: Verify built-in Kotlin remains enabled and KGP is not applied
+        run: |
+          HOST=integrations/flutter/migration/generated/aya_flutter/example/android
+          grep -qx 'android.builtInKotlin=true' "$HOST/gradle.properties"
+          grep -qx 'android.newDsl=false' "$HOST/gradle.properties"
+          if grep -Eq '^[[:space:]]*id\("(kotlin-android|org.jetbrains.kotlin.android)"\)' "$HOST/app/build.gradle.kts"; then
+            echo 'Legacy Kotlin plugin applied to AGP 9 host' >&2
+            exit 1
+          fi
+          if grep -Eq "apply plugin: ['\"](kotlin-android|org.jetbrains.kotlin.android)['\"]" integrations/flutter/migration/generated/aya_flutter/android/build.gradle; then
+            echo 'Legacy Kotlin plugin applied by modern candidate' >&2
+            exit 1
+          fi
+      - name: Verify host APK identity, bundled guide, manifests and compiled native classes
+        run: |
+          APK=integrations/flutter/migration/generated/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk
+          AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -n "$AAPT" && test -x "$AAPT"
+          python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md --aapt "$AAPT"
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver
+      - name: Preserve experimental APK evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-flutter-built-in-kotlin-host
+          path: integrations/flutter/migration/generated/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+          if-no-files-found: error
