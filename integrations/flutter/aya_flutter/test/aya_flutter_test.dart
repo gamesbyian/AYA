@@ -1,0 +1,98 @@
+import 'package:aya_flutter/aya_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(AyaFlutter.channel, null);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('result reports only local review opening', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(AyaFlutter.channel, (call) async {
+      expect(call.method, 'openHelp');
+      expect(call.arguments['guideAsset'], 'aya-guide.md');
+      return {'status': 'review_opened'};
+    });
+    final response = await AyaFlutter.openHelp(question: 'example');
+    expect(response.status, AyaLocalStatus.reviewOpened);
+    expect(response.rejected, isFalse);
+  });
+
+  test('unknown native states reject instead of claiming success', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(AyaFlutter.channel, (call) async {
+      return {'status': 'agent_finished'};
+    });
+    final response = await AyaFlutter.openHelp(question: 'example');
+    expect(response.status, AyaLocalStatus.rejected);
+  });
+
+  test('invalid asset is rejected before native dispatch', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final response = await AyaFlutter.openHelp(guideAsset: '../guide.md');
+    expect(response.rejected, isTrue);
+  });
+
+  testWidgets('missing host output guidance never exposes an AYA button',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: AyaHelpCard(
+          description: 'Help',
+          attachmentDisclosure: 'A guide may be offered.',
+          outputInstructions: '',
+        ),
+      ),
+    ));
+    expect(find.textContaining('AYA is unavailable'), findsOneWidget);
+    expect(find.text('Ask Your Agent'), findsNothing);
+  });
+
+  testWidgets('host card discloses output path and only sends on user tap',
+      (tester) async {
+    var calls = 0;
+    String? question;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(AyaFlutter.channel, (call) async {
+      calls++;
+      question = call.arguments['question'] as String?;
+      return {'status': 'review_opened'};
+    });
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: AyaHelpCard(
+            description: 'How to use this app.',
+            attachmentDisclosure: 'A guide may be offered as text.',
+            outputInstructions: 'Follow the instructions manually.',
+          ),
+        ),
+      ),
+    ));
+    expect(find.textContaining('Follow the instructions manually.'), findsOneWidget);
+    expect(calls, 0);
+    await tester.enterText(find.byType(TextField), 'What is this screen?');
+    // Scope a temporary Android override to this one native-channel dispatch;
+    // Flutter's widget-test invariant requires it cleared before test exit.
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      await tester.tap(find.widgetWithText(FilledButton, 'Ask Your Agent'));
+      await tester.pumpAndSettle();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+    expect(calls, 1);
+    expect(question, 'What is this screen?');
+  });
+}

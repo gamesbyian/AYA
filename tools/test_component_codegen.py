@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, android_xml_snippet, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
+from component_codegen import flutter_snippet, ComponentError, android_xml_snippet, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -128,6 +128,21 @@ class ComponentCodegenTest(unittest.TestCase):
         self.assertIn("AyaComponentAction.Help(", code)
         self.assertIn("askQuestion = false", code)
         self.assertNotIn("ACTION_SEND", code)
+
+    def test_flutter_card_preserves_disclosure_and_review(self):
+        code = flutter_snippet(self.manifest)
+        self.assertIn("AyaHelpCard(", code)
+        self.assertIn("outputInstructions:", code)
+        self.assertIn("attachmentDisclosure:", code)
+        self.assertIn("restorationId:", code)
+        self.assertNotIn("ACTION_SEND", code)
+
+    def test_flutter_action_carries_only_local_help_request(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": False}
+        code = flutter_snippet(self.manifest)
+        self.assertIn("AyaFlutter.openHelp(", code)
+        self.assertIn("askQuestion: false", code)
+        self.assertNotIn("onAgentAnswered", code)
 
     def test_bad_action_boolean_rejected(self):
         self.manifest["presentation"] = {"kind": "action", "askQuestion": "false"}

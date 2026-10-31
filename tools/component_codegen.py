@@ -230,12 +230,59 @@ def android_xml_snippet(m: dict[str, Any]) -> str:
     return "<dev.aya.android.AyaXmlCardView" + chr(10) + "    " + (chr(10) + "    ").join(attributes) + " />" + chr(10)
 
 
+def flutter_snippet(m: dict[str, Any]) -> str:
+    """Emit Dart help card or headless action for the optional Flutter plugin.
+
+    Only declarative source is generated; the real Android AYA AAR must be
+    installed and an exact-version host reference independently supplied.
+    """
+    m = validate(m)
+    p = m["presentation"]
+    q = kotlin_quote  # Both Kotlin and Dart double-quoted strings escape $.
+    name = kotlin_function_name("render" if p["kind"] == "card" else "launch", m["id"])
+    if p["kind"] == "card":
+        lines = [
+            "// AYA source-only Flutter component: " + m["id"],
+            "import 'package:flutter/widgets.dart';",
+            "import 'package:aya_flutter/aya_flutter.dart';",
+            "",
+            "class " + name + " extends StatelessWidget {",
+            "  const " + name + "({super.key});",
+            "  @override",
+            "  Widget build(BuildContext context) => AyaHelpCard(",
+            "    key: const ValueKey(" + q(m["id"]) + "),",
+            "    guideAsset: " + q(m["guideAsset"]) + ",",
+            "    title: " + q(p["title"]) + ",",
+            "    description: " + q(p["description"]) + ",",
+            "    attachmentDisclosure: " + q(p["attachmentDisclosure"]) + ",",
+            "    outputInstructions: " + q(p["outputInstructions"]) + ",",
+            "    restorationId: " + q(m["id"]) + ",",
+        ]
+        if "screenName" in m:
+            lines.append("    screenName: " + q(m["screenName"]) + ",")
+        lines += ["  );", "}"]
+    else:
+        lines = [
+            "// AYA source-only Flutter action: " + m["id"],
+            "import 'package:aya_flutter/aya_flutter.dart';",
+            "",
+            "Future<AyaLocalResult> " + name + "(String question) => AyaFlutter.openHelp(",
+            "  guideAsset: " + q(m["guideAsset"]) + ",",
+            "  question: question,",
+            "  askQuestion: " + str(p["askQuestion"]).lower() + ",",
+        ]
+        if "screenName" in m:
+            lines.append("  screenName: " + q(m["screenName"]) + ",")
+        lines += [");"]
+    return "\n".join(lines) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path, help="static component JSON configuration")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="validate configuration without generating code")
-    group.add_argument("--format", choices=("kotlin", "compose", "android-xml"), help="emit deterministic Android Kotlin source")
+    group.add_argument("--format", choices=("kotlin", "compose", "android-xml", "flutter"), help="emit deterministic Android Kotlin source")
     args = parser.parse_args(argv)
     try:
         config = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -250,6 +297,8 @@ def main(argv: list[str] | None = None) -> int:
             print(android_xml_snippet(config), end="")
         elif args.format == "compose":
             print(compose_snippet(config), end="")
+        elif args.format == "flutter":
+            print(flutter_snippet(config), end="")
         else:
             print(f"Valid AYA component/v1: {config['id']} ({config['presentation']['kind']})")
     except ComponentError as exc:
