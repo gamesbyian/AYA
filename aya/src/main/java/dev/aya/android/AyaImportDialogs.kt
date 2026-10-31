@@ -58,14 +58,22 @@ object AyaImportDialogs {
                     if (onChooseAnotherFile != null) setPositiveButton("Choose another file") { _, _ -> onChooseAnotherFile() }
                 }.show()
             is AyaImportDecision.Ambiguous -> {
-                val options = decision.routes.map { it.title }.toTypedArray()
-                AlertDialog.Builder(activity)
-                    .setTitle("Which importer should handle this file?")
-                    .setItems(options) { _, index ->
-                        onChooseAmbiguousRoute?.invoke(decision.routes[index])
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                if (onChooseAmbiguousRoute == null) {
+                    AlertDialog.Builder(activity)
+                        .setTitle("More than one importer recognizes this file")
+                        .setMessage("Choose the appropriate importer in the host app. Nothing has been imported.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                } else {
+                    val options = decision.routes.map { it.title }.toTypedArray()
+                    AlertDialog.Builder(activity)
+                        .setTitle("Which importer should handle this file?")
+                        .setItems(options) { _, index ->
+                            onChooseAmbiguousRoute.invoke(decision.routes[index])
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
             }
         }
     }
