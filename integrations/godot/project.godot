@@ -1,0 +1,8 @@
+config_version=5
+
+[application]
+config/name="AYA addon editor smoke"
+run/main_scene="res://aya_smoke.tscn"
+
+[editor_plugins]
+enabled=PackedStringArray("res://addons/AYA/plugin.cfg")
