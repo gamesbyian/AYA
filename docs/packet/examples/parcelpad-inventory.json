@@ -1,0 +1,87 @@
+{
+  "schema_version": "aya-packet-inventory/v1",
+  "app_id": "dev.parcelpad.example",
+  "app_version": "1.0.0",
+  "source_revision": "fictional-fixture-1",
+  "inventory_method": "Invented independent teaching task map, not from a real released app",
+  "items": [
+    {
+      "id": "FACT-001",
+      "profiles": [
+        "help",
+        "creative",
+        "structured",
+        "translation"
+      ],
+      "criticality": "low",
+      "source_ref": "source_code"
+    },
+    {
+      "id": "FACT-002",
+      "profiles": [
+        "help",
+        "creative",
+        "structured",
+        "translation"
+      ],
+      "criticality": "high",
+      "source_ref": "acceptance_test"
+    },
+    {
+      "id": "FACT-003",
+      "profiles": [
+        "creative"
+      ],
+      "criticality": "low",
+      "source_ref": "source_code"
+    },
+    {
+      "id": "FACT-004",
+      "profiles": [
+        "creative"
+      ],
+      "criticality": "low",
+      "source_ref": "source_code"
+    },
+    {
+      "id": "FACT-005",
+      "profiles": [
+        "structured"
+      ],
+      "criticality": "low",
+      "source_ref": "official_contract"
+    },
+    {
+      "id": "FACT-006",
+      "profiles": [
+        "structured"
+      ],
+      "criticality": "low",
+      "source_ref": "acceptance_test"
+    },
+    {
+      "id": "FACT-007",
+      "profiles": [
+        "translation"
+      ],
+      "criticality": "low",
+      "source_ref": "source_code"
+    },
+    {
+      "id": "FACT-008",
+      "profiles": [
+        "translation"
+      ],
+      "criticality": "medium",
+      "source_ref": "acceptance_test"
+    },
+    {
+      "id": "FACT-009",
+      "profiles": [
+        "help"
+      ],
+      "criticality": "low",
+      "source_ref": "acceptance_test"
+    }
+  ]
+}
