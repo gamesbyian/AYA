@@ -4,6 +4,8 @@ import android.widget.Button
 import java.io.ByteArrayOutputStream
 import android.widget.EditText
 import dev.aya.android.AyaCardView
+import dev.aya.android.AyaBundledLaunchResult
+import dev.aya.android.AyaComponentAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -83,6 +85,36 @@ class QuestionFlowTest {
             assertTrue("Card action should be enabled for blank or nonblank questions", button.isEnabled)
             button.performClick()
         }
+    }
+
+    @Test fun typedComponentActionUsesVersionGuardAndOpensReviewedDocument() {
+        val question = "How is this component integrated into the sample?"
+        scenario.scenario.onActivity { activity ->
+            val result = AyaComponentAction.Help(
+                guideAsset = "aya-guide.md",
+                screenName = "Home",
+                askQuestion = false
+            ).launch(activity, text = question)
+            assertTrue("Only the local review opening can be reported",
+                result is AyaBundledLaunchResult.PreviewOpened)
+        }
+        val preview = find(By.desc("Reviewed AYA help document"))
+        assertTrue("Typed action must preserve the supplied question", preview.text.contains(question))
+        assertFalse("Host-provided question must not trigger duplicate entry",
+            device.hasObject(By.desc("Your question for the assistant (optional)")))
+    }
+
+    @Test fun typedComponentActionRejectsMissingBundledGuideWithoutOpeningReview() {
+        scenario.scenario.onActivity { activity ->
+            val result = AyaComponentAction.Help(
+                guideAsset = "nonexistent-aya-guide.md",
+                askQuestion = false
+            ).launch(activity, text = "Will not be shared")
+            assertTrue("Invalid/missing reference must not fall back to raw launch",
+                result is AyaBundledLaunchResult.Rejected)
+        }
+        assertFalse("No review should be shown for a missing guide",
+            device.hasObject(By.desc("Reviewed AYA help document")))
     }
 
     @Test fun cardQuestionFeedsTheActualReviewedDocumentWithoutDuplicateComposer() {
