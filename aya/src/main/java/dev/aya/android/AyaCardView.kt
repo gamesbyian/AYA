@@ -55,7 +55,7 @@ class AyaCardView(
         background = GradientDrawable().apply {
             setColor(themedColor(android.R.attr.colorBackground, 0xffffffff.toInt()))
             setStroke(dp(1), outline)
-            cornerRadius = dpF(cornerRadiusDp)
+            cornerRadius = dpF(cornerRadiusDp.coerceAtLeast(0f))
         }
         val inset = if (compact) 12 else 16
         setPadding(dp(inset), dp(inset), dp(inset), dp(inset))
@@ -95,7 +95,8 @@ class AyaCardView(
             hint = "What would you like help with? (optional)"
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             minLines = if (compact) 1 else 2
-            maxLines = if (compact) 3 else 5
+            setHorizontallyScrolling(false)
+            // Grow with input; the host screen, rather than an inner card viewport, scrolls.
             setSingleLine(false)
             contentDescription = "Question for your agent, optional"
             id = View.generateViewId()
