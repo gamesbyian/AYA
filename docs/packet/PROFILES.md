@@ -25,6 +25,8 @@ This profile currently has a documented [portable contract](../STRUCTURED_ARTIFA
 
 Use the [Translation Kit developer authoring guide](../translation/AUTHORING.md) and the exact-version `aya-translation-kit.md`. Its output schema must be generated from the real pack importer, with a source catalog, Rosetta meanings and counterexamples. If there is no importer, the app must not display the AYA generation card. The typed packet compiler can supply reusable semantic facts, but does not replace the seven-section kit. Keep ordinary Language UI primary.
 
+For all profiles, run a [controlled agent trial ledger](EVALUATION.md) on the exact compiled packet and separately verify import or action results, where applicable. Never infer correctness from a generated text file alone.
+
 ## Relationship to the Android SDK
 
 The compiler can emit a bounded full-context `--brief-output` for request-only paths, but the host must explicitly use it and preserve final user edits. If this fails its length check, use full reviewed attachment and do not silently omit facts.
