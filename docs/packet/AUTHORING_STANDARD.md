@@ -2,6 +2,10 @@
 
 This document is normative for all AYA host integrations. It supplements the [12-section AYA-RAS Help Reference](../reference/AUTHORING_STANDARD.md), [Creative extension](../reference/CREATIVE_AUTHORING.md), [structured artifact profile](../STRUCTURED_ARTIFACT_HANDOFF.md), and [Translation Kit authoring](../translation/AUTHORING.md). Module-specific details cannot override its truth, privacy or disclosure boundaries.
 
+## Upstream prerequisite: understand the product
+
+Before extracting facts for a packet, follow [AYA Application Understanding Framework](../understanding/README.md). Build a product thesis, domain ontology, goal-to-capability map, design principles and contradictions between intended, implemented, observed and expected behavior. Consult an authorized project director adaptively when material product interpretation is unresolved; record scoped decisions and deferrals. The AUF model informs shared facts but must not be treated as proof that intended features ship. See the [Director Consultation Protocol](../understanding/CONSULTATION.md).
+
 ## 1. Recover product reality before writing
 
 Pin the **actual distributed app**: package, exact versionName/versionCode, variant, flavor, platform, feature flags and source commit. Never infer shipping behavior from open PRs, plans, tests that were not executed, or examples. Survey (a) navigational destinations/activities/Compose routes; (b) control callbacks, reducer actions, storage, remote calls; (c) strings and semantics; (d) permissions, lifecycle and accessibility; (e) service/provider variants and failures. Trace an action through observable UI, state persistence, and any remote consequences. Build a state matrix: absent/available/disabled, offline, permission denied, local/remote, concurrent changes, restart, retry, failure, rollback.
