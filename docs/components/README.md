@@ -62,6 +62,8 @@ See [JSON Schema](aya-component-v1.schema.json) and [sample fixture](examples/sa
 
 A `card` includes its own optional editable question and launches local review. An `action` is headless: its host may supply `question` at invocation time. Neither offers a runtime field that bypasses review, bypasses guide validation, forces a recipient, or automatically attaches additional user files.
 
+The generator can also emit Compose wrappers with `--format kotlin-compose` when the optional Compose adapter is installed.
+
 Example generator:
 
 ```sh

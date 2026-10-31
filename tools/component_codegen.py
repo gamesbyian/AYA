@@ -137,12 +137,61 @@ def kotlin_snippet(m: dict[str, Any]) -> str:
     )
 
 
+def compose_snippet(m: dict[str, Any]) -> str:
+    """Emit a standalone @Composable wrapper using the optional aya-compose AAR."""
+    m = validate(m)
+    p = m["presentation"]
+    screen = f",\\n        screenName = {kotlin_quote(m['screenName'])}" if "screenName" in m else ""
+    if p["kind"] == "card":
+        function = kotlin_function_name("render", m["id"])
+        return (
+            "// AYA component: " + m["id"] + "\\n"
+            "import android.app.Activity\\n"
+            "import androidx.compose.runtime.Composable\\n"
+            "import androidx.compose.ui.Modifier\\n"
+            "import dev.aya.android.AyaCardDensity\\n"
+            "import dev.aya.compose.AyaCard\\n\\n"
+            "@Composable\\n"
+            "fun " + function + "(activity: Activity, modifier: Modifier = Modifier) {\\n"
+            "    AyaCard(\\n"
+            "        activity = activity,\\n"
+            "        componentId = " + kotlin_quote(m["id"]) + ",\\n"
+            "        modifier = modifier,\\n"
+            "        guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\\n"
+            "        title = " + kotlin_quote(p["title"]) + ",\\n"
+            "        description = " + kotlin_quote(p["description"]) + ",\\n"
+            "        attachmentDisclosure = " + kotlin_quote(p["attachmentDisclosure"]) + ",\\n"
+            "        outputInstructions = " + kotlin_quote(p["outputInstructions"]) + ",\\n"
+            "        densityMode = AyaCardDensity." + p["density"].upper() + "\\n"
+            "    )\\n"
+            "}\\n"
+        )
+    function = kotlin_function_name("remember", m["id"])
+    return (
+        "// AYA component: " + m["id"] + "\\n"
+        "import android.app.Activity\\n"
+        "import androidx.compose.runtime.Composable\\n"
+        "import androidx.compose.runtime.remember\\n"
+        "import dev.aya.android.AyaBundledLaunchResult\\n"
+        "import dev.aya.android.AyaComponentAction\\n"
+        "import dev.aya.compose.rememberAyaLauncher\\n\\n"
+        "@Composable\\n"
+        "fun " + function + "(activity: Activity): (String?) -> AyaBundledLaunchResult {\\n"
+        "    val action = remember { AyaComponentAction.Help(\\n"
+        "        guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\\n"
+        "        askQuestion = " + str(p["askQuestion"]).lower() + "\\n"
+        "    ) }\\n"
+        "    return rememberAyaLauncher(activity, action)\\n"
+        "}\\n"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path, help="static component JSON configuration")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="validate configuration without generating code")
-    group.add_argument("--format", choices=("kotlin",), help="emit deterministic Android Kotlin source")
+    group.add_argument("--format", choices=("kotlin", "kotlin-compose"), help="emit deterministic Android Kotlin source")
     args = parser.parse_args(argv)
     try:
         config = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -152,6 +201,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if args.format == "kotlin":
         print(kotlin_snippet(config), end="")
+    elif args.format == "kotlin-compose":
+        print(compose_snippet(config), end="")
     else:
         print(f"Valid AYA component/v1: {config['id']} ({config['presentation']['kind']})")
     return 0

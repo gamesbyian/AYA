@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
+from component_codegen import ComponentError, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -74,6 +74,22 @@ class ComponentCodegenTest(unittest.TestCase):
         self.manifest["presentation"]["outputInstructions"] = "  "
         with self.assertRaises(ComponentError):
             validate(self.manifest)
+
+    def test_compose_card_codegen_preserves_stable_id_and_output_contract(self):
+        source = compose_snippet(self.manifest)
+        self.assertIn("import dev.aya.compose.AyaCard", source)
+        self.assertIn("componentId = \\"sample.help.home\\"", source)
+        self.assertIn("outputInstructions = ", source)
+        self.assertIn("AyaCardDensity.STANDARD", source)
+        self.assertNotIn("Aya.launch(", source)
+
+    def test_compose_action_codegen_uses_guarded_launcher(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": False}
+        source = compose_snippet(self.manifest)
+        self.assertIn("rememberAyaLauncher(activity, action)", source)
+        self.assertIn("AyaComponentAction.Help(", source)
+        self.assertIn("askQuestion = false", source)
+        self.assertNotIn("ACTION_SEND", source)
 
     def test_kotlin_strings_never_interpolate_or_break_syntax(self):
         quoted = kotlin_quote('hello $token "quote" \\ next\nline')

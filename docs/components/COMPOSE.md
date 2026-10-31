@@ -22,6 +22,15 @@ Add the Kotlin 2.0+ Compose Compiler Gradle plugin matching your Kotlin version 
 
 Bundle a developer-authored, audited, installed-version-matched `app/src/main/assets/aya-guide.md` in the **host APK**, not just the library. Follow [AYA-AUF](../understanding/README.md), [AYA-RAS](../reference/INDEX.md) and the [Packet Authoring Standard](../packet/README.md). Version-guard failure means no review/share.
 
+## Generate a drop-in Compose component from a manifest
+
+```sh
+python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin-compose
+python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin-compose
+```
+
+This emits a compilable `@Composable` wrapper for a card or an `@Composable` function returning a headless action. Generated function names include the stable component ID and a short collision-resistant suffix, so separate cards can coexist. The output is **source to integrate into the host project**, not an installed FlutterFlow or Compose marketplace plugin. The CI compiles both generated forms inside the first-party sample.
+
 ## Visible card
 
 ```kotlin
