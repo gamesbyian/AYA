@@ -13,8 +13,7 @@ IGNORE = {"tools/test_module_portability.py"}
 # Known historical leaks. This test lives in tools; no AYA module depends on it.
 UNRELATED_HOSTS = re.compile(
     r"\b(?:ROYGBIV|Wallgen|Chunks|Expository|Glimpse|UR[- ]?Recomp|Uniracers|Plex)\b"
-    r"|github\.com/gamesbyian/(?!AYA(?:/|\b))[\w.-]+",
-    re.IGNORECASE,
+    r"|(?i:github\.com/gamesbyian/)(?!(?i:AYA)(?:/|\b))[\w.-]+",
 )
 
 
@@ -41,6 +40,8 @@ class ModulePortabilityTest(unittest.TestCase):
         self.assertRegex("https://github.com/gamesbyian/wallgen/tree/branch", UNRELATED_HOSTS)
         self.assertNotRegex("https://github.com/gamesbyian/AYA/issues/3", UNRELATED_HOSTS)
         self.assertNotRegex("HarborFiles and ParcelPad are fictional", UNRELATED_HOSTS)
+        self.assertNotRegex("The transfer arrives in chunks", UNRELATED_HOSTS)
+        self.assertNotRegex("A glimpse of a screenshot", UNRELATED_HOSTS)
 
 
 if __name__ == "__main__":
