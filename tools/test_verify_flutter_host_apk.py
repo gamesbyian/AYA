@@ -18,6 +18,10 @@ def fake_runner(*, name=APP_ID, version="1.0.0", provider=True, receiver=True):
             return Mock(returncode=0, stdout=(
                 f"package: name='{name}' versionCode='1' versionName='{version}'\n"
             ), stderr="")
+        # aapt requires "xmltree <apk> AndroidManifest.xml" in this order.
+        if not (len(argv) == 5 and argv[3].endswith(".apk") and
+                argv[4] == "AndroidManifest.xml"):
+            return Mock(returncode=1, stdout="", stderr="bad aapt xmltree argument order")
         manifest = (("androidx.core.content.FileProvider\n" +
                       name + ".aya.files\n") if provider else "")
         if receiver:

@@ -63,6 +63,7 @@ def check_apk(
 
     def aapt_dump(*args: str) -> str:
         output = command_runner(
+            [aapt, "dump", *args] if args[0] == "xmltree" else
             [aapt, "dump", *args, str(apk_path)],
             capture_output=True, text=True, check=False,
         )
@@ -82,7 +83,7 @@ def check_apk(
             f"{metadata['app_id']}@{metadata['app_version_min']}"
         )
 
-    xml = aapt_dump("xmltree", "AndroidManifest.xml")
+    xml = aapt_dump("xmltree", str(apk_path), "AndroidManifest.xml")
     for expected in (
         "androidx.core.content.FileProvider",
         package_id + ".aya.files",
