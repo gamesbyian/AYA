@@ -22,6 +22,8 @@ Cards expected to produce host-importable files should include a secondary **Imp
 
 Upon user file selection, use the [Output Return & Import module](OUTPUT_RETURN_IMPORT.md): bounded read, content-based artifact registry, schema validation and preview. Wrong-card results should offer routing to the correct host importer. Unknown/incompatible files receive explanations and a safe choose-another-file fallback. Any destructive change requires domain-specific dry-run, user confirmation and safe transaction controls; AYA itself performs no import.
 
+For specialized cards, supply `onAskRequested = { userInput -> ... }` to invoke the actual guarded module-specific API, and `questionHint` for its task wording. Default `AyaCardView` behaviour continues using the version-verified Help reference. Never bypass a module’s validation or report preview success when its guarded API rejects.
+
 The return instruction should explicitly mention the import action where it exists, while still explaining that users must save their agent's result first. Provider-choice hints are optional local-only opt-in; never scan storage or claim AYA saw the agent's output.
 
 ## Conforming densities
