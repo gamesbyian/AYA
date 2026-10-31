@@ -4,12 +4,18 @@ on:
     paths:
       - 'integrations/flutter/**'
       - 'aya/**'
+      - 'tools/component_codegen.py'
+      - 'tools/test_component_codegen.py'
+      - 'docs/components/examples/**'
       - '.github/workflows/flutter.yml'
   push:
     branches: [main]
     paths:
       - 'integrations/flutter/**'
       - 'aya/**'
+      - 'tools/component_codegen.py'
+      - 'tools/test_component_codegen.py'
+      - 'docs/components/examples/**'
       - '.github/workflows/flutter.yml'
 
 jobs:
