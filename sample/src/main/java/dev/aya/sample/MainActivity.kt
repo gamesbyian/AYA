@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -57,9 +58,16 @@ class MainActivity : Activity() {
         })
         // The host scrolls when large fonts or the keyboard exceed the viewport;
         // the AYA card itself does not introduce a nested scroll container.
+        window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
         setContentView(ScrollView(this).apply {
             isFillViewport = true
+            isFocusableInTouchMode = true
             addView(column)
+            // Prevent a newly-created card EditText from summoning the IME on entry.
+            requestFocus()
         })
     }
 }
