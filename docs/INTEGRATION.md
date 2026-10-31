@@ -68,7 +68,7 @@ The full envelope also needs `locale`, `guide_revision`, `source_revision`, `las
 
 ## Optional standardized host card
 
-For a recognisable in-app AYA entry point, use the [AYA Card UI Standard v1](CARD_UI_STANDARD.md). `AyaCardView` uses host theme colours, a tinted vector icon, an outlined panel, a contextual explanation, attachment disclosure, an optional question field and an explicit handoff action. It does **not** add an AI provider or automatically transmit any data. Both `STANDARD` and `COMPACT` densities share the same safe local review.
+For a recognisable in-app AYA entry point, use the [AYA Card UI Standard v1](CARD_UI_STANDARD.md). `AyaCardView` uses host theme colours, a tinted vector icon, an outlined panel, a contextual explanation, attachment disclosure, a required verified return/use instruction, an optional question field and an explicit handoff action. It does **not** add an AI provider or automatically transmit any data. Both `STANDARD` and `COMPACT` densities share the same safe local review.
 
 ```kotlin
 val ayaCard = AyaCardView(
@@ -77,6 +77,7 @@ val ayaCard = AyaCardView(
     screenName = "Connections",
     description = "Ask your agent about connection settings or errors.",
     attachmentDisclosure = "A reference guide will be offered to your AI app; file acceptance varies.",
+    outputInstructions = "Return here and apply the suggested connection settings manually.",
     densityMode = AyaCardDensity.COMPACT, // optional; defaults to STANDARD
     cornerRadiusDp = 0f // use square corners if the host design is square
 )
@@ -85,7 +86,7 @@ ayaCard.questionInput.id = R.id.your_aya_question // stable host-owned ID for dr
 container.addView(ayaCard)
 ```
 
-Put the card inside a **host-managed scroll container** if the screen might exceed the viewport with large text or the keyboard. Do not embed another scrolling panel inside the card. This View API also works within Compose via `AndroidView`, without changing AYA's core dependency graph. The supplied card currently handles the **standard help reference** route only: creative, structured-artifact and translation tasks must retain their specific guarded launch APIs and disclose their actual attachment behaviour rather than reusing a help-specific promise.
+Put the card inside a **host-managed scroll container** if the screen might exceed the viewport with large text or the keyboard. Do not embed another scrolling panel inside the card. This View API also works within Compose via `AndroidView`, without changing AYA's core dependency graph. The output-use instruction is mandatory: tell the user how to **use or import** the agent's result through real host controls, or explicitly describe manual use if no importer exists. Do not promise AYA imports or tracks results. The supplied card currently handles the **standard help reference** route only: creative, structured-artifact and translation tasks must retain their specific guarded launch APIs and disclose their actual attachment behaviour rather than reusing a help-specific promise.
 
 ## 3. Connect the help button and question editor
 
