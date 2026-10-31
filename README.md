@@ -16,7 +16,7 @@ Apps can offer ordinary **Language** settings (device language, installed langua
 
 **Start here:** [Translation module and Kotlin usage](docs/translation/README.md), [app-specific kit authoring standard](docs/translation/AUTHORING.md), [fictional complete kit](docs/translation/examples/parcelpad-translation-kit.md), [output schema](docs/translation/examples/parcelpad-output.schema.json), and [Pirate pack example](docs/translation/examples/parcelpad-pirate.pack.json).
 
-**Implementation status:** the typed task/verifier and guarded Android handoff are implemented on this branch; no host language-pack runtime, generator, gallery or real-recipient acceptance is implemented or verified. This module is optional and does not require an AI account for normal language settings.
+**Implementation status:** the typed task/verifier and guarded Android handoff are implemented in the SDK; no host language-pack runtime, generator, gallery or real-recipient acceptance is implemented or verified. This module is optional and does not require an AI account for normal language settings.
 
 ## Structured artifact handoffs
 
