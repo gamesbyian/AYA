@@ -28,7 +28,7 @@ Developer and director
   -> version-matched assets packaged into host APK
   -> aya-component/v1 (declarative, build-time help wiring)
        | Android Studio/Views    -> AyaCardView or AyaComponentAction.Help
-       | Compose                -> AndroidView wrapper (dedicated composable planned)
+       | Compose                -> optional aya-compose adapter (source/CI acceptance pending)
        | Flutter/FlutterFlow    -> future Dart plugin + visual widget/action
        | React Native/Expo      -> future native module + JS component/action
        | Godot                  -> future Android v2 addon + inspector node/signals
@@ -91,7 +91,7 @@ if (result is AyaBundledLaunchResult.Rejected) {
 // No result from any assistant is available here.
 ```
 
-For a simple embedded card, use `AyaCardView(context, activity, outputInstructions = "...")` as documented in [Card UI Standard](../CARD_UI_STANDARD.md). Compose can currently wrap that View with `AndroidView`. Avoid adding Compose as a transitive dependency of the core runtime.
+For a simple embedded card, use `AyaCardView(context, activity, outputInstructions = "...")` as documented in [Card UI Standard](../CARD_UI_STANDARD.md). Compose hosts can use the optional [AyaCard and rememberAyaLauncher adapter](COMPOSE.md), which wraps the established Android card without adding Compose as a dependency of the core runtime. The same help-only manifest can generate Compose snippets with `--format compose`.
 
 ## Adapter compatibility contract
 

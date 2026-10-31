@@ -3,6 +3,10 @@
         android:label="AYA Sample"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
+            android:name=".ComposeDemoActivity"
+            android:exported="false"
+            android:label="AYA Compose Demo" />
+        <activity
             android:name=".ArtworkActivity"
             android:exported="false"
             android:label="AYA Artwork Demo" />

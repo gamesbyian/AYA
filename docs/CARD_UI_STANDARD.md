@@ -16,16 +16,6 @@
 10. **Every card explains what to do after the agent replies.** This is a visible, short, host-authored instruction: how to save and import a generated artifact using a real host control, where to paste/apply a result, or how to follow advice manually when there is no importable output. Say explicitly when nothing is imported or applied automatically. Never invent a menu path or imply AYA watches the recipient. A card whose host-specific return path is unknown must use a truthful manual-use explanation rather than claiming an import mechanism. Include the same verified path in the agent packet so its answer can guide the user.
 11. Keep context semantics explicit: the host chooses screen hint and factual descriptive text from its evidence-backed app model. No assumptions that future/planned capabilities work.
 
-## Output import action (optional, functional)
-
-Cards expected to produce host-importable files should include a secondary **Import agent output** action, 48 dp minimum target, in both densities. It is available as `AyaCardView(onImportRequested = { ... })`, and must open a real host-controlled Android document picker/importer. Help-only cards or modules without an actual importer omit this action. Do not display a dead link.
-
-Upon user file selection, use the [Output Return & Import module](OUTPUT_RETURN_IMPORT.md): bounded read, content-based artifact registry, schema validation and preview. Wrong-card results should offer routing to the correct host importer. Unknown/incompatible files receive explanations and a safe choose-another-file fallback. Any destructive change requires domain-specific dry-run, user confirmation and safe transaction controls; AYA itself performs no import.
-
-For specialized cards, supply `onAskRequested = { userInput -> ... }` to invoke the actual guarded module-specific API, and `questionHint` for its task wording. Default `AyaCardView` behaviour continues using the version-verified Help reference. Never bypass a module’s validation or report preview success when its guarded API rejects.
-
-The return instruction should explicitly mention the import action where it exists, while still explaining that users must save their agent's result first. Provider-choice hints are optional local-only opt-in; never scan storage or claim AYA saw the agent's output.
-
 ## Conforming densities
 
 **Standard:** 64 dp mark on the left of title and multi-line explainer; an attachment disclosure and a concise 'After your agent replies' instruction; full-width multiline editor; full-width 48 dp action. Recommended for dedicated panels.
@@ -65,7 +55,6 @@ container.addView(card)
 - Keyboard, TalkBack, focus traversal, rotation/recreation: question survives when stable ID and host state restoration are provided.
 - Blank, edited, very long and multi-line question; verify final review and final EXTRA_TEXT use same approved data.
 - Missing/stale guide blocks share; no recipient falsely marked successful.
-- When a file importer is supported, confirm an actionable import button opens SAF, can handle wrong-card selection and fails safely without automatic commits.
 - Confirm the visible output-use path is correct for help/advice, creative image import, structured recipes, and translation packs; do not invent or promise automatic import.
 - Show attachment status accurately for each module, including text-only creative routes and optional file handoffs.
 - Verify using a dated Android/receiver version; actual ingestion and fresh-chat semantics are independent external QA.

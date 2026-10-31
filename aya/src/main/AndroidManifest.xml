@@ -7,8 +7,5 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/aya_file_paths" />
         </provider>
-        <receiver
-            android:name="dev.aya.android.AyaShareSelectionReceiver"
-            android:exported="false" />
     </application>
 </manifest>

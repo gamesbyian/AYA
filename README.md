@@ -38,6 +38,10 @@ Instead of leaving the app, switching to an assistant, explaining which app and 
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
+## Optional Jetpack Compose drop-in
+
+An optional [AYA Compose adapter](docs/components/COMPOSE.md) is being implemented, supplying an embedded help card and a guarded action launcher for existing Compose buttons. It keeps Compose dependencies out of the core Android library. A matching sample Activity exercises both features. **This is source code under review, not a published marketplace plugin.**
+
 ## Drop-in components for visual builders and coding agents
 
 AYA is intended to become a **drop-in part of development workflows**: a configurable Android card, a headless action/node, and an optional adapter for the app-building tools developers already use. You do not need to adopt AYA's code to adopt the interaction convention.
@@ -58,7 +62,7 @@ AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) 
 
 ## Standard host-app AYA card
 
-The [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md) defines the thin-outline, host-themed card with the monochrome AYA mark, contextual explanation, honest file-sharing disclosure, **brief instructions for returning to the host and using or importing the agent’s output**, optional question field, and **Ask Your Agent** action. The Android SDK now includes `AyaCardView`, a reusable View implementation demonstrated in the sample. Blank questions are welcome; pressing the button opens the existing version-checked **local review**, not automatic sharing. The host controls corner radius and contextual copy. Both Standard and Compact densities are implemented through `AyaCardDensity`, sharing the same safe handoff and full-width controls. Where the host supports an importable agent-created artifact, cards can also show a user-controlled **Import agent output** action. The [Output Return & Import module](docs/OUTPUT_RETURN_IMPORT.md) provides bounded SAF document reading, host-owned import routing, wrong-card recovery, confirmation guidance and an optional local-only Sharesheet recipient hint. This is a separate user-initiated operation; AYA does not watch agent replies or auto-import files.
+The [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md) defines the thin-outline, host-themed card with the monochrome AYA mark, contextual explanation, honest file-sharing disclosure, **brief instructions for returning to the host and using or importing the agent’s output**, optional question field, and **Ask Your Agent** action. The Android SDK now includes `AyaCardView`, a reusable View implementation demonstrated in the sample. Blank questions are welcome; pressing the button opens the existing version-checked **local review**, not automatic sharing. The host controls corner radius and contextual copy. Both Standard and Compact densities are implemented through `AyaCardDensity`, sharing the same safe handoff and full-width controls.
 
 ## Where to start
 **Interoperability additions (October 2026):** [recipient capability evidence model](docs/RECIPIENT_CAPABILITIES.md), [portable handoff manifest schema](docs/protocol/README.md), optional [AssistContent adapter](docs/ASSIST_CONTEXT.md), and a [separate AppFunctions decision record](docs/APPFUNCTIONS_DECISION.md). The capability model holds only developer-supplied QA facts; it neither monitors user conversations nor learns from outcomes. The JSON manifest is a documented *host-side interchange format*, not a new wire format for AI recipients.
