@@ -1,6 +1,7 @@
 package dev.aya.sample
 
 import android.widget.Button
+import java.io.ByteArrayOutputStream
 import android.widget.EditText
 import dev.aya.android.AyaCardView
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -49,9 +50,21 @@ class QuestionFlowTest {
         device.waitForIdle()
     }
 
-    private fun find(selector: BySelector): UiObject2 =
-        device.wait(Until.findObject(selector), 15000)
-            ?: throw AssertionError("UI not found: $selector")
+    private fun find(selector: BySelector): UiObject2 {
+        val found = device.wait(Until.findObject(selector), 15000)
+        if (found != null) return found
+        val tree = ByteArrayOutputStream()
+        val hierarchy = try {
+            device.dumpWindowHierarchy(tree)
+            tree.toString(Charsets.UTF_8.name()).take(10000)
+        } catch (e: Exception) {
+            "Hierarchy unavailable: " + e.javaClass.simpleName
+        }
+        throw AssertionError(
+            "UI not found: $selector. Foreground package: " +
+                device.currentPackageName + ". Hierarchy: " + hierarchy
+        )
+    }
 
     private fun tapHost(id: Int) {
         scenario.scenario.onActivity {
