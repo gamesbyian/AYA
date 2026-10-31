@@ -8,14 +8,14 @@
 **User-facing review:** a short, editable image-generation request is shared by default. The complete app-specific reference is offered only after the user explicitly chooses Full guide. Even when not transmitted, that reference remains mandatory, version-checked, comprehensive and accurate. Do not document default creative sharing as attaching the guide automatically.
 
 
-1. **Static installed-version guide:** document the app's actual artwork picker, supported asset types and import behavior as verified in shipping code and tests. Include feature, task and error IDs, navigation, failure recovery, privacy, evidence/unknowns and exact build applicability in the usual 12 sections.
+1. **Static installed-version guide:** document the app's real image/asset editing or import entry point, supported asset types and import behavior as verified in shipping code and tests. Include feature, task and error IDs, navigation, failure recovery, privacy, evidence/unknowns and exact build applicability in the usual 12 sections.
 2. **Dynamic per-handoff creative task:** `AyaCreativeTask(subject, assetRole, image, importInstructions, hostContext?)` plus user-authored `direction`, all visible in the review. Fields must represent the *actual active item and host import route* and must be tested independently. Dynamic request data is not evidence of what the app supports.
 
 The user chooses their AI provider. The author cannot guarantee the recipient creates an image, understands the guide, recognizes copyrighted fictional characters, satisfies exact pixels, preserves lettering, or installs artwork. The assistant must be asked to **generate an actual image**, while being truthful about absent capabilities.
 
 ## Research checklist for an integrating app
 
-- Identify actual available art slots separately: square media tile, season cover, vertical movie poster, landscape banner, artist portrait, album/playlist artwork. Record exact ratios, accepted import dimensions (hard bounds versus recommendations), accepted MIME/file formats and alpha handling **per slot**. Do not generalize square art constraints to banners.
+- Identify actual image/asset destinations separately: for example profile avatars, UI icons, document illustrations, game textures, media tiles, vertical posters or landscape banners **only where the host supports them**. Record actual ratios, accepted import dimensions (hard bounds versus recommendations), accepted MIME/file formats and alpha handling **per slot**. Do not generalize one destination's constraints to another.
 - Distinguish recommended artwork, search results, local import, external URLs, custom image capture, crop/edit, cancel/undo and persistence. Follow each to the real underlying implementation, even when it differs between app modes or versions.
 - Record storage authority, device media picker, Android permissions, remote/cloud provider state, offline cases, thumbnails/previews, overwrite behavior, automatic resizes/compression, rejection messages, crop bounds, file-size limits, and where edits appear.
 - Document host manual import flow from the **same screen the user left**, including if Android recreates the Activity, whether it retains the draft selection, and whether the file picker persists access. Distinguish local selection from actual saved/applied artwork.
@@ -30,7 +30,7 @@ Use the library's types (see [Creative Handoff contract](../CREATIVE_HANDOFF.md)
 - `subject`: concise public-facing title of the selected work; don't export server addresses, file locations, tracking IDs or authentication data. If the title itself is sensitive, give the user control to edit before sharing.
 - `assetRole`: unambiguous noun phrase, e.g. "square Season 4 key art", not "an image". Record actual target slot.
 - `image`: ratio and optional preferred pixel dimensions that mathematically match; only formats supported by **the host importer**. Distinguish pixel preferences from strict minimum/maximum constraints in the host guide. Model transparency/margins only when applicable.
-- `importInstructions`: navigation starting from the retained artwork picker, actual picker actions and save/apply controls. No fabricated one-tap back or deep-link instructions.
+- `importInstructions`: navigation starting from the host's real retained image/asset editor or importer, actual picker actions and save/apply controls. No fabricated one-tap back or deep-link instructions.
 - `hostContext`: compact, public, necessary facts only. Never automatically include current private image, local filesystem paths, URLs containing tokens, logs, installed app accounts, or extracted metadata from a sensitive library.
 - `direction`: preserve user text; do not quietly prepend aesthetic judgments, strip names or rewrite their intent. The assistant may need to honor its own image policies, which AYA does not override.
 
@@ -39,6 +39,8 @@ Use the library's types (see [Creative Handoff contract](../CREATIVE_HANDOFF.md)
 **Request quality target:** a receiving assistant with only `EXTRA_TEXT` can understand what to generate, for which subject and target, intended composition/ratio, preferred resolution and supported import formats, and the manual save/import relationship. The full guide is supplemental. A receiver that only ingests the file receives all of it. The final approved preview must control both channels.
 
 ## AYA-RAS authoring examples (illustrative only)
+
+The examples below use a fictional media artwork editor for concreteness, **not** as the canonical Creative host category. A profile-image importer, illustration editor or game-asset tool must substitute its own actual UI, schema and tested constraints.
 
 `TASK-ART-001` [AVAILABLE, verified host version]: "From Library > Season > Artwork, tap Change > Choose from device, select an image/jpeg or image/png, crop and tap Save. If Save is disabled, see ERR-ART-002. This updates the local season artwork only; any remote server propagation is UNKNOWN."
 
@@ -50,7 +52,7 @@ Every assertion in an actual app guide needs a real source pointer. These are fi
 
 ## Independent QA cases
 
-Maintain held-out questions independent of the reference writer, covering at least: "No recommended poster suits me"; "I want square key art of Season 4"; "The AI just wrote a prompt"; "My provider doesn't appear in Share"; "It generated 1024² instead of 2000²"; "I can save PNG but my app rejects it"; "I returned and lost the artwork picker"; "Does AYA automatically install my art?"; "Will my original cover be overwritten?"; "Are private cover images sent?"; and "Which settings differ between local and remote mode?". Score exact steps, truthful uncertainty, formatting requirements, no hidden data and safe manual import. Never use production user conversations as automated QA telemetry.
+Maintain held-out questions independent of the reference writer, including host-relevant cases such as: "I want a new avatar/illustration/icon"; "The AI just wrote a prompt"; "My provider doesn't appear in Share"; "It generated dimensions different from the host's requirement"; "I can save PNG but the importer rejects it"; "I returned and lost my target selection"; "Does AYA automatically install my art?"; "Will this overwrite the current asset?"; "Are private source images sent?"; and "What changes between available host modes?". Score exact steps, truthful uncertainty, formatting requirements, no hidden data and safe manual import. Never use production user conversations as automated QA telemetry.
 
 ## Release checklist
 
