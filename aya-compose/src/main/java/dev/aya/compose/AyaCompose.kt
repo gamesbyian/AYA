@@ -39,14 +39,27 @@ fun AyaCard(
     description: String = "Ask for help with this app. Review its reference before sharing.",
     attachmentDisclosure: String = "App reference offered for sharing; your AI app may not accept files.",
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
+    componentId: String? = null,
+    initialQuestion: String = "",
+    cornerRadiusDp: Float = 12f,
+    questionHint: String = "What would you like help with? (optional)",
+    onQuestionChanged: ((String) -> Unit)? = null,
+    onAskRequested: ((String) -> Unit)? = null,
+    onImportRequested: (() -> Unit)? = null,
     onRejected: ((String) -> Unit)? = null
 ) {
     // Compose is the sole state owner. Preserve a draft during recreation but
     // never carry a private question into a different reference/screen scope.
-    var draft by rememberSaveable(guideAsset, screenName) { mutableStateOf("") }
+    require(outputInstructions.isNotBlank()) { "Host-specific output instructions are required" }
+    require(componentId == null || componentId.isNotBlank()) { "componentId must be nonblank when supplied" }
+    var draft by rememberSaveable(guideAsset, screenName, componentId) { mutableStateOf(initialQuestion) }
     val latestRejection = rememberUpdatedState(onRejected)
+    val latestQuestionChange = rememberUpdatedState(onQuestionChanged)
+    val latestAsk = rememberUpdatedState(onAskRequested)
+    val latestImport = rememberUpdatedState(onImportRequested)
 
-    key(activity, guideAsset, screenName, title, description, densityMode) {
+    key(activity, componentId, guideAsset, screenName, title, description, densityMode,
+        cornerRadiusDp, questionHint, onAskRequested != null, onImportRequested != null) {
         AndroidView(
             modifier = modifier,
             factory = { context ->
@@ -60,6 +73,14 @@ fun AyaCard(
                     attachmentDisclosure = attachmentDisclosure,
                     outputInstructions = outputInstructions,
                     densityMode = densityMode,
+                    cornerRadiusDp = cornerRadiusDp,
+                    questionHint = questionHint,
+                    onAskRequested = if (onAskRequested == null) null else { text ->
+                        latestAsk.value?.invoke(text)
+                    },
+                    onImportRequested = if (onImportRequested == null) null else {
+                        { latestImport.value?.invoke() }
+                    },
                     onRejected = { reason ->
                         val callback = latestRejection.value
                         if (callback != null) callback(reason)
@@ -71,7 +92,10 @@ fun AyaCard(
                         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                             val updated = s?.toString().orEmpty()
-                            if (updated != draft) draft = updated
+                            if (updated != draft) {
+                                draft = updated
+                                latestQuestionChange.value?.invoke(updated)
+                            }
                         }
                         override fun afterTextChanged(s: Editable?) {}
                     })

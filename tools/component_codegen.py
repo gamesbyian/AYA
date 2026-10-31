@@ -156,6 +156,7 @@ def compose_snippet(m: dict[str, Any]) -> str:
             "fun " + function + "(activity: Activity, modifier: Modifier = Modifier) {\n"
             "    AyaCard(\n"
             "        activity = activity,\n"
+            "        componentId = " + kotlin_quote(m["id"]) + ",\n"
             "        modifier = modifier,\n"
             "        guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\n"
             "        title = " + kotlin_quote(p["title"]) + ",\n"
