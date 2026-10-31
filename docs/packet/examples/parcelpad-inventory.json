@@ -11,7 +11,8 @@
         "help",
         "creative",
         "structured",
-        "translation"
+        "translation",
+        "filesystem"
       ],
       "criticality": "low",
       "source_ref": "README fictional fixture"
@@ -22,7 +23,8 @@
         "help",
         "creative",
         "structured",
-        "translation"
+        "translation",
+        "filesystem"
       ],
       "criticality": "high",
       "source_ref": "sample fictional operation contract"
@@ -82,6 +84,22 @@
       ],
       "criticality": "low",
       "source_ref": "fictional support QA fixture"
+    },
+    {
+      "id": "FACT-010",
+      "profiles": [
+        "filesystem"
+      ],
+      "criticality": "high",
+      "source_ref": "fictional filesystem schema fixture"
+    },
+    {
+      "id": "FACT-011",
+      "profiles": [
+        "filesystem"
+      ],
+      "criticality": "high",
+      "source_ref": "fictional snapshot safety fixture"
     }
   ]
 }

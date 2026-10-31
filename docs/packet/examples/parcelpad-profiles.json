@@ -41,6 +41,16 @@
         "FACT-007",
         "FACT-008"
       ]
+    },
+    "filesystem": {
+      "purpose": "Author a host-importable filesystem recipe from clarified intent.",
+      "request": "Clarify scope/exclusions, use the released host parser schema and optional bounded snapshot as stale, non-authoritative context.",
+      "output_contract": "Emit only a valid declarative recipe file for manual import. The host independently validates, previews and authorizes execution.",
+      "examples": "Valid: preserve protected basenames; require complete scan and approval. Invalid: guess missing paths, use partial snapshot as deletion list or claim execution.",
+      "always_include": [
+        "FACT-010",
+        "FACT-011"
+      ]
     }
   }
 }
