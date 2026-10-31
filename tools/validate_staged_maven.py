@@ -8,12 +8,73 @@ import argparse
 import hashlib
 import re
 import sys
+import io
+import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
 VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?$")
 ARTIFACTS = ("aya-android", "aya-compose")
 NS = {"m": "http://maven.apache.org/POM/4.0.0"}
+MAX_AAR_BYTES = 128 * 1024 * 1024
+MAX_CLASSES_JAR_BYTES = 64 * 1024 * 1024
+REQUIRED_CLASSES = {
+    "aya-android": (
+        "dev/aya/android/Aya.class",
+        "dev/aya/android/AyaReferenceVerifier.class",
+        "dev/aya/android/AyaComponentAction.class",
+        "dev/aya/android/AyaShareSelectionReceiver.class",
+    ),
+    "aya-compose": ("dev/aya/compose/AyaComposeKt.class",),
+}
+
+
+def validate_aar(aar: Path, artifact: str) -> None:
+    """Inspect the actual published AAR, not just its name and byte count.
+
+    This proves that expected compiled types are packaged. It does not prove
+    source provenance, binary API compatibility, or a consuming APK's behavior.
+    """
+    if aar.stat().st_size > MAX_AAR_BYTES:
+        raise ValueError(f"AYA AAR exceeds inspection budget: {aar}")
+    try:
+        with zipfile.ZipFile(aar) as archive:
+            members = archive.infolist()
+            if len(members) > 20_000 or sum(x.file_size for x in members) > 2 * MAX_AAR_BYTES:
+                raise ValueError(f"AAR archive expansion exceeds inspection budget: {aar}")
+            names = [entry.filename for entry in members]
+            if len(names) != len(set(names)):
+                raise ValueError(f"Duplicate AAR entries: {aar}")
+            if any(
+                name.startswith("/") or chr(92) in name or
+                ".." in name.split("/") or "" in name.split("/")[:-1]
+                for name in names
+            ):
+                raise ValueError(f"Unsafe AAR entry path: {aar}")
+            if archive.testzip() is not None:
+                raise ValueError(f"AAR has damaged archive member: {aar}")
+            for entry in ("AndroidManifest.xml", "classes.jar"):
+                if entry not in names:
+                    raise ValueError(f"Missing required AAR member {entry}: {aar}")
+            if archive.getinfo("AndroidManifest.xml").file_size == 0:
+                raise ValueError(f"Empty AAR Android manifest: {aar}")
+            classes_info = archive.getinfo("classes.jar")
+            if not (0 < classes_info.file_size <= MAX_CLASSES_JAR_BYTES):
+                raise ValueError(f"Invalid AAR classes.jar length: {aar}")
+            with zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) as classes:
+                members = classes.infolist()
+                if len(members) > 20_000 or sum(x.file_size for x in members) > MAX_CLASSES_JAR_BYTES:
+                    raise ValueError(f"JAR expansion exceeds inspection budget: {aar}")
+                class_names = [member.filename for member in members]
+                if len(class_names) != len(set(class_names)):
+                    raise ValueError(f"Duplicate compiled class entry: {aar}")
+                if classes.testzip() is not None:
+                    raise ValueError(f"Damaged compiled class entry: {aar}")
+                for expected in REQUIRED_CLASSES[artifact]:
+                    if expected not in class_names:
+                        raise ValueError(f"Missing compiled {expected} in {aar}")
+    except (zipfile.BadZipFile, zipfile.LargeZipFile) as exc:
+        raise ValueError(f"Corrupt published AAR/classes.jar: {aar}") from exc
 
 
 def check(root: Path, version: str) -> dict[str, str]:
@@ -28,6 +89,7 @@ def check(root: Path, version: str) -> dict[str, str]:
             if not path.is_file() or path.stat().st_size == 0:
                 raise ValueError(f"Missing/empty artifact: {path}")
             manifest[path.relative_to(root).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+        validate_aar(aar, artifact)
         tree = ET.parse(pom)
         element = tree.getroot()
         def field(name):
