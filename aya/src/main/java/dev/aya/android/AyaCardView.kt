@@ -38,6 +38,7 @@ class AyaCardView(
     outputInstructions: String,
     cornerRadiusDp: Float = 12f,
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
+    private val onImportRequested: (() -> Unit)? = null,
     private val onRejected: (String) -> Unit = {
         Toast.makeText(context, "AYA unavailable: $it", Toast.LENGTH_LONG).show()
     }
@@ -129,6 +130,19 @@ class AyaCardView(
         }, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
             topMargin = dp(if (compact) 4 else 8)
         })
+
+        // Optional second action only for hosts with a real, registered output
+        // importer. No app output is read or imported just by showing a card.
+        onImportRequested?.let { openHostImport ->
+            addView(Button(context).apply {
+                text = "Import agent output"
+                contentDescription = "Choose a saved agent output file for host validation"
+                minHeight = dp(48)
+                setOnClickListener { openHostImport() }
+            }, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = dp(if (compact) 4 else 8)
+            })
+        }
     }
 
     /** Host may revise disclosure when its actual attachment selection changes. */
