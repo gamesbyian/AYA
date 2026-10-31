@@ -26,7 +26,7 @@ The host must first implement normal language selection and a working, safe pack
 
 ## 1. Add the library
 
-AYA currently distributes a **staging Maven AAR** through the GitHub Actions build artifact or as source. There is **no public Maven Central release** and no redistribution license has been selected. CI uses Gradle 8.9, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, JDK 17, compileSdk 35 and minSdk 23.
+AYA currently distributes a **staging Maven AAR** through the GitHub Actions build artifact or as source. There is **no public Maven Central release**. The repository uses the [Unlicense](../UNLICENSE); third-party dependencies retain their own licenses. CI uses Gradle 8.9, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, JDK 17, compileSdk 35 and minSdk 23.
 
 **Source-module path:** place or include the `aya/` module as a module in your Android Gradle build. Example in the host `settings.gradle.kts` after checking out AYA alongside the host:
 
@@ -47,7 +47,7 @@ dependencies { implementation(project(":aya")) }
 maven { url = uri(rootDir.resolve("libs/aya-maven")) }
 ```
 
-Then add `implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")`. This is an experimental snapshot, not a stable public release. The sample CI builds once against `:aya` and once against the staged POM/AAR to verify resolution. Do not distribute the snapshot externally without resolving the license.
+Then add `implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")`. This is an experimental snapshot, not a stable public release. The sample CI builds once against `:aya` and once against the staged POM/AAR to verify resolution. Review the Unlicense, third-party dependency obligations and the unstable snapshot API before external distribution.
 
 Enable `android.useAndroidX=true` in the host's Gradle properties. AYA's manifest supplies the non-exported `FileProvider` authority `${applicationId}.aya.files`. Check the **merged manifest**, especially if your app defines other providers.
 
