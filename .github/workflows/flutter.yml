@@ -89,11 +89,11 @@ jobs:
           HOST=integrations/flutter/aya_flutter/example/android
           grep -qx 'android.builtInKotlin=true' "$HOST/gradle.properties"
           grep -qx 'android.newDsl=false' "$HOST/gradle.properties"
-          if grep -Eq '^[[:space:]]*id\\("(kotlin-android|org.jetbrains.kotlin.android)"\\)' "$HOST/app/build.gradle.kts"; then
+          if grep -Fq 'id("kotlin-android")' "$HOST/app/build.gradle.kts" || grep -Fq 'id("org.jetbrains.kotlin.android")' "$HOST/app/build.gradle.kts"; then
             echo 'Legacy Kotlin plugin reintroduced into AGP 9 application' >&2
             exit 1
           fi
-          if grep -Eq "apply plugin: ['\\\"](kotlin-android|org.jetbrains.kotlin.android)['\\\"]" integrations/flutter/aya_flutter/android/build.gradle; then
+          if grep -Fq "apply plugin: 'kotlin-android'" integrations/flutter/aya_flutter/android/build.gradle || grep -Fq 'id("org.jetbrains.kotlin.android")' integrations/flutter/aya_flutter/android/build.gradle; then
             echo 'Legacy Kotlin plugin reintroduced into source package' >&2
             exit 1
           fi
