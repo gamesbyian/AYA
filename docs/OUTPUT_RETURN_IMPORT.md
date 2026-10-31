@@ -23,7 +23,7 @@ The registry is app-wide: each host module registers a stable route ID, user-vis
 Use a host-managed Activity Result launcher. The following outline targets an AndroidX `ComponentActivity`:
 
 ```kotlin
-val registry = AyaImportRegistry(packageName, listOf(languageRoute, wallpaperRoute))
+val registry = AyaImportRegistry(packageName, listOf(languageRoute, structuredRoute))
 // Host-created routes implement AyaImportRoute. Their validators are read-only.
 val pickOutput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
     val uri = result.data?.data ?: return@registerForActivityResult
@@ -33,7 +33,7 @@ val pickOutput = registerForActivityResult(ActivityResultContracts.StartActivity
             when (read) {
                 is AyaImportRead.Rejected -> showImportError(read.explanation)
                 is AyaImportRead.Loaded -> {
-                    val decision = registry.inspect(read.artifact, cardRouteId = "wallpaper")
+                    val decision = registry.inspect(read.artifact, cardRouteId = "structured")
                     AyaImportDialogs.show(
                         this, decision,
                         onContinueToHostImporter = { ready ->
@@ -45,7 +45,7 @@ val pickOutput = registerForActivityResult(ActivityResultContracts.StartActivity
                         },
                         onChooseAnotherFile = { openOutputPicker() },
                         onChooseAmbiguousRoute = { route ->
-                            val chosen = registry.inspectAs(read.artifact, route.id, "wallpaper")
+                            val chosen = registry.inspectAs(read.artifact, route.id, "structured")
                             showRoutingDecision(chosen)
                         }
                     )
@@ -81,7 +81,7 @@ The optional JSON marker below is useful **only** when the actual artifact schem
 
 The [optional envelope JSON Schema](output/aya-output-envelope-v1.schema.json) captures this shape for host formats that permit it. It is documentation and host-side authoring guidance, not automatically imposed by AYA. All fields are *claims supplied by an untrusted file*. The app's real parser and versioned schema remain authoritative. A `request_id` can improve explanations but must never grant permission or act as an authentication token. Users may import a valid file from another device, another agent, or a manual editor without an AYA marker.
 
-**Do not wrap formats that require an exact root object.** ROYGBIV's canonical JSON recipe, for example, should remain in its native format. For legacy formats, identify through source-derived content probes or accept a separate opt-in sidecar with no authority over the artifact. Do not strip unknown keys or normalize a recipe merely to make it appear valid.
+**Do not wrap formats that require an exact root object.** A host's native JSON preset, project file or layout document must retain the exact root shape its own importer requires. For legacy formats, identify through source-derived content probes or accept a separate opt-in sidecar with no authority over the artifact. Do not strip unknown keys or normalize a recipe merely to make it appear valid.
 
 ### Wrong AYA card
 
@@ -96,7 +96,7 @@ The [optional envelope JSON Schema](output/aya-output-envelope-v1.schema.json) c
 
 **Mandatory gates:** user selection; bounded read; confident content recognition; actual schema/version validation; preview; any dependency/side-effect analysis; explicit authorization appropriate to the operation; atomic host-side commit with rollback/recovery. Every host importer independently checks app identity, permissions, schema, referenced assets and side effects. Keep the original file unchanged on failure.
 
-Low-risk imports (previewing a wallpaper recipe or proposing a language pack) may use a single confirmation after validation. Destructive or remote actions (delete files, reorganize trees, changing a server) require a dry-run manifest, target scope proof, collision/ownership checks, separate risk confirmation and reversible or recoverable transaction where possible. No generic AYA handler may grant arbitrary filesystem authority.
+Low-risk imports (previewing a non-executable design preset or proposing a language pack) may use a single confirmation after validation. Destructive or remote actions (delete files, reorganize trees, changing a server) require a dry-run manifest, target scope proof, collision/ownership checks, separate risk confirmation and reversible or recoverable transaction where possible. No generic AYA handler may grant arbitrary filesystem authority.
 
 Revalidate any external dependencies at commit, even with an immutable artifact snapshot: current app version, user account/environment, target paths/objects, storage ownership, schema migration and permissions can change. Do not use a file's claimed origin to bypass confirmation.
 

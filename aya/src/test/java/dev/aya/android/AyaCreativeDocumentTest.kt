@@ -7,7 +7,7 @@ import org.junit.Test
 
 class AyaCreativeDocumentTest {
     private val task = AyaCreativeTask(
-        subject = "House, M.D., Season 4",
+        subject = "Aurora Station, Season 4",
         assetRole = "Square season key art",
         image = AyaImageRequirements(
             aspectWidth = 1,
@@ -22,12 +22,12 @@ class AyaCreativeDocumentTest {
 
     @Test fun imageRequestIsSelfContainedWhenTextOnlyRecipientIgnoresAttachment() {
         val payload = AyaDocument.render(AyaRequest(
-            "Chunks", "1.0", "Reference", "Artwork picker",
+            "ExampleHost", "1.0", "Reference", "Artwork picker",
             "Blue hospital lighting, minimal lettering.", task
         ))
         val text = AyaDocument.shareMessageFromPayload(payload)
         assertTrue(text.contains("Please generate an actual image"))
-        assertTrue(text.contains("House, M.D., Season 4"))
+        assertTrue(text.contains("Aurora Station, Season 4"))
         assertTrue(text.contains("Blue hospital lighting"))
         assertTrue(text.contains("1:1"))
         assertTrue(text.contains("2000 × 2000"))
@@ -96,7 +96,7 @@ class AyaCreativeDocumentTest {
         ))
         val text = AyaDocument.textOnlyMessageFromPayload(payload)!!
         assertTrue(text.contains("Bold red and blue."))
-        assertTrue(text.contains("House, M.D."))
+        assertTrue(text.contains("Aurora Station"))
         assertFalse(text.contains("Secret unrelated guide content"))
     }
 
@@ -136,7 +136,7 @@ class AyaCreativeDocumentTest {
 
     @Test fun promptFirstExpansionUsesApprovedEditsNotOriginalHostDirection() {
         val request = AyaRequest(
-            "Chunks", "1.0", "Known guide reference",
+            "ExampleHost", "1.0", "Known guide reference",
             question = "Old original direction",
             creativeTask = task
         )
@@ -149,7 +149,7 @@ class AyaCreativeDocumentTest {
     }
 
     @Test fun expandedPromptCanRemainMultilineWithoutRegeneration() {
-        val request = AyaRequest("Chunks", "1.0", "Guide", creativeTask = task)
+        val request = AyaRequest("ExampleHost", "1.0", "Guide", creativeTask = task)
         val prompt = "Generate my image.\nKeep faces centered.\nUse 16-bit colors."
         val expanded = AyaDocument.renderWithPrompt(request, prompt)
         assertEquals(prompt, AyaDocument.textOnlyMessageFromPayload(expanded))

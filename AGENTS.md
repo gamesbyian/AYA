@@ -4,6 +4,10 @@
 
 AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
+## Module portability and host neutrality
+
+**Normative:** follow [Module Portability Standard](docs/MODULE_PORTABILITY.md) for every core module, adapter, sample, documentation update and integration template. AYA defines host-feature contracts, not specializations for any separate product or repository. Do not name or link a maintainer's unrelated app, branch, repository, build layout or unique UI as the module's reference behavior. Use clearly fictional fixtures or abstract role-based examples. Host-specific schemas, paths, capabilities and UI steps belong in the adopting developer's source-derived *generated packet* or in that host's own repository, not in AYA's generic implementation. Review independently whether module behavior works across at least two substantially different plausible hosts. Run `python3 -m unittest tools.test_module_portability` before merging.
+
 ## Application understanding before packet authoring
 
 Read [AYA-AUF](docs/understanding/README.md), [concept modelling](docs/understanding/MODEL.md) and [Director Consultation Protocol](docs/understanding/CONSULTATION.md) before drafting host packet content. Recover purpose, user goals, ontology, intended automation/control, misconceptions, disputed semantics and four distinct truth categories. Investigate evidence before asking the director; request only consequential missing direction through context-rich questions, and preserve deferral/delegation/unknowns. Validate AUF models and decisions with `tools/validate_understanding.py`. A director statement proves only scoped **intention**, never shipping or successful behavior. The protocol operates in the developer workflow, not in AYA's user-facing handoff.

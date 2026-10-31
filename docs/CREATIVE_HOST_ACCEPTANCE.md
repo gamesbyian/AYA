@@ -4,7 +4,7 @@
 
 ## Objective and boundaries
 
-A user viewing a particular artwork slot in Chunks, a music application, or another host may decide to generate their own artwork in an external AI application. The host remains fully responsible for its *existing* Import from device pathway. AYA neither downloads the result nor observes the user's AI conversation. The host may remember the selected artwork target locally while the user switches apps, because this is normal host state restoration, **not** AYA response monitoring.
+A user viewing an editable artwork slot in a media manager, publishing tool, game editor or other image-importing host may decide to generate artwork in an external AI application. The host remains fully responsible for its *existing* Import from device pathway. AYA neither downloads the result nor observes the user's AI conversation. The host may remember the selected artwork target locally while the user switches apps, because this is normal host state restoration, **not** AYA response monitoring.
 
 The integrator must distinguish:
 1. **Preferred generator output:** target composition, aspect ratio, optional nominal resolution, preferred format and safe margins, provided to the agent as practical guidance.

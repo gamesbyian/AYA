@@ -1,6 +1,6 @@
 # Creative Handoff: image generation v1
 
-**Status:** prototype implemented in AYA's Android library and demonstration host; real recipient compatibility and device UX acceptance remain unverified. This document is normative for integrations and describes **current implementation**, not a claim that Chunks, Plex or any third-party app has shipped AYA.
+**Status:** prototype implemented in AYA's Android library and demonstration host; real recipient compatibility and device UX acceptance remain unverified. This document is normative for integrations and describes **current implementation**, not a claim that any separate production host has shipped this module.
 
 ## Purpose and architecture
 
@@ -102,5 +102,5 @@ v1 prototype evidence: pure Kotlin unit tests for request constraints, creative 
 1. **Implemented in AYA:** typed image spec, reused guarded launch, generation-focused text/attachment composition, default/host composer paths, editable consent, copy fallback, sample manual chooser, Kotlin regression tests.
 2. **Build validation:** Android unit, library AAR, sample APK, existing reference-guide validator/audit, instrumentation compilation. CI must pass before merge.
 3. **Device QA (not yet proven):** 320×700/412×892 and larger screens, TalkBack, IME/back/rotation/relaunch, signed-in and signed-out clients, no share apps, real URI permissions, actual image import of PNG/JPEG, invalid image selection, failures.
-4. **Real integrations:** independently inspect host artwork screens/metadata, embed a release-matched AYA-RAS guide, add AYA beneath the artwork picker and **reuse** existing import flow, then acceptance-test manually on device. No claim that integration into Chunks/Plex/music apps already exists.
+4. **Real integrations:** independently inspect host artwork screens/metadata, embed a release-matched AYA-RAS guide, add AYA beneath the artwork picker and **reuse** existing import flow, then acceptance-test manually on device. No claim that integration into any third-party host exists merely because AYA's demonstration app works.
 5. **Future separately gated:** optional user-approved reference images/edit requests, operation/domain extensions, per-provider compatibility preferences if evidence warrants, and better host state restoration. No automated output tracking or background monitoring at any phase.

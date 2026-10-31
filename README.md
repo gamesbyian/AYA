@@ -34,9 +34,11 @@ The SDK now exposes `Aya.launchFilesystemBundled()` with `AyaFilesystemTask`, a 
 
 ## Structured artifact handoffs
 
-AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**, such as a ROYGBIV wallpaper recipe in JSON. A version-matched schema and effect guide can accompany an editable natural-language brief and optional user-approved current artifact. The person manually saves and imports the agent's file into the original app. No callback, agent-response monitoring or automatic import is needed.
+AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**: a procedural-design preset, editor layout, visualization configuration, animation sequence, or another host-importable artifact. A source-derived, version-matched schema and field-interaction guide can accompany an editable brief and an optional user-approved current artifact. The person saves the result and explicitly imports it into their host app. AYA does not monitor replies or import files automatically.
 
-The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) documents the browser/PWA reference integration under ROYGBIV's More menu and a future generic Android SDK extension. **The Android structured-artifact API is not implemented yet**, and receiving assistants have different attachment capabilities.
+The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) defines a portable, schema-driven pattern for Android and browser/PWA hosts. **A generic Android structured-artifact entry point is not yet implemented**; each host must provide its own real schema, importer and manual return flow.
+
+**Module independence:** AYA's modules describe reusable host *capabilities*, not any external app or repository. See the [Module Portability Standard](docs/MODULE_PORTABILITY.md) for the separation between generic AYA contracts and app-specific packets authored by each adopting developer.
 
 ## Why use AYA instead of opening an AI app yourself?
 
@@ -134,7 +136,7 @@ GitHub Actions runs reference checks, Kotlin unit tests and the sample build, co
 
 ## Prototype status
 
-Creative Handoff is a **prototype** with typed Kotlin implementation and sample image chooser; real AI-recipient generation, saving and manual-return behavior remain unverified. AYA does not generate images, monitor output, or automatically apply the result in the host. No Chunks, Plex or other real-world app integration is implied.
+Creative Handoff is a **prototype** with typed Kotlin implementation and sample image chooser; real AI-recipient generation, saving and manual-return behavior remain unverified. AYA does not generate images, monitor output, or automatically apply the result in the host. No integration into an unrelated production application is implied.
 
 
 Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.

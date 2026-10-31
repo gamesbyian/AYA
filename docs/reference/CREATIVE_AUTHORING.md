@@ -46,7 +46,7 @@ Use the library's types (see [Creative Handoff contract](../CREATIVE_HANDOFF.md)
 
 `ERR-ART-002` [AVAILABLE]: "Unsupported image format. Choose one of the confirmed importer types or convert **outside AYA**. Verify the preview and metadata after saving."
 
-Every assertion in an actual app guide needs a real source pointer. These are templates, **not real Chunks/Plex behavior**.
+Every assertion in an actual app guide needs a real source pointer. These are fictional templates, **not verified behavior for any production host**.
 
 ## Independent QA cases
 
