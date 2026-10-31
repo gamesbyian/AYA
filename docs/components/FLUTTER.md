@@ -29,6 +29,14 @@ Alternatively call AyaFlutter.openHelp from an existing Flutter button after col
 
 FlutterFlow supports Custom Actions and Custom Widgets with external package dependencies. The editor can host a future AYA widget and visual action node, but public dependency distribution, actual Android export, custom-code import and host-specific asset packaging are release gates, not delivered claims.
 
+## Synthetic host APK packaging acceptance
+
+The repository's Flutter CI now compiles a generated Android host with a **real `AyaHelpCard` on its screen** and an independent source-derived, exact-version `aya-guide.md` packed in native `android/app/src/main/assets/`. The guide's ID/version are pinned to the *generated host* (`com.example.aya_flutter_ci_host`, `1.0.0`), never copied blindly into an unrelated app.
+
+The offline APK verifier checks that the final APK includes the exact reference bytes, that Android's compiled package identity/version match the reference metadata, and that the AYA FileProvider and share-selection receiver survive Android manifest merging. Negative tests reject missing/altered/duplicate guides, mismatched package/version and absent native components. This is packaging evidence, **not** proof of on-device dialog success, Android Sharesheet target compatibility, or any recipient reading the guide.
+
+The fixture exists only at `integrations/flutter/aya_flutter/ci-host/` and should not be reused as a reference for third-party apps. Real hosts must build their own vetted guides.
+
 ## Release gates
 
 1. Flutter analyzer and mocked platform-channel tests pass: user click only, unknown status refusal, invalid guide path, honest local state.
