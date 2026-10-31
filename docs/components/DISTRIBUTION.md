@@ -22,7 +22,7 @@ gradle :sample:assembleDebug -Paya.consumePublished=true \
   -Paya.version=0.1.0-preview.1 --no-daemon
 ```
 
-Alternatively, use GitHub Actions **Versioned AYA Maven preview (manual, unpublished)** with an explicit version input. It stages, validates and uploads the Maven directory plus SHA-256 checksums as a GitHub Actions artifact. This workflow has **read-only contents permissions and never publishes a GitHub release, changes the default branch, pushes a Maven registry or enables GitHub Pages**. Its output is temporary build evidence, not a stable public dependency source. Compare checksums independently and pin versions.
+Alternatively, use GitHub Actions **Versioned AYA Maven preview (manual, unpublished)** with an explicit version input. It stages, validates and uploads the Maven directory plus SHA-256 checksums as a GitHub Actions artifact. The validator now also opens each staged AAR and its nested compiled `classes.jar`, refusing missing manifests, damaged members, unsafe ZIP entries and absent core/Compose entry-point classes. An AAR/POM that merely has the expected filename is insufficient packaging evidence. This workflow has **read-only contents permissions and never publishes a GitHub release, changes the default branch, pushes a Maven registry or enables GitHub Pages**. Its output is temporary build evidence, not a stable public dependency source. Compare checksums independently and pin versions.
 
 ## Why distribution is still blocked
 
