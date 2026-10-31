@@ -52,6 +52,21 @@ class InteractionTraceTest(unittest.TestCase):
         with self.assertRaises(TraceValidationError):
             check_case("review_copy", events)
 
+    def test_question_composer_and_edit_must_precede_terminal_review(self):
+        share = ["reference_validated", "review_opened", "question_opened",
+                 "review_approved", "share_requested", "chooser_opened"]
+        with self.assertRaises(TraceValidationError):
+            check_case("review_share", share)
+        cancelled = ["reference_validated", "review_opened", "review_cancelled",
+                     "review_edited"]
+        with self.assertRaises(TraceValidationError):
+            check_case("cancel", cancelled)
+        changed_after_approval = ["reference_validated", "review_opened",
+                                  "review_edited", "review_approved",
+                                  "review_edited", "share_requested", "chooser_opened"]
+        with self.assertRaises(TraceValidationError):
+            check_case("review_share", changed_after_approval)
+
     def test_cancel_cannot_have_side_effects(self):
         for extra in ("share_requested", "copy_requested", "review_approved"):
             with self.subTest(extra=extra):
