@@ -1,5 +1,20 @@
 # AYA verification and release gates
 
+## Shared Packet Authoring checks
+
+Run the [Packet compiler](packet/README.md) on the fictional four-profile fixture, then independently test against real host builds before release:
+
+```sh
+python3 tools/packet_compiler.py --source docs/packet/examples/parcelpad-facts.json \
+  --inventory docs/packet/examples/parcelpad-inventory.json \
+  --profiles docs/packet/examples/parcelpad-profiles.json \
+  --profile help --as-of 2026-10-30T00:00:00Z \
+  --output /tmp/aya-help-packet.md --report /tmp/aya-help-packet.json
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
+
+For each actual adopting app independently verify inventory coverage, live UI and effects, dependency closure, text-only essential constraints, precise import semantics, token/byte limits, actual assistant attachment ingestion and generated-output acceptance. Refuse stale upstream claims and unreviewed high-risk facts. No production response monitoring is allowed.
+
 ## Static and reference checks
 
 - `python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md`
