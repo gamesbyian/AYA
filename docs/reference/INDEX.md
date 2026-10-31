@@ -1,5 +1,7 @@
 # The AYA reference-document system
 
+**Upstream foundation:** [AYA Application Understanding Framework](../understanding/README.md) teaches developer agents to conceptualize the host's purpose, objects, goals, design principles and uncertainty. Its [Director Consultation Protocol](../understanding/CONSULTATION.md) provides adaptive project-director questions and scoped decision records. This precedes AYA-RAS reference writing and does not imply runtime AYA monitoring.
+
 **Cross-module authoring:** [Common Packet Authoring Standard](../packet/AUTHORING_STANDARD.md) governs source-backed facts, independent coverage inventory, packet assembly and release gates for Help, Creative, Structured Artifact and Translation Kit. [Module profiles](../packet/PROFILES.md) set task-specific requirements. The 12-section AYA-RAS guide remains the canonical Help reference and current Android bundled-version guard.
 
 **AYA-RAS** is a documentation-as-product discipline for app-specific AI support. Authors first discover what truly ships, model the states that change behavior, and build a versioned guide. Independent inventories and held-out questions verify breadth and accuracy. A downstream assistant sees a self-contained reference, not an assertion of authority or permission to control the app.
