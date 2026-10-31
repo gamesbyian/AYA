@@ -36,14 +36,15 @@ val card = AyaCardView(
     title = "Ask Your Agent",
     description = "Ask about connections, errors or configuration.",
     attachmentDisclosure = "App reference offered for sharing; your AI app may not accept files.",
-    cornerRadiusDp = 0f // square host styling; use host's shape token
+    cornerRadiusDp = 0f, // square host styling; use host's shape token
+    densityMode = AyaCardDensity.COMPACT // or STANDARD (default)
 )
 container.addView(card)
 ```
 
 `questionInput` is available for draft restoration; host should assign a stable view ID when saving a view hierarchy. The SDK invokes existing version guarding and final preview. `onRejected` may replace the default Toast. The custom View does not add a dependency on a specific receiving assistant.
 
-**Current implementation:** standard View card + icon vector + local bundled review. The Compact variant is a specification for host implementers, not a separately shipped composable/widget. UI measurements, TalkBack and recipient transport require device testing; they are acceptance criteria, not verified claims.
+**Current implementation:** standard View card + icon vector + local bundled review. Both Standard and Compact are implemented by `AyaCardView` through `densityMode = AyaCardDensity.STANDARD` (default) or `AyaCardDensity.COMPACT`. Compact reduces the mark, padding and initial field height but retains the full-width accessible action and disclosure. Compose hosts can wrap either variant with `AndroidView`; a dedicated Compose component is not shipped. UI measurements, TalkBack and recipient transport require device testing; they are acceptance criteria, not verified claims.
 
 ## Acceptance checks
 
