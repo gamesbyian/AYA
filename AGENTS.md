@@ -86,3 +86,7 @@ On GitHub, use the provided Actions workflows. Do not claim tests were run witho
 ## Prioritization
 
 Prefer an integrated working handoff, truthful app-specific docs and real-device acceptance over additional speculative features or untested compatibility layers. Treat hallucinated user instructions and accidental sensitive disclosures as release-blocking defects.
+
+## Expo host-guide prebuild helper
+
+The optional source-preview [Expo guide plugin](docs/components/EXPO.md) is solely a safe build-time Android asset copier. A real Expo app must author its own guide, match configured Android package and version, and preserve native developer review and Share/Copy. The plugin must reject symlink/traversal escapes, unsafe foreign-file replacements, mismatched AYA-RAS references and ambiguous provenance; update its negative tests with any path/ownership changes. This does not provide a React Native native module, Expo Go support, or proof of compiled APK/recipient behavior.
