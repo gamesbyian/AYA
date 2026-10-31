@@ -31,7 +31,7 @@ class AyaFlutter {
           reason: 'AYA handoff is available in Android builds only.');
     }
     if (guideAsset.trim().isEmpty || guideAsset.startsWith('/') ||
-        guideAsset.split('/').contains('..') || guideAsset.contains(r'\')) {
+        guideAsset.split('/').contains('..') || guideAsset.contains(String.fromCharCode(92))) {
       return const AyaLocalResult(AyaLocalStatus.rejected,
           reason: 'Invalid guide asset path.');
     }
