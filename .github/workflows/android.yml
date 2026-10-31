@@ -10,6 +10,8 @@ on:
       - 'tools/component_scaffold.py'
       - 'tools/test_component_codegen.py'
       - 'tools/test_component_scaffold.py'
+      - 'tools/validate_staged_maven.py'
+      - 'tools/test_validate_staged_maven.py'
       - 'docs/components/examples/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
@@ -24,6 +26,8 @@ on:
       - 'tools/component_scaffold.py'
       - 'tools/test_component_codegen.py'
       - 'tools/test_component_scaffold.py'
+      - 'tools/validate_staged_maven.py'
+      - 'tools/test_validate_staged_maven.py'
       - 'docs/components/examples/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
@@ -92,7 +96,8 @@ jobs:
       - name: Exercise non-SNAPSHOT staged Maven coordinates
         run: |
           gradle :aya:publishReleasePublicationToStagingRepository :aya-compose:publishReleasePublicationToStagingRepository -Paya.version=0.1.0-preview.1 --no-daemon
-          python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version 0.1.0-preview.1
+          python3 -m unittest discover -s tools -p 'test_validate_staged_maven.py'
+          python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version 0.1.0-preview.1 --checksum-output aya-staging-sha256.txt
           gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version=0.1.0-preview.1 --no-daemon
       - uses: actions/upload-artifact@v4
         with:
