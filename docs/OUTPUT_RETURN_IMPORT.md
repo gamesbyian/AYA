@@ -79,7 +79,7 @@ The optional JSON marker below is useful **only** when the actual artifact schem
 }
 ```
 
-All fields are *claims supplied by an untrusted file*. The app's real parser and versioned schema remain authoritative. A `request_id` can improve explanations but must never grant permission or act as an authentication token. Users may import a valid file from another device, another agent, or a manual editor without an AYA marker.
+The [optional envelope JSON Schema](output/aya-output-envelope-v1.schema.json) captures this shape for host formats that permit it. It is documentation and host-side authoring guidance, not automatically imposed by AYA. All fields are *claims supplied by an untrusted file*. The app's real parser and versioned schema remain authoritative. A `request_id` can improve explanations but must never grant permission or act as an authentication token. Users may import a valid file from another device, another agent, or a manual editor without an AYA marker.
 
 **Do not wrap formats that require an exact root object.** ROYGBIV's canonical JSON recipe, for example, should remain in its native format. For legacy formats, identify through source-derived content probes or accept a separate opt-in sidecar with no authority over the artifact. Do not strip unknown keys or normalize a recipe merely to make it appear valid.
 
@@ -116,6 +116,10 @@ Android `Intent.createChooser(target, title, IntentSender)` can report a selecte
 AYA exposes `AyaShareTargetHints.setEnabled(context, true)` as an **explicit user-opt-in, local-only** feature (off by default). The library records only the last selected receiver package in the host's private preferences; `lastChosenPackage()`, `clear()`, and `setEnabled(false)` allow local hints and deletion. Disabling clears the value. Hosts must explain the setting and must not use it for marketing or surveillance.
 
 The value can improve "Return from your AI app" wording if the host has independently verified that provider's export conventions for that Android version. It cannot identify a saved document, a folder or app-private storage. Use a user-selected SAF URI, and optionally `DocumentsContract.EXTRA_INITIAL_URI` only with a previously granted document location (API 26+). Avoid arbitrary Downloads sweeps, broad storage permission requests, hardcoded guessed folders and provider-specific scraping.
+
+### Android Share / Open With integration
+
+Hosts may additionally expose a dedicated, user-visible `ACTION_SEND` / `ACTION_VIEW` intent-filter activity for artifact MIME types they can genuinely validate. Such an activity must handle a single explicit `content:` URI, verify the sender's grant and present a local import preview; it must not silently apply payloads in `onCreate`. Android may offer this activity from another app's Share or Open With menu. Keep the host intent filter narrowly scoped to supported formats and document the activity's export/security model; **AYA does not register a universal inbound receiver**, because only the host knows which artifacts and MIME types it can safely import.
 
 Android source references: [Intent chooser callback](https://developer.android.com/reference/android/content/Intent#createChooser(android.content.Intent,%20java.lang.CharSequence,%20android.content.IntentSender)), [Storage Access Framework document selection](https://developer.android.com/training/data-storage/shared/documents-files), [DocumentsContract initial URI](https://developer.android.com/reference/android/provider/DocumentsContract#EXTRA_INITIAL_URI).
 
