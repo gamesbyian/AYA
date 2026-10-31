@@ -84,6 +84,20 @@ class QuestionFlowTest {
             device.hasObject(By.desc("Your question for the assistant (optional)")))
     }
 
+    @Test fun cardQuestionDraftSurvivesHostRecreation() {
+        val question = "Does this draft survive rotation and Activity recreation?"
+        scenario.scenario.onActivity {
+            it.findViewById<EditText>(R.id.aya_sample_help_question).setText(question)
+        }
+        scenario.scenario.recreate()
+        scenario.scenario.onActivity {
+            assertTrue(
+                "The host saves its own AYA card question field",
+                it.findViewById<EditText>(R.id.aya_sample_help_question).text.toString() == question
+            )
+        }
+    }
+
     @Test fun blankCardQuestionIsAllowedAndGetsGenericHelpRequest() {
         scenario.scenario.onActivity {
             assertTrue(it.findViewById<EditText>(R.id.aya_sample_help_question).text.isBlank())
