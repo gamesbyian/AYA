@@ -70,6 +70,8 @@ python3 tools/component_codegen.py docs/components/examples/sample-help-card.jso
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
+The generated card/action function name incorporates the component's stable ID and a short hash so multiple drop-ins can coexist without duplicate Kotlin functions. **State restoration remains host-owned:** when installing a card, assign both the returned card and its `questionInput` stable resource IDs (for example `R.id.aya_help_card` and `R.id.aya_help_question`) and retain the same IDs across Activity recreation. The sample app demonstrates this requirement. The generator cannot safely invent resources in an unrelated host project.
+
 The generated Kotlin is an **integration snippet** to paste or adapt, not an automatically modified project. The sample fixture is bound to the first-party sample's real guide; other hosts must source their own documentation and output instructions. Do not copy sample wording into unrelated apps. `--check` validates static configuration only. It cannot establish binary/guide equivalence, source truth, installed recipient behavior, accessibility or runtime success.
 
 ### Runtime action API (first slice)

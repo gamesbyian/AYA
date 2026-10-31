@@ -8,6 +8,7 @@ exact-version guide: run the independent reference audit and Android tests.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -87,9 +88,18 @@ def kotlin_quote(value: str) -> str:
     return '"' + body + '"'
 
 
+def kotlin_function_name(prefix: str, component_id: str) -> str:
+    """Stable and collision-resistant across independent component manifests."""
+    normalized = re.sub(r"[^A-Za-z0-9_]", "_", component_id)
+    suffix = hashlib.sha256(component_id.encode("utf-8")).hexdigest()[:8]
+    return f"{prefix}AyaComponent_{normalized}_{suffix}"
+
+
 def kotlin_snippet(m: dict[str, Any]) -> str:
     m = validate(m)
     p = m["presentation"]
+    card_function = kotlin_function_name("install", m["id"])
+    action_function = kotlin_function_name("launch", m["id"])
     screen = f",\n        screenName = {kotlin_quote(m['screenName'])}" if "screenName" in m else ""
     if p["kind"] == "card":
         return (
@@ -98,7 +108,7 @@ def kotlin_snippet(m: dict[str, Any]) -> str:
             "import android.view.ViewGroup\n"
             "import dev.aya.android.AyaCardDensity\n"
             "import dev.aya.android.AyaCardView\n\n"
-            "fun installAyaComponent(activity: Activity, container: ViewGroup): AyaCardView {\n"
+            "fun " + card_function + "(activity: Activity, container: ViewGroup): AyaCardView {\n"
             "    val card = AyaCardView(\n"
             "        context = activity,\n"
             "        activity = activity,\n"
@@ -118,7 +128,7 @@ def kotlin_snippet(m: dict[str, Any]) -> str:
         "import android.app.Activity\n"
         "import dev.aya.android.AyaBundledLaunchResult\n"
         "import dev.aya.android.AyaComponentAction\n\n"
-        "fun launchAyaComponent(activity: Activity, question: String?): AyaBundledLaunchResult {\n"
+        "fun " + action_function + "(activity: Activity, question: String?): AyaBundledLaunchResult {\n"
         "    return AyaComponentAction.Help(\n"
         "        guideAsset = " + kotlin_quote(m["guideAsset"]) + screen + ",\n"
         "        askQuestion = " + str(p["askQuestion"]).lower() + "\n"

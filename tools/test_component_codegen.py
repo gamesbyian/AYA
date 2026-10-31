@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, kotlin_quote, kotlin_snippet, validate
+from component_codegen import ComponentError, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -81,6 +81,14 @@ class ComponentCodegenTest(unittest.TestCase):
         self.assertIn('\\"quote\\"', quoted)
         self.assertIn("\\\\ next", quoted)
         self.assertIn("\\nline", quoted)
+
+    def test_multiple_cards_have_unique_stable_function_names(self):
+        a = kotlin_function_name("install", "screen.a")
+        b = kotlin_function_name("install", "screen-a")
+        self.assertNotEqual(a, b)
+        self.assertEqual(a, kotlin_function_name("install", "screen.a"))
+        self.assertTrue(a.startswith("installAyaComponent_"))
+        self.assertIn(a, kotlin_snippet({**self.manifest, "id": "screen.a"}))
 
     def test_bad_action_boolean_rejected(self):
         self.manifest["presentation"] = {"kind": "action", "askQuestion": "false"}

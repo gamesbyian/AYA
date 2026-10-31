@@ -11,7 +11,7 @@
 
 Deliver:
 1. Freeze help-only `aya-component/v1` static configuration JSON Schema and sample fixture; make invalid/extra keys rejectable.
-2. Provide offline manifest validation plus deterministic Kotlin snippet generation, with injection-safe quoted string literals; clean command exit codes and negative tests.
+2. Provide offline manifest validation plus deterministic multi-instance-safe Kotlin snippet generation, with injection-safe quoted string literals; clean command exit codes and negative tests. Explicitly document host-assigned stable View IDs for draft restoration.
 3. Add Kotlin `AyaComponentAction` typed dispatcher for existing help/image/translation guarded entry points. Avoid changing core Share/Copy transport, output-return PR or card styles.
 4. Document platform boundaries, host-side authoring model, director consultation, data minimization, truth categories, import separation and conformance invariants.
 5. Link the developer entrypoint in README and AGENTS.md; keep release status accurate.
