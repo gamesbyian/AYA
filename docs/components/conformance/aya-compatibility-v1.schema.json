@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gamesbyian/AYA/blob/main/docs/components/conformance/aya-compatibility-v1.schema.json",
+  "title": "AYA behaviour compatibility evidence manifest v1",
+  "description": "Human-submitted QA evidence only; schema validation never certifies real assistant ingestion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "implementation",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aya-compatibility/v1"
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "app_id",
+        "app_version",
+        "implementation_kind",
+        "platform",
+        "reviewer",
+        "tested_at_utc"
+      ],
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "app_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementation_kind": {
+          "enum": [
+            "aya-sdk",
+            "self-implemented"
+          ]
+        },
+        "platform": {
+          "const": "android"
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tested_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "test_method",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "installed_version_identity",
+              "source_backed_scope",
+              "explicit_user_initiation",
+              "editable_review",
+              "cancel_without_share",
+              "manual_copy_fallback",
+              "reject_missing_stale_guide",
+              "read_only_attachment",
+              "provider_neutrality",
+              "truthful_return_use",
+              "no_answer_monitoring",
+              "accessibility_lifecycle"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "unverified",
+              "not_applicable"
+            ]
+          },
+          "test_method": {
+            "enum": [
+              "instrumentation",
+              "manual-device",
+              "source-audit",
+              "unverified"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

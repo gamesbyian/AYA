@@ -1,0 +1,85 @@
+{
+  "schema_version": "aya-compatibility/v1",
+  "implementation": {
+    "app_id": "dev.example.aya_demo",
+    "app_version": "0.0.0-fictional",
+    "implementation_kind": "self-implemented",
+    "platform": "android",
+    "reviewer": "UNASSIGNED",
+    "tested_at_utc": "2026-10-30T00:00:00Z"
+  },
+  "cases": [
+    {
+      "id": "installed_version_identity",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "source_backed_scope",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "explicit_user_initiation",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "editable_review",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "cancel_without_share",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "manual_copy_fallback",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "reject_missing_stale_guide",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "read_only_attachment",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "provider_neutrality",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "truthful_return_use",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "no_answer_monitoring",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    },
+    {
+      "id": "accessibility_lifecycle",
+      "status": "unverified",
+      "test_method": "unverified",
+      "notes": "Example-only; evidence must be independently collected."
+    }
+  ]
+}
