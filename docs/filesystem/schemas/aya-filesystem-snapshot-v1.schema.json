@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AYA Filesystem Snapshot v1",
+  "description": "Host-supplied, user-reviewed, non-authoritative metadata. Never execution permission.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "app_id",
+    "app_version",
+    "generated_at_utc",
+    "scope",
+    "scan",
+    "summary",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aya-filesystem-snapshot/v1"
+    },
+    "app_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "app_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "root",
+        "recursive",
+        "symlinks"
+      ],
+      "properties": {
+        "backend": {
+          "enum": [
+            "local",
+            "ftp",
+            "ftps",
+            "sftp",
+            "saf",
+            "webdav",
+            "smb",
+            "cloud",
+            "other"
+          ]
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recursive": {
+          "type": "boolean"
+        },
+        "symlinks": {
+          "enum": [
+            "not_followed",
+            "followed_within_scope",
+            "unsupported",
+            "unknown"
+          ]
+        },
+        "depth_limit": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "truncated",
+        "directories_visited",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "complete",
+            "partial",
+            "failed"
+          ]
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "type": "string"
+        },
+        "directories_visited": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "permission",
+                  "timeout",
+                  "listing",
+                  "loop",
+                  "unsupported",
+                  "other"
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files_seen",
+        "directories_seen",
+        "matching_files_seen"
+      ],
+      "properties": {
+        "files_seen": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "directories_seen": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "matching_files_seen": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 2500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "file",
+              "directory",
+              "symlink",
+              "unknown"
+            ]
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "modified_at_utc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason_included": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "redacted": {
+          "type": "boolean"
+        },
+        "omitted_sensitive_paths": {
+          "type": "boolean"
+        },
+        "summary_only": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

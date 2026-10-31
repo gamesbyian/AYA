@@ -10,7 +10,7 @@
 
 [**Android integration guide**](docs/INTEGRATION.md) · [**Quick explanation and use cases**](docs/DISCOVERABILITY.md) · [**Reference packet authoring**](docs/reference/INDEX.md) · [**Privacy and security**](docs/SECURITY.md)
 
-**Help Handoff + Creative Handoff + optional Translation Kit Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
+**Help, Creative, Translation Kit, and optional Filesystem Automation Handoffs.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
 
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
@@ -23,6 +23,12 @@ Apps can offer ordinary **Language** settings (device language, installed langua
 **Start here:** [Translation module and Kotlin usage](docs/translation/README.md), [app-specific kit authoring standard](docs/translation/AUTHORING.md), [fictional complete kit](docs/translation/examples/parcelpad-translation-kit.md), [output schema](docs/translation/examples/parcelpad-output.schema.json), and [Pirate pack example](docs/translation/examples/parcelpad-pirate.pack.json).
 
 **Implementation status:** the typed task/verifier and guarded Android handoff are implemented in the SDK; no host language-pack runtime, generator, gallery or real-recipient acceptance is implemented or verified. This module is optional and does not require an AI account for normal language settings.
+
+## Filesystem Automation Handoff for file managers and FTP clients
+
+The optional [Filesystem Automation module](docs/filesystem/README.md) helps developers of FTP/FTPS/SFTP clients, local/SAF browsers, WebDAV/SMB and cloud file managers let users ask their chosen assistant to **author a safe, host-importable automation recipe**. The exact-version [Filesystem Kit authoring standard](docs/filesystem/AUTHORING.md) requires the real host's recipe schema, backend capability truth, clarification protocol, safety requirements, worked examples and manual-import instructions. A user-approved, dated [Filesystem Snapshot](docs/filesystem/SNAPSHOTS.md) can supply compact directory/contents context without sharing credentials or requiring an AI backend. The user saves and imports any resulting recipe manually. The host independently validates, previews, rechecks and executes it. AYA never scans, imports or executes files, monitors agent replies or promises recipient ingestion.
+
+The SDK now exposes `Aya.launchFilesystemBundled()` with `AyaFilesystemTask`, a structurally guarded bundled kit and an optional bounded JSON snapshot. **Snapshot generation and recipe execution are host-owned, not included in AYA.** See [fixture and acceptance tests](docs/filesystem/TEST_PLAN.md).
 
 ## Structured artifact handoffs
 
@@ -59,7 +65,7 @@ The [AYA Application Understanding Framework](docs/understanding/README.md) teac
 
 ## Packet authoring across modules
 
-AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) and [four module profiles](docs/packet/PROFILES.md) covering Help, Creative, Structured Artifact and Translation Kit. Developers define source-backed atomic host facts, an independent inventory, module-specific output contracts and negative examples. The offline [packet compiler](tools/packet_compiler.py) deterministically creates scoped, provenance-marked, dependency-complete context packets and explicitly reports omitted facts; it refuses stale external claims and oversized exports. See [quickstart and fictional fixtures](docs/packet/README.md).
+AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) and [five module profiles](docs/packet/PROFILES.md) covering Help, Creative, Structured Artifact, Translation Kit and Filesystem Automation. Developers define source-backed atomic host facts, an independent inventory, module-specific output contracts and negative examples. The offline [packet compiler](tools/packet_compiler.py) deterministically creates scoped, provenance-marked, dependency-complete context packets and explicitly reports omitted facts; it refuses stale external claims and oversized exports. See [quickstart and fictional fixtures](docs/packet/README.md).
 
 **Scope:** this is **build-time authoring infrastructure**, not a new on-device model, dynamic host-state reader, assistant integration, or automatic reply/import mechanism. The verified packet must be deliberately packaged into the existing version-matched AYA handoff. AYA still ends at the user-controlled Share/Copy boundary.
 
@@ -73,6 +79,7 @@ The [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md) defines the thin-outline
 
 - [Reference-document authoring system](docs/reference/INDEX.md): **mandatory guide for every integrating app**. Includes the [base authoring standard](docs/reference/AUTHORING_STANDARD.md), [advanced authoring techniques](docs/reference/ADVANCED_AUTHORING.md), [agent production workflow](docs/reference/AGENT_WORKFLOW.md), [independent inventory and traceability](docs/reference/TRACEABILITY.md), [assistant evaluation protocol](docs/reference/EVALUATION_PROTOCOL.md), [template](docs/reference/TEMPLATE.md), [quality rubric](docs/reference/QA_RUBRIC.md), [question bank](docs/reference/QUESTION_BANK.md), [maintenance process](docs/reference/MAINTENANCE.md), [modular guide builder](docs/reference/MODULAR_BUILDS.md) and [fictional worked example](docs/reference/EXAMPLE_PARCELPAD.md).
 - [Android integration](docs/INTEGRATION.md), [question-first UX contract](docs/QUESTION_COMPOSER.md), [Android sharing research](docs/ANDROID_SHARING_RESEARCH.md), [readiness checklist](docs/INTEGRATION_READINESS.md), and [real sample host](sample/): version-guarded invocation, standalone AAR consumption, and release gates.
+- [Filesystem Automation host authoring](docs/filesystem/README.md), [kit authoring](docs/filesystem/AUTHORING.md), [snapshot specification](docs/filesystem/SNAPSHOTS.md), and [test matrix](docs/filesystem/TEST_PLAN.md).
 - [Product specification](docs/SPEC.md), [privacy/security](docs/SECURITY.md), [test plan](docs/TEST_PLAN.md), [recipient compatibility ledger](docs/PROVIDER_COMPATIBILITY.md).
 
 **A good AYA reference is much more than a manual.** It is a testable, source-backed explanation of screens, settings, version-specific capabilities, exact task steps, errors, recovery, data impact, provider differences and known limits. It must enable a model to say "unknown" instead of hallucinating controls.

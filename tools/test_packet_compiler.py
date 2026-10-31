@@ -27,8 +27,8 @@ class PacketCompilerTests(unittest.TestCase):
         return compile_packet(*(inputs or sources()), profile, selected or [],
                               budget, fragment, NOW)
 
-    def test_all_four_profiles_compile_and_are_deterministic(self):
-        for profile in ("help", "creative", "structured", "translation"):
+    def test_all_five_profiles_compile_and_are_deterministic(self):
+        for profile in ("help", "creative", "structured", "translation", "filesystem"):
             with self.subTest(profile=profile):
                 a, report = self.compile(profile)
                 b, repeat = self.compile(profile)
@@ -37,6 +37,12 @@ class PacketCompilerTests(unittest.TestCase):
                 self.assertIn("Excluded entries are not evidence", a) if report["excluded"] else None
                 self.assertEqual(report["sha256"], repeat["sha256"])
                 self.assertGreater(report["included"], 0)
+
+    def test_filesystem_keeps_safety_dependencies(self):
+        text, report = self.compile("filesystem", ["FACT-010"])
+        self.assertTrue({"FACT-001", "FACT-002", "FACT-010", "FACT-011"}
+                        .issubset(report["included_ids"]))
+        self.assertIn("snapshot", text.lower())
 
     def test_scoping_keeps_dependencies_and_mandatory_constraints(self):
         text, report = self.compile("structured", ["FACT-006"])

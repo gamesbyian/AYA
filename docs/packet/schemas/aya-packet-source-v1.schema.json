@@ -116,7 +116,8 @@
                 "help",
                 "creative",
                 "structured",
-                "translation"
+                "translation",
+                "filesystem"
               ]
             }
           },

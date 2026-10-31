@@ -27,6 +27,24 @@ The host must first implement normal language selection and a working, safe pack
 
 **Preferred path:** use a version-matched bundled guide and `Aya.launchBundled()`, not a hand-assembled request string. See [integration readiness](INTEGRATION_READINESS.md) and the [AYA-RAS authoring system](reference/INDEX.md).
 
+## Optional file-manager automation recipes
+
+For FTP, FTPS, SFTP, SAF, local, SMB, WebDAV and cloud storage hosts with an **existing safe recipe importer**, use the [Filesystem Automation module](filesystem/README.md). Bundle `aya-filesystem-kit.md` for the exact installed app, documenting the real recipe parser schema, backend semantics, intent clarification, protective conditions and manual import. When the user explicitly asks to provide filesystem context, the host may generate a sanitized [snapshot](filesystem/SNAPSHOTS.md) and offer it for review. AYA performs no crawling or scanning.
+
+```kotlin
+Aya.launchFilesystemBundled(
+    activity = this,
+    task = AyaFilesystemTask(
+        importInstructions = "Automation > Import recipe > Review > Approve"
+    ),
+    direction = userApprovedRequest,
+    askDirection = false,
+    snapshotJson = optionalUserApprovedSnapshotJson
+)
+```
+
+The user manually saves the assistant's recipe and returns to the host importer. AYA does not ingest the response, decide what to delete, run an operation or guarantee a file was generated. See the [authoring spec](filesystem/AUTHORING.md) and [safety acceptance](filesystem/TEST_PLAN.md) before enabling a card. This is a dedicated guarded API; `AyaCardView`'s built-in action is still standard Help.
+
 ## 1. Add the library
 
 AYA currently distributes a **staging Maven AAR** through the GitHub Actions build artifact or as source. There is **no public Maven Central release**. The repository uses the [Unlicense](../UNLICENSE); third-party dependencies retain their own licenses. CI uses Gradle 8.9, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, JDK 17, compileSdk 35 and minSdk 23.
