@@ -42,6 +42,8 @@ Follow [AYA Card UI Standard v1](docs/CARD_UI_STANDARD.md). Every embedded AYA c
 
 Read [Component specification](docs/components/README.md) and [delivery roadmap](docs/components/ROADMAP.md) when editing the Android component action, static manifest, code generator, proposed Compose/Flutter/React Native/Expo/Godot/Unity/visual-builder adapters or examples. The `aya-component/v1` manifest is **help-only and build-time**; the separate `aya-handoff/v1` protocol is not a runtime parser. Keep the typed action routed through `Aya.launch*Bundled()`, not the unverified manual `Aya.launch()`.
 
+The XML layout editor drop-in [AYA XML card](docs/components/XML.md) must delegate to the existing guarded `AyaCardView`, have an inert layout preview, fail closed without an Activity or truthful output-use instructions, and preserve a host-assigned stable question input resource ID across recreation.
+
 Visual components/nodes must never bypass installed-version checks or edited preview, invent assistant-reply callbacks, infer recipient ingestion, silently collect host state, or advertise automatic output import. Card copy needs verified output-use instructions. Generators must escape Kotlin strings (especially interpolation), reject unknown fields and asset traversal, and report structural success without implying factual accuracy. Keep core SDK framework-agnostic; distribute Compose and other bridges as optional packages with separate acceptance matrices.
 
 ## Engineering constraints

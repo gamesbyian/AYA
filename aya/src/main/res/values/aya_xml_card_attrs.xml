@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AyaXmlCardView">
+        <attr name="ayaGuideAsset" format="string" />
+        <attr name="ayaScreenName" format="string" />
+        <attr name="ayaTitle" format="string" />
+        <attr name="ayaDescription" format="string" />
+        <attr name="ayaAttachmentDisclosure" format="string" />
+        <attr name="ayaOutputInstructions" format="string" />
+        <attr name="ayaCornerRadius" format="dimension" />
+        <attr name="ayaQuestionInputId" format="reference" />
+        <attr name="ayaDensity">
+            <enum name="standard" value="0" />
+            <enum name="compact" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>
