@@ -48,6 +48,7 @@ class ComposeDemoActivity : ComponentActivity() {
                     "The agent's response must be used manually.")
                 AyaCard(
                     activity = this@ComposeDemoActivity,
+                    componentId = "sample.compose.help",
                     modifier = Modifier.fillMaxWidth(),
                     guideAsset = "aya-guide.md",
                     screenName = "Compose demo",
