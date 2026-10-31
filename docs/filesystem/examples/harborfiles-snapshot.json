@@ -1,0 +1,50 @@
+{
+  "schema_version": "aya-filesystem-snapshot/v1",
+  "app_id": "dev.harborfiles.demo",
+  "app_version": "1.0.0",
+  "generated_at_utc": "2026-10-30T20:00:00Z",
+  "scope": {
+    "backend": "sftp",
+    "root": "/",
+    "recursive": true,
+    "symlinks": "not_followed",
+    "depth_limit": null
+  },
+  "scan": {
+    "status": "complete",
+    "truncated": false,
+    "directories_visited": 4,
+    "errors": []
+  },
+  "summary": {
+    "files_seen": 5,
+    "directories_seen": 4,
+    "matching_files_seen": 3,
+    "notes": "Illustrative snapshot; no real server was queried."
+  },
+  "entries": [
+    {
+      "path": "/archives/2021/pomegranate.txt",
+      "kind": "file",
+      "size_bytes": 12,
+      "reason_included": "protected basename"
+    },
+    {
+      "path": "/notes/diary.txt",
+      "kind": "file",
+      "size_bytes": 123,
+      "reason_included": "matching extension"
+    },
+    {
+      "path": "/docs/draft.rtf",
+      "kind": "file",
+      "size_bytes": 304,
+      "reason_included": "matching extension"
+    }
+  ],
+  "disclosure": {
+    "redacted": true,
+    "omitted_sensitive_paths": false,
+    "summary_only": false
+  }
+}

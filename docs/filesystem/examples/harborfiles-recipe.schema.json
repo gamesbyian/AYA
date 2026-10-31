@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fictional HarborFiles recipe: teaching fixture, no real importer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "target",
+    "selection",
+    "preconditions",
+    "action",
+    "execution"
+  ],
+  "properties": {
+    "format": {
+      "const": "harborfiles-recipe/v1"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root",
+        "recursive"
+      ],
+      "properties": {
+        "root": {
+          "const": "/"
+        },
+        "recursive": {
+          "const": true
+        }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "extensions",
+        "exclude_basenames",
+        "case_sensitive"
+      ],
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              ".txt",
+              ".rtf"
+            ]
+          }
+        },
+        "exclude_basenames": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "case_sensitive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "preconditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protected_basename_must_exist",
+        "require_complete_scan"
+      ],
+      "properties": {
+        "protected_basename_must_exist": {
+          "type": "string",
+          "minLength": 1
+        },
+        "require_complete_scan": {
+          "const": true
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "delete"
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dry_run",
+        "require_approval",
+        "revalidate"
+      ],
+      "properties": {
+        "dry_run": {
+          "const": true
+        },
+        "require_approval": {
+          "const": true
+        },
+        "revalidate": {
+          "const": true
+        }
+      }
+    }
+  }
+}
