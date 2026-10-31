@@ -8,6 +8,7 @@ on:
       - 'aya/**'
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
+      - 'tools/test_flutter_builtin_migration.py'
   push:
     branches: [main]
     paths:
@@ -42,6 +43,8 @@ jobs:
           cache: true
       - name: Confirm Flutter and Dart versions
         run: flutter --version
+      - name: Exercise migration fixture and fail-closed identity guards
+        run: python3 -m unittest discover -s tools -p 'test_flutter_builtin_migration.py'
       - name: Stage canonical unpublished AYA Android AAR
         run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
       - name: Independently validate exact-version Flutter CI host reference
