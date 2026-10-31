@@ -1,0 +1,46 @@
+{
+  "schema_version": "aya-packet-profiles/v1",
+  "app_id": "dev.parcelpad.example",
+  "source_revision": "fictional-fixture-1",
+  "profiles": {
+    "help": {
+      "purpose": "Assist with understanding and troubleshooting the fictional ParcelPad UI.",
+      "request": "Answer a user's question accurately using scoped host facts; distinguish local observations from external delivery outcomes.",
+      "output_contract": "Provide exact evidenced steps and verification; explicitly say UNKNOWN or unsupported when appropriate.",
+      "examples": "Valid: 'Ready is local status, not proof of delivery.' Invalid: 'Your parcel was delivered.'",
+      "always_include": [
+        "FACT-001"
+      ]
+    },
+    "creative": {
+      "purpose": "Guide creation of compatible square parcel artwork via the user's assistant.",
+      "request": "Produce a 1:1 PNG image for an artwork slot; the host's manual import path remains required.",
+      "output_contract": "Actual image or explicit capability limitation; no claim of automatic installation.",
+      "examples": "Valid: an opaque square image saved locally. Invalid: assuming the app accepts an SVG or that the assistant installed it.",
+      "always_include": [
+        "FACT-003",
+        "FACT-004"
+      ]
+    },
+    "structured": {
+      "purpose": "Produce a host-compatible JSON recipe file.",
+      "request": "Create or modify only the documented recipe fields and preserve existing unrequested values.",
+      "output_contract": "Return a plain .json object with title:string and itemCount:int 0..20. The user imports it manually.",
+      "examples": "Valid: {\"title\":\"Example\",\"itemCount\":2}. Invalid: {\"title\":\"Example\",\"itemCount\":200}.",
+      "always_include": [
+        "FACT-005",
+        "FACT-006"
+      ]
+    },
+    "translation": {
+      "purpose": "Produce a locale or personality pack while preserving meaning and placeholders.",
+      "request": "Generate an importable JSON translation overlay from the approved source catalog, with safe wording for destructive actions.",
+      "output_contract": "Return host-specified JSON with exact string keys and compatible placeholders; no claim of activation.",
+      "examples": "Valid: Pirate style 'Remove from list' remains unambiguously non-destructive. Invalid: translating Remove as Delete files.",
+      "always_include": [
+        "FACT-007",
+        "FACT-008"
+      ]
+    }
+  }
+}

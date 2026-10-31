@@ -1,5 +1,22 @@
 # AYA verification and release gates
 
+The [cross-module trial ledger](packet/EVALUATION.md) must bind results to the exact compiled packet, record actual attachment ingestion and independently checked host outcomes. The offline tool `tools/validate_packet_trials.py` rejects fabricated-incomplete *metadata* claims, but human proof is still necessary. Unit tests use explicitly synthetic fixtures only.
+
+## Shared Packet Authoring checks
+
+Run the [Packet compiler](packet/README.md) on the fictional four-profile fixture, then independently test against real host builds before release:
+
+```sh
+python3 tools/packet_compiler.py --source docs/packet/examples/parcelpad-facts.json \
+  --inventory docs/packet/examples/parcelpad-inventory.json \
+  --profiles docs/packet/examples/parcelpad-profiles.json \
+  --profile help --as-of 2026-10-30T00:00:00Z \
+  --output /tmp/aya-help-packet.md --report /tmp/aya-help-packet.json
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
+
+For each actual adopting app independently verify inventory coverage, live UI and effects, dependency closure, text-only essential constraints, precise import semantics, token/byte limits, actual assistant attachment ingestion and generated-output acceptance. Refuse stale upstream claims and unreviewed high-risk facts. No production response monitoring is allowed.
+
 ## Static and reference checks
 
 - `python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md`
@@ -8,6 +25,13 @@
 - `python3 -m unittest discover -s tools -p 'test_*.py'`
 - For every integrating app, run validator and independent [AYA-RAS review](reference/AUTHORING_STANDARD.md); score against [QA rubric](reference/QA_RUBRIC.md) and [question bank](reference/QUESTION_BANK.md).
 - Structural checks are necessary but cannot prove that an app guide matches shipping behavior.
+
+## Optional Translation Kit checks
+
+- Run `python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md --schema docs/translation/examples/parcelpad-output.schema.json --example docs/translation/examples/parcelpad-pirate.pack.json` and `tools/test_validate_translation_kit.py` through Python discovery.
+- Kotlin `AyaTranslationKitTest` checks version/app rejection, required sections, duplicate metadata, invalid task values, preserved meaning and final-review prompt edits. Verify these through Android unit-test CI; fixture consistency is not proof of a real host's importer.
+- In an actual adopting host: verify kit content matches released string catalog, exact-version AYA-RAS guide, imported pack parser and user-visible manual import route. Test protected/destructive/permission/accessibility texts, invalid ICU placeholders/plurals, locale variants, RTL, size/UTF-8, unknown keys, incomplete overlays, fallback and rollback.
+- Device tests: ordinary Language settings do not require an assistant; the AYA card remains secondary; Copy/Cancel/Share correctly distinguish approved text and the single attachment; the chosen recipient may ignore attachments; user imports returned output manually. No background observation or inferred generation success.
 
 ## Android CI
 

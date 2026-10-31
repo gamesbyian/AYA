@@ -1,5 +1,7 @@
 # Structured Artifact Handoff · JSON recipe profile
 
+**Shared authoring:** use the [Common Packet Authoring Standard](packet/AUTHORING_STANDARD.md) and [Structured profile](packet/PROFILES.md#structured-artifact) to derive schema, field semantics, dependencies and examples from actual importers. A compiled packet is build-time reference material, not a new implemented Android structured-task API.
+
 **Status 2026-10-30:** browser/PWA implementation reference exists in the companion `gamesbyian/wallgen` branch `feature/aya-recipe-handoff-20261030`; AYA's Android library **does not yet expose a generic structured-artifact Kotlin entry point**. Do not claim native Android recipient compatibility. This document specifies the portable handoff profile and its future typed SDK extension.
 
 ## Purpose

@@ -1,5 +1,7 @@
 # AYA reference quality rubric
 
+**Cross-module quality:** Apply [the Packet Authoring Standard](../packet/AUTHORING_STANDARD.md) to Help, Creative, Structured Artifact and Translation Kit. Record packet scope/omissions, source-revision, evidence dependencies, essential-constraint coverage, reproducible output formatting, host import checks and provider ingestion separately. A successful source/inventory compiler test is a structural gate, not a guarantee of semantic or model quality.
+
 Quality is measured on the **actual installed app and realistic support questions**. Structural validation checks headings/metadata; human or agent review checks truth and usefulness.
 
 ## Scoring

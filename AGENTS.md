@@ -4,6 +4,10 @@
 
 AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
+## Cross-module packet authoring
+
+Read [Common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md), [module profiles](docs/packet/PROFILES.md) and [compiler usage](docs/packet/README.md) when changing or adding any host-to-agent information packet. Keep independent source-derived inventory, atomic host facts with source evidence and profile dependencies, actual output contracts, contextual examples/negative examples and source freshness. Run the compiler and regression tests, verify high-risk facts against the installed binary, and reject silent truncation or missing protective dependencies. A structural green check does not establish truth or provider ingestion. Never infer receiver success or monitor production agent responses.
+
 ## Documentation is a release-critical feature
 
 **Read [docs/reference/INDEX.md](docs/reference/INDEX.md) and [docs/reference/AUTHORING_STANDARD.md](docs/reference/AUTHORING_STANDARD.md) before working on references.** For release-bound integrations **also follow** [ADVANCED_AUTHORING.md](docs/reference/ADVANCED_AUTHORING.md), [AGENT_WORKFLOW.md](docs/reference/AGENT_WORKFLOW.md), [TRACEABILITY.md](docs/reference/TRACEABILITY.md) and [EVALUATION_PROTOCOL.md](docs/reference/EVALUATION_PROTOCOL.md). Follow [TEMPLATE.md](docs/reference/TEMPLATE.md), [QA_RUBRIC.md](docs/reference/QA_RUBRIC.md), [QUESTION_BANK.md](docs/reference/QUESTION_BANK.md), and [MAINTENANCE.md](docs/reference/MAINTENANCE.md). The fictional ParcelPad reference illustrates structure but **never** provides real-app evidence.
@@ -17,6 +21,14 @@ When integrating AYA into another app:
 5. Create a **separate, source-derived JSON inventory and held-out gold question set**; run `python3 tools/validate_guide.py --strict path/to/guide.md` plus `python3 tools/audit_reference.py path/to/guide.md --inventory path/to/inventory.json --questions path/to/questions.json --strict`; complete a manual behavior/evidence audit and held-out question-bank evaluation.
 6. For large apps, use [modular reference builds](docs/reference/MODULAR_BUILDS.md) so the exported reference is deterministic and self-contained. Ship the guide with the exact installed version and keep it updated in the same PRs that modify user-facing product behavior.
 7. Verify Android recipient behavior on **dated app and OS versions**; keep [compatibility ledger](docs/PROVIDER_COMPATIBILITY.md) factual.
+
+## Optional Translation Kit integration
+
+- Read [Translation Kit module](docs/translation/README.md) and [developer authoring standard](docs/translation/AUTHORING.md) before introducing localization handoffs. Host language selection, import, validation, rollback, fallback and live UI updates remain host-owned. The AYA prompt card must be subordinate to normal language settings.
+- Source-derive every stable key, shipped source string, meaning, placeholder/plural type, risk label, technical glossary and Rosetta counterexample from the *exact installed* app build. Never substitute the fictional ParcelPad kit as evidence for a real app or invent a language importer.
+- Use `Aya.launchTranslationBundled()` and an exact-version `aya-guide.md` plus `aya-translation-kit.md`. AYA verifies identity/shape but not semantic correctness or valid returned packs. Keep model-produced notes distinct from developer-approved constraints; use explicit no-data-loss ambiguity rules.
+- Preserve the one-file reviewed UTF-8 Share path and derived final `EXTRA_TEXT`, 1 MiB kit and 2 MiB combined limits, no provider-specific API, no background response tracking and no automatic return/import. Do not promise a language pack was created simply because the Sharesheet opened.
+- Run `python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md --schema docs/translation/examples/parcelpad-output.schema.json --example docs/translation/examples/parcelpad-pirate.pack.json` plus unit/reference checks. Test bad placeholders, wrong versions, missing headings and high-risk copy.
 
 ## Engineering constraints
 - AYA's evidence registry is **read-only** and initially empty. Device QA must match recipient package, app version, Android SDK, account state and exact transport. Published claims or intent filters are NOT verified ingestion. Do not introduce package sweeps, telemetry, success monitoring or automatic recipient selection.

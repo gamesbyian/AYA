@@ -4,6 +4,10 @@ For an artwork-picker integration, additionally apply the [Creative Handoff acce
 
 This document distinguishes **ready for first host integration** from **ready for public production release**.
 
+## Optional translation readiness
+
+The typed `Aya.launchTranslationBundled()` path requires the ordinary exact-version AYA-RAS guide **and** a second source-derived `aya-translation-kit.md`. See [module contract](translation/README.md) and [host authoring instructions](translation/AUTHORING.md). A host must already have normal language selection, file import, independent schema/ICU/semantic validation and live fallback before offering an AYA "Make a language pack" card. AYA does not supply the host importer or monitor agent output. The fictional ParcelPad schema is example-only. Device/recipient acceptance and a real host translation round trip remain **UNVERIFIED**.
+
 ## Current implementation contract
 
 - Stable concept: Android app packages an AYA-RAS guide; user launches an editable privacy preview; Android shares one UTF-8 document with a chosen recipient.
@@ -24,7 +28,7 @@ This document distinguishes **ready for first host integration** from **ready fo
 7. **Build smoke.** Compile host against source module **and** independently resolved Maven AAR as applicable; check merged FileProvider authority `${applicationId}.aya.files` and URI subtree.
 8. **Device.** Instrumented tests for URI grants, UTF-8 and provider containment; manual TalkBack/font scale/keyboard, navigation and rotation. Then physically test each intended assistant and record versioned outcomes.
 9. **Quality.** Measure realistic assistant responses with held-out cases, especially unknown/unsupported features, high-stakes operations and error troubleshooting.
-10. **Release.** Choose license/distribution, stable API/versioning/retention policy, and publish only compatibility claims supported by recipient-specific evidence.
+10. **Release.** Confirm Unlicense and third-party rights, distribution, stable API/versioning/retention policy, and publish only compatibility claims supported by recipient-specific evidence.
 
 ## Current gates
 
@@ -37,7 +41,8 @@ This document distinguishes **ready for first host integration** from **ready fo
 | Intent/provider instrumentation source tests | Implemented; emulator/device execution required |
 | User-accessible privacy preview | Implemented; manual accessibility/lifecycle acceptance required |
 | Android receiver apps (ChatGPT, Claude) | **UNVERIFIED** |
-| Stable public distribution and third-party license | **NOT DECIDED** |
+| Public-domain dedication | **UNLICENSE committed; third-party rights still apply** |
+| Stable public distribution/API | **NOT READY** |
 
 ## Evidence and limits
 

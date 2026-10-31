@@ -4,23 +4,19 @@
 
 # AYA · Ask Your Agent
 
-**Help Handoff + Creative Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
+**Help Handoff + Creative Handoff + optional Translation Kit Handoff.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
 
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
-## An idea first, a toolkit second
+## Translation Kit: optional language and personality packs
 
-**You don't need to use AYA's code, processes, branding, or documentation to use the idea.** Think of **Ask Your Agent** as a familiar application convention, in the same spirit as **Save**, **Share**, or **Open with**: when someone wants help inside an app, give them a convenient way to ask their own AI assistant, with useful context about the app included.
+Apps can offer ordinary **Language** settings (device language, installed languages, Import pack) with a small optional **"Make a language pack with your AI"** AYA card. AYA now provides `Aya.launchTranslationBundled()`: an exact-version-guarded, one-way handoff carrying a host-authored translation schema, catalog, Rosetta/glossary, style and safety constraints, examples, and import instructions. Users can request French, Pirate, Cajun-flavoured, space-sage, technical terminology, or other creative voices. The recipient may produce a JSON pack; the user saves it and imports it through the **host's existing language importer**. AYA never sees the response or applies a pack.
 
-My hope is simply that developers adopt this idea wherever it benefits their users. Implement it independently, adapt it to your app, call it something else, or build a better version. There's no need to depend on this repository, use a particular AI provider, or follow AYA's workflow.
+**Start here:** [Translation module and Kotlin usage](docs/translation/README.md), [app-specific kit authoring standard](docs/translation/AUTHORING.md), [fictional complete kit](docs/translation/examples/parcelpad-translation-kit.md), [output schema](docs/translation/examples/parcelpad-output.schema.json), and [Pirate pack example](docs/translation/examples/parcelpad-pirate.pack.json).
 
-What I maintain here is primarily a shortcut for **vibe coders, hobbyists, indie developers, and anyone who'd rather spend their energy building their app than re-engineering an AI handoff**. The sample code, integration patterns, documentation standards, templates, and examples are meant to make a thoughtful implementation easier if you want that help. Take as much or as little guidance as is useful.
-
-The central idea is deliberately small: **let users bring their own agent, and give that agent enough accurate, relevant information to help.** AYA's implementation keeps the handoff one-way; it does not follow the conversation or collect the answer.
-
-**The implementation is offered under [the Unlicense](UNLICENSE).** You're welcome to reuse, adapt, publish, or ignore the code and documentation. No attribution is requested. The idea stands independently of this implementation.
+**Implementation status:** the typed task/verifier and guarded Android handoff are implemented in the SDK; no host language-pack runtime, generator, gallery or real-recipient acceptance is implemented or verified. This module is optional and does not require an AI account for normal language settings.
 
 ## Structured artifact handoffs
 
@@ -35,6 +31,12 @@ You absolutely can open ChatGPT, Claude, or another assistant and type a questio
 Instead of leaving the app, switching to an assistant, explaining which app and screen you are using, and finding the relevant instructions, you can start with **Ask Your Agent** where the question arises. The host can offer a suggested question or let you write your own, then AYA lets you review a relevant, version-aware app reference and pass the approved question and context to your chosen assistant through Android sharing. Whether the receiving app accepts the attachment or opens a new conversation depends on that app.
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
+
+## Packet authoring across modules
+
+AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) and [four module profiles](docs/packet/PROFILES.md) covering Help, Creative, Structured Artifact and Translation Kit. Developers define source-backed atomic host facts, an independent inventory, module-specific output contracts and negative examples. The offline [packet compiler](tools/packet_compiler.py) deterministically creates scoped, provenance-marked, dependency-complete context packets and explicitly reports omitted facts; it refuses stale external claims and oversized exports. See [quickstart and fictional fixtures](docs/packet/README.md).
+
+**Scope:** this is **build-time authoring infrastructure**, not a new on-device model, dynamic host-state reader, assistant integration, or automatic reply/import mechanism. The verified packet must be deliberately packaged into the existing version-matched AYA handoff. AYA still ends at the user-controlled Share/Copy boundary.
 
 ## Where to start
 **Interoperability additions (October 2026):** [recipient capability evidence model](docs/RECIPIENT_CAPABILITIES.md), [portable handoff manifest schema](docs/protocol/README.md), optional [AssistContent adapter](docs/ASSIST_CONTEXT.md), and a [separate AppFunctions decision record](docs/APPFUNCTIONS_DECISION.md). The capability model holds only developer-supplied QA facts; it neither monitors user conversations nor learns from outcomes. The JSON manifest is a documented *host-side interchange format*, not a new wire format for AI recipients.
@@ -99,7 +101,7 @@ Creative Handoff is a **prototype** with typed Kotlin implementation and sample 
 
 Android builds and reference checks have passed CI; real-device recipient verification is still required. Do not claim production readiness or tested ChatGPT/Claude behavior. [Compatibility evidence](docs/PROVIDER_COMPATIBILITY.md) is currently unverified.
 
-Known work: actually executing instrumentation tests on emulator/device, accessibility and lifecycle acceptance, real-device assistant trials, comprehensive privacy review, and stable license/distribution/API policy. The guarded API supports **exact** version-matched guides; multi-version guide resolution is deliberately unsupported.
+Known work: actually executing instrumentation tests on emulator/device, accessibility and lifecycle acceptance, real-device assistant trials, comprehensive privacy review, and stable distribution/API policy. The guarded API supports **exact** version-matched guides; multi-version guide resolution is deliberately unsupported.
 
 ## License
 

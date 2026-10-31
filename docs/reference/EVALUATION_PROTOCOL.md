@@ -72,6 +72,8 @@ Record false confident claims separately. A plausible wrong answer is **worse** 
 
 Track accuracy by category, high-risk zero-defect rate, task success, unknown calibration and top failure causes. Don't hide critical failures under a large average score.
 
+**Common packet QA:** [Controlled packet trial evidence](../packet/EVALUATION.md) adds exact packet hashes, explicit recipient ingestion and independently checked host outcomes across Help, Creative, Structured Artifact and Translation Kit. The ledger validator cannot score real-world truth and is not production monitoring.
+
 ## Recipient protocol
 
 Use the **same exported bytes and user question** for each tested assistant. Record provider/app version, Android version, date/time, auth state, app version, input size, whether attachment was ingested, latency if measured, answers and evaluator notes. Repeat after provider updates because ingestion behavior can change without AYA changing. A sharesheet listing alone does not prove a valid help session.

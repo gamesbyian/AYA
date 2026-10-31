@@ -1,5 +1,9 @@
 # Security and privacy
 
+## Translation Kit privacy and trust
+
+A translation kit is a static, source-derived reference. It must never include live user strings, private settings, credential-bearing URLs, logs, account names, filenames, location, or personal documents. Both the standard AYA-RAS guide and the translation kit are checked against the installed app ID and **exact** version before opening the handoff; AYA checks structure and identity only, not the truth of every statement or JSON Schema. The complete kit is attached as user-reviewed text, with a shorter approved request in `EXTRA_TEXT`. A third-party recipient may ignore the attachment, upload it or retain it. The host must separately validate all generated packs as untrusted input before preview or activation, with semantic safety review and atomic rollback. No inference provider, output watcher or import callback is added.
+
 ## Trust boundary
 
 Host app constructs text → AYA renders a reference package → user may **edit and approve** → AYA writes a unique UTF-8 cache file → Android grants a user-selected recipient temporary read access. AYA never performs network requests itself. The receiving app may upload/store the content under its own policies.

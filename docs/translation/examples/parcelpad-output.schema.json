@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fictional ParcelPad language pack v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "app_id",
+    "catalog_revision",
+    "kind",
+    "target",
+    "base_locale",
+    "entries"
+  ],
+  "properties": {
+    "format": {
+      "const": "parcelpad-pack/v1"
+    },
+    "app_id": {
+      "const": "dev.parcelpad.example"
+    },
+    "catalog_revision": {
+      "const": "fictional-catalog-v1"
+    },
+    "kind": {
+      "enum": [
+        "language",
+        "personality",
+        "terminology"
+      ]
+    },
+    "target": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 48
+    },
+    "base_locale": {
+      "const": "en"
+    },
+    "entries": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "parcel.status.ready": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800
+        },
+        "parcel.action.remove": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800
+        },
+        "parcel.action.delete_files": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800
+        },
+        "parcel.files.count": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800
+        },
+        "parcel.a11y.delete_files": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800
+        }
+      }
+    }
+  }
+}

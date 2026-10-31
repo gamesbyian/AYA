@@ -1,10 +1,32 @@
 # Integrating AYA into an Android app
 
+## Optional language and personality packs
+
+AYA includes `Aya.launchTranslationBundled(activity, task, kitAsset?, guideAsset?, screenName?, direction?, askDirection?)`, which uses the regular installed-version-verified AYA-RAS guide **plus** an independently exact-version-verified `aya-translation-kit.md`. This second asset describes the host's *actual* supported pack format, closed output schema, source strings, Rosetta meanings, technical terms, sensitive action distinctions, worked examples and manual import steps. The request and kit appear in one editable, reviewed UTF-8 handoff attachment. This flow does not require any new receiving-assistant integration.
+
+```kotlin
+val result = Aya.launchTranslationBundled(
+    activity = this,
+    task = AyaTranslationTask(
+        kind = AyaTranslationKind.LANGUAGE,
+        target = "es-MX",
+        importInstructions = "Settings > Language > Add language pack > choose the JSON file."
+    ),
+    direction = "Use contemporary Mexican Spanish.",
+    askDirection = false
+)
+if (result is AyaBundledLaunchResult.Rejected) {
+    // Inform the user; do not silently substitute an unverified kit.
+}
+```
+
+The host must first implement normal language selection and a working, safe pack importer. Put a small optional AYA prompt below those ordinary controls. `askDirection=true` offers a local direction editor; `false` skips that screen when the host already supplied the preference. The user manually saves the output from their chosen AI and imports it into the host. AYA does not monitor the recipient, handle the returned file or activate a locale. Full production preparation is in the [Translation Kit authoring guide](translation/AUTHORING.md) and [module overview](translation/README.md); use the fictional example only as a format demonstration.
+
 **Preferred path:** use a version-matched bundled guide and `Aya.launchBundled()`, not a hand-assembled request string. See [integration readiness](INTEGRATION_READINESS.md) and the [AYA-RAS authoring system](reference/INDEX.md).
 
 ## 1. Add the library
 
-AYA currently distributes a **staging Maven AAR** through the GitHub Actions build artifact or as source. There is **no public Maven Central release** and no redistribution license has been selected. CI uses Gradle 8.9, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, JDK 17, compileSdk 35 and minSdk 23.
+AYA currently distributes a **staging Maven AAR** through the GitHub Actions build artifact or as source. There is **no public Maven Central release**. The repository uses the [Unlicense](../UNLICENSE); third-party dependencies retain their own licenses. CI uses Gradle 8.9, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, JDK 17, compileSdk 35 and minSdk 23.
 
 **Source-module path:** place or include the `aya/` module as a module in your Android Gradle build. Example in the host `settings.gradle.kts` after checking out AYA alongside the host:
 
@@ -25,7 +47,7 @@ dependencies { implementation(project(":aya")) }
 maven { url = uri(rootDir.resolve("libs/aya-maven")) }
 ```
 
-Then add `implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")`. This is an experimental snapshot, not a stable public release. The sample CI builds once against `:aya` and once against the staged POM/AAR to verify resolution. Do not distribute the snapshot externally without resolving the license.
+Then add `implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")`. This is an experimental snapshot, not a stable public release. The sample CI builds once against `:aya` and once against the staged POM/AAR to verify resolution. Review the Unlicense, third-party dependency obligations and the unstable snapshot API before external distribution.
 
 Enable `android.useAndroidX=true` in the host's Gradle properties. AYA's manifest supplies the non-exported `FileProvider` authority `${applicationId}.aya.files`. Check the **merged manifest**, especially if your app defines other providers.
 

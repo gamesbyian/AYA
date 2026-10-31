@@ -1,5 +1,7 @@
 # AYA Creative Handoff: app-specific authoring extension
 
+**Shared rule:** follow the [Common Packet Authoring Standard](../packet/AUTHORING_STANDARD.md) and [Creative profile](../packet/PROFILES.md#creative) for evidence, dependencies, scoped context, examples and independent QA. A request-only Share must contain every essential generation/import constraint even without a full reference attachment; test the exact visible approved text.
+
 **Status:** v1 image generation. This extends, but does not replace, the [AYA-RAS v1 12-section guide](AUTHORING_STANDARD.md) and the version guard. The core reference remains a standalone, source-backed explanation of the actual installed app. The dynamic creative request supplies the currently selected asset, task and user direction; **do not generate a separate user-specific AYA guide for each item**.
 
 ## Two distinct contracts
