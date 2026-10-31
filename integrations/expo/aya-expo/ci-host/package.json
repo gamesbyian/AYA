@@ -1,0 +1,21 @@
+{
+  "name": "aya-expo-ci-host",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo/AppEntry",
+  "scripts": {
+    "prebuild:android": "expo prebuild --platform android --no-install"
+  },
+  "dependencies": {
+    "aya-expo": "file:..",
+    "aya-expo-guide": "file:../../guide-plugin",
+    "expo": "~57.0.31",
+    "expo-modules-core": "~57.0.17",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "typescript": "^6.0.3"
+  }
+}
