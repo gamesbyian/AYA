@@ -53,6 +53,12 @@ class MainActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT
         ))
         column.addView(Button(this).apply {
+            id = R.id.aya_sample_open_compose
+            text = "Open Compose drop-in demo"
+            contentDescription = "Open Compose drop-in demo"
+            setOnClickListener { startActivity(Intent(this@MainActivity, ComposeDemoActivity::class.java)) }
+        })
+        column.addView(Button(this).apply {
             id = R.id.aya_sample_open_artwork
             text = "Open artwork generation demo"
             contentDescription = "Open artwork generation demo"
