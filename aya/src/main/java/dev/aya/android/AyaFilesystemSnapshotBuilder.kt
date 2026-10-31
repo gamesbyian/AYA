@@ -88,20 +88,20 @@ object AyaFilesystemSnapshotBuilder {
                 .put("root", input.scopeRoot)
                 .put("recursive", input.recursive)
                 .put("symlinks", input.symlinks))
-            .put("scan", JSONObject()
-                .put("status", input.status.wireValue)
-                .put("truncated", input.truncated)
-                .put("directories_visited", input.directoriesVisited)
-                .put("errors", JSONArray().apply {
+            .put("scan", JSONObject().apply {
+                put("status", input.status.wireValue)
+                put("truncated", input.truncated)
+                put("directories_visited", input.directoriesVisited)
+                put("errors", JSONArray().apply {
                     input.errors.forEach { err ->
                         put(JSONObject().put("kind", err.kind).apply {
                             err.path?.let { put("path", it) }
                             err.detail?.let { put("detail", it) }
                         })
                     }
-                }).apply {
-                    input.truncationReason?.let { put("truncation_reason", it) }
                 })
+                input.truncationReason?.let { put("truncation_reason", it) }
+            })
             .put("summary", JSONObject()
                 .put("files_seen", nullableCount(input.filesSeen))
                 .put("directories_seen", nullableCount(input.directoriesSeen))
