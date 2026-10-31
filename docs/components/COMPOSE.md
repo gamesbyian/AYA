@@ -41,6 +41,10 @@ Import `dev.aya.compose.AyaCard`, `dev.aya.compose.rememberAyaLauncher`, `dev.ay
 
 For output import, the host must use its own verified import pipeline. The first Compose adapter deliberately keeps a simple Help card; use the existing `AyaCardView` optional import callback in a tailored `AndroidView` if the host really supports import. Future adapter releases may offer an explicit import hook after it has its own tests.
 
+## Generate Compose wrappers from a component manifest
+
+The same help-only component configuration works for traditional Android and Compose. Run `python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format compose` to emit an annotated, uniquely named Kotlin composable; use the action example to emit a `rememberAyaLauncher` wrapper. Add the generated source to an app package, pass its actual Activity and place it in the desired UI. Code generation is static and never reads host runtime state. CI compiles both generated Compose examples into the consuming sample.
+
 ## Validation
 
 - `gradle :aya-compose:assembleDebug :sample:assembleDebug`

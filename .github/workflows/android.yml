@@ -29,6 +29,8 @@ jobs:
         run: |
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComponent.kt
           { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format kotlin; } > sample/src/main/java/dev/aya/sample/AyaGeneratedAction.kt
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeCard.kt
+          { echo 'package dev.aya.sample'; echo; python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format compose; } > sample/src/main/java/dev/aya/sample/AyaGeneratedComposeAction.kt
       - name: Unit tests and module-based consumer
         run: gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidTest :aya-compose:assembleDebug :sample:assembleDebug --no-daemon
       - name: Produce Maven-style library distribution
