@@ -46,11 +46,11 @@ jobs:
       - name: Verify staged plugin binaries and Java-visible static entry point
         run: |
           OUT=aya-unity/build/unity-plugin/Plugins/Android
-          test -s "$OUT/aya-unity-debug.aar"
-          test -s "$OUT/aya-unity-release.aar"
-          test -s "$OUT/aya-debug.aar"
-          test -s "$OUT/aya-release.aar"
-          unzip -p "$OUT/aya-unity-debug.aar" classes.jar > /tmp/aya-unity-classes.jar
+          test -s "$OUT/debug/aya-unity-debug.aar"
+          test -s "$OUT/release/aya-unity-release.aar"
+          test -s "$OUT/debug/aya-debug.aar"
+          test -s "$OUT/release/aya-release.aar"
+          unzip -p "$OUT/debug/aya-unity-debug.aar" classes.jar > /tmp/aya-unity-classes.jar
           test -s /tmp/aya-unity-classes.jar
           javap -classpath /tmp/aya-unity-classes.jar dev.aya.unity.AyaUnityBridge | tee /tmp/aya-unity-javap.txt
           grep -F 'public static final java.lang.String openHelp(' /tmp/aya-unity-javap.txt
