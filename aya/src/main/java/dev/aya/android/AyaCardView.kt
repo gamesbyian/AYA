@@ -16,6 +16,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 
+/** AYA density. Both modes use the same accessible, full-width submission flow. */
+enum class AyaCardDensity { STANDARD, COMPACT }
+
 /**
  * A host-native, optional question-first card. No data is transmitted from this view.
  * The button opens the SDK's installed-version-checked review, not a recipient app.
@@ -33,6 +36,7 @@ class AyaCardView(
     description: String = "Ask for help with this app. You can review the app reference before sharing it.",
     attachmentDisclosure: String = "App reference offered for sharing; your AI app may not accept files.",
     cornerRadiusDp: Float = 12f,
+    densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
     private val onRejected: (String) -> Unit = {
         Toast.makeText(context, "AYA unavailable: $it", Toast.LENGTH_LONG).show()
     }
@@ -41,6 +45,7 @@ class AyaCardView(
     val questionInput: EditText = EditText(context)
     private val shareDetails: TextView = TextView(context)
     private val density = resources.displayMetrics.density
+    private val compact = densityMode == AyaCardDensity.COMPACT
 
     init {
         orientation = VERTICAL
@@ -52,7 +57,8 @@ class AyaCardView(
             setStroke(dp(1), outline)
             cornerRadius = dpF(cornerRadiusDp)
         }
-        setPadding(dp(16), dp(16), dp(16), dp(16))
+        val inset = if (compact) 12 else 16
+        setPadding(dp(inset), dp(inset), dp(inset), dp(inset))
 
         val header = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.TOP }
         val logo = ImageView(context).apply {
@@ -61,12 +67,13 @@ class AyaCardView(
             contentDescription = null
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
         }
-        header.addView(logo, LayoutParams(dp(64), dp(64)).apply { rightMargin = dp(12) })
+        val logoSize = if (compact) 48 else 64
+        header.addView(logo, LayoutParams(dp(logoSize), dp(logoSize)).apply { rightMargin = dp(if (compact) 8 else 12) })
         val copy = LinearLayout(context).apply { orientation = VERTICAL }
         val heading = TextView(context).apply {
             text = title
             setTextColor(foreground)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 16f else 17f)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
         copy.addView(heading)
@@ -81,14 +88,14 @@ class AyaCardView(
         shareDetails.text = attachmentDisclosure
         shareDetails.setTextColor(secondary)
         shareDetails.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        shareDetails.setPadding(0, dp(12), 0, dp(8))
+        shareDetails.setPadding(0, dp(if (compact) 8 else 12), 0, dp(if (compact) 4 else 8))
         addView(shareDetails)
 
         questionInput.apply {
             hint = "What would you like help with? (optional)"
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            minLines = 2
-            maxLines = 5
+            minLines = if (compact) 1 else 2
+            maxLines = if (compact) 3 else 5
             setSingleLine(false)
             contentDescription = "Question for your agent, optional"
             id = View.generateViewId()
@@ -110,7 +117,7 @@ class AyaCardView(
                 if (result is AyaBundledLaunchResult.Rejected) onRejected(result.reason.toString())
             }
         }, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            topMargin = dp(8)
+            topMargin = dp(if (compact) 4 else 8)
         })
     }
 
