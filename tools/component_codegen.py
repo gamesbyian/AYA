@@ -149,7 +149,7 @@ def android_xml_snippet(m: dict[str, Any]) -> str:
         # AAPT parses resource sigils and backslashes specially in raw XML
         # attributes. Refuse ambiguous expressions instead of silently
         # changing the developer's configured disclosure/instructions.
-        if any(ch in value for ch in "\\r\\n\\t\\\\"):
+        if any(ch in value for ch in (chr(13), chr(10), chr(9), chr(92))):
             raise ComponentError("XML card copy must be single-line and omit backslashes; use resources otherwise")
         if value.startswith(("@", "?")):
             raise ComponentError("XML card copy may not start with a resource sigil")
@@ -177,7 +177,7 @@ def android_xml_snippet(m: dict[str, Any]) -> str:
     ):
         attributes.append(f'app:{attr}=' + quote(p[key]))
     attributes.append('app:ayaDensity=' + quote(p["density"]))
-    return "<dev.aya.android.AyaXmlCardView\\n    " + "\\n    ".join(attributes) + " />\\n"
+    return "<dev.aya.android.AyaXmlCardView" + chr(10) + "    " + (chr(10) + "    ").join(attributes) + " />" + chr(10)
 
 
 def main(argv: list[str] | None = None) -> int:

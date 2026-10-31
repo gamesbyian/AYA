@@ -108,7 +108,7 @@ class ComponentCodegenTest(unittest.TestCase):
         with self.assertRaises(ComponentError):
             android_xml_snippet(self.manifest)
         self.manifest = json.loads(EXAMPLE.read_text(encoding="utf-8"))
-        for description in ("@resource", "first\\nsecond", "path\\\\name"):
+        for description in ("@resource", "first" + chr(10) + "second", "path" + chr(92) + "name"):
             self.manifest["presentation"]["description"] = description
             with self.assertRaises(ComponentError):
                 android_xml_snippet(self.manifest)
