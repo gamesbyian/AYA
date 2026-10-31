@@ -28,7 +28,7 @@ The typed `Aya.launchTranslationBundled()` path requires the ordinary exact-vers
 7. **Build smoke.** Compile host against source module **and** independently resolved Maven AAR as applicable; check merged FileProvider authority `${applicationId}.aya.files` and URI subtree.
 8. **Device.** Instrumented tests for URI grants, UTF-8 and provider containment; manual TalkBack/font scale/keyboard, navigation and rotation. Then physically test each intended assistant and record versioned outcomes.
 9. **Quality.** Measure realistic assistant responses with held-out cases, especially unknown/unsupported features, high-stakes operations and error troubleshooting.
-10. **Release.** Choose license/distribution, stable API/versioning/retention policy, and publish only compatibility claims supported by recipient-specific evidence.
+10. **Release.** Confirm Unlicense and third-party rights, distribution, stable API/versioning/retention policy, and publish only compatibility claims supported by recipient-specific evidence.
 
 ## Current gates
 
@@ -41,7 +41,8 @@ The typed `Aya.launchTranslationBundled()` path requires the ordinary exact-vers
 | Intent/provider instrumentation source tests | Implemented; emulator/device execution required |
 | User-accessible privacy preview | Implemented; manual accessibility/lifecycle acceptance required |
 | Android receiver apps (ChatGPT, Claude) | **UNVERIFIED** |
-| Stable public distribution and third-party license | **NOT DECIDED** |
+| Public-domain dedication | **UNLICENSE committed; third-party rights still apply** |
+| Stable public distribution/API | **NOT READY** |
 
 ## Evidence and limits
 
