@@ -43,7 +43,8 @@ Deliver:
 
 ## Phase 3: React Native and Expo (P1)
 
-- First source-preview Expo CNG asset helper exists for exact-version guide packaging; no native Expo module or editor/export acceptance yet. Verify source test suite and prebuild APK before claiming support.\n- Build npm package with TypeScript types, `AskYourAgentCard` and `askYourAgent()`, a Kotlin module bridge and config plugin for Android assets/provider. Support ordinary React Native and prebuild/custom development clients for Expo where applicable.
+- Expo CNG guide-asset helper is merged; an Android-only Expo Modules API bridge and React Native card are source previews. Build a real Expo Android APK with both and a matching audited guide before claiming compiled-host compatibility.
+- A publishable npm package and tested integration with ordinary React Native hosts remain pending. Verify custom development builds, Activity lifecycle and exact native dependency resolution before announcing compatibility.
 - Do not claim stock Expo Go can load arbitrary native modules; document precise support matrix and reject unsupported runtime environments with a helpful error.
 - Validate user-typed prompt and JS lifecycle without promising provider reception. Confirm no source-scanning, automatic permission escalation or implicit file attachments.
 - CI: example Android app build, TypeScript and native integration tests, manifest merge checks, local negative-control cases.

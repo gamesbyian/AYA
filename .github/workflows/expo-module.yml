@@ -1,0 +1,35 @@
+name: AYA Expo native source-preview checks
+on:
+  pull_request:
+    paths:
+      - 'integrations/expo/aya-expo/**'
+      - '.github/workflows/expo-module.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/expo/aya-expo/**'
+      - '.github/workflows/expo-module.yml'
+
+concurrency:
+  group: aya-expo-module-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  types-and-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve pinned Expo SDK 57 typecheck baseline
+        working-directory: integrations/expo/aya-expo
+        run: npm install --ignore-scripts --no-fund --no-audit
+      - name: Typecheck native client and React Native card
+        working-directory: integrations/expo/aya-expo
+        run: npm run typecheck
+      - name: Check local-only status and fail-closed bridge contracts
+        working-directory: integrations/expo/aya-expo
+        run: npm test

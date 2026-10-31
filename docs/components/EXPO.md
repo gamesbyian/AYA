@@ -42,3 +42,7 @@ Repeated identical prebuilds are idempotent. Changing the source guide is allowe
 - Expo Go cannot load arbitrary custom native code; use a compiled native development build or exported APK. iOS and web exports have no AYA Android handoff.
 
 Tests: `node --test integrations/expo/guide-plugin/test/*.test.cjs`. These are structural, filesystem and identity negative controls, not an Expo editor acceptance certificate.
+
+## Independent native Expo module
+
+An optional [Expo Modules API/Kotlin and React Native card source preview](EXPO_MODULE.md) is checked in. The guide prebuild helper remains a separate prerequisite; it does not register the native module or distribute the unpublished AYA Android AAR. Host apps must integrate both and verify APK identity before use.

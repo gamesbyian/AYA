@@ -1,0 +1,32 @@
+{
+  "name": "aya-expo",
+  "version": "0.1.0-dev.1",
+  "private": true,
+  "description": "Source-preview Android Expo Module for user-reviewed AYA handoffs",
+  "main": "src/index.ts",
+  "reactNative": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "android",
+    "src",
+    "expo-module.config.json"
+  ],
+  "peerDependencies": {
+    "expo": ">=56.0.0 <59.0.0",
+    "expo-modules-core": ">=56.0.0 <59.0.0",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "@types/react": "^19.2.0",
+    "expo": "~57.0.31",
+    "expo-modules-core": "~57.0.17",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.cjs"
+  }
+}

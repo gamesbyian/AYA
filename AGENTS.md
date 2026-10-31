@@ -98,3 +98,7 @@ The optional source-preview [Expo guide plugin](docs/components/EXPO.md) is sole
 ## Flutter synthetic host packaging evidence
 
 The CI-only Flutter host fixture at `integrations/flutter/aya_flutter/ci-host/` must be an accurate guide to its own checked-in Flutter screen, not a generic template for production apps. Keep its `app_id` and exact `app_version_min/max` synchronized with the **actual generated APK**. The independent `tools/verify_flutter_host_apk.py` checks native APK assets, package/version, AYA FileProvider and share receiver; it does not verify the assistant recipient. If the Flutter generated project, plugin, or CI host changes, update source guide provenance and negative tests in the same PR. Never mark a Dart analyzer pass as native APK asset acceptance.
+
+## Expo typed Android bridge and React Native card
+
+See [Expo native module source-preview](docs/components/EXPO_MODULE.md). Never use a custom Sharesheet, skip native AYA-RAS guide checks, infer assistant activity from `question_opened`/`review_opened`, or substitute Expo Go for a native Android host. The module must call `AyaComponentAction.Help` through an active Android Activity, and its JS wrapper must reject unsupported platform, missing native linkage, unsafe asset paths, malformed input and unknown statuses. The source-only TypeScript tests do not certify an Android APK until a matching staged AYA AAR, native reference, merged manifest and installed UI are verified.
