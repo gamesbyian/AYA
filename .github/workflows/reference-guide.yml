@@ -45,5 +45,10 @@ jobs:
               --brief-output "/tmp/aya-$module-brief.txt" \
               --report "/tmp/aya-$module-report.json"
           done
+      - name: Validate AYA Application Understanding and director records
+        run: |
+          python3 tools/validate_understanding.py \
+            docs/understanding/examples/parcelpad-understanding.json \
+            --decisions docs/understanding/examples/parcelpad-decisions.json
       - name: Run documentation compiler and validator regression tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
