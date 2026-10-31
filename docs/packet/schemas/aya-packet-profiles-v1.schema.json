@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AYA Packet Profiles v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "app_id",
+    "source_revision",
+    "profiles"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aya-packet-profiles/v1"
+    },
+    "app_id": {
+      "type": "string"
+    },
+    "source_revision": {
+      "type": "string"
+    },
+    "profiles": {
+      "type": "object",
+      "required": [
+        "help",
+        "creative",
+        "structured",
+        "translation"
+      ],
+      "properties": {
+        "help": {
+          "type": "object",
+          "required": [
+            "purpose",
+            "request",
+            "output_contract",
+            "examples",
+            "always_include"
+          ],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "examples": {
+              "type": "string",
+              "minLength": 1
+            },
+            "always_include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^FACT-[0-9]{3,}$"
+              }
+            }
+          }
+        },
+        "creative": {
+          "type": "object",
+          "required": [
+            "purpose",
+            "request",
+            "output_contract",
+            "examples",
+            "always_include"
+          ],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "examples": {
+              "type": "string",
+              "minLength": 1
+            },
+            "always_include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^FACT-[0-9]{3,}$"
+              }
+            }
+          }
+        },
+        "structured": {
+          "type": "object",
+          "required": [
+            "purpose",
+            "request",
+            "output_contract",
+            "examples",
+            "always_include"
+          ],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "examples": {
+              "type": "string",
+              "minLength": 1
+            },
+            "always_include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^FACT-[0-9]{3,}$"
+              }
+            }
+          }
+        },
+        "translation": {
+          "type": "object",
+          "required": [
+            "purpose",
+            "request",
+            "output_contract",
+            "examples",
+            "always_include"
+          ],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "examples": {
+              "type": "string",
+              "minLength": 1
+            },
+            "always_include": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^FACT-[0-9]{3,}$"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
