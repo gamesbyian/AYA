@@ -1,55 +1,64 @@
-# Flutter built-in Kotlin migration experiment
+# Flutter built-in Kotlin migration: source preview and evidence
 
-**Status:** experimental dual-lane migration proof, not a new distributed Flutter
-plugin or a claim that the existing legacy package supports AGP 9 built-in Kotlin.
-The existing `integrations/flutter/aya_flutter` implementation is unchanged.
+**Status:** the Flutter AGP 9 built-in Kotlin **trial passed**, and the
+primary source-preview plugin is being promoted from `0.1.0-dev.1` to
+`0.2.0-dev.1`. This does **not** publish a package, grant receiving
+assistant compatibility, or establish all external host toolchains.
 
-## Why a parallel trial instead of immediately bumping the SDK minimum?
+## Tested migration and compatibility matrix
 
-The checked-in legacy AYA Flutter adapter advertises Flutter >=3.19, Dart
->=3.3, AGP 8.7.3 and KGP 2.0.21. A current built-in Kotlin migration requires
-Flutter >=3.44 and Dart >=3.12; enabling built-in Kotlin in an actual Flutter
-host requires Flutter >=3.47 plus AGP >=9.0. This is a **meaningful increase**
-in consumer requirements, not a patch update.
-
-The separately tested `modern.android.gradle` and `modern.pubspec.yaml`
-provide the proposed 0.2.0-dev.1 configuration without changing that legacy
-package. `prepare_host.py` copies the existing source into a disposable
-`generated/aya_flutter` folder and uses those candidates only there. A
-generated Flutter Android host then receives the exact-version source-authored
-CI reference, is pinned to AGP 9.0.1 / Gradle 9.1.0, and explicitly sets
-`android.builtInKotlin=true` and `android.newDsl=false`. The app and
-plugin must not apply `kotlin-android`. This is tested by an actual
-`flutter build apk --debug` and APK identity, guide, manifest and DEX checks.
-
-## Compatibility decision matrix
-
-| Consumer | Support decision | Evidence |
+| Consumer | Source path / compatibility | Verification |
 |---|---|---|
-| Flutter 3.19+ / Dart 3.3+ with legacy KGP/AGP 8 | Keep **current** source package 0.1.0-dev.1 intact until replacement acceptance; it is not generally published | Existing Flutter CI builds a real generated Android host with the exact guide. Actual physical-device behavior remains unverified |
-| Flutter 3.44+ / Dart 3.12+ with AGP 9 but built-in Kotlin disabled | Transitional compatibility exists in Flutter's official guidance; **no AYA host test** in this experiment | Not certified; do not infer support merely from version numbers |
-| Flutter 3.47.9 / Dart 3.12+ with AGP 9.0.1, Gradle 9.1.0 and built-in Kotlin enabled | Proposed successor 0.2.0-dev.1 in disposable CI source | Must pass real built APK inspection before this row can be called verified |
-| Any Flutter version, any Android recipient | Actual AI recipient ingestion, physical-device accessibility and lifecycle | Independently unverified; requires dated controlled phone tests |
+| Flutter >=3.19 / Dart >=3.3, legacy KGP/AGP 8 | Frozen `aya_flutter@0.1.0-dev.1` source at Git SHA `fb5e004eea766261ed50194e8013b11fd9ade583`; do not silently install the modern package | Real host and exact-version guide passed legacy [CI 41248634751](https://github.com/gamesbyian/AYA/actions/runs/41248634751) |
+| Flutter >=3.44 / Dart >=3.12 / AGP9 with built-in Kotlin **false** | Flutter supports this transition upstream. AYA's new source-preview declared minimum is 3.44/3.12, but this *specific host configuration is not verified* | Unverified |
+| Flutter 3.47.9 / Dart >=3.12 / AGP9.0.1 / Gradle9.1.0 / built-in Kotlin **true** | Proposed `aya_flutter@0.2.0-dev.1` source preview, with host-owned exact-version guide and staged AYA AAR | Migrated disposable source-copy APK passed [CI 41248634708](https://github.com/gamesbyian/AYA/actions/runs/41248634708). **The primary source checkout has independent CI**; only claim it passed once that run is green |
+| FlutterFlow editor, external consuming app, real Android recipient | Source adapter import, native setup and on-device assistant attachment handling | Not independently verified |
 
-The host's installed package ID and version are checked against
-`aya_flutter/ci-host/aya-guide.md`; the original test host is synthetic
-and its guide must never be reused by another adopting app.
+This is an explicit minimum-support decision. Flutter's official
+[plugin-author migration guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors)
+requires a Flutter 3.44 / Dart 3.12 floor for the migrated compiler options.
+Flutter 3.47 adds built-in Kotlin true host support. The version
+`0.2.0-dev.1` is a **separate preview series**, not a backward-compatible
+patch to an already-published stable release.
 
-## Promotion prerequisites
+## Test architecture
 
-1. Green pinned legacy CI **and** AGP 9 built-in-Kotlin trial for the same
-   canonical native SDK and truthful guide (no skipped failing step).
-2. Independently verify AGP/KGP host truth after Flutter build; reject hidden
-   host migration back to `android.builtInKotlin=false`.
-3. Preserve the compiled AYA Flutter bridge class, FileProvider, receiver,
-   exact guide bytes and installed identity in final APK.
-4. If promoting, release a new source-preview version with an explicit
-   Flutter >=3.44/Dart >=3.12 SDK floor and a migration note. Existing
-   source consumers needing the earlier baseline must pin the previous Git
-   revision; no imaginary dual-compatibility API.
-5. Real Android and FlutterFlow editor/recipient acceptance remain separate.
+`modern.android.gradle` and `modern.pubspec.yaml` preserve the green
+migration trial's reviewed compiler and dependency configuration.
+`prepare_host.py prepare` copies the AYA Flutter Dart/Kotlin source to
+a disposable trial and uses those manifests. `prepare_host.py configure`
+accepts an explicit `--host` and `--source` to configure the **actual**
+root Flutter host, with exact-version guide verification, AGP 9.0.1,
+Gradle 9.1.0, built-in Kotlin enabled and transitional AGP DSL disabled.
 
-Sources:
+Both `.github/workflows/flutter-builtin-kotlin.yml` (experimental mirror)
+and `.github/workflows/flutter.yml` (real source package) require the
+canonical staged AYA core AAR, independent guide inventory and held-out
+question audit, Android compilation, installed app package/version, exact
+guide bytes, merged FileProvider/receiver and DEX class definitions.
+They must reject a post-build downgrade to legacy `kotlin-android` and
+must never substitute a dummy guide.
+
+## Migration checklist for a consuming host
+
+1. Confirm your Flutter SDK/Dart version. If below 3.44/3.12, pin the
+   historical legacy AYA source checkout, or update the host deliberately.
+2. Upgrade the Flutter host to a version compatible with AGP 9. For
+   built-in Kotlin true, use Flutter 3.47+ and AGP 9+, with the minimum
+   compatible Gradle wrapper. Remove applied Kotlin Gradle Plugin from
+   host Android modules, move `android.kotlinOptions` to
+   `kotlin.compilerOptions`, and test the host's **other** plugins.
+3. Supply the unpublished canonical AYA native Android AAR and exact version
+   from a controlled Maven staging repository. Do not silently omit
+   dependencies or copy unrelated AAR variants.
+4. Author a source-verified exact-installed-package/version AYA-RAS guide
+   for **your** app and package it into raw Android APK `assets/`.
+   Sample CI reference files must never be reused as real app guides.
+5. Build your actual APK and inspect installed ID/version, guide bytes,
+   merged manifest and compiled plugin classes. Test lifecycle, locale,
+   accessibility, Copy fallback and receiving assistant separately.
+
+Upstream docs:
 - https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
 - https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers
 - https://developer.android.com/build/releases/agp-9-0-0-release-notes

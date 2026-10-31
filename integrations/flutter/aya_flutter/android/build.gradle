@@ -1,38 +1,32 @@
-group = 'dev.aya.flutter'
-version = '0.1.0-dev.1'
-
-buildscript {
-    ext.kotlin_version = '2.0.21'
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+// Migrated source preview: requires Flutter >=3.44 / Dart >=3.12,
+// and a host using AGP 9 with built-in Kotlin enabled (Flutter >=3.47).
+// Plugin versions belong to the consuming Flutter Android host.
+plugins {
+    id 'com.android.library'
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+group = 'dev.aya.flutter'
+version = '0.2.0-dev.1'
 
 android {
     namespace 'dev.aya.flutter'
     compileSdk 35
-    defaultConfig {
-        minSdk 23
-    }
+    defaultConfig { minSdk 23 }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
+}
+
+// AGP 9's built-in Kotlin creates this extension without applying KGP.
+// Flutter 3.47+ enables built-in Kotlin with android.builtInKotlin=true.
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
 dependencies {
-    // Source-preview only: host must supply a compatible staging Maven repo.
-    // Do not publish this until a public release is reliably resolvable.
+    // No silent missing dependency or network-only binary assumption.
     implementation 'dev.aya:aya-android:0.1.0-SNAPSHOT'
 }

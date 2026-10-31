@@ -37,10 +37,12 @@ def prepare() -> None:
     print(f"Disposable modern candidate staged in {TRIAL}")
 
 
-def configure() -> None:
-    if not (HOST / "android").is_dir():
+def configure(host: Path | None = None, package: Path | None = None) -> None:
+    host = host or HOST
+    package = package or SOURCE
+    if not (host / "android").is_dir():
         raise RuntimeError("Flutter generated Android host missing; run flutter create first")
-    pub = HOST / "pubspec.yaml"
+    pub = host / "pubspec.yaml"
     value = pub.read_text()
     if not re.search(r"(?m)^version:\s*1\.0\.0\+1\s*$", value):
         raise RuntimeError("Generated app version changed; re-audit CI AYA-RAS guide")
@@ -54,12 +56,12 @@ def configure() -> None:
         raise RuntimeError("Host pubspec must have one top-level dependencies key")
     pub.write_text(value)
 
-    target = HOST / "android/app/src/main/assets"
+    target = host / "android/app/src/main/assets"
     target.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(SOURCE / "ci-host/aya-guide.md", target / "aya-guide.md")
-    shutil.copyfile(SOURCE / "ci-host/main.dart", HOST / "lib/main.dart")
+    shutil.copyfile(package / "ci-host/aya-guide.md", target / "aya-guide.md")
+    shutil.copyfile(package / "ci-host/main.dart", host / "lib/main.dart")
 
-    settings = HOST / "android/settings.gradle.kts"
+    settings = host / "android/settings.gradle.kts"
     if not settings.is_file():
         raise RuntimeError("Unexpected Flutter Gradle settings format")
     source = settings.read_text()
@@ -84,7 +86,7 @@ dependencyResolutionManagement {
 """
     settings.write_text(source)
 
-    app = HOST / "android/app/build.gradle.kts"
+    app = host / "android/app/build.gradle.kts"
     if not app.is_file():
         raise RuntimeError("Unexpected Flutter application Gradle format")
     value = app.read_text()
@@ -107,7 +109,7 @@ kotlin {
 """
     app.write_text(value)
 
-    wrapper = HOST / "android/gradle/wrapper/gradle-wrapper.properties"
+    wrapper = host / "android/gradle/wrapper/gradle-wrapper.properties"
     if not wrapper.is_file():
         raise RuntimeError("Flutter generated Gradle wrapper missing")
     value = wrapper.read_text()
@@ -117,7 +119,7 @@ kotlin {
         raise RuntimeError("Unexpected Gradle distribution URL")
     wrapper.write_text(value)
 
-    props = HOST / "android/gradle.properties"
+    props = host / "android/gradle.properties"
     value = props.read_text()
     # Explicitly override Flutter's temporary old-KGP default; AGP new DSL
     # remains disabled to retain transitional Flutter Gradle compatibility.
@@ -131,8 +133,15 @@ kotlin {
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "configure"))
+    parser.add_argument("--host", type=Path, help="Explicit generated host for canonical source")
+    parser.add_argument("--source", type=Path, help="Host-owning Flutter package root")
     args = parser.parse_args()
-    (prepare if args.action == "prepare" else configure)()
+    if args.action == "prepare":
+        if args.host or args.source:
+            parser.error("--host and --source apply only to configure")
+        prepare()
+    else:
+        configure(args.host, args.source)
 
 
 if __name__ == "__main__":
