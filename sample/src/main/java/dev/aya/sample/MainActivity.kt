@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import dev.aya.android.Aya
+import dev.aya.android.AyaCardView
 import dev.aya.android.AyaBundledLaunchResult
 
 /** First-party consumer of the version-guarded AYA library. No user data is read. */
@@ -34,55 +35,24 @@ class MainActivity : Activity() {
         }, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
-        column.addView(Button(this).apply {
+        column.addView(AyaCardView(
+            context = this,
+            activity = this,
+            guideAsset = "aya-guide.md",
+            screenName = "Home",
+            title = "Ask Your Agent",
+            description = "Ask about using this sample app or the AYA handoff. " +
+                "You can review the complete reference before sharing.",
+            attachmentDisclosure = "A reference for this sample app is offered as a text file. " +
+                "Your selected AI app may not accept attachments.",
+            cornerRadiusDp = 12f
+        ).apply {
             id = R.id.aya_sample_open_help
-            text = "Ask your agent"
-            contentDescription = "Open AYA help with a version-matched reference"
-            setOnClickListener {
-                val result = Aya.launchBundled(
-                    activity = this@MainActivity,
-                    guideAsset = "aya-guide.md",
-                    screenName = "Home",
-                    question = null // user writes their own question in AYA's composer
-                )
-                if (result is AyaBundledLaunchResult.Rejected) {
-                    Toast.makeText(
-                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        })
-        val hostQuestion = EditText(this).apply {
-            id = R.id.aya_sample_help_question
-            hint = "Or type your question here"
-            contentDescription = "Type a question in the host app"
-            minLines = 2
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
-        }
-        column.addView(hostQuestion, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            questionInput.id = R.id.aya_sample_help_question
+        }, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
         ))
-        column.addView(Button(this).apply {
-            id = R.id.aya_sample_review_host_question
-            text = "Ask using my question"
-            contentDescription = "Review my question with the app reference before sharing"
-            setOnClickListener {
-                val result = Aya.launchBundled(
-                    activity = this@MainActivity,
-                    guideAsset = "aya-guide.md",
-                    screenName = "Home",
-                    question = hostQuestion.text.toString(),
-                    askQuestion = false // host already captured the question
-                )
-                if (result is AyaBundledLaunchResult.Rejected) {
-                    Toast.makeText(
-                        this@MainActivity, "AYA reference unavailable: ${result.reason}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        })
         column.addView(Button(this).apply {
             id = R.id.aya_sample_open_artwork
             text = "Open artwork generation demo"
