@@ -35,6 +35,7 @@ class AyaCardView(
     title: String = "Ask Your Agent",
     description: String = "Ask for help with this app. You can review the app reference before sharing it.",
     attachmentDisclosure: String = "App reference offered for sharing; your AI app may not accept files.",
+    outputInstructions: String,
     cornerRadiusDp: Float = 12f,
     densityMode: AyaCardDensity = AyaCardDensity.STANDARD,
     private val onRejected: (String) -> Unit = {
@@ -44,6 +45,7 @@ class AyaCardView(
 
     val questionInput: EditText = EditText(context)
     private val shareDetails: TextView = TextView(context)
+    private val returnDetails: TextView = TextView(context)
     private val density = resources.displayMetrics.density
     private val compact = densityMode == AyaCardDensity.COMPACT
 
@@ -91,6 +93,13 @@ class AyaCardView(
         shareDetails.setPadding(0, dp(if (compact) 8 else 12), 0, dp(if (compact) 4 else 8))
         addView(shareDetails)
 
+        require(outputInstructions.isNotBlank()) { "Host-specific output-use instructions are required." }
+        returnDetails.text = "After your agent replies: " + outputInstructions.trim()
+        returnDetails.setTextColor(secondary)
+        returnDetails.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        returnDetails.setPadding(0, 0, 0, dp(if (compact) 8 else 12))
+        addView(returnDetails)
+
         questionInput.apply {
             hint = "What would you like help with? (optional)"
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -124,6 +133,12 @@ class AyaCardView(
 
     /** Host may revise disclosure when its actual attachment selection changes. */
     fun setAttachmentDisclosure(value: String) { shareDetails.text = value }
+
+    /** Keep this aligned with the host’s real, version-verified import/use flow. */
+    fun setOutputInstructions(value: String) {
+        require(value.isNotBlank()) { "Host-specific output-use instructions are required." }
+        returnDetails.text = "After your agent replies: " + value.trim()
+    }
 
     private fun dp(value: Int): Int = (value * density + 0.5f).toInt()
     private fun dpF(value: Float): Float = value * density
