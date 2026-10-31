@@ -17,7 +17,7 @@ from validate_understanding import validate as validate_understanding
 SOURCE_VERSION = "aya-packet-source/v1"
 INVENTORY_VERSION = "aya-packet-inventory/v1"
 PROFILES_VERSION = "aya-packet-profiles/v1"
-PROFILES = {"help", "creative", "structured", "translation"}
+PROFILES = {"help", "creative", "structured", "translation", "filesystem"}
 STATUSES = {"AVAILABLE", "CONDITIONAL", "EXPERIMENTAL", "PLANNED",
             "REMOVED", "UNSUPPORTED", "UNKNOWN"}
 IMPACTS = {"ordinary", "technical", "accessibility", "privacy",
@@ -149,7 +149,7 @@ def validate_inputs(source: dict, inventory: dict, profiles: dict,
                 raise PacketError(f"{identifier} depends on missing {dep}")
     definitions = profiles.get("profiles")
     if not isinstance(definitions, dict) or set(definitions) != PROFILES:
-        raise PacketError("Expected all four profile definitions")
+        raise PacketError("Expected all five profile definitions")
     for name, spec in definitions.items():
         if not isinstance(spec, dict):
             raise PacketError("Profile definition must be object: " + name)
