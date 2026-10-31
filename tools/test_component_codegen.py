@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from component_codegen import ComponentError, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
+from component_codegen import ComponentError, android_xml_snippet, compose_snippet, kotlin_function_name, kotlin_quote, kotlin_snippet, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "docs/components/examples/sample-help-card.json"
@@ -89,6 +89,29 @@ class ComponentCodegenTest(unittest.TestCase):
         self.assertEqual(a, kotlin_function_name("install", "screen.a"))
         self.assertTrue(a.startswith("installAyaComponent_"))
         self.assertIn(a, kotlin_snippet({**self.manifest, "id": "screen.a"}))
+
+    def test_xml_card_is_parseable_and_has_unique_stable_ids(self):
+        import xml.etree.ElementTree as ET
+        xml = android_xml_snippet(self.manifest)
+        root = ET.fromstring(xml)
+        self.assertTrue(root.tag.endswith("AyaXmlCardView"))
+        ids = [v for k, v in root.attrib.items() if k.endswith("id") or k.endswith("ayaQuestionInputId")]
+        self.assertEqual(len(ids), 2)
+        self.assertNotEqual(ids[0], ids[1])
+        self.assertEqual(xml, android_xml_snippet(self.manifest))
+        other = copy.deepcopy(self.manifest)
+        other["id"] = "sample.help-other"
+        self.assertNotEqual(xml, android_xml_snippet(other))
+
+    def test_xml_rejects_action_and_ambiguous_copy(self):
+        self.manifest["presentation"] = {"kind": "action", "askQuestion": True}
+        with self.assertRaises(ComponentError):
+            android_xml_snippet(self.manifest)
+        self.manifest = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        for description in ("@resource", "first" + chr(10) + "second", "path" + chr(92) + "name"):
+            self.manifest["presentation"]["description"] = description
+            with self.assertRaises(ComponentError):
+                android_xml_snippet(self.manifest)
 
     def test_compose_card_uses_optional_adapter_and_original_view_card(self):
         code = compose_snippet(self.manifest)

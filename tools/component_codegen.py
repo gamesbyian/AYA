@@ -13,6 +13,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from xml.sax.saxutils import quoteattr
 from typing import Any
 
 ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.-]{1,79}$")
@@ -186,12 +187,54 @@ def compose_snippet(m: dict[str, Any]) -> str:
     )
 
 
+def android_xml_snippet(m: dict[str, Any]) -> str:
+    """Generate an Android Studio layout element with stable, unique view IDs."""
+    m = validate(m)
+    p = m["presentation"]
+    if p["kind"] != "card":
+        raise ComponentError("android-xml output only supports visible cards; actions need a host button")
+
+    def quote(value: str) -> str:
+        # AAPT parses resource sigils and backslashes specially in raw XML
+        # attributes. Refuse ambiguous expressions instead of silently
+        # changing the developer's configured disclosure/instructions.
+        if any(ch in value for ch in (chr(13), chr(10), chr(9), chr(92))):
+            raise ComponentError("XML card copy must be single-line and omit backslashes; use resources otherwise")
+        if value.startswith(("@", "?")):
+            raise ComponentError("XML card copy may not start with a resource sigil")
+        return quoteattr(value)
+
+    suffix = hashlib.sha256(m["id"].encode("utf-8")).hexdigest()[:8]
+    stem = re.sub(r"[^a-z0-9_]", "_", m["id"].lower())
+    card_id = f"aya_card_{stem}_{suffix}"
+    input_id = f"aya_question_{stem}_{suffix}"
+    attributes = [
+        'xmlns:android="http://schemas.android.com/apk/res/android"',
+        'xmlns:app="http://schemas.android.com/apk/res-auto"',
+        f'android:id="@+id/{card_id}"',
+        'android:layout_width="match_parent"',
+        'android:layout_height="wrap_content"',
+        'app:ayaQuestionInputId="@+id/' + input_id + '"',
+        'app:ayaGuideAsset=' + quote(m["guideAsset"]),
+    ]
+    if "screenName" in m:
+        attributes.append('app:ayaScreenName=' + quote(m["screenName"]))
+    for key, attr in (
+        ("title", "ayaTitle"), ("description", "ayaDescription"),
+        ("attachmentDisclosure", "ayaAttachmentDisclosure"),
+        ("outputInstructions", "ayaOutputInstructions")
+    ):
+        attributes.append(f'app:{attr}=' + quote(p[key]))
+    attributes.append('app:ayaDensity=' + quote(p["density"]))
+    return "<dev.aya.android.AyaXmlCardView" + chr(10) + "    " + (chr(10) + "    ").join(attributes) + " />" + chr(10)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path, help="static component JSON configuration")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="validate configuration without generating code")
-    group.add_argument("--format", choices=("kotlin", "compose"), help="emit deterministic Android/Compose Kotlin source")
+    group.add_argument("--format", choices=("kotlin", "compose", "android-xml"), help="emit deterministic Android Kotlin source")
     args = parser.parse_args(argv)
     try:
         config = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -199,12 +242,18 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, UnicodeError, json.JSONDecodeError, ComponentError) as exc:
         print(f"AYA component invalid: {exc}", file=sys.stderr)
         return 2
-    if args.format == "kotlin":
-        print(kotlin_snippet(config), end="")
-    elif args.format == "compose":
-        print(compose_snippet(config), end="")
-    else:
-        print(f"Valid AYA component/v1: {config['id']} ({config['presentation']['kind']})")
+    try:
+        if args.format == "kotlin":
+            print(kotlin_snippet(config), end="")
+        elif args.format == "android-xml":
+            print(android_xml_snippet(config), end="")
+        elif args.format == "compose":
+            print(compose_snippet(config), end="")
+        else:
+            print(f"Valid AYA component/v1: {config['id']} ({config['presentation']['kind']})")
+    except ComponentError as exc:
+        print(f"AYA component invalid: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 
