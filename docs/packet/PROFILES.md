@@ -1,5 +1,7 @@
 # Shared AYA Packet profiles
 
+All four profiles consume the app-specific understanding developed with [AYA-AUF](../understanding/README.md). Recover purpose, user goals, concept distinctions and director-approved intent first; then verify runtime facts with the existing packet source and inventory. Do not regenerate conflicting semantic definitions independently for each module.
+
 Every profile uses [the same authoring standard](AUTHORING_STANDARD.md) and typed fact source. Its `always_include` list names the app-specific facts required in every packet of that kind, while the dependency graph includes additional constraints for a selected action.
 
 | Profile | Goal | Mandatory host context | QA target |
