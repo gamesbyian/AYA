@@ -1,0 +1,40 @@
+name: Godot Android v2 adapter build
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  godot-android:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Install Android platform
+        run: |
+          SDKROOT=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+      - name: Build Godot plugin and stage both AYA library AARs
+        run: gradle :aya-godot:stageGodotAddon --no-daemon
+      - name: Validate assembled addon
+        run: |
+          test -s aya-godot/build/godot-addon/AYA/bin/debug/aya-debug.aar
+          test -s aya-godot/build/godot-addon/AYA/bin/debug/aya-godot-debug.aar
+          test -s aya-godot/build/godot-addon/AYA/bin/release/aya-release.aar
+          test -s aya-godot/build/godot-addon/AYA/bin/release/aya-godot-release.aar
+          test -s aya-godot/build/godot-addon/AYA/export_plugin.gd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-godot-prototype-addon
+          path: aya-godot/build/godot-addon/
+          if-no-files-found: error
