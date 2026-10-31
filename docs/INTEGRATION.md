@@ -1,5 +1,8 @@
 # Integrating AYA into an Android app
 
+
+> **Using a visual builder, node system or coding agent?** Start with [Drop-in Component specification](components/README.md) and the [phased implementation plan](components/ROADMAP.md). The initial `aya-component/v1` manifest and Kotlin snippet generator cover **help only**. FlutterFlow, Flutter, React Native/Expo, Godot, Unity and no-code plugins are not shipped. For native Android, `AyaCardView` and guarded `AyaComponentAction` are reusable entry points; the user still reviews what is shared.
+
 ## Optional language and personality packs
 
 AYA includes `Aya.launchTranslationBundled(activity, task, kitAsset?, guideAsset?, screenName?, direction?, askDirection?)`, which uses the regular installed-version-verified AYA-RAS guide **plus** an independently exact-version-verified `aya-translation-kit.md`. This second asset describes the host's *actual* supported pack format, closed output schema, source strings, Rosetta meanings, technical terms, sensitive action distinctions, worked examples and manual import steps. The request and kit appear in one editable, reviewed UTF-8 handoff attachment. This flow does not require any new receiving-assistant integration.
