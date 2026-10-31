@@ -1,6 +1,6 @@
 # AYA Drop-in Components and Visual Builder Integration
 
-**Status (2026-10-31):** Android Views/XML, Compose, Flutter source plugin and Godot Android v2 source addon are integrated with different levels of CI evidence. FlutterFlow body templates are available, while React Native/Expo, Unity and no-code extensions remain planned. See [current adapter status and release blockers](STATUS.md). The portable component manifest **v1 remains help-only**; passing structural checks does not prove correct host instructions or assistant ingestion.
+**Status (2026-10-31):** Android Views/XML, Compose, Flutter source plugin and Godot Android v2 source addon are integrated with different levels of CI evidence. FlutterFlow body templates and a React Native/Expo Android-only source bridge are checked in, while Unity and no-code extensions remain planned. Expo real-APK integration is pending in PR #42. See [current adapter status and release blockers](STATUS.md). The portable component manifest **v1 remains help-only**; passing structural checks does not prove correct host instructions or assistant ingestion.
 
 ## Purpose
 
@@ -30,7 +30,7 @@ Developer and director
        | Android Studio/Views    -> AyaCardView or AyaComponentAction.Help
        | Compose                -> merged optional aya-compose source adapter
        | Flutter/FlutterFlow    -> source Flutter plugin + unverified editor templates
-       | React Native/Expo      -> future native module + JS component/action
+       | React Native/Expo      -> Android source bridge + React Native card (APK pending)
        | Godot                  -> Android v2 addon + card (export/device unverified)
        | Unity                  -> future Android plugin + Visual Scripting unit
        | App Inventor/Kodular   -> future compatible .aix extension
@@ -118,12 +118,12 @@ This import standard is **design work only**; it does not imply AYA has a genera
 
 | Toolchain | User experience | Implementation target | Status |
 |---|---|---|---|
-| Android Studio / Kotlin Views | Gradle dependency + card/action | Existing AAR plus typed action/config generator | First slice underway |
-| Jetpack Compose | Reusable composable + action | Separate optional Compose artifact, no core dependency | Planned |
-| Flutter | Dart widget and callable action | Android platform channel/native plugin | Planned |
-| FlutterFlow | Reusable custom widget/action | Flutter plugin + editor distribution; test custom-code restrictions | Planned |
-| React Native / Expo | npm component and function | Kotlin-backed native module; config plugin for required Android setup | Planned |
-| Godot | AYA node with inspector inputs/signals | Godot 4 Android v2 plugin + GDScript addon | Planned |
+| Android Studio / Kotlin Views | Gradle dependency + card/action | Existing AAR plus typed action/config generator | Source/CI tested; public distribution and device acceptance pending |
+| Jetpack Compose | Reusable composable + action | Separate optional Compose artifact, no core dependency | Merged source/CI; independent consumer/device acceptance pending |
+| Flutter | Dart widget and callable action | Android platform channel/native plugin | Merged source and real-host APK guide inspection; unpublished |
+| FlutterFlow | Reusable custom widget/action | Flutter plugin + editor distribution; test custom-code restrictions | Source templates only; editor import/export unverified |
+| React Native / Expo | npm component and function | Kotlin-backed Android Expo Modules source bridge and separate guide plugin | Source/TypeScript tests passed; APK integration and distribution pending |
+| Godot | AYA node with inspector inputs/signals | Godot 4 Android v2 plugin + GDScript addon | Merged source/headless checks; exported APK and device acceptance pending |
 | Unity | Inspector component + Visual Scripting unit | Android Java/Kotlin plugin + UPM wrapper | Planned |
 | App Inventor / Kodular | Designer block with properties | Compatible .aix extension, build target constraints tested | Research/planned |
 
