@@ -32,6 +32,10 @@ Instead of leaving the app, switching to an assistant, explaining which app and 
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
+## Understanding the host before producing packets
+
+The [AYA Application Understanding Framework](docs/understanding/README.md) teaches a developer's agent to reconstruct the host application's purpose, domain concepts, user goals, interaction philosophy, misconceptions and evidence boundaries **before** building any AYA informational packet. Its [adaptive Director Consultation Protocol](docs/understanding/CONSULTATION.md) encourages focused questions to authorized project directors when intent is unclear, with a [reusable question bank](docs/understanding/QUESTIONS.md), [decision records](docs/understanding/SCHEMA.md) and offline validation. Director answers express design intent; they do not prove functionality ships. Consultation happens during development, not through AYA's runtime handoff.
+
 ## Packet authoring across modules
 
 AYA has a [common Packet Authoring Standard](docs/packet/AUTHORING_STANDARD.md) and [four module profiles](docs/packet/PROFILES.md) covering Help, Creative, Structured Artifact and Translation Kit. Developers define source-backed atomic host facts, an independent inventory, module-specific output contracts and negative examples. The offline [packet compiler](tools/packet_compiler.py) deterministically creates scoped, provenance-marked, dependency-complete context packets and explicitly reports omitted facts; it refuses stale external claims and oversized exports. See [quickstart and fictional fixtures](docs/packet/README.md).
