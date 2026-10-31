@@ -35,6 +35,11 @@ jobs:
           cache: true
       - name: Resolve Flutter source package
         run: flutter pub get
+      - name: Compile generated Flutter card and action from AYA component manifests
+        working-directory: .
+        run: |
+          python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format flutter > integrations/flutter/aya_flutter/lib/aya_generated_card.dart
+          python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --format flutter > integrations/flutter/aya_flutter/lib/aya_generated_action.dart
       - name: Analyze Dart widget and bridge API
         run: flutter analyze
       - name: Verify mocked native channel and review-first card
