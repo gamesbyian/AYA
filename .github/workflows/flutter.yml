@@ -2,7 +2,15 @@ name: Flutter AYA source-preview checks
 on:
   pull_request:
     paths:
-      - 'integrations/flutter/**'
+      - 'integrations/flutter/aya_flutter/android/**'
+      - 'integrations/flutter/aya_flutter/lib/**'
+      - 'integrations/flutter/aya_flutter/test/**'
+      - 'integrations/flutter/aya_flutter/ci-host/**'
+      - 'integrations/flutter/aya_flutter/pubspec.yaml'
+      - 'integrations/flutter/aya_flutter/analysis_options.yaml'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'integrations/flutter/migration/modern.android.gradle'
+      - 'integrations/flutter/migration/modern.pubspec.yaml'
       - 'aya/**'
       - 'tools/component_codegen.py'
       - 'tools/test_component_codegen.py'
@@ -11,7 +19,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'integrations/flutter/**'
+      - 'integrations/flutter/aya_flutter/android/**'
+      - 'integrations/flutter/aya_flutter/lib/**'
+      - 'integrations/flutter/aya_flutter/test/**'
+      - 'integrations/flutter/aya_flutter/ci-host/**'
+      - 'integrations/flutter/aya_flutter/pubspec.yaml'
+      - 'integrations/flutter/aya_flutter/analysis_options.yaml'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'integrations/flutter/migration/modern.android.gradle'
+      - 'integrations/flutter/migration/modern.pubspec.yaml'
       - 'aya/**'
       - 'tools/component_codegen.py'
       - 'tools/test_component_codegen.py'
