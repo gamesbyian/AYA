@@ -43,9 +43,7 @@ val pickOutput = registerForActivityResult(ActivityResultContracts.StartActivity
                             // show impact/diff/dry-run, confirm, then commit atomically.
                             openHostImporter(ready)
                         },
-                        onChooseAnotherFile = { pickOutput.launch(
-                            AyaImportPicker.openDocumentIntent(listOf("application/json"))
-                        ) },
+                        onChooseAnotherFile = { openOutputPicker() },
                         onChooseAmbiguousRoute = { route ->
                             val chosen = registry.inspectAs(read.artifact, route.id, "wallpaper")
                             showRoutingDecision(chosen)
@@ -60,13 +58,11 @@ val card = AyaCardView(
     context = this,
     activity = this,
     outputInstructions = "Save the JSON recipe, then choose Import agent output here.",
-    onImportRequested = {
-        pickOutput.launch(AyaImportPicker.openDocumentIntent(listOf("application/json")))
-    }
+    onImportRequested = { openOutputPicker() }
 )
 ```
 
-In production, wire the helper callbacks to actual host methods and close any Activity/lifecycle/executor resources appropriately. Compose hosts can use an `AndroidView` wrapper and Compose's Activity Result contract. For a simple in-app image picker with no structured schema, prefer the host's existing image-import pipeline.
+Here, `openOutputPicker()` is a host method that launches the registered `pickOutput` Activity Result launcher. For creative, translation or structured-agent request cards, supply `onAskRequested = { userText -> /* call the appropriate guarded Aya.launch...Bundled API */ }` and `questionHint`; the default card action remains the guarded Help path. In production, wire the helper callbacks to actual host methods and close any Activity/lifecycle/executor resources appropriately. Compose hosts can use an `AndroidView` wrapper and Compose's Activity Result contract. For a simple in-app image picker with no structured schema, prefer the host's existing image-import pipeline.
 
 ## AYA identification hints, compatibility, and request matching
 
