@@ -33,6 +33,16 @@ The optional `--brief-output` creates a **complete**, at-most-4000-UTF-16-unit t
 
 Changing `--profile` to `help`, `structured`, or `translation` uses the same verified facts without competing hand-written descriptions. Omit `--select` to include the full profile. Specify more than one `--select` for multiple facts. The compiler walks transitive dependencies and mandatory facts; if a packet is too large it **fails**, instead of clipping the safety context. Set a smaller selection or revise the source. `--fragment` makes a Markdown fragment that can be incorporated into an existing APK-bundled AYA-RAS guide using its modular build process.
 
+**APK guide integration:** The existing modular guide builder now accepts `--packet-source`, `--packet-inventory`, `--packet-profiles`, `--packet-profile`, and optional `--packet-select`. It compiles a nested Markdown fragment into the AYA-RAS document, and **rejects** a fact source whose app ID, exact version or source revision differs from the guide. This makes authoring-to-APK assembly a repeatable build step without adding a new Android runtime API.
+
+```sh
+python3 tools/build_reference.py host-reference-fragments/ app/src/main/assets/aya-guide.md \
+  --packet-source host-docs/facts.json \
+  --packet-inventory host-docs/independent-inventory.json \
+  --packet-profiles host-docs/profiles.json \
+  --packet-profile help
+```
+
 **Important limitation:** A compiled AYA packet does not automatically get attached to a conversation. The host must deliberately package it into its version-matched guide, translation kit, or task-specific export. AYA still shares one approved TXT attachment; the normal app importer handles returned files. The current SDK has no general-purpose runtime parser of the `aya-packet/v1` format.
 
 See [controlled cross-module evaluation](EVALUATION.md) and the offline `tools/validate_packet_trials.py` gate for reproducible, byte-matched assistant trials. No model responses are observed by AYA itself.
