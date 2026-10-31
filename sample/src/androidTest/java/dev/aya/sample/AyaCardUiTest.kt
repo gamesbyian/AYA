@@ -36,6 +36,30 @@ class AyaCardUiTest {
         }
     }
 
+    @Test fun optionalImportActionOnlyInvokesHostCallback() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val activity = instrumentation.startActivitySync(
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        ) as MainActivity
+        try {
+            var requests = 0
+            instrumentation.runOnMainSync {
+                val card = AyaCardView(
+                    context, activity,
+                    outputInstructions = "Import your saved result via the file picker.",
+                    onImportRequested = { requests++ }
+                )
+                val action = card.getChildAt(card.childCount - 1) as android.widget.Button
+                assertEquals("Import agent output", action.text.toString())
+                action.performClick()
+            }
+            assertEquals(1, requests)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     @Test fun compactCardPreservesOptionalEditorAndAction() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
