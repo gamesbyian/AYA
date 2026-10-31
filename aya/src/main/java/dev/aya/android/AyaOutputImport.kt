@@ -47,8 +47,12 @@ class AyaImportFile private constructor(
     }
 
     companion object {
-        fun fromBytes(bytes: ByteArray, displayName: String? = null, mimeType: String? = null): AyaImportFile =
-            AyaImportFile(bytes, displayName, mimeType)
+        fun fromBytes(bytes: ByteArray, displayName: String? = null, mimeType: String? = null): AyaImportFile {
+            require(bytes.size <= AyaImportPicker.HARD_MAX_BYTES) {
+                "Artifact exceeds AYA's in-memory import limit"
+            }
+            return AyaImportFile(bytes, displayName, mimeType)
+        }
     }
 }
 
@@ -189,6 +193,7 @@ object AyaImportPicker {
                 while (true) {
                     val count = stream.read(buffer)
                     if (count == -1) break
+                    if (count == 0) return AyaImportRead.Rejected("Selected document stream stopped making progress.")
                     if (bytes.size() + count > maxBytes) {
                         return AyaImportRead.Rejected("Selected document exceeds the import size limit.")
                     }
