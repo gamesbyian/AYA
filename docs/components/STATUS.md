@@ -9,7 +9,7 @@ This inventory separates **checked-in source**, CI builds, Android host acceptan
 | Godot 4 Android | Android v2 Kotlin plugin, GDScript card/editor addon and staged AARs | Godot 4.5.1 headless parser plus Gradle source build | Manual editor install, Android APK export and correct guide asset verification |
 | Flutter | Android-only Dart card/headless action and Kotlin ActivityAware bridge | Analyzer, mocked widget/channel tests and complete Flutter Android APK build in [CI run 41233862629](https://github.com/gamesbyian/AYA/actions/runs/41233862629) | Public native AAR distribution; matching host APK guide; real-device testing; pub.dev |
 | FlutterFlow | Custom Widget and Custom Action body templates | Source-contract/docs tests | Actual FlutterFlow editor import/export and publicly resolvable native SDK; not a marketplace component |
-| React Native / Expo | Specifications | No implemented bridge | JS/TS, Kotlin module, Expo native build and actual app tests |
+| React Native / Expo | Expo Android AYA guide-asset prebuild helper (source preview; separate from native module) | Local source-code review and offline path/ownership/version-negative tests under CI; native Expo prebuild unverified | Actual Expo CNG export, custom native module, APK identity/guide inspection and device tests |
 | Unity | Specifications | No implemented adapter | UPM, Android plugin, visual nodes, exported APK tests |
 | App Inventor / Kodular | Feasibility plan | No shipped extension | Platform extension, APK asset/consent testing |
 
