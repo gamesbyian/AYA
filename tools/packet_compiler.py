@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from validate_understanding import validate as validate_understanding
 
 SOURCE_VERSION = "aya-packet-source/v1"
 INVENTORY_VERSION = "aya-packet-inventory/v1"
@@ -317,6 +318,10 @@ def compile_brief(source: dict, inventory: dict, profiles: dict,
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--understanding", type=Path,
+                        help="Optional upstream AUF concept model")
+    parser.add_argument("--director-decisions", type=Path,
+                        help="Director record ledger paired with AUF model")
     parser.add_argument("--inventory", type=Path, required=True)
     parser.add_argument("--profiles", type=Path, required=True)
     parser.add_argument("--profile", choices=sorted(PROFILES), required=True)
@@ -331,6 +336,17 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     try:
         stamp = parse_date(args.as_of, "as-of") if args.as_of else None
+        if bool(args.understanding) != bool(args.director_decisions):
+            raise PacketError("Specify both AUF model and director decisions")
+        if args.understanding:
+            concept = read_json(args.understanding)
+            decisions = read_json(args.director_decisions)
+            validate_understanding(concept, decisions)
+            fact_source = read_json(args.source)
+            host = fact_source["host"]
+            if any(concept["host"][key] != host[key]
+                   for key in ("app_id", "app_version", "source_revision")):
+                raise PacketError("AUF model does not match packet host identity/version/revision")
         data, report = compile_packet(
             read_json(args.source), read_json(args.inventory),
             read_json(args.profiles), args.profile, args.select,
