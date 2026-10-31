@@ -49,6 +49,8 @@ Each module profile must supply at least one valid and one invalid example with 
 
 An attractive example cannot establish real importer compatibility. The only authoritative output schema is the one generated or independently checked against the host's actual parser. Keep developer-approved semantics separate from inferred model commentary.
 
+Use [controlled trial evaluation](EVALUATION.md) to record exact packet hashes, assistant versions, confirmed attachment ingestion, independently verified host results and failure severity. Treat models as external, changing dependencies.
+
 ## 7. Independent QA and release
 
 1. Run structural checks on typed source, independent inventory, profile, compiled output and existing AYA-RAS guide.
