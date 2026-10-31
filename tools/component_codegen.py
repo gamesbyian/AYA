@@ -283,7 +283,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("manifest", type=Path, help="static component JSON configuration")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="validate configuration without generating code")
-    group.add_argument("--format", choices=("kotlin", "compose", "android-xml"), help="emit deterministic Android Kotlin source")
+    group.add_argument("--format", choices=("kotlin", "compose", "kotlin-compose", "android-xml"), help="emit deterministic Android Kotlin source")
     args = parser.parse_args(argv)
     try:
         config = json.loads(args.manifest.read_text(encoding="utf-8"))
