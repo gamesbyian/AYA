@@ -52,7 +52,7 @@ Deliver:
 ## Phase 4: visual scripting/game toolchains (P2)
 
 - **Godot 4:** Android v2 plugin, editor addon, `AyaHandoff` node, inspector fields from schema, `open_help(question)` method, `review_opened`/`rejected(reason)` signals. Android export-only; editor preview is a mock and must be labelled.
-- **Unity:** UPM package with custom inspector + visual-scripting unit wrapping Android plugin. Verify Unity Android Activity access, export manifest, IL2CPP/Mono boundaries and Editor placeholder handling.
+- **Unity:** first source-preview UPM Inspector action and Android Kotlin bridge are being compiled in CI; a dedicated custom Visual Scripting Unit is still planned. Verify Unity Android Activity access, actual Editor import, export manifest, IL2CPP/Mono boundaries and non-Android rejection before claiming usability.
 - Document how UI controls and graph logic both connect to the same action. Never imply Godot/Unity desktop exports can use Android Sharesheet without a separate backend.
 - CI smoke tests where headless toolchains allow; interactive editor import, android export and real Android device acceptance are distinct.
 
