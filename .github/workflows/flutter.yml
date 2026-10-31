@@ -127,7 +127,7 @@ jobs:
         run: |
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -n "$AAPT" && test -x "$AAPT"
-          python3 tools/verify_flutter_host_apk.py \\
-            --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk \\
-            --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md \\
+          python3 tools/verify_flutter_host_apk.py \
+            --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk \
+            --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md \
             --aapt "$AAPT"
