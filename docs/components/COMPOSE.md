@@ -1,6 +1,6 @@
 # AYA Compose drop-in (initial optional Android adapter)
 
-**Status:** source integration under review, not a published Maven Central package or a visual editor marketplace extension. Source module `:aya-compose` adds an optional Compose UI adapter and depends on the existing Android `:aya` SDK. Minimum Android API 23. Version 0.1.0-SNAPSHOT is for CI staging; no external release is claimed.
+**Status:** optional source/CI-tested Android Compose adapter in AYA; not a published Maven Central package or a visual editor marketplace extension. Source module `:aya-compose` adds an optional Compose UI adapter and depends on the existing Android `:aya` SDK. Minimum Android API 23. Version 0.1.0-SNAPSHOT is for CI staging; no external release is claimed.
 
 ## Why an optional module?
 
@@ -52,3 +52,9 @@ The same help-only component configuration works for traditional Android and Com
 - Emulator: enter text in Compose-embedded card; verify local review contains exact question and cancel returns without share; exercise headless action and missing guide refusal.
 - Manual Android device: 320x700 and 412x892; 200% font, TalkBack, keyboard IME, rotation, multiple cards, light/dark host theme, chooser canceled/no target, Copy fallback.
 - Re-evaluate imported outputs separately in the host. None of these tests can confirm that a third-party AI provider ingested an attachment.
+
+## Extended host-facing card contract
+
+The Compose card also accepts an optional stable `componentId` for multi-card screens, an `initialQuestion` seed, `questionHint`, `cornerRadiusDp`, and `onQuestionChanged` for **locally typed** draft text. No callback receives model responses. A generated Compose card automatically uses the manifest's stable component ID. A host changing component identity or guide/screen scope must not carry stale private drafts into another context.
+
+Optional `onAskRequested = { question -> ... }` allows a real host implementation to invoke a **guarded module-specific SDK action** instead of default Help; the host must keep source-verified packet contracts, user review and local error handling. Optional `onImportRequested = { ... }` exposes the existing native card's secondary import control only when a real host-controlled SAF picker and validator are supplied. These are independent user-initiated actions, **not** agent-return listeners. A help-only host should omit both callbacks. The wrapped Android View remains the visible source of the attachment and output-use disclosures.

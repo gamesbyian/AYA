@@ -118,6 +118,7 @@ class ComponentCodegenTest(unittest.TestCase):
         self.assertIn("import dev.aya.compose.AyaCard", code)
         self.assertIn("@Composable", code)
         self.assertIn("outputInstructions = ", code)
+        self.assertIn('componentId = "sample.help.home"', code)
         self.assertNotIn("Aya.launch(", code)
 
     def test_compose_action_preserves_manual_review_and_local_status(self):
