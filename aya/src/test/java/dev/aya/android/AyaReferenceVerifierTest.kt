@@ -84,6 +84,20 @@ class AyaReferenceVerifierTest {
             is AyaReferenceCheck.Rejected)
     }
 
+    @Test fun localeVariantsAreHostSelectedAndNotAutoDetectedByV1() {
+        // v1 requires nonblank locale provenance but has no requested-locale
+        // parameter. Host code must choose the correct variant/locale asset.
+        val guide = validGuide().replace("locale: en", "locale: fr-CA")
+        assertTrue(AyaReferenceVerifier.verify(guide, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Accepted)
+        val missing = guide.replace("locale: fr-CA", "locale: ")
+        assertTrue(AyaReferenceVerifier.verify(missing, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+        val stale = guide.replace("app_version_min: 1.0.0", "app_version_min: 1.0.1")
+        assertTrue(AyaReferenceVerifier.verify(stale, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+    }
+
     @Test fun preservesGuideUnchanged() {
         val input = validGuide()
         val result = AyaReferenceVerifier.verify(input, "dev.aya.sample", "1.0.0")
