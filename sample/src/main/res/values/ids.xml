@@ -3,5 +3,8 @@
     <!-- Stable view IDs enable Android to save and restore both draft text fields
          when the app is backgrounded, rotated or later recreated. -->
     <item type="id" name="aya_sample_help_question" />
+    <item type="id" name="aya_sample_open_help" />
+    <item type="id" name="aya_sample_review_host_question" />
+    <item type="id" name="aya_sample_open_artwork" />
     <item type="id" name="aya_sample_artwork_direction" />
 </resources>
