@@ -29,6 +29,10 @@ class UnitySourceContractTest(unittest.TestCase):
         self.assertIn('stageUnityPlugin', build)
         self.assertIn('":aya:assembleDebug"', build)
         self.assertIn('":aya:assembleRelease"', build)
+        # The matched native/sdk AARs must never be staged together with
+        # their other build-variant counterparts for blind Unity imports.
+        self.assertEqual(build.count('into("debug")'), 2)
+        self.assertEqual(build.count('into("release")'), 2)
         settings = (ROOT / "settings.gradle.kts").read_text()
         self.assertIn('":aya-unity"', settings)
 
