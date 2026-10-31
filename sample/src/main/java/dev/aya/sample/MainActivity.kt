@@ -58,6 +58,12 @@ class MainActivity : Activity() {
             contentDescription = "Open artwork generation demo"
             setOnClickListener { startActivity(Intent(this@MainActivity, ArtworkActivity::class.java)) }
         })
+        column.addView(Button(this).apply {
+            id = R.id.aya_sample_open_compose
+            text = "Open Compose component demo"
+            contentDescription = "Open Compose component demo"
+            setOnClickListener { startActivity(Intent(this@MainActivity, ComposeDemoActivity::class.java)) }
+        })
         // The host scrolls when large fonts or the keyboard exceed the viewport;
         // the AYA card itself does not introduce a nested scroll container.
         window.setSoftInputMode(
