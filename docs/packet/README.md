@@ -35,6 +35,8 @@ Changing `--profile` to `help`, `structured`, or `translation` uses the same ver
 
 **Important limitation:** A compiled AYA packet does not automatically get attached to a conversation. The host must deliberately package it into its version-matched guide, translation kit, or task-specific export. AYA still shares one approved TXT attachment; the normal app importer handles returned files. The current SDK has no general-purpose runtime parser of the `aya-packet/v1` format.
 
+See [controlled cross-module evaluation](EVALUATION.md) and the offline `tools/validate_packet_trials.py` gate for reproducible, byte-matched assistant trials. No model responses are observed by AYA itself.
+
 ## Release gates
 
 - Compile every applicable profile with a pinned source revision and independent inventory; inspect report and covered high-risk facts.
