@@ -54,6 +54,10 @@ The XML layout editor drop-in [AYA XML card](docs/components/XML.md) must delega
 
 Visual components/nodes must never bypass installed-version checks or edited preview, invent assistant-reply callbacks, infer recipient ingestion, silently collect host state, or advertise automatic output import. Card copy needs verified output-use instructions. Generators must escape Kotlin strings (especially interpolation), reject unknown fields and asset traversal, and report structural success without implying factual accuracy. Keep core SDK framework-agnostic; distribute Compose and other bridges as optional packages with separate acceptance matrices.
 
+## Unity Android bridge and inspector-action preview
+
+Read [Unity adapter source preview](docs/components/UNITY.md) for the optional `aya-unity` Android AAR and source UPM component. The bridge must use only guarded `AyaComponentAction.Help` on an active Android UI thread and return explicit **local** statuses; marshal callbacks to Unity's main thread. Editor/desktop builds must reject without pretending to contact a model. Host UI copy, source-derived exact-version guide and native APK/manifest wiring are not automatically supplied by a Unity component. Do not represent callable public C# methods as a tested custom Visual Scripting Unit, or a Gradle AAR as a Unity Editor/Android export acceptance result.
+
 ## Engineering constraints
 - AYA's evidence registry is **read-only** and initially empty. Device QA must match recipient package, app version, Android SDK, account state and exact transport. Published claims or intent filters are NOT verified ingestion. Do not introduce package sweeps, telemetry, success monitoring or automatic recipient selection.
 - The optional `AyaAssistContext` adapter is Android's separate system-assistant request surface, and must only be wired into a host after explicit host approval of the exact public context. Do not enable it implicitly, send private identifiers, or misrepresent Android JSON-LD as the AYA handoff format.

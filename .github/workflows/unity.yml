@@ -1,0 +1,63 @@
+name: Unity Android AYA source bridge
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'aya-unity/**'
+      - 'integrations/unity/**'
+      - 'tools/test_unity_adapter.py'
+      - '.github/workflows/unity.yml'
+      - 'settings.gradle.kts'
+      - 'aya/**'
+  pull_request:
+    paths:
+      - 'aya-unity/**'
+      - 'integrations/unity/**'
+      - 'tools/test_unity_adapter.py'
+      - '.github/workflows/unity.yml'
+      - 'settings.gradle.kts'
+      - 'aya/**'
+
+jobs:
+  android-native-bridge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Install Android SDK platform
+        run: |
+          SDKROOT=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+      - name: Verify source-only Unity UPM and JNI boundaries
+        run: python3 -m unittest discover -s tools -p 'test_unity_adapter.py'
+      - name: Compile native Kotlin bridge and stage matching AYA AARs
+        run: gradle :aya-unity:stageUnityPlugin --no-daemon --stacktrace
+      - name: Verify staged plugin binaries and Java-visible static entry point
+        run: |
+          OUT=aya-unity/build/unity-plugin/Plugins/Android
+          test -s "$OUT/debug/aya-unity-debug.aar"
+          test -s "$OUT/release/aya-unity-release.aar"
+          test -s "$OUT/debug/aya-debug.aar"
+          test -s "$OUT/release/aya-release.aar"
+          unzip -p "$OUT/debug/aya-unity-debug.aar" classes.jar > /tmp/aya-unity-classes.jar
+          test -s /tmp/aya-unity-classes.jar
+          javap -classpath /tmp/aya-unity-classes.jar dev.aya.unity.AyaUnityBridge | tee /tmp/aya-unity-javap.txt
+          grep -F 'public static final java.lang.String openHelp(' /tmp/aya-unity-javap.txt
+          echo 'Scope: native AAR Java bridge only; Unity editor, exported APK and recipient not yet verified.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-unity-android-source-preview
+          path: aya-unity/build/unity-plugin/Plugins/Android/
+          retention-days: 7
+          if-no-files-found: error
