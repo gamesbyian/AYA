@@ -1,7 +1,7 @@
 # Flutter built-in Kotlin migration: source preview and evidence
 
 **Status:** the Flutter AGP 9 built-in Kotlin **trial passed**, and the
-primary source-preview plugin is being promoted from `0.1.0-dev.1` to
+primary source-preview plugin has been promoted from `0.1.0-dev.1` to
 `0.2.0-dev.1`. This does **not** publish a package, grant receiving
 assistant compatibility, or establish all external host toolchains.
 
@@ -11,7 +11,7 @@ assistant compatibility, or establish all external host toolchains.
 |---|---|---|
 | Flutter >=3.19 / Dart >=3.3, legacy KGP/AGP 8 | Frozen `aya_flutter@0.1.0-dev.1` source at Git SHA `fb5e004eea766261ed50194e8013b11fd9ade583`; do not silently install the modern package | Real host and exact-version guide passed legacy [CI 41248634751](https://github.com/gamesbyian/AYA/actions/runs/41248634751) |
 | Flutter >=3.44 / Dart >=3.12 / AGP9 with built-in Kotlin **false** | Flutter supports this transition upstream. AYA's new source-preview declared minimum is 3.44/3.12, but this *specific host configuration is not verified* | Unverified |
-| Flutter 3.47.9 / Dart >=3.12 / AGP9.0.1 / Gradle9.1.0 / built-in Kotlin **true** | Proposed `aya_flutter@0.2.0-dev.1` source preview, with host-owned exact-version guide and staged AYA AAR | Migrated disposable source-copy APK passed [CI 41248634708](https://github.com/gamesbyian/AYA/actions/runs/41248634708). **The primary source checkout has independent CI**; only claim it passed once that run is green |
+| Flutter 3.47.9 / Dart >=3.12 / AGP9.0.1 / Gradle9.1.0 / built-in Kotlin **true** | Merged `aya_flutter@0.2.0-dev.1` source preview, with host-owned exact-version guide and staged AYA AAR | Migrated disposable source-copy APK passed [CI 41248634708](https://github.com/gamesbyian/AYA/actions/runs/41248634708). The primary source checkout's real host APK/guide/DEX gate also passed [CI 41249286150](https://github.com/gamesbyian/AYA/actions/runs/41249286150) |
 | FlutterFlow editor, external consuming app, real Android recipient | Source adapter import, native setup and on-device assistant attachment handling | Not independently verified |
 
 This is an explicit minimum-support decision. Flutter's official
