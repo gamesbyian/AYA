@@ -42,6 +42,8 @@ class MainActivity : Activity() {
                 "You can review the complete reference before sharing.",
             attachmentDisclosure = "A reference for this sample app is offered as a text file. " +
                 "Your selected AI app may not accept attachments.",
+            outputInstructions = "Read your agent’s answer and follow its advice yourself. " +
+                "This sample does not import or apply help responses automatically.",
             cornerRadiusDp = 12f
         ).apply {
             id = R.id.aya_sample_open_help
