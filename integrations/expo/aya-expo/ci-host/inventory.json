@@ -1,0 +1,41 @@
+{
+  "schema_version": "aya-inventory/v1",
+  "app_id": "dev.aya.expo.cihost",
+  "app_version": "1.0.0",
+  "source_revision": "expo-ci-host-v1",
+  "reviewed_at_utc": "2026-10-31T21:00:00Z",
+  "items": [
+    {
+      "id": "TASK-001",
+      "kind": "task",
+      "title": "Review a question in the single-screen Expo Android host",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/expo/aya-expo/ci-host/App.tsx;integrations/expo/aya-expo/src/AyaHelpCard.tsx;integrations/expo/aya-expo/android/src/main/java/dev/aya/expo/AyaExpoModule.kt"
+    },
+    {
+      "id": "F-001",
+      "kind": "feature",
+      "title": "Host-themed optional-question Android AYA card",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/expo/aya-expo/ci-host/App.tsx;integrations/expo/aya-expo/src/AyaHelpCard.tsx"
+    },
+    {
+      "id": "ERR-001",
+      "kind": "error",
+      "title": "Native bridge, screen or reference identity unavailable",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "integrations/expo/aya-expo/src/native.ts;integrations/expo/aya-expo/android/src/main/java/dev/aya/expo/AyaExpoModule.kt;aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt"
+    },
+    {
+      "id": "ERR-002",
+      "kind": "error",
+      "title": "External assistant cannot ingest an offered guide",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "aya/src/main/java/dev/aya/android/Aya.kt"
+    }
+  ]
+}
