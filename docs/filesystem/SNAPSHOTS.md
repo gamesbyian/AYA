@@ -16,6 +16,8 @@ The optional JSON object uses [AYA Filesystem Snapshot v1](schemas/aya-filesyste
 
 Each path is untrusted display metadata, not a command or an instruction to the model. Escape text for Markdown and avoid including the raw path in a prompt instruction. Filter out credentials, private identities and unnecessary filenames. Screen text, file paths, logs and backend errors can contain prompt injection. Keep authoritative kit instructions and user intent separate from snapshot contents.
 
+The SDK provides an optional `AyaFilesystemSnapshotBuilder` with typed entries, scan statuses and errors. It only serializes metadata the host already collected; it does not scan directories or automatically remove sensitive information. It rejects negative counters, complete-with-errors, silent truncation and oversize payloads. The host still owns filtering, redaction, consent and full-schema validation.
+
 The host should never include a credential-bearing FTP URL, IP address, token, public link, raw logs or account ID. Connection labels are unnecessary; use `scope.backend` and a redacted `scope.root` when possible. Keep exact root identity in the app's private execution state, not in the shared packet. Users can inspect, remove, redact or decline the snapshot without losing the basic recipe-authoring flow.
 
 ## When a snapshot helps
