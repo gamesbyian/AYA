@@ -12,8 +12,8 @@ This guide is written for someone who knows what they want their app to do but h
 | Godot 4 Android | The AYA addon + a configurable card/node | Godot editor/addon source exists; Android export and app-specific asset packaging need host verification |
 | Flutter | `AyaHelpCard` or `AyaFlutter.openHelp` | Source plugin and CI APK compile; unpublished core AAR means manual native dependency setup |
 | FlutterFlow | Prepared Custom Widget / Action body templates | Templates are **not** a currently working published FlutterFlow widget |
-| React Native / Expo | Android-only Expo Modules source adapter and React Native card | Source/API contract tests pass; unpublished AAR and real Expo APK acceptance pending in PR #42. No Expo Go support. |
-| Unity | Unpublished source UPM/Android bridge preview | Kotlin AAR compile pending; no Unity Editor or APK export acceptance. Follow [Unity preview](UNITY.md). |
+| React Native / Expo | Android-only Expo Modules source adapter and React Native card | First-party generated Expo Android APK, exact guide/manifest and compiled DEX verified; isolated npm tarball consumer remains a separate gate. No Expo Go or public npm release. |
+| Unity | Unpublished source UPM/Android bridge preview | Kotlin AAR, Java entry point and managed C# compilation against test-only Unity signatures passed; Unity Editor and actual exported Unity APK remain unverified. Follow [Unity preview](UNITY.md). |
 | App Inventor | Design/roadmap only | No implemented or tested drop-in adapter to install |
 
 See the [live snapshot of source and verification evidence](STATUS.md) before trying another toolchain.
