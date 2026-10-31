@@ -27,6 +27,8 @@ Use the [Translation Kit developer authoring guide](../translation/AUTHORING.md)
 
 ## Relationship to the Android SDK
 
+The compiler can emit a bounded full-context `--brief-output` for request-only paths, but the host must explicitly use it and preserve final user edits. If this fails its length check, use full reviewed attachment and do not silently omit facts.
+
 The currently shipped SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative Handoff has its own typed task. Translation Kit's proposed/branch SDK adds a guarded, second kit asset. The packet compiler is currently developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
 
 Do not claim recipient interoperability or release readiness without dated, independent QA.
