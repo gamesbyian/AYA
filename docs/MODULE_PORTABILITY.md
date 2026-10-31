@@ -41,3 +41,7 @@ File format, backend, renderer, control names, paths, card placement, color pale
 ## Review checklist
 
 A module change is portable when its public types have generic semantics, its documentation names prerequisites rather than one host's controls, its examples are fictional, all app-specific claims are supplied by the adopter and verifiable, and the same reusable implementation serves more than one host category. Do not label a host-integrated feature as implemented in AYA unless the generic SDK actually ships it.
+
+## Automated coverage and limits
+
+`python3 -m unittest tools.test_module_portability` scans first-party documentation, source code and component templates across Android, Flutter, React Native/Expo, Godot, Unity/C#, web and Gradle formats, excluding generated outputs and installed third-party dependencies. The check rejects known historical cross-project names and links. It is a narrow, deterministic guard, **not** proof that an innocuously named module is conceptually portable; reviewers must still apply the two-host reasoning test and inspect values, behavior and generated packets.
