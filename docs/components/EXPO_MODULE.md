@@ -1,6 +1,6 @@
 # AYA Expo Modules Android bridge (source preview)
 
-**Status:** Android-only typed Expo Modules API/Kotlin bridge and React Native card merged as source previews in PR #41. An actual generated Expo Android host APK is being verified separately in PR #42; do not claim successful packaging until those checks pass. TypeScript compiler and mocked local-status checks are CI gates. This is not yet a published npm module, tested Expo Android APK, validated Expo editor export, or physical-device acceptance.
+**Status:** Android-only typed Expo Modules API/Kotlin bridge and React Native card merged as source previews in PR #41. The independently authored CI host now builds a real Android APK with staged AYA SDK, exact-version source-derived guide, and native AYA manifest components (PR #42, [CI run 41245911246](https://github.com/gamesbyian/AYA/actions/runs/41245911246)). TypeScript compiler and mocked local-status checks are also CI gates. This is not a published npm module, Unity/Expo editor validation, physical-device interaction, or assistant-recipient ingestion certificate.
 
 ## API and visible card
 
@@ -35,6 +35,6 @@ The package is intentionally private/unpublished. Follow Expo's [native module s
 ## Release gates
 
 1. Pass TypeScript compiler and mocked status/validation tests against a pinned Expo SDK/React Native baseline.
-2. Build a real Expo Android APK with a matching staged version of the AYA core SDK and exact host guide; verify merged native manifest and APK bytes.
+2. [PASS, first-party synthetic host] Compile a real Expo Android APK with the staged AYA core SDK and independently audited, exact-version host guide; check the APK's bytes, installed identity and merged manifest. Additionally verify that the Expo native bridge and AYA receiver are defined in the compiled APK DEX before advertising binary packaging evidence for any subsequent revision.
 3. Test Activity detach/reattach, rotation, backgrounding, no recipient, Copy fallback, 200% font scaling, TalkBack and narrow phones on real devices.
 4. Test dated selected AI receivers separately. Opening local review is never evidence of ingestion, answer generation or import.

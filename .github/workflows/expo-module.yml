@@ -1,4 +1,4 @@
-name: AYA Expo native source-preview checks
+name: AYA Expo native APK and contract checks
 on:
   pull_request:
     paths:
@@ -6,12 +6,17 @@ on:
       - 'integrations/expo/guide-plugin/**'
       - 'aya/**'
       - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
       - 'tools/validate_guide.py'
       - '.github/workflows/expo-module.yml'
   push:
     branches: [main]
     paths:
       - 'integrations/expo/aya-expo/**'
+      - 'integrations/expo/guide-plugin/**'
+      - 'aya/**'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
       - '.github/workflows/expo-module.yml'
 
 concurrency:
@@ -106,6 +111,8 @@ jobs:
             --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk \
             --guide integrations/expo/aya-expo/ci-host/aya-guide.md \
             --aapt "$AAPT"
+      - name: Verify Expo bridge and core share receiver are defined in actual APK DEX
+        run: python3 tools/verify_android_adapter_apk.py --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver
       - name: Upload synthetic host APK for controlled QA
         uses: actions/upload-artifact@v4
         with:
