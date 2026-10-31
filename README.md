@@ -38,6 +38,14 @@ Instead of leaving the app, switching to an assistant, explaining which app and 
 
 The benefit is deliberately modest: **one less point of inertia between wanting to do something and getting help to do it**. AYA keeps the user moving toward the experience they wanted in the first place, without replacing their assistant, operating an AI service, or tracking what happens after the handoff.
 
+## Drop-in components for visual builders and coding agents
+
+AYA is intended to become a **drop-in part of development workflows**: a configurable Android card, a headless action/node, and an optional adapter for the app-building tools developers already use. You do not need to adopt AYA's code to adopt the interaction convention.
+
+The new [Drop-in Component specification](docs/components/README.md) and [implementation roadmap](docs/components/ROADMAP.md) cover Android Studio/Views/Compose, Flutter/FlutterFlow, React Native/Expo, Godot, Unity and beginner no-code tools. **These cross-platform adapters are proposals, not currently published or installed plugins.**
+
+**First incremental developer kit:** a help-only `aya-component/v1` JSON manifest, [example card configuration](docs/components/examples/sample-help-card.json), Kotlin snippet generator (`python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format kotlin`) and an Android `AyaComponentAction` dispatcher for existing guarded help/image/translation handoffs. Native Android `AyaCardView` remains the real shipped embedded card. Every real integration still needs its own evidence-based exact-version guide, truthful output-use guidance, review and device QA. Static manifest validation does not prove assistant ingestion.
+
 ## Understanding the host before producing packets
 
 The [AYA Application Understanding Framework](docs/understanding/README.md) teaches a developer's agent to reconstruct the host application's purpose, domain concepts, user goals, interaction philosophy, misconceptions and evidence boundaries **before** building any AYA informational packet. Its [adaptive Director Consultation Protocol](docs/understanding/CONSULTATION.md) encourages focused questions to authorized project directors when intent is unclear, with a [reusable question bank](docs/understanding/QUESTIONS.md), [decision records](docs/understanding/SCHEMA.md) and offline validation. Director answers express design intent; they do not prove functionality ships. Consultation happens during development, not through AYA's runtime handoff.
