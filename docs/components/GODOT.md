@@ -1,6 +1,6 @@
 # Godot Android v2 AYA drop-in (prototype)
 
-Status: prototype Kotlin bridge and Godot editor addon under independent CI. This is NOT a tested Godot APK export, verified recipient handoff, published Asset Library plugin or generally installable addon yet. No binary AARs are committed.
+Status: prototype Kotlin bridge and Godot editor addon under independent CI, including a pinned 4.5.1 headless editor parse and no-Android smoke check. This is NOT a tested Godot APK export, verified recipient handoff, published Asset Library plugin or generally installable addon yet. No binary AARs are committed.
 
 The design follows the official Godot Android v2 plugin documentation (https://docs.godotengine.org/en/stable/tutorials/platform/android/android_plugin.html) and the Godot Android Plugin Template (https://github.com/m4gr3d/Godot-Android-Plugin-Template). It targets Godot 4.2+ v2 architecture and compiles against Godot Android library 4.5.1.stable.
 
@@ -33,7 +33,7 @@ This prototype does not silently edit an unknown Godot build template or invent 
 ## Acceptance before release
 
 - Android Gradle module compiles and staged addon contains all four debug/release AARs and editor scripts.
-- Import into real Godot editor tested on 4.5 and 4.6: preview and inspector render, GDScript parses, no editor handoff, Android export registration loads.
+- Headless Godot 4.5.1 plugin parser and scene smoke test pass; manual GUI editor import on 4.5 and 4.6 still required: preview and inspector render, GDScript parses, no editor handoff, Android export registration loads.
 - Exported APK has the correct AYA-RAS guide as a raw APK asset and matches installed app version. A missing/incorrect guide is rejected without fallback.
 - Multi-card request ID isolation, dismissal, rotation, unavailable engine singleton and no share-target behaviour are tested without claiming AI ingestion.
 - Large fonts, gamepad focus, screen readers, narrow phones, and IME behaviour satisfy the host's UX/accessibility requirements.
