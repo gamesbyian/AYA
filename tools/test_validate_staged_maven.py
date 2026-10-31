@@ -86,6 +86,16 @@ class StagedMavenTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Corrupt published AAR"):
             check(self.root, self.version)
 
+    def test_rejects_pathological_zip_member_counts_before_decompression(self):
+        path = self.artifact_path('aya-compose')
+        with zipfile.ZipFile(path, 'w') as output:
+            output.writestr('AndroidManifest.xml', b'<manifest/>')
+            output.writestr('classes.jar', b'placeholder')
+            for index in range(20_001):
+                output.writestr(f'padding/{index}', b'')
+        with self.assertRaisesRegex(ValueError, 'expansion exceeds inspection budget'):
+            check(self.root, self.version)
+
     def test_bad_compose_dependency_refuses(self):
         path = self.root / 'dev/aya/aya-compose/0.1.0-preview.1/aya-compose-0.1.0-preview.1.pom'
         path.write_text(path.read_text().replace('0.1.0-preview.1</version></dependency>',
