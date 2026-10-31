@@ -4,6 +4,14 @@
 
 `dev.aya.android.AyaXmlCardView` can be inserted in an Android XML screen. At runtime it delegates to the canonical `AyaCardView`, using the same installed-version-guarded AYA preview and user-chosen Android Sharesheet. No receiver detection, model credentials or result monitoring is added. Android Studio's layout editor shows an **inert preview** when no real Activity exists.
 
+## Generate the XML layout element
+
+```sh
+python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --format android-xml
+```
+
+The help-only component manifest now generates a real Android XML custom-view element with stable collision-resistant card/question IDs and escaped XML attributes. The output can be pasted into a layout file. Multi-line/backslash-containing text and ambiguous `@`/`?`-prefixed values fail instead of silently changing wording; those should be authored as verified Android string resources by the host. Action-only manifests must instead use a native button and the Kotlin action API.
+
 ## Paste into a host layout
 
 ```xml
