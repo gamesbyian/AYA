@@ -2,8 +2,8 @@
   "schema_version": "aya-inventory/v1",
   "app_id": "dev.aya.sample",
   "app_version": "1.0.0",
-  "source_revision": "aya-sample-prompt-first-artwork-v1",
-  "reviewed_at_utc": "2026-10-29T12:00:00Z",
+  "source_revision": "aya-sample-standard-help-card-v1",
+  "reviewed_at_utc": "2026-10-31T01:30:00Z",
   "items": [
     {
       "id": "TASK-001",
@@ -24,7 +24,7 @@
     {
       "id": "TASK-003",
       "kind": "task",
-      "title": "Ask from the host's own question input",
+      "title": "Ask from the standardized host AYA card",
       "status": "AVAILABLE",
       "criticality": "medium",
       "source_ref": "sample/src/main/java/dev/aya/sample/MainActivity.kt;aya/src/main/java/dev/aya/android/Aya.kt"
@@ -40,15 +40,15 @@
     {
       "id": "F-002",
       "kind": "feature",
-      "title": "Editable review and sharing",
+      "title": "Themed AYA card, editable review and sharing",
       "status": "AVAILABLE",
       "criticality": "high",
-      "source_ref": "aya/src/main/java/dev/aya/android/Aya.kt"
+      "source_ref": "aya/src/main/java/dev/aya/android/AyaCardView.kt;aya/src/main/java/dev/aya/android/Aya.kt"
     },
     {
       "id": "ERR-001",
       "kind": "error",
-      "title": "AYA reference unavailable",
+      "title": "AYA unavailable",
       "status": "AVAILABLE",
       "criticality": "high",
       "source_ref": "sample/src/main/java/dev/aya/sample/MainActivity.kt"

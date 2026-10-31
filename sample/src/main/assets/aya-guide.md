@@ -6,9 +6,9 @@ app_version_min: 1.0.0
 app_version_max: 1.0.0
 platform: android
 locale: en
-guide_revision: 5
-source_revision: aya-sample-prompt-first-artwork-v1
-last_verified_utc: 2026-10-29T12:00:00Z
+guide_revision: 6
+source_revision: aya-sample-standard-help-card-v1
+last_verified_utc: 2026-10-31T01:30:00Z
 owner: AYA maintainers
 ---
 
@@ -26,7 +26,7 @@ This is a guide to the real AYA Sample *source implementation*. The Android appl
 
 ## Quick orientation
 
-The sample has a title, explanation, an "Ask your agent" button, and an optional host-owned question field with an "Ask using my question" button. It also has a separate fictional Aurora Station artwork editor, accessed with "Open artwork generation demo", with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The first button loads this guide, verifies the installed app version, and opens a local question composer. The second uses the host's already typed question to skip the additional question composer. Both paths lead to a local editable privacy review. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
+The Home screen includes a standardized, thin-outline AYA card with a monochrome logo, explanation, proposed-reference disclosure, optional multiline question field and an "Ask Your Agent" button. It also has a separate fictional Aurora Station artwork editor, accessed with "Open artwork generation demo", with a creative direction editor, a guarded "Generate artwork with my agent" action, an "Import saved image" Android document picker and an on-screen selected-image preview. Import is local to this demo; no media library is modified. The card button loads this guide, verifies the installed app version, and opens the local editable privacy review directly, whether a question was entered or left blank. There is no duplicate question composer on the sample Home screen. The user may Cancel, Copy, or Share the help text. Android's chooser offers installed compatible targets; recipients control how they process the file.
 
 The sample is a handoff demonstration, not a functioning helpdesk or AI client. Its external assistant integration is only a standard Android share intent.
 
@@ -34,10 +34,9 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 - Home > Open artwork generation demo: opens a dedicated ArtworkActivity; Android Back returns to the help screen.
 
-- Home: title "AYA: Ask Your Agent", explanation, "Ask your agent" button, "Or type your question here" field, and "Ask using my question" button.
-- Home > Ask your agent: question composer, "What do you need help with?" and multiline input; "Review details" moves to preview.
-- Home > Or type your question here > Ask using my question: skips duplicate question entry and opens preview directly.
-- Both flows > Review details (when needed): expanded "Ask your agent" review dialog with editable multiline help text.
+- Home: title "AYA: Ask Your Agent", explanation, and a bordered AYA card with an optional question field, proposed attachment disclosure, and "Ask Your Agent" button. The Home screen scrolls when necessary for large fonts or keyboard.
+- Home > AYA card > Ask Your Agent: validates the bundled reference, then opens the editable "Ask your agent" review dialog directly. Blank input gives a generic help request.
+- The sample's card has one question field; unlike the optional SDK standalone composer, it does not ask twice.
 - Review > Cancel: returns to Home, without sharing.
 - Review > Copy: copies the currently edited text into Android's clipboard.
 - Review > Share: opens the Android Sharesheet with a temporary text document.
@@ -50,12 +49,11 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Applies to: AYA Sample 1.0.0 on Android 23+ with a compatible installed share target.
 - Start: Home.
 - Prerequisites: a correctly packaged guide; an external application capable of receiving a text attachment.
-1. Tap "Ask your agent".
-2. Enter your question in the optional multiline prompt, or leave blank for general help.
-3. Tap "Review details".
-4. Review or edit the complete reference package. Remove private information.
-5. Tap "Share" and select a destination in Android's Sharesheet.
-6. In the destination, verify that the document content is actually present and start or send the chat as that app requires.
+1. In the Home AYA card, enter an optional question or leave it blank for general help.
+2. Tap "Ask Your Agent" to open the local editable review. No data has yet been sent.
+3. Review or edit the complete reference package. Remove private information.
+4. Tap "Share" and select a destination in Android's Sharesheet.
+5. In the destination, verify that the document content is actually present and start or send the chat as that app requires.
 - Expect: the receiving app is offered a UTF-8 text attachment; successful ingestion and chat creation are NOT guaranteed.
 - Verification: the Android share chooser opening proves only that a share was initiated, not that the recipient has read the document.
 - Side effects/undo: a unique temporary file is written to the sample's cache; the selected app may upload or retain a copy. Once sent, AYA cannot retract it.
@@ -67,11 +65,10 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Applies to: AYA Sample 1.0.0 and an Android device with clipboard support.
 - Start: Home.
 - Prerequisites: a valid bundled guide.
-1. Tap "Ask your agent".
-2. Optionally type your question and tap "Review details".
-3. Review or edit text in the review screen.
-4. Tap "Copy".
-5. Open an assistant manually and paste the text into a conversation.
+1. In the Home AYA card optionally enter a question and tap "Ask Your Agent".
+2. Review or edit text in the local review screen.
+3. Tap "Copy".
+4. Open an assistant manually and paste the text into a conversation.
 - Expect: a "Help text copied" message, followed by clipboard data ready for manual paste.
 - Verification: verify the pasted content before submitting; copying alone does not contact an AI service.
 - Side effects/undo: clipboard contains the complete copied text until replaced/cleared by the OS or user; other applications may have access.
@@ -83,8 +80,8 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 - Applies to: AYA Sample 1.0.0 on Android 23+.
 - Start: Home.
 - Prerequisites: valid version-matched reference bundled with app.
-1. Type a question in "Or type your question here".
-2. Tap "Ask using my question".
+1. Type a question in the AYA card's optional question field.
+2. Tap "Ask Your Agent".
 3. The full AYA review opens directly, with your typed question already embedded.
 4. Edit or remove any text, then use Copy or Share.
 - Expect: no duplicate question composer because the host already captured the question.
@@ -135,9 +132,9 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ### F-002: Editable review and user-controlled sharing [AVAILABLE]
 
-- What it does: Help has the full editable reference preview. Creative handoff first shows an editable prompt with Share request, Copy request, Full guide, and Cancel. Full guide opens the complete reference with optional attachment.
-- Location: Home > Ask your agent, or Home > Ask using my question.
-- Defaults: question-first for "Ask your agent"; host-owned question uses `askQuestion=false`; no automatic share. The help package includes the guide, installed version, current screen and user question.
+- What it does: the host AYA card has inherited host styling, a context description, optional question and truthful disclosure; Help has the full editable reference preview. Creative handoff first shows an editable prompt with Share request, Copy request, Full guide, and Cancel. Full guide opens the complete reference with optional attachment.
+- Location: Home > AYA card > Ask Your Agent.
+- Defaults: the host card captures an optional question and calls `askQuestion=false` to open review directly; no automatic share. The separate SDK composer remains available to other hosts. The help package includes the guide, installed version, current screen and user question.
 - Constraints and interactions: sharing disallows blank text and packages over 2 MiB; file is plain UTF-8 text. The final user-approved question is also shared as bounded `EXTRA_TEXT`, and can be edited in review.
 - Visibility: the dialog appears only after a successfully validated guide.
 - Persistence: approved shares are cached temporarily and older AYA cache entries are pruned opportunistically after seven days on subsequent shares.
@@ -154,9 +151,9 @@ The sample is a handoff demonstration, not a functioning helpdesk or AI client. 
 
 ## Troubleshooting
 
-### ERR-001: "AYA reference unavailable"
+### ERR-001: "AYA unavailable"
 
-- Context: the Home screen shows this prefix when the packaged guide is missing, stale, invalid, or cannot be read.
+- Context: the Home card shows the default "AYA unavailable:" message if the packaged guide is missing, stale, invalid, or cannot be read.
 - Meaning: the guarded API did not open a review or share package.
 - Check: use the exact installed build and verify its bundled `aya-guide.md` has the app ID and exact installed version. Do not bypass the check with another app's guide.
 - Fix: update the APK with the correct reference asset. End users cannot repair a broken packaged guide in the app.

@@ -1,7 +1,9 @@
 package dev.aya.sample
 
 import android.widget.Button
+import java.io.ByteArrayOutputStream
 import android.widget.EditText
+import dev.aya.android.AyaCardView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -43,14 +45,26 @@ class QuestionFlowTest {
         // ActivityScenario recreation and can fail before testing any AYA UI.
         scenario.scenario.onActivity {
             assertTrue("Sample host action must exist",
-                it.findViewById<Button>(R.id.aya_sample_open_help) != null)
+                it.findViewById<AyaCardView>(R.id.aya_sample_open_help) != null)
         }
         device.waitForIdle()
     }
 
-    private fun find(selector: BySelector): UiObject2 =
-        device.wait(Until.findObject(selector), 15000)
-            ?: throw AssertionError("UI not found: $selector")
+    private fun find(selector: BySelector): UiObject2 {
+        val found = device.wait(Until.findObject(selector), 15000)
+        if (found != null) return found
+        val tree = ByteArrayOutputStream()
+        val hierarchy = try {
+            device.dumpWindowHierarchy(tree)
+            tree.toString(Charsets.UTF_8.name()).take(10000)
+        } catch (e: Exception) {
+            "Hierarchy unavailable: " + e.javaClass.simpleName
+        }
+        throw AssertionError(
+            "UI not found: $selector. Foreground package: " +
+                device.currentPackageName + ". Hierarchy: " + hierarchy
+        )
+    }
 
     private fun tapHost(id: Int) {
         scenario.scenario.onActivity {
@@ -61,26 +75,50 @@ class QuestionFlowTest {
         }
     }
 
-    @Test fun builtInComposerFeedsTheActualReviewedDocument() {
-        val question = "Why does the help attachment need a file provider?"
-        tapHost(R.id.aya_sample_open_help)
-        find(By.desc("Your question for the assistant (optional)")).setText(question)
-        // Android AlertDialog can transform or localize button labels; use stable IDs.
-        find(By.res("android", "button1")).click()
-        val preview = find(By.desc("Reviewed AYA help document"))
-        assertTrue("Approved preview must contain the typed question", preview.text.contains(question))
+    private fun submitCard() {
+        scenario.scenario.onActivity {
+            val card = it.findViewById<AyaCardView>(R.id.aya_sample_open_help)
+                ?: throw AssertionError("Missing AYA card")
+            val button = card.getChildAt(card.childCount - 1) as Button
+            assertTrue("Card action should be enabled for blank or nonblank questions", button.isEnabled)
+            button.performClick()
+        }
     }
 
-    @Test fun hostProvidedQuestionSkipsDuplicateComposer() {
-        val question = "How can I verify the share?"
+    @Test fun cardQuestionFeedsTheActualReviewedDocumentWithoutDuplicateComposer() {
+        val question = "Why does the help attachment need a file provider?"
         scenario.scenario.onActivity {
             it.findViewById<EditText>(R.id.aya_sample_help_question).setText(question)
         }
-        tapHost(R.id.aya_sample_review_host_question)
+        submitCard()
         val preview = find(By.desc("Reviewed AYA help document"))
-        assertTrue("Host question must appear in review", preview.text.contains(question))
-        assertFalse("Host flow must not open a second question box",
+        assertTrue("Approved preview must contain the typed question", preview.text.contains(question))
+        assertFalse("Host card must not open a duplicate composer",
             device.hasObject(By.desc("Your question for the assistant (optional)")))
+    }
+
+    @Test fun cardQuestionDraftSurvivesHostRecreation() {
+        val question = "Does this draft survive rotation and Activity recreation?"
+        scenario.scenario.onActivity {
+            it.findViewById<EditText>(R.id.aya_sample_help_question).setText(question)
+        }
+        scenario.scenario.recreate()
+        scenario.scenario.onActivity {
+            assertTrue(
+                "The host saves its own AYA card question field",
+                it.findViewById<EditText>(R.id.aya_sample_help_question).text.toString() == question
+            )
+        }
+    }
+
+    @Test fun blankCardQuestionIsAllowedAndGetsGenericHelpRequest() {
+        scenario.scenario.onActivity {
+            assertTrue(it.findViewById<EditText>(R.id.aya_sample_help_question).text.isBlank())
+        }
+        submitCard()
+        val preview = find(By.desc("Reviewed AYA help document"))
+        assertTrue(preview.text.contains("Help me understand and use this application."))
+        assertFalse(device.hasObject(By.desc("Your question for the assistant (optional)")))
     }
 
     @Test fun creativeEditorIsPromptFirstAndFullGuidePreservesEdits() {
@@ -106,20 +144,22 @@ class QuestionFlowTest {
             full.text.contains("Atmospheric science-fiction season art"))
     }
 
-    @Test fun cancelQuestionComposerKeepsHostAppOpen() {
-        tapHost(R.id.aya_sample_open_help)
-        find(By.desc("Your question for the assistant (optional)"))
+    @Test fun cancelCardReviewKeepsHostAppOpenAndDraftIntact() {
+        val question = "Can I cancel before sharing?"
+        scenario.scenario.onActivity {
+            it.findViewById<EditText>(R.id.aya_sample_help_question).setText(question)
+        }
+        submitCard()
+        find(By.desc("Reviewed AYA help document"))
+        // The review's negative button cancels without invoking ACTION_SEND.
         find(By.res("android", "button2")).click()
-        assertTrue("Cancel dialog should disappear",
-            device.wait(Until.gone(By.desc("Your question for the assistant (optional)")), 5000))
-        // Cancellation must close the composer and leave the host Activity
-        // alive. The IME can still obscure a lower button on small emulators,
-        // so visibility of that button is not a reliable lifecycle assertion.
+        assertTrue("Cancel must close review",
+            device.wait(Until.gone(By.desc("Reviewed AYA help document")), 5000))
         scenario.scenario.onActivity {
             assertFalse("Cancelling AYA must not finish the host", it.isFinishing)
             assertFalse("Cancelling AYA must not destroy the host", it.isDestroyed)
+            assertTrue("The host card retains the question after cancellation",
+                it.findViewById<EditText>(R.id.aya_sample_help_question).text.toString() == question)
         }
-        assertFalse(device.hasObject(By.desc("Your question for the assistant (optional)")))
-        assertFalse(device.hasObject(By.desc("Reviewed AYA help document")))
     }
 }

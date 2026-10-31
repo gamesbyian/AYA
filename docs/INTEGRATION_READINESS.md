@@ -51,3 +51,8 @@ Build success validates compilation and packaged integration, not source-guide t
 ## Suggested first host selection
 
 Choose one app with a known, reproducible public release and reviewable UI. Produce its reference independently; prove version matching and error handling before adding optional sensitive context. Do not spread AYA to multiple apps until one real app has completed the end-to-end acceptance matrix.
+
+
+## Standard host-card acceptance
+
+When a host embeds `AyaCardView`, apply [Card UI Standard v1](CARD_UI_STANDARD.md): verified host-specific explanation, host-styled border/corners/text, official monochrome icon, truthful proposed attachment disclosure, optional question entry, no duplicated composer, and an independent final privacy review. Verify Standard and Compact densities at 320 dp / 412 dp, with landscape, 200% font scaling, TalkBack, the IME, blank questions and Activity recreation. The host should scroll its containing screen when needed. This is an acceptance gate, not a claim that recipient ingestion has been verified.

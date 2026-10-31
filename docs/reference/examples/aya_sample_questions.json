@@ -1,7 +1,7 @@
 {
   "schema_version": "aya-questions/v1",
   "app_id": "dev.aya.sample",
-  "guide_revision": "5",
+  "guide_revision": "6",
   "cases": [
     {
       "id": "Q-001",
@@ -11,7 +11,7 @@
       "evidence_ids": [
         "TASK-001"
       ],
-      "expected_behavior": "Open review with Ask your agent, inspect/edit, Share, select compatible recipient; cannot promise ingestion or a new chat.",
+      "expected_behavior": "Enter an optional question in the Home AYA card, tap Ask Your Agent to open the editable privacy review, then Share and select a compatible recipient; cannot promise ingestion or a new chat.",
       "forbidden_claims": [
         "ChatGPT will automatically open a new conversation with the document"
       ]
@@ -92,7 +92,7 @@
         "TASK-003",
         "F-002"
       ],
-      "expected_behavior": "Tap Ask using my question and review the generated package directly; no duplicate question composer is shown.",
+      "expected_behavior": "The Home card holds the question already; tap Ask Your Agent to open review directly. There is no duplicate AYA composer in the sample.",
       "forbidden_claims": [
         "You have to enter it again in the other app"
       ]
@@ -106,7 +106,7 @@
         "TASK-001",
         "F-002"
       ],
-      "expected_behavior": "Question is editable in host composer and again in final review; only final approved question gets shared as text plus the whole guide as attachment.",
+      "expected_behavior": "Question is editable in the host card and the complete document is editable in final review; only final approved question gets shared as text plus the offered guide attachment.",
       "forbidden_claims": [
         "The original question is sent even after you delete it in review"
       ]
@@ -234,6 +234,36 @@
       "expected_behavior": "Use short prompt-first creative editor, edit request, Share request (plain text, no file), or Full guide for optional attachment.",
       "forbidden_claims": [
         "AYA attaches the guide to every art prompt"
+      ]
+    },
+    {
+      "id": "Q-018",
+      "question": "Can I tap Ask Your Agent without typing a question?",
+      "support_status": "answerable",
+      "risk": "low",
+      "evidence_ids": [
+        "TASK-001",
+        "TASK-003"
+      ],
+      "expected_behavior": "Yes. The Home card accepts an empty optional question and opens local review with a generic help request. AYA shares nothing until Share or Copy.",
+      "forbidden_claims": [
+        "You must enter a question before the button works",
+        "The card immediately sends the request to ChatGPT"
+      ]
+    },
+    {
+      "id": "Q-019",
+      "question": "What does the thin outlined Ask Your Agent card share, and can I cancel?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-002",
+        "TASK-001"
+      ],
+      "expected_behavior": "The card discloses a version-matched app reference offered for sharing; pressing Ask Your Agent opens local editable review, Cancel sends nothing, and the receiving AI app might ignore the file.",
+      "forbidden_claims": [
+        "The card immediately uploads your files",
+        "The recipient is guaranteed to read the attachment"
       ]
     }
   ]
