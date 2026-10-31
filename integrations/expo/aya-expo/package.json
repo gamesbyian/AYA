@@ -12,16 +12,21 @@
     "expo-module.config.json"
   ],
   "peerDependencies": {
-    "expo": ">=53.0.0",
-    "expo-modules-core": ">=2.0.0",
+    "expo": ">=56.0.0 <59.0.0",
+    "expo-modules-core": ">=56.0.0 <59.0.0",
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "typescript": "~5.9.3"
+    "typescript": "^6.0.3",
+    "@types/react": "^19.2.0",
+    "expo": "~57.0.31",
+    "expo-modules-core": "~57.0.17",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test:contracts": "node --test test/*.test.cjs"
+    "test": "node --test test/*.test.cjs"
   }
 }

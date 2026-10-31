@@ -8,7 +8,7 @@ import {
   useColorScheme,
   View
 } from 'react-native';
-import { openAyaHelp } from './index';
+import { openAyaHelp } from './native';
 import type { AyaLocalResult } from './index';
 
 export type AyaHelpCardProps = {
