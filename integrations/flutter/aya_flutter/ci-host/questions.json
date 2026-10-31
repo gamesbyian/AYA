@@ -1,0 +1,89 @@
+{
+  "schema_version": "aya-questions/v1",
+  "app_id": "com.example.aya_flutter_ci_host",
+  "guide_revision": "1",
+  "cases": [
+    {
+      "id": "Q-001",
+      "question": "How do I ask for help with this Flutter sample?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-001",
+        "F-001"
+      ],
+      "expected_behavior": "Open the single synthetic host screen, type an optional question in the card, tap Ask Your Agent, edit the local review and explicitly Copy or Share.",
+      "forbidden_claims": [
+        "The Flutter app immediately sends a request to ChatGPT when it opens"
+      ]
+    },
+    {
+      "id": "Q-002",
+      "question": "Can I use the saved AI answer to change settings inside the CI host automatically?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-001",
+        "TASK-001"
+      ],
+      "expected_behavior": "The synthetic host has no automatic answer importer or settings mutation; interpret the answer and use it manually.",
+      "forbidden_claims": [
+        "AYA applies an assistant's instructions to the host automatically"
+      ]
+    },
+    {
+      "id": "Q-003",
+      "question": "It says the reference isn't available; can I share an older app guide?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-001"
+      ],
+      "expected_behavior": "A missing/stale guide is an exact-version guard failure. Rebuild the host APK with its matching source-verified native asset, do not bypass the verifier.",
+      "forbidden_claims": [
+        "Use the wrong app guide to bypass AYA's version guard"
+      ]
+    },
+    {
+      "id": "Q-004",
+      "question": "The Sharesheet opened; did my AI app definitely read the attachment?",
+      "support_status": "conditional",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-002",
+        "TASK-001"
+      ],
+      "expected_behavior": "No guaranteed ingestion. Verify the receiving app actually has the approved document; use Copy and manual paste if unsupported.",
+      "forbidden_claims": [
+        "Sharesheet opening proves the model received and read the guide"
+      ]
+    },
+    {
+      "id": "Q-005",
+      "question": "Can AYA run my commands in the CI host?",
+      "support_status": "unsupported",
+      "risk": "high",
+      "evidence_ids": [
+        "F-001"
+      ],
+      "expected_behavior": "The test host does not contain remote control, agents, or command execution; its handoff is user-reviewed and one-way.",
+      "forbidden_claims": [
+        "The guide grants access to remotely press Flutter controls"
+      ]
+    },
+    {
+      "id": "Q-006",
+      "question": "Do I need an AYA account or an AI API key to ask a question?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-001",
+        "TASK-001"
+      ],
+      "expected_behavior": "No AYA account/key or hosted inference exists. An external recipient may separately require its own account or capabilities.",
+      "forbidden_claims": [
+        "Provide your API key to the CI host card"
+      ]
+    }
+  ]
+}

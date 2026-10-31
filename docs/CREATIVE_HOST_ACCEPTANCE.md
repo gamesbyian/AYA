@@ -1,10 +1,10 @@
 # AYA Creative Handoff: host artwork integration acceptance
 
-**Audience:** implementers of real Android artwork pickers. This contract is mandatory for production integrations; the AYA module itself is deliberately a one-way prompt/reference handoff and must not receive or track generated output.
+**Audience:** implementers of Android image and graphical-asset import/edit features. This contract is mandatory for production integrations; the AYA module itself is deliberately a one-way prompt/reference handoff and must not receive or track generated output.
 
 ## Objective and boundaries
 
-A user viewing a particular artwork slot in Chunks, a music application, or another host may decide to generate their own artwork in an external AI application. The host remains fully responsible for its *existing* Import from device pathway. AYA neither downloads the result nor observes the user's AI conversation. The host may remember the selected artwork target locally while the user switches apps, because this is normal host state restoration, **not** AYA response monitoring.
+A user viewing an editable artwork slot in a media manager, publishing tool, game editor or other image-importing host may decide to generate artwork in an external AI application. The host remains fully responsible for its *existing* Import from device pathway. AYA neither downloads the result nor observes the user's AI conversation. The host may remember the selected artwork target locally while the user switches apps, because this is normal host state restoration, **not** AYA response monitoring.
 
 The integrator must distinguish:
 1. **Preferred generator output:** target composition, aspect ratio, optional nominal resolution, preferred format and safe margins, provided to the agent as practical guidance.
@@ -15,7 +15,7 @@ Never promise that an external image generator can deliver an exact pixel count,
 
 ## Host-owned state and lifecycle
 
-The host captures the selected media item and artwork slot in its own scoped, stable state before the AYA handoff. It must persist at least the item identifier or a safe local navigation reference, slot type (poster/banner/season tile/etc.), original artwork or applicable undo metadata, edit draft, and the intended action. For multiple simultaneous artwork edits, ensure each screen instance is unambiguous and a returned picker result cannot target the wrong item. Avoid passing or sharing those private identifiers to AYA unless explicitly necessary and user-approved.
+The host captures the selected target object and destination asset slot (where one exists) in its own scoped, stable state before the AYA handoff. It must persist at least the item identifier or a safe local navigation reference, slot type or role (e.g. avatar/icon/banner/illustration), original image/asset or applicable undo metadata, edit draft, and the intended action. For multiple simultaneous artwork edits, ensure each screen instance is unambiguous and a returned picker result cannot target the wrong item. Avoid passing or sharing those private identifiers to AYA unless explicitly necessary and user-approved.
 
 When Android backgrounds, rotates, kills or recreates the host Activity, restore the editor and scroll position where practical. Revalidate current item existence and editability on return. If the underlying media item or server-side state changed, ask for confirmation rather than silently applying to a different target. The host may provide **Import saved image** as a persistent control on the same artwork screen. No automatic deep-link back, recipient polling, clipboard scraping, content observer, or background scanning for generated images may be used to reconstruct an AYA result.
 
@@ -37,7 +37,7 @@ The actual Apply/Save operation must use the host's existing persistence code an
 
 ## Accessibility and simplicity
 
-Place an optional AYA panel beneath existing recommendations, while preserving a normal import button that never requires AI. The creative direction field and its final prompt-first AYA review must be accessible with TalkBack, keyboard navigation, font scaling, orientation changes and at least 44dp touch targets. Validate a small screen and a large screen with keyboard visible; avoid making the host's usual help controls inaccessible merely by adding the creative panel.
+Place the optional AYA action near the host's actual image import/edit path, preserving its normal import action without AI; recommendation grids are optional host UI. The creative direction field and its final prompt-first AYA review must be accessible with TalkBack, keyboard navigation, font scaling, orientation changes and at least 44dp touch targets. Validate a small screen and a large screen with keyboard visible; avoid making the host's usual help controls inaccessible merely by adding the creative panel.
 
 Avoid duplicating the question composer when the host already has a text field (`askDirection=false`). Do not preselect recipients, scrape installed AI app accounts, claim a new chat will open automatically, or hide provider limitations. If sharing fails, offer the copy/manual-paste path. Returning after generating an image should not require the user to re-enter the original media selection.
 

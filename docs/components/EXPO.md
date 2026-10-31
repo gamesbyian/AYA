@@ -45,4 +45,4 @@ Tests: `node --test integrations/expo/guide-plugin/test/*.test.cjs`. These are s
 
 ## Independent native Expo module
 
-An optional [Expo Modules API/Kotlin and React Native card source preview](EXPO_MODULE.md) is in development. The guide prebuild helper remains a separate prerequisite; it does not register the native module or distribute the unpublished AYA Android AAR. Host apps must integrate both and verify APK identity before use.
+An optional [Expo Modules API/Kotlin and React Native card source preview](EXPO_MODULE.md) is checked in. The guide prebuild helper remains a separate prerequisite; it does not register the native module or distribute the unpublished AYA Android AAR. Host apps must integrate both and verify APK identity before use.

@@ -1,6 +1,6 @@
 # Common AYA Packet Authoring Standard v1
 
-This document is normative for all AYA host integrations. It supplements the [12-section AYA-RAS Help Reference](../reference/AUTHORING_STANDARD.md), [Creative extension](../reference/CREATIVE_AUTHORING.md), [structured artifact profile](../STRUCTURED_ARTIFACT_HANDOFF.md), and [Translation Kit authoring](../translation/AUTHORING.md). Module-specific details cannot override its truth, privacy or disclosure boundaries.
+This document is normative for all AYA host integrations. It supplements the [12-section AYA-RAS Help Reference](../reference/AUTHORING_STANDARD.md), [Creative extension](../reference/CREATIVE_AUTHORING.md), [structured artifact profile](../STRUCTURED_ARTIFACT_HANDOFF.md), and [Translation Kit authoring](../translation/AUTHORING.md). Module-specific details cannot override its truth, privacy or disclosure boundaries. The [Module Portability Standard](../MODULE_PORTABILITY.md) also governs these profiles: generic AYA contract and tooling must not encode assumptions from any one adopting host. Source-derived app details belong in the host-authored packet, not the reusable module.
 
 ## Upstream prerequisite: understand the product
 
