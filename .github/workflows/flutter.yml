@@ -73,7 +73,7 @@ jobs:
           data = pub.read_text()
           # Detect changes in generated host identity rather than accidentally
           # packaging a stale reference for a different Flutter template.
-          if not re.search(r"(?m)^version:\\s*1\\.0\\.0\\+1\\s*$", data):
+          if not re.search(r"(?m)^version:\s*1\.0\.0\+1\s*$", data):
               raise RuntimeError("CI host version changed; update and re-review aya-guide.md")
           src = Path("ci-host")
           target = host / "android" / "app" / "src" / "main" / "assets"
