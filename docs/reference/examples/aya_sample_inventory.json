@@ -2,8 +2,8 @@
   "schema_version": "aya-inventory/v1",
   "app_id": "dev.aya.sample",
   "app_version": "1.0.0",
-  "source_revision": "aya-sample-standard-help-card-v1",
-  "reviewed_at_utc": "2026-10-31T01:30:00Z",
+  "source_revision": "aya-sample-card-return-instructions-v1",
+  "reviewed_at_utc": "2026-10-31T03:00:00Z",
   "items": [
     {
       "id": "TASK-001",
