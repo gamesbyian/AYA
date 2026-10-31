@@ -44,9 +44,14 @@ def configure() -> None:
     value = pub.read_text()
     if not re.search(r"(?m)^version:\s*1\.0\.0\+1\s*$", value):
         raise RuntimeError("Generated app version changed; re-audit CI AYA-RAS guide")
-    value = replace_exact(value, "dependencies:\n",
-                          "dependencies:\n  aya_flutter:\n    path: ..\n",
-                          "Host pubspec dependencies")
+    # Match the top-level YAML key, not the suffix of dev_dependencies.
+    value, count = re.subn(
+        r"(?m)^dependencies:[ \\t]*$",
+        "dependencies:\\n  aya_flutter:\\n    path: ..",
+        value,
+    )
+    if count != 1:
+        raise RuntimeError("Host pubspec must have one top-level dependencies key")
     pub.write_text(value)
 
     target = HOST / "android/app/src/main/assets"
