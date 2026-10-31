@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AYA Director Decisions v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "app_id",
+    "source_revision",
+    "decisions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aya-director-decisions/v1"
+    },
+    "app_id": {
+      "type": "string"
+    },
+    "source_revision": {
+      "type": "string"
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ambiguity_id",
+          "status",
+          "question",
+          "observed_evidence",
+          "provisional_interpretation",
+          "response",
+          "actor",
+          "actor_role",
+          "recorded_at_utc",
+          "source_ref",
+          "scope",
+          "affected_ids",
+          "review_trigger"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "confirmed",
+              "provisional",
+              "delegated",
+              "deferred",
+              "superseded"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
