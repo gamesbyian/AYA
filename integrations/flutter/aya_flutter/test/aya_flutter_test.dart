@@ -6,10 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-  });
-
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(AyaFlutter.channel, null);
@@ -17,6 +13,8 @@ void main() {
   });
 
   test('result reports only local review opening', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(AyaFlutter.channel, (call) async {
       expect(call.method, 'openHelp');
@@ -29,6 +27,8 @@ void main() {
   });
 
   test('unknown native states reject instead of claiming success', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(AyaFlutter.channel, (call) async {
       return {'status': 'agent_finished'};
@@ -38,6 +38,8 @@ void main() {
   });
 
   test('invalid asset is rejected before native dispatch', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
     final response = await AyaFlutter.openHelp(guideAsset: '../guide.md');
     expect(response.rejected, isTrue);
   });
@@ -81,8 +83,15 @@ void main() {
     expect(find.textContaining('Follow the instructions manually.'), findsOneWidget);
     expect(calls, 0);
     await tester.enterText(find.byType(TextField), 'What is this screen?');
-    await tester.tap(find.text('Ask Your Agent'));
-    await tester.pumpAndSettle();
+    // Scope a temporary Android override to this one native-channel dispatch;
+    // Flutter's widget-test invariant requires it cleared before test exit.
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      await tester.tap(find.widgetWithText(FilledButton, 'Ask Your Agent'));
+      await tester.pumpAndSettle();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
     expect(calls, 1);
     expect(question, 'What is this screen?');
   });
