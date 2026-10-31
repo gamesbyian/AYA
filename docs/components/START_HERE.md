@@ -16,7 +16,7 @@ This guide is written for someone who knows what they want their app to do but h
 | Unity | Unpublished source UPM/Android bridge preview | Kotlin AAR, Java entry point and managed C# compilation against test-only Unity signatures passed; Unity Editor and actual exported Unity APK remain unverified. Follow [Unity preview](UNITY.md). |
 | App Inventor | Design/roadmap only | No implemented or tested drop-in adapter to install |
 
-See the [live snapshot of source and verification evidence](STATUS.md) before trying another toolchain.
+See the [live snapshot of source and verification evidence](STATUS.md) before trying another toolchain. If you are implementing the **AYA interaction convention without any AYA SDK**, see the [offline handoff trace verifier](../conformance/README.md). It checks declared event ordering and negative cases, not real app behavior or recipient ingestion.
 
 ## 2. Tell your coding agent what to do
 
