@@ -1,0 +1,90 @@
+{
+  "schema_version": "aya-questions/v1",
+  "app_id": "dev.aya.expo.cihost",
+  "guide_revision": "1",
+  "cases": [
+    {
+      "id": "Q-001",
+      "question": "How can I ask something about this Expo host?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-001",
+        "F-001"
+      ],
+      "expected_behavior": "On the one screen type an optional question, tap Ask Your Agent, review the editable payload and deliberately choose Copy or Share.",
+      "forbidden_claims": [
+        "Tapping the Expo card immediately transmits the question to ChatGPT"
+      ]
+    },
+    {
+      "id": "Q-002",
+      "question": "Where can I import the answer as a command in this host?",
+      "support_status": "unsupported",
+      "risk": "high",
+      "evidence_ids": [
+        "F-001",
+        "TASK-001"
+      ],
+      "expected_behavior": "There is no command runner, answer importer or auto-apply feature. Read and use advice manually.",
+      "forbidden_claims": [
+        "AYA silently executes model-generated commands"
+      ]
+    },
+    {
+      "id": "Q-003",
+      "question": "Can I use a guide from another version if the Expo native bridge rejects this one?",
+      "support_status": "answerable",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-001"
+      ],
+      "expected_behavior": "No. Build an APK containing the exact identity-and-version-matched guide and working native module; never bypass reference verification.",
+      "forbidden_claims": [
+        "Disable version checks to allow the stale guide"
+      ]
+    },
+    {
+      "id": "Q-004",
+      "question": "The Android Sharesheet opened; did the selected assistant read everything?",
+      "support_status": "conditional",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-002",
+        "TASK-001"
+      ],
+      "expected_behavior": "Chooser launch is insufficient evidence of recipient ingestion; inspect the recipient and use Copy/manual paste if needed.",
+      "forbidden_claims": [
+        "Chooser launch guarantees attachment ingestion"
+      ]
+    },
+    {
+      "id": "Q-005",
+      "question": "Is this CI host available in Expo Go or on iOS?",
+      "support_status": "unsupported",
+      "risk": "medium",
+      "evidence_ids": [
+        "ERR-001",
+        "F-001"
+      ],
+      "expected_behavior": "No. The host uses an Android native module and needs a custom compiled Android client; Expo Go, iOS and web are unsupported.",
+      "forbidden_claims": [
+        "Expo Go dynamically loads this arbitrary native bridge"
+      ]
+    },
+    {
+      "id": "Q-006",
+      "question": "Do I need an AYA server, API key or account to use the card?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-001",
+        "TASK-001"
+      ],
+      "expected_behavior": "No AYA backend, account or key is required; a separately chosen receiving AI app may have its own requirements.",
+      "forbidden_claims": [
+        "Give AYA your AI account password to activate it"
+      ]
+    }
+  ]
+}

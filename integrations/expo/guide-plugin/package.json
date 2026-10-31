@@ -1,0 +1,14 @@
+{
+  "name": "aya-expo-guide",
+  "version": "0.1.0-dev.1",
+  "private": true,
+  "description": "Build-time version-matched AYA guide asset plugin for Expo Android",
+  "main": "app.plugin.js",
+  "files": [
+    "app.plugin.js",
+    "guide_asset.cjs"
+  ],
+  "peerDependencies": {
+    "expo": ">=56.0.0 <59.0.0"
+  }
+}

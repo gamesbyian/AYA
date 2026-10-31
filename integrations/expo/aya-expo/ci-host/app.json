@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "AYA Expo CI Host",
+    "slug": "aya-expo-ci-host",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "android": {
+      "package": "dev.aya.expo.cihost",
+      "versionCode": 1
+    },
+    "plugins": [
+      [
+        "aya-expo-guide",
+        {
+          "guidePath": "aya-guide.md"
+        }
+      ]
+    ]
+  }
+}

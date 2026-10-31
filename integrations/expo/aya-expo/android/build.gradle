@@ -10,6 +10,9 @@ android {
 
     defaultConfig {
         minSdk 23
+        // Expo Modules' publishing plugin requires library versionName.
+        // Reuse this package's declared Gradle version; never a host app version.
+        versionName project.version.toString()
     }
 }
 
