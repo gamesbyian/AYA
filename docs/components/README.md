@@ -1,6 +1,6 @@
 # AYA Drop-in Components and Visual Builder Integration
 
-**Status (2026-10-31):** Android Views/XML, Compose, Flutter source plugin and Godot Android v2 source addon are integrated with different levels of CI evidence. FlutterFlow body templates and a React Native/Expo Android-only source bridge are checked in, while Unity and no-code extensions remain planned. Expo real-APK integration is pending in PR #42. See [current adapter status and release blockers](STATUS.md). The portable component manifest **v1 remains help-only**; passing structural checks does not prove correct host instructions or assistant ingestion.
+**Status (2026-10-31):** Android Views/XML, Compose, Flutter source plugin and Godot Android v2 source addon are integrated with different levels of CI evidence. FlutterFlow body templates, a React Native/Expo Android-only source bridge, and a Unity Android bridge/Inspector-action source package are checked in. The Expo synthetic host has passed real Android APK, exact-reference and compiled native-class checks, while Unity has native AAR and stand-in managed C# compilation evidence; neither has independent editor/device/recipient acceptance. No-code extensions remain planned. See [current adapter evidence](STATUS.md) and the [cross-adapter release-evidence criteria](RELEASE-EVIDENCE.md). The portable component manifest **v1 remains help-only**; passing structural checks does not prove correct host instructions or assistant ingestion.
 
 ## Purpose
 
@@ -30,7 +30,7 @@ Developer and director
        | Android Studio/Views    -> AyaCardView or AyaComponentAction.Help
        | Compose                -> merged optional aya-compose source adapter
        | Flutter/FlutterFlow    -> source Flutter plugin + unverified editor templates
-       | React Native/Expo      -> Android source bridge + React Native card (APK pending)
+       | React Native/Expo      -> Android source bridge + React Native card (first-party APK verified)
        | Godot                  -> Android v2 addon + card (export/device unverified)
        | Unity                  -> Kotlin Android source bridge + inspector action (Unity export unverified)
        | App Inventor/Kodular   -> future compatible .aix extension
@@ -122,9 +122,9 @@ This import standard is **design work only**; it does not imply AYA has a genera
 | Jetpack Compose | Reusable composable + action | Separate optional Compose artifact, no core dependency | Merged source/CI; independent consumer/device acceptance pending |
 | Flutter | Dart widget and callable action | Android platform channel/native plugin | Merged source and real-host APK guide inspection; unpublished |
 | FlutterFlow | Reusable custom widget/action | Flutter plugin + editor distribution; test custom-code restrictions | Source templates only; editor import/export unverified |
-| React Native / Expo | npm component and function | Kotlin-backed Android Expo Modules source bridge and separate guide plugin | Source/TypeScript tests passed; APK integration and distribution pending |
+| React Native / Expo | Source npm module and React Native card | Kotlin-backed Android Expo Modules bridge and separate guide plugin | Source/TypeScript tests and first-party Android APK/DEX checks passed; tarball consumer, distribution, real-device and assistant ingestion are separate gates |
 | Godot | AYA node with inspector inputs/signals | Godot 4 Android v2 plugin + GDScript addon | Merged source/headless checks; exported APK and device acceptance pending |
-| Unity | Inspector-configurable Button action and callable C# API | Android Kotlin bridge and source UPM wrapper | Source preview; Gradle CI required; Unity Editor/export unverified |
+| Unity | Inspector-configurable Button action and callable C# API | Android Kotlin bridge and source UPM wrapper | Kotlin/AAR and managed C# stub-API compile passed; Unity Editor/export and real-device compatibility unverified |
 | App Inventor / Kodular | Designer block with properties | Compatible .aix extension, build target constraints tested | Research/planned |
 
 CI and samples must make installation/removal, minSdk/AndroidX compatibility, runtime packaging and Android manifest merges visible. Generic node metadata is insufficient: actual editor UI integration must be tested in that specific tool.
