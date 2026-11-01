@@ -7,6 +7,14 @@ run/main_scene="res://aya_smoke.tscn"
 [editor_plugins]
 enabled=PackedStringArray("res://addons/AYA/plugin.cfg")
 
+[display]
+
+window/size/viewport_width=360
+window/size/viewport_height=720
+window/handheld/orientation=1
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
 [rendering]
 
 ; Synthetic host only: use GLES Compatibility on headless software-GPU

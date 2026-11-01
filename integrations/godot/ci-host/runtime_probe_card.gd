@@ -43,6 +43,17 @@ func _verify_native_card() -> void:
         print("AYA_CI_GODOT_RUNTIME_FAIL")
         push_error("AYA card exists but has no visible Android viewport geometry")
 
+# Deterministic background belongs to the disposable test *host* only.
+# If these high-contrast bands never reach Godot's own ViewportTexture, the
+# renderer/scene is not visually testable even though card nodes exist.
+func _draw() -> void:
+    var midpoint: float = size.x * 0.5
+    draw_rect(Rect2(0.0, 0.0, midpoint, size.y),
+        Color(0.015, 0.015, 0.015, 1.0), true)
+    draw_rect(Rect2(midpoint, 0.0, size.x - midpoint, size.y),
+        Color(0.27, 0.32, 0.37, 1.0), true)
+
+
 func _capture_synthetic_viewport_stats() -> void:
     # Synthetic fixture only: log pixel counts, never image bytes or user data.
     var source: Image = get_viewport().get_texture().get_image()
