@@ -31,7 +31,7 @@ def fake_png(width, height):
 class FakeADB:
     def __init__(self, *, marker=READY_MARKER, pid="3212", installed=True,
                  booted=True, fail_install=False, corrupt_png=False,
-                 immersive_supported=True):
+                 immersive_supported=True, focused_window=None):
         self.commands = []
         self.marker = marker
         self.pid = pid
@@ -41,6 +41,7 @@ class FakeADB:
         self.corrupt_png = corrupt_png
         self.immersive_supported = immersive_supported
         self.immersive_value = "null"
+        self.focused_window = focused_window
 
     def __call__(self, args, **kwargs):
         self.commands.append(tuple(args))
@@ -53,7 +54,12 @@ class FakeADB:
             width, height = (int(x) for x in size.split("x"))
             image = b"not a PNG" if self.corrupt_png else fake_png(width, height)
             return CompletedProcess(args, 0, image, b"")
-        if "settings get secure immersive_mode_confirmations" in command:
+        if "dumpsys window displays" in command:
+            focused = self.focused_window or (
+                "Window{9a0 u0 " + PACKAGE + "/org.godotengine.godot.GodotActivity}"
+            )
+            out = "mCurrentFocus=" + focused + "\n"
+        elif "settings get secure immersive_mode_confirmations" in command:
             out = self.immersive_value + "\n"
         elif "settings put secure immersive_mode_confirmations" in command:
             if self.immersive_supported:
@@ -129,6 +135,24 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
             self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
         self.assertFalse((Path(self.tmp.name) / "screens").exists())
         self.assertIn(("adb", "shell", "wm", "size", "reset"), fake.commands)
+
+    def test_system_dialog_covering_card_prevents_visual_acceptance(self):
+        fake = FakeADB(focused_window=(
+            "Window{123 u0 Application Not Responding: "
+            "com.google.android.apps.nexuslauncher}"
+        ))
+        folder = Path(self.tmp.name) / "screens"
+        with self.assertRaisesRegex(EmulatorSmokeError,
+                                    "system dialog or non-host window"):
+            self.execute(fake, screenshots_dir=folder)
+        self.assertFalse(folder.exists())
+        self.assertIn(("adb", "shell", "wm", "size", "reset"), fake.commands)
+
+    def test_missing_foreground_focus_prevents_visual_acceptance(self):
+        fake = FakeADB(focused_window="Window{456 u0 com.android.systemui/Overlay}")
+        with self.assertRaisesRegex(EmulatorSmokeError,
+                                    "system dialog or non-host window"):
+            self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()

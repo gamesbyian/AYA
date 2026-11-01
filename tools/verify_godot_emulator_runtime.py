@@ -257,6 +257,20 @@ def smoke(
                 )
             screenshot = None
             if screenshots_dir is not None:
+                # Process readiness does not prove the AYA card is foreground.
+                # A system fullscreen confirmation or Launcher ANR can hide it.
+                windows = adb("shell", "dumpsys", "window", "displays")
+                focused = [
+                    line.strip() for line in windows.splitlines()
+                    if "mCurrentFocus=" in line
+                ]
+                if (len(focused) != 1 or PACKAGE not in focused[0] or
+                        "Application Not Responding" in focused[0]):
+                    state = focused[0][:180] if focused else "not reported"
+                    raise EmulatorSmokeError(
+                        f"Android system dialog or non-host window obscures "
+                        f"AYA screenshot at {size}; focused_window={state}"
+                    )
                 name = f"godot_{size}_font{int(float(scale) * 100)}.png"
                 screenshot = capture_synthetic_screenshot(
                     size, scale, screenshots_dir / name, run=run
