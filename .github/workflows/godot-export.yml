@@ -233,10 +233,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: |
-            python3 tools/verify_godot_emulator_runtime.py \
-              --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" \
-              --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"
+          script: python3 tools/verify_godot_emulator_runtime.py --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"
       - name: Preserve minimal synthetic emulator evidence
         if: always()
         uses: actions/upload-artifact@v4
