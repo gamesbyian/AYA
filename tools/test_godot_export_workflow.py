@@ -12,6 +12,7 @@ class GodotExportWorkflowContract(unittest.TestCase):
     def setUpClass(cls):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.preset = PRESET.read_text(encoding="utf-8")
+        cls.project_settings = (ROOT / "integrations" / "godot" / "project.godot").read_text(encoding="utf-8")
 
     def test_actual_godot_editor_and_gradle_build_required(self):
         for expected in (
@@ -60,6 +61,12 @@ class GodotExportWorkflowContract(unittest.TestCase):
         self.assertIn('package/unique_name="dev.aya.godot.cihost"', self.preset)
         self.assertIn('version/name="1.0.0"', self.preset)
         self.assertIn('gradle_build/min_sdk="24"', self.preset)
+
+    def test_android_texture_import_enabled_for_headless_export(self):
+        # Godot 4.5 export_plugin.cpp returns invalid with no diagnostic
+        # when ETC2/ASTC import was never enabled on a desktop Linux host.
+        self.assertIn("textures/vram_compression/import_etc2_astc=true",
+                      self.project_settings)
 
     def test_one_expensive_godot_export_job(self):
         self.assertEqual(self.workflow.count("    runs-on: ubuntu-latest"), 1)
