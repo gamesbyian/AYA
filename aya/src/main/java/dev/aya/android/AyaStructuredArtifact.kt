@@ -45,7 +45,7 @@ object AyaStructuredKitVerifier {
         "Host import and recovery"
     )
 
-    fun verify(kit: String, packageId: String, version: String): AyaStructuredKitCheck {
+    fun verify(kit: String, packageId: String, version: String, task: AyaStructuredTask): AyaStructuredKitCheck {
         if (kit.toByteArray(Charsets.UTF_8).size > 1024 * 1024)
             return AyaStructuredKitCheck.Rejected("Structured artifact kit exceeds 1 MiB.")
         val lines = kit.removePrefix("\uFEFF").lineSequence().toList()
@@ -68,10 +68,13 @@ object AyaStructuredKitVerifier {
         if (version.isBlank() || fields["app_id"] != packageId ||
             fields["app_version"] != version)
             return AyaStructuredKitCheck.Rejected("Structured kit does not match installed app.")
-        if (listOf("schema_revision", "source_revision", "owner").any {
-                fields[it].isNullOrBlank()
-            })
+        if (listOf("schema_revision", "source_revision", "owner",
+                "artifact_extension", "artifact_mime").any { fields[it].isNullOrBlank() })
             return AyaStructuredKitCheck.Rejected("Structured kit provenance is incomplete.")
+        if (fields["schema_revision"] != task.schemaVersion ||
+            fields["artifact_extension"] != task.fileExtension ||
+            fields["artifact_mime"] != task.mimeType)
+            return AyaStructuredKitCheck.Rejected("Structured kit output contract differs from task.")
         val actual = lines.drop(end + 1).filter { it.startsWith("## ") }
             .map { it.removePrefix("## ").trim() }
         if (actual != headings)

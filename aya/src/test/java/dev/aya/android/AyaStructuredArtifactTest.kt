@@ -12,6 +12,8 @@ class AyaStructuredArtifactTest {
         app_id: dev.example.chart
         app_version: $version
         schema_revision: chart-3
+        artifact_extension: .json
+        artifact_mime: application/json
         source_revision: checkout-1
         owner: Example developer
         ---
@@ -40,7 +42,7 @@ class AyaStructuredArtifactTest {
 
     @Test fun exactInstalledAppKitPasses() {
         assertEquals(AyaStructuredKitCheck.Accepted,
-            AyaStructuredKitVerifier.verify(kit(), "dev.example.chart", "1.0"))
+            AyaStructuredKitVerifier.verify(kit(), "dev.example.chart", "1.0", task))
     }
 
     @Test fun staleForeignMissingDuplicateAndOversizedKitsFailClosed() {
@@ -56,9 +58,21 @@ class AyaStructuredArtifactTest {
             (kit() + "x".repeat(1024 * 1024)) to ("dev.example.chart" to "1.0")
         )
         examples.forEach { (value, identity) ->
-            assertTrue(AyaStructuredKitVerifier.verify(value, identity.first, identity.second)
+            assertTrue(AyaStructuredKitVerifier.verify(value, identity.first, identity.second, task)
                 is AyaStructuredKitCheck.Rejected)
         }
+    }
+
+    @Test fun kitAndDeclaredTaskMustAgreeOnActualImporterContract() {
+        assertTrue(AyaStructuredKitVerifier.verify(
+            kit().replace("artifact_extension: .json", "artifact_extension: .svg"),
+            "dev.example.chart", "1.0", task) is AyaStructuredKitCheck.Rejected)
+        assertTrue(AyaStructuredKitVerifier.verify(
+            kit(), "dev.example.chart", "1.0",
+            task.copy(schemaVersion = "chart-4")) is AyaStructuredKitCheck.Rejected)
+        assertTrue(AyaStructuredKitVerifier.verify(
+            kit(), "dev.example.chart", "1.0",
+            task.copy(mimeType = "application/xml")) is AyaStructuredKitCheck.Rejected)
     }
 
     @Test fun taskRejectsFakeOrUnsafeFileContract() {

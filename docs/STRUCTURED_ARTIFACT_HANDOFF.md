@@ -14,7 +14,7 @@ The host must have an operational, safe importer. If it cannot parse, validate o
 
 ## Portable structured task contract (unpublished Android SDK)
 
-`AyaStructuredTask` carries the host-verified `artifactRole`, lower-case `fileExtension`, `mimeType`, `schemaVersion` and true `importInstructions`. The runtime receives an editable direction, an exact-version AYA-RAS guide, and a separate developer-authored `aya-structured-kit/v1` asset. It reads at most 1 MiB of kit, caps the combined reviewed package at 2 MiB, checks installed package/version, rejects unsafe kit paths and malformed UTF-8, then opens the normal local question or review dialog. The host creates, validates, previews and applies any returned file; AYA does not receive or import it.
+`AyaStructuredTask` carries the host-verified `artifactRole`, lower-case `fileExtension`, `mimeType`, `schemaVersion` and true `importInstructions`. The runtime receives an editable direction, an exact-version AYA-RAS guide, and a separate developer-authored `aya-structured-kit/v1` asset. It reads at most 1 MiB of kit, caps the combined reviewed package at 2 MiB, checks installed package/version, rejects unsafe kit paths and malformed UTF-8, then opens the normal local question or review dialog. The structural verifier additionally checks that kit schema revision, extension and MIME type **exactly match the typed task**, preventing two different host output contracts from being silently shared. The host creates, validates, previews and applies any returned file; AYA does not receive or import it.
 
 An optional **current artifact** is intentionally **not** accepted by this API yet. Any future attachment must use a separate unchecked-by-default user approval and a bounded, auditable payload. Do not misuse image-generation requirements to describe structured files.
 
@@ -46,6 +46,8 @@ schema_version: aya-structured-kit/v1
 app_id: dev.example.chart
 app_version: 1.0
 schema_revision: chart-3
+artifact_extension: .json
+artifact_mime: application/json
 source_revision: example-build
 owner: example developer
 ---

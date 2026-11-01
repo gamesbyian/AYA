@@ -737,7 +737,7 @@ object Aya {
                             .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
                             .decode(java.nio.ByteBuffer.wrap(kitBytes.toByteArray())).toString()
                         when (val verified = AyaStructuredKitVerifier.verify(
-                            text, activity.packageName, version
+                            text, activity.packageName, version, structuredTask
                         )) {
                             is AyaStructuredKitCheck.Rejected ->
                                 return AyaBundledLaunchResult.Rejected(verified.reason)
