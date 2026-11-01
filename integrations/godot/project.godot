@@ -9,5 +9,10 @@ enabled=PackedStringArray("res://addons/AYA/plugin.cfg")
 
 [rendering]
 
+; Synthetic host only: use GLES Compatibility on headless software-GPU
+; emulators. AYA's reusable addon does not prescribe a Godot renderer.
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
 ; Godot Android exporter requires ETC2/ASTC textures on Linux CI.
 textures/vram_compression/import_etc2_astc=true
