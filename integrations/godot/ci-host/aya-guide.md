@@ -52,7 +52,7 @@ The button is intentionally disabled inside the Godot editor, on desktop/non-And
 3. If local review opens, read and edit the exact content. Remove any private information.
 4. Choose Cancel to stop, Copy for manual pasting, or Share to offer the approved text/attachment to a chosen installed Android app.
 5. In the receiving app, verify whether the attachment/text arrived and follow that app's own Send action if appropriate.
-- Expected outcome: local review and user-controlled Copy/Share on a compatible device. Successful assistant ingestion is UNKNOWN until tested separately.
+- Expect: local review and user-controlled Copy/Share on a compatible device. Successful assistant ingestion is UNKNOWN until tested separately.
 - Failures: see ERR-001 for unavailable native plugin/guide; ERR-002 for absent or incompatible recipient.
 - Side effects: Copy modifies the clipboard; Share may expose approved content to a recipient; no model output is captured or executed by the host.
 - Evidence: `integrations/godot/addons/AYA/aya_card.gd`, `aya-godot/src/main/java/dev/aya/godot/AyaGodotPlugin.kt` and `aya/src/main/java/dev/aya/android/AyaComponentAction.kt`.
@@ -63,7 +63,7 @@ The button is intentionally disabled inside the Godot editor, on desktop/non-And
 1. Read the advice in that external application.
 2. Return manually to the synthetic Godot scene.
 3. Apply any useful knowledge yourself. There is no button to import an answer or run a generated command.
-- Expected outcome: a manual user decision. The scene has no writable game state or agent-output handler.
+- Expect: a manual user decision. The scene has no writable game state or agent-output handler.
 - Limitations: AYA cannot know whether you received or acted on an answer.
 - Evidence: `integrations/godot/aya_smoke.tscn` and `integrations/godot/addons/AYA/aya_card.gd`.
 
