@@ -1,0 +1,57 @@
+{
+  "schema_version": "aya-inventory/v1",
+  "app_id": "dev.aya.godot.cihost",
+  "app_version": "1.0.0",
+  "source_revision": "godot-ci-host-v1",
+  "reviewed_at_utc": "2026-10-31T21:00:00Z",
+  "items": [
+    {
+      "id": "TASK-001",
+      "kind": "task",
+      "title": "Review and share a Godot help question on Android",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "integrations/godot/addons/AYA/aya_card.gd;aya-godot/src/main/java/dev/aya/godot/AyaGodotPlugin.kt"
+    },
+    {
+      "id": "TASK-002",
+      "kind": "task",
+      "title": "Manually interpret advice without automatic imports",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/godot/aya_smoke.tscn;integrations/godot/addons/AYA/aya_card.gd"
+    },
+    {
+      "id": "F-001",
+      "kind": "feature",
+      "title": "Android guarded Godot AYA card",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "integrations/godot/addons/AYA/aya_card.gd;aya-godot/src/main/java/dev/aya/godot/AyaGodotPlugin.kt"
+    },
+    {
+      "id": "F-002",
+      "kind": "feature",
+      "title": "Editor or invalid output-use instructions disable handoff",
+      "status": "AVAILABLE",
+      "criticality": "high",
+      "source_ref": "integrations/godot/aya_smoke.gd;integrations/godot/addons/AYA/aya_card.gd"
+    },
+    {
+      "id": "ERR-001",
+      "kind": "error",
+      "title": "Native plugin or version-matched reference unavailable",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "aya-godot/src/main/java/dev/aya/godot/AyaGodotPlugin.kt;aya/src/main/java/dev/aya/android/AyaReferenceVerifier.kt"
+    },
+    {
+      "id": "ERR-002",
+      "kind": "error",
+      "title": "Receiving Android assistant ignores an attachment",
+      "status": "CONDITIONAL",
+      "criticality": "high",
+      "source_ref": "aya/src/main/java/dev/aya/android/Aya.kt"
+    }
+  ]
+}
