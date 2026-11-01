@@ -60,8 +60,8 @@ def make_digest(outcomes: dict, environment: dict[str, str] | None = None) -> di
         "first_observed_failure": failures[0]["stage"] if failures else None,
         "root_error": None,
         "root_error_limit": (
-            "Stage outcomes identify where a failure occurred; no log excerpt "
-            "or root cause has been independently established."
+            "Stage outcomes identify the failing stage, but the root cause "
+            "and supporting log excerpt remain unverified."
         ),
         "reproduce_from": ".github/workflows/reference-guide.yml",
         "next_action": (
