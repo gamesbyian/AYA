@@ -158,8 +158,12 @@ def verify_aix(path: Path) -> dict:
                     _check_members(native)
                     for name in (CORE_ACTION, PROVIDER.replace(".", "/") + ".class",
                                  RECEIVER.replace(".", "/") + ".class"):
-                        if not _zip_file(native, name):
-                            raise AIXError("Missing native AYA compiled class: " + name)
+                        try:
+                            compiled = _zip_file(native, name)
+                        except AIXError as exc:
+                            raise AIXError("Missing native AYA compiled class: " + name) from exc
+                        if not compiled:
+                            raise AIXError("Empty native AYA compiled class: " + name)
     except (zipfile.BadZipFile, OSError, AdapterApkError) as exc:
         raise AIXError("Malformed built AIX or native code archive") from exc
     return {
