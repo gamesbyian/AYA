@@ -1,3 +1,4 @@
+@tool
 extends "res://addons/AYA/aya_card.gd"
 
 # Synthetic CI-host probe, deliberately OUTSIDE the reusable AYA addon.
