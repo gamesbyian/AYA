@@ -14,6 +14,12 @@ The AYA prototype uses only canonical `AyaComponentAction.Help`, a Java `@Extens
 
 See the [actual Rush project](../../integrations/app-inventor/aya-rush/README.md) for source and detailed host integration instructions.
 
+## Verified shape of the actual Rush 2 AIX archive
+
+A real [Rush 2.1.2 CI artifact](https://github.com/gamesbyian/AYA/actions/runs/41267356990) established that the generated `.aix` uses `dev.aya.appinventor/components.json`, `files/component_build_infos.json`, an outer `classes.jar` containing `classes.dex`, and a separately **relocated private native AYA AAR**. The resulting AAR contains canonical AYA's guarded help dispatcher, the scoped `AyaFileProvider`, share chooser receiver and `res/xml/` cache-path declaration under Rush's namespaced class/resource names. The extension's build-info manifest fragments register the provider and receiver for a future consuming package without requesting unrelated Android permissions.
+
+The offline `tools/verify_appinventor_aix.py` therefore inspects **that actual binary shape after every Rush compilation**, rather than trusting source imports or the mere existence of a ZIP. It follows Android DEX `class_defs` for the public App Inventor component, verifies the three local-only block surfaces, the relocated AAR's compiled class entries and manifest, the matching provider/receiver build-info declarations, the scoped cache-path XML, and absence of added permissions. Synthetic positive and destructive negative-control fixtures run before the heavy build. This is still **S1 native archive packaging evidence**: only a genuine App Inventor-built host APK can prove whether App Inventor merges and loads those entries at runtime.
+
 ## Honest limits before distributing any AIX
 
 1. The compiled AYA core AAR is staged from the same source checkout; it is not publicly distributed as a stable Maven dependency. Only a fresh, reproducible AIX build artifact from CI can qualify as a source preview.
