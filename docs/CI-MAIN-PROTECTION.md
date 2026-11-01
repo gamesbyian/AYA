@@ -1,6 +1,6 @@
 # Protecting AYA's main branch with an always-running CI baseline
 
-**Current observation (2026-10-31 UTC):** GitHub's public branch metadata reported `main.protected=false`, and no repository rulesets were returned. Reading the legacy branch-protection endpoint requires administration permission not available through this connection. **No branch-protection change has been made.**
+**Current observation (2026-11-01 UTC):** GitHub's public branch metadata now reports `main.protected=true`. The repository has an [active `Default` ruleset #26302570](https://github.com/gamesbyian/AYA/rules/26302570) with pull-request, no-deletion and non-fast-forward restrictions. **Its `required_status_checks` array is empty**, so the always-on `docs` CI job is **not yet mandatory**. The ruleset currently targets both `~DEFAULT_BRANCH` **and** `~ALL`, and a normal write to an existing feature-branch PR head was rejected with HTTP 409 (`Changes must be made through a pull request`). This over-broad selection obstructs ordinary PR iteration. The legacy branch-protection details endpoint still requires administration permission unavailable through this connector.
 
 ## Required-check compatibility
 
@@ -12,8 +12,11 @@ The deterministic `tools/test_reference_gate_dispatch.py` check prevents acciden
 
 ## Repository-admin steps still required
 
-A maintainer with repository administration rights should open the GitHub repository Settings, Rules, Rulesets (or Branch protection rules where appropriate), and create a rule targeting `main`. Require a pull request before merging, disallow force-push and branch deletion, and require the **successful actual `docs` job under `Reference authoring checks`**, selected from the completed check context shown in GitHub. Use source/actor pinning to avoid naming a similarly titled untrusted external check.
+In GitHub repository **Settings → Rules → Rulesets**, edit the existing active [`Default` ruleset #26302570](https://github.com/gamesbyian/AYA/rules/26302570):
 
-Before enabling the requirement, verify a documentation-only PR **and** a code-only PR both receive the `Reference authoring checks` job. Test that a genuine failing validator blocks merging; do not silently change required checks based on skip status. Add review/approval requirements compatible with the project's contributor model, and preserve admin override/break-glass policy explicitly rather than assuming it. Verify permissions and ruleset behavior through GitHub's own UI.
+1. Target **only `~DEFAULT_BRANCH`** (the current `main`), removing `~ALL` from its branch matching conditions. Preserve pull-request, no-force-push and no-deletion protections on `main`. Do not turn protection off merely to allow agents to write feature branches.
+2. Under required status checks, add the actual **`docs`** context from the `Reference authoring checks` workflow, with source/actor pinning where supported. GitHub currently reports an empty required list, which means a failing `docs` job does not yet block a merge.
+3. Confirm both a docs-only and a native-code PR produce the always-on `docs` check; separately prove a deliberately failing `docs` check cannot merge. Native jobs remain path-filtered and must be reviewed when affected, not added as globally required skipped contexts.
+4. Test that an ordinary contributor can update a feature-branch PR head without bypass, while no direct unreviewed change can reach `main`. Confirm available bypass actors, review requirements and administrator recovery procedures intentionally.
 
-**The repository remains unprotected until the administrator actually enables the rule.** AYA agents must never claim a CI workflow edit, an issue, or a successful test enforces branch protection by itself.
+**Verified:** branch protection is active. **Still unverified:** an enforceable required-`docs` check, successful PR-head authoring under the intended rule scope, and fail-closed merge negative controls. See [issue #73](https://github.com/gamesbyian/AYA/issues/73). The current GitHub connector can read the ruleset but cannot mutate GitHub administration settings.
