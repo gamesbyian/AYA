@@ -1,4 +1,4 @@
-name: AYA Expo native APK and contract checks
+name: AYA Expo typed bridge and source contract checks
 on:
   pull_request:
     paths:
@@ -43,80 +43,7 @@ jobs:
         working-directory: integrations/expo/aya-expo
         run: npm test
 
-  real-android-host-apk:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-      - name: Install Android SDK platform for the native host
-        run: |
-          SDKROOT=/usr/local/lib/android/sdk
-          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
-          test -n "$SDKMANAGER"
-          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
-          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
-      - name: Stage exact native AYA Android AAR/POM
-        run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
-      - name: Independently audit this synthetic host's exact-version guide
-        run: |
-          python3 tools/validate_guide.py --strict integrations/expo/aya-expo/ci-host/aya-guide.md
-          python3 tools/audit_reference.py integrations/expo/aya-expo/ci-host/aya-guide.md --inventory integrations/expo/aya-expo/ci-host/inventory.json --questions integrations/expo/aya-expo/ci-host/questions.json --strict
-          node --test integrations/expo/guide-plugin/test/*.test.cjs
-          python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
-      - name: Install pinned Expo host with local unpublished modules
-        working-directory: integrations/expo/aya-expo/ci-host
-        run: npm install --no-fund --no-audit
-      - name: Run actual Expo Android CNG prebuild and verified guide plugin
-        working-directory: integrations/expo/aya-expo/ci-host
-        env:
-          CI: '1'
-        run: npx expo prebuild --platform android --no-install
-      - name: Compile native Expo/AYA host into a debug Android APK
-        working-directory: integrations/expo/aya-expo/ci-host/android
-        env:
-          AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
-        run: |
-          cat > ../aya-maven.init.gradle <<'GRADLE'
-          def staging = System.getenv('AYA_STAGING_MAVEN')
-          if (!staging || !new File(staging).isDirectory()) {
-              throw new GradleException("AYA staged Maven directory missing")
-          }
-          settingsEvaluated { settings ->
-              settings.dependencyResolutionManagement.repositories.maven {
-                  url = settings.uri(staging)
-              }
-          }
-          allprojects {
-              repositories.maven { url = uri(staging) }
-          }
-          GRADLE
-          ./gradlew :app:assembleDebug -I ../aya-maven.init.gradle --no-daemon --stacktrace
-      - name: Inspect actual installed package, guide bytes and native share manifest
-        run: |
-          AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
-          test -n "$AAPT" && test -x "$AAPT"
-          python3 tools/verify_flutter_host_apk.py \
-            --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk \
-            --guide integrations/expo/aya-expo/ci-host/aya-guide.md \
-            --aapt "$AAPT"
-      - name: Verify Expo bridge and core share receiver are defined in actual APK DEX
-        run: python3 tools/verify_android_adapter_apk.py --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver
-      - name: Upload synthetic host APK for controlled QA
-        uses: actions/upload-artifact@v4
-        with:
-          name: aya-expo-native-ci-host-debug
-          path: integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
-          if-no-files-found: error
+# The canonical native APK gate is .github/workflows/expo-packed-host.yml.
+# It compiles an out-of-tree npm-tarball consumer with the staged AYA Android
+# SDK and verifies installed guide identity, FileProvider/receiver and DEX.
+# Do not reintroduce a second Android build in this source-contract workflow.
