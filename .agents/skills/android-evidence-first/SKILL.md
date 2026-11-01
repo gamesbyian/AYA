@@ -5,7 +5,7 @@ description: Verify native Android changes using platform-grounded, production-c
 
 # Android evidence-first verification
 
-Apply this skill only to **native Android** work. For Expository it applies exclusively to `android-transfer/`, not the read-only Pages explorer.
+Apply this skill only to **native Android** work. In repositories containing both web and native applications, scope it only to native Android components.
 
 ## Authority and prerequisites
 1. Read the repository's live `AGENTS.md`, applicable native agent guide, current queue, active issue/PR ownership, canonical safety contracts and verification policy before proposing changes. Those documents outrank this advisory skill.
