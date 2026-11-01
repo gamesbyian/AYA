@@ -36,6 +36,12 @@ compatibility between different versions merely because Kotlin sources
 compile. Publish core and optional adapters as a reviewed compatibility
 set and keep all core coordinates exactly aligned.
 
+## Android FileProvider identity and host coexistence
+
+AYA uses the concrete `dev.aya.android.AyaFileProvider : androidx.core.content.FileProvider` manifest component, with the same private `${applicationId}.aya.files` authority and `@xml/aya_file_paths` as before. Android's manifest merger **keys providers by their class names**. Reusing the generic `androidx.core.content.FileProvider` name collides with host and engine providers even when authorities differ; Godot's actual Android Gradle export exposed this defect. The concrete subclass is the supported AndroidX integration pattern and keeps AYA's path restrictions, export prohibition and temporary URI grants unchanged.
+
+This is a native **manifest-component identity change**, so prebuilt hosts that use unusual explicit manifest rules, provider removals or reflective class-name expectations need to revalidate their merged APK. Consumers should depend on one matching new AYA AAR and must never paper over collisions with `tools:replace="android:authorities"` or `tools:replace="android:resource"`, which would discard a provider's authority or paths. Existing user-facing URI authorities and `Aya.launchBundled`/Share/Copy APIs stay unchanged. Rebuild and instrument-test both AYA and host FileProviders as applicable. The fix has no claim about receiver ingestion or a public stable release.
+
 ## Exact-version, variant and locale selection
 
 AYA-RAS v1 identifies `app_id`, `app_version_min`,
