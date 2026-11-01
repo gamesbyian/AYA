@@ -30,6 +30,8 @@ class GodotExportWorkflowContract(unittest.TestCase):
             "integrations/godot/**", "aya-godot/**", "aya/**",
             "tools/stage_godot_android_guide.py",
             "tools/verify_android_manifest_metadata.py",
+            "tools/verify_android_manifest_providers.py",
+            "tools/test_verify_android_manifest_providers.py",
             ".github/workflows/godot-export.yml",
         ):
             self.assertEqual(self.workflow.count("'" + path + "'"), 2, path)
@@ -54,6 +56,10 @@ class GodotExportWorkflowContract(unittest.TestCase):
             "tools/verify_flutter_host_apk.py",
             "tools/verify_android_adapter_apk.py",
             "tools/verify_android_manifest_metadata.py",
+            "tools/verify_android_manifest_providers.py",
+            "dev.aya.android.AyaFileProvider=dev.aya.godot.cihost.aya.files",
+            "androidx.core.content.FileProvider=dev.aya.godot.cihost.fileprovider",
+            "--class dev.aya.android.AyaFileProvider",
             "dev.aya.godot.AyaGodotPlugin",
             "dev.aya.android.AyaShareSelectionReceiver",
         ):
