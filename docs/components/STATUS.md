@@ -1,4 +1,4 @@
-# AYA cross-toolchain adapter status (2026-10-31)
+# AYA cross-toolchain adapter status (2026-11-01)
 
 This inventory separates **checked-in source**, CI builds, Android host acceptance, and distribution. Merged code is not equivalent to a marketplace plugin, and opening Android's Sharesheet does not prove assistant ingestion. Keep this ledger current whenever an adapter ships or changes.
 
@@ -16,3 +16,10 @@ This inventory separates **checked-in source**, CI builds, Android host acceptan
 **All adapters share the same trust boundary:** verified exact-version host guide, user-edited local review, deliberate Copy/Share, truthful output-use instructions, no provider lock-in, and no monitoring of agent answers. A host-owned file importer is separate; generated recipes remain untrusted and must not be executed unattended.
 
 Priorities: run the [non-public versioned Maven preview](DISTRIBUTION.md), prepare reproducible distribution, and obtain independently authored consuming-host evidence after first-party S2+ packaging; verify real Unity/Godot/FlutterFlow editor exports; conduct device TalkBack, keyboard, large-text and recipient-ingestion trials; enforce host-specific version/locale guide truth under the [API/variant policy](../API_COMPATIBILITY.md) and [release-evidence standard](RELEASE-EVIDENCE.md). See [architecture](README.md), [roadmap](ROADMAP.md), [Flutter](FLUTTER.md), [FlutterFlow](FLUTTERFLOW.md), [Godot](GODOT.md) and [installation](INSTALLER.md).
+
+
+## November 1 verified update
+
+- Structured source-preview Android handoff: [PR #93](https://github.com/gamesbyian/AYA/pull/93) introduced the typed API, [PR #95](https://github.com/gamesbyian/AYA/pull/95) added offline developer-kit validation and reference CI, and [PR #98](https://github.com/gamesbyian/AYA/pull/98) added Android runtime empty-section rejection and factual importer wording. PR #98 passed all 14 exact-head cross-framework and Android checks. These are source/first-party structural checks, not actual importer semantic correctness, a real host artifact round trip, physical-device acceptance, recipient ingestion or public SDK distribution.
+- Godot visual QA is still blocked. [PR #86](https://github.com/gamesbyian/AYA/pull/86) and the unsuccessful transparent-render-target test [PR #96](https://github.com/gamesbyian/AYA/pull/96) were closed WITHOUT merging, despite passing real Godot APK export. Exact-head run 41280997628 captured four blank Android 412x892 frames with internal Godot pixel counts dark=0, light=0, opaque=0, draw callbacks=3. The older opaque-target test had 4096 opaque samples but no accepted pixels. Diagnostic [PR #100](https://github.com/gamesbyian/AYA/pull/100) is a draft, intended to retain a rejected synthetic PNG and a failure JSON; it does not prove readable UI or device acceptance.
+- Main branch is protected by active ruleset 26302570, but that ruleset currently targets all branches and has no required status checks. Admin [issue #73](https://github.com/gamesbyian/AYA/issues/73) tracks narrowing its scope to the default branch and requiring the GitHub Actions docs context, with a verified failing-check negative control.
