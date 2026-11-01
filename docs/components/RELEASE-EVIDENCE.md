@@ -32,8 +32,8 @@ A test must fail closed when the guide is absent, stale or inconsistent with ins
 
 ## Current independent gates
 
-- Expo has first-party APK/guide/manifest/DEX evidence. A clean npm tarball consumer is tracked separately and remains a synthetic host until an independently developed app is tested.
-- Flutter's AGP 9 built-in Kotlin promoted source passed a first-party real-host APK test ([CI 41249286150](https://github.com/gamesbyian/AYA/actions/runs/41249286150)). Legacy KGP remains a **separately pinned source version**. External Flutter/FlutterFlow editors, actual devices and recipients remain unverified.
+- Expo has S2+ evidence: a genuine npm-tarball consumer created outside the checkout, with complete real Android APK, identity/guide/manifest/DEX inspection ([CI 41259561589](https://github.com/gamesbyian/AYA/actions/runs/41259561589)) and separately exported Metro JavaScript ([CI 41259561573](https://github.com/gamesbyian/AYA/actions/runs/41259561573)). The test host is still authored by AYA maintainers; independent adopting developers, physical devices and AI recipients are unverified.
+- Flutter's AGP 9 built-in Kotlin promoted source passed a first-party real-host APK test ([CI 41249286150](https://github.com/gamesbyian/AYA/actions/runs/41249286150)) and out-of-tree synthetic source-package APK inspection ([CI 41250574535](https://github.com/gamesbyian/AYA/actions/runs/41250574535)), qualifying only for S2+. Legacy KGP remains a **separately pinned source version**. External Flutter/FlutterFlow editors, independent adopter authorship, actual devices and recipients remain unverified.
 - Godot has native AAR and headless editor evidence. Actual Android export with the host's raw APK guide and real editor integration are independent requirements.
 - Unity has native AAR and stand-in C# compilation evidence. Actual Unity Editor import, exported Android APK, Mono/IL2CPP and device lifecycle are unverified.
 
