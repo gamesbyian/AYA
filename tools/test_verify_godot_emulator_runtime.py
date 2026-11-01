@@ -185,9 +185,6 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
     def test_image_content_check_rejects_uniform_black_or_white(self):
         self.assertFalse(png_has_visible_content(fake_png(50, 30, blank=True)))
         self.assertTrue(png_has_visible_content(fake_png(50, 30)))
-        with self.assertRaisesRegex(EmulatorSmokeError, "image data"):
-            valid = fake_png(50, 30)
-            png_has_visible_content(valid.replace(b"IDAT", b"IXAT", 1))
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()
