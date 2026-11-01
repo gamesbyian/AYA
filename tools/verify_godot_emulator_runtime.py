@@ -17,6 +17,7 @@ import subprocess
 import sys
 import time
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Callable
 
@@ -36,16 +37,42 @@ class EmulatorSmokeError(ValueError):
 
 
 def png_dimensions(data: bytes) -> tuple[int, int]:
-    """Reject obviously incomplete/mismatched raw ADB screenshot captures."""
+    """Validate bounded PNG chunk framing and CRC without decoding pixels."""
     if not isinstance(data, bytes) or not 60 <= len(data) <= MAX_SCREENSHOT_BYTES:
         raise EmulatorSmokeError("Invalid or unreasonably large screenshot bytes")
-    if (not data.startswith(PNG_SIGNATURE) or data[8:16] !=
-            b"\x00\x00\x00\x0dIHDR" or not data.endswith(PNG_END)):
+    if not data.startswith(PNG_SIGNATURE):
         raise EmulatorSmokeError("Android screencap returned malformed PNG framing")
-    width, height = struct.unpack(">II", data[16:24])
-    if not 1 <= width <= 4096 or not 1 <= height <= 4096 or b"IDAT" not in data:
-        raise EmulatorSmokeError("Screenshot has invalid dimensions or no image data")
-    return width, height
+    position = len(PNG_SIGNATURE)
+    width = height = 0
+    saw_idat = False
+    while position < len(data):
+        if len(data) - position < 12:
+            raise EmulatorSmokeError("Incomplete screenshot PNG chunk")
+        length = struct.unpack(">I", data[position:position + 4])[0]
+        end = position + 12 + length
+        if length > MAX_SCREENSHOT_BYTES or end > len(data):
+            raise EmulatorSmokeError("Invalid screenshot PNG chunk length")
+        kind = data[position + 4:position + 8]
+        payload = data[position + 8:position + 8 + length]
+        actual_crc = struct.unpack(">I", data[end - 4:end])[0]
+        if zlib.crc32(kind + payload) & 0xffffffff != actual_crc:
+            raise EmulatorSmokeError("Screenshot PNG chunk CRC mismatch")
+        if position == len(PNG_SIGNATURE):
+            if kind != b"IHDR" or length != 13:
+                raise EmulatorSmokeError("Screenshot PNG is missing its IHDR")
+            width, height = struct.unpack(">II", payload[:8])
+            if not 1 <= width <= 4096 or not 1 <= height <= 4096:
+                raise EmulatorSmokeError("Screenshot has invalid dimensions")
+        elif kind == b"IHDR":
+            raise EmulatorSmokeError("Duplicate screenshot PNG IHDR")
+        if kind == b"IDAT" and length:
+            saw_idat = True
+        if kind == b"IEND":
+            if length or not saw_idat or end != len(data):
+                raise EmulatorSmokeError("Incomplete or trailing screenshot PNG data")
+            return width, height
+        position = end
+    raise EmulatorSmokeError("Screenshot PNG has no terminating IEND")
 
 
 def capture_synthetic_screenshot(
@@ -71,7 +98,19 @@ def capture_synthetic_screenshot(
     if destination.parent.is_symlink():
         raise EmulatorSmokeError("Refusing symlinked screenshot directory")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_bytes(blob)
+    # Exclusive creation prevents symlink following and foreign-file overwrite
+    # even when the destination appears between the preflight check and write.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(destination, flags, 0o600)
+    except FileExistsError as exc:
+        raise EmulatorSmokeError("Refusing to overwrite existing screenshot") from exc
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(blob)
+    except OSError:
+        destination.unlink(missing_ok=True)
+        raise
     return {
         "file": destination.name,
         "width_px": width,

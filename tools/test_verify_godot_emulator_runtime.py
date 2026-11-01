@@ -120,6 +120,27 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         with self.assertRaisesRegex(EmulatorSmokeError, "Invalid or unreasonably"):
             self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
 
+    def test_png_crc_and_chunk_integrity(self):
+        good = fake_png(412, 892)
+        bad = bytearray(good)
+        bad[30] ^= 1  # IHDR checksum, without altering the dimensions
+        with self.assertRaisesRegex(EmulatorSmokeError, "CRC mismatch"):
+            png_dimensions(bytes(bad))
+        with self.assertRaisesRegex(EmulatorSmokeError, "IEND"):
+            png_dimensions(good[:-12])
+        with self.assertRaisesRegex(EmulatorSmokeError, "trailing"):
+            png_dimensions(good + b"extra data")
+
+    def test_symlinked_screenshot_destination_is_rejected(self):
+        folder = Path(self.tmp.name) / "screens"
+        folder.mkdir()
+        private = folder / "private.txt"
+        private.write_text("do not touch")
+        (folder / "godot_412x892_font100.png").symlink_to(private)
+        with self.assertRaisesRegex(EmulatorSmokeError, "Refusing to overwrite"):
+            self.execute(FakeADB(), screenshots_dir=folder)
+        self.assertEqual(private.read_text(), "do not touch")
+
     def test_existing_screenshot_is_never_overwritten(self):
         folder = Path(self.tmp.name) / "screens"
         folder.mkdir()

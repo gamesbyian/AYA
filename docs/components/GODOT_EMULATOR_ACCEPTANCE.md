@@ -37,7 +37,7 @@ After a successful Godot exporter workflow, download the `aya-godot-4-5-real-exp
 python3 -m unittest discover -s tools -p 'test_verify_godot_emulator_runtime.py'
 python3 tools/verify_godot_emulator_runtime.py \
   --apk /path/to/aya-godot-host-debug.apk \
-  --report /tmp/aya-godot-emulator-evidence.json \\
+  --report /tmp/aya-godot-emulator-evidence.json \
   --screenshots-dir /tmp/aya-godot-screenshots
 ```
 
