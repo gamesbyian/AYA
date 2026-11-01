@@ -67,6 +67,12 @@ class GodotExportWorkflowContract(unittest.TestCase):
         self.assertIn('package/unique_name="dev.aya.godot.cihost"', self.preset)
         self.assertIn('version/name="1.0.0"', self.preset)
         self.assertIn('gradle_build/min_sdk="24"', self.preset)
+        self.assertIn('include_filter="aya-guide.md"', self.preset)
+        staging = (ROOT / "tools" / "stage_godot_android_guide.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('TARGET = Path("aya-guide.md")', staging)
+        self.assertNotIn('TARGET = Path("android/build/assets/aya-guide.md")', staging)
 
     def test_android_texture_import_enabled_for_headless_export(self):
         # Godot 4.5 export_plugin.cpp returns invalid with no diagnostic
