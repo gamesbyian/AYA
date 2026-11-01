@@ -37,8 +37,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Validate complete fictional guide example
+        id: fictional_guide
         run: python3 tools/validate_guide.py --strict docs/reference/EXAMPLE_PARCELPAD.md
       - name: Audit independent product inventory and gold question set
+        id: inventory
         run: |
           python3 tools/audit_reference.py \
             docs/reference/EXAMPLE_PARCELPAD.md \
@@ -46,23 +48,27 @@ jobs:
             --questions docs/reference/examples/parcelpad_questions.json \
             --strict
       - name: Validate the actual consuming sample app reference
+        id: sample_reference
         run: |
           python3 tools/validate_guide.py --strict sample/src/main/assets/aya-guide.md
           python3 tools/audit_reference.py sample/src/main/assets/aya-guide.md \
             --inventory docs/reference/examples/aya_sample_inventory.json \
             --questions docs/reference/examples/aya_sample_questions.json --strict
       - name: Validate Translation Kit fictional example
+        id: translation
         run: |
           python3 tools/validate_translation_kit.py docs/translation/examples/parcelpad-translation-kit.md \
             --schema docs/translation/examples/parcelpad-output.schema.json \
             --example docs/translation/examples/parcelpad-pirate.pack.json
       - name: Validate the fictional Filesystem Automation Kit
+        id: filesystem
         run: |
           python3 tools/validate_filesystem_kit.py docs/filesystem/examples/harborfiles-kit.md \
             --schema docs/filesystem/examples/harborfiles-recipe.schema.json \
             --example docs/filesystem/examples/harborfiles-delete.recipe.json \
             --snapshot docs/filesystem/examples/harborfiles-snapshot.json
       - name: Compile all five AYA packet profiles and bounded brief
+        id: packet_profiles
         run: |
           for module in help creative structured translation filesystem; do
             python3 tools/packet_compiler.py \
@@ -77,15 +83,35 @@ jobs:
               --report "/tmp/aya-$module-report.json"
           done
       - name: Validate AYA Application Understanding and director records
+        id: understanding
         run: |
           python3 tools/validate_understanding.py \
             docs/understanding/examples/parcelpad-understanding.json \
             --decisions docs/understanding/examples/parcelpad-decisions.json
       - name: Validate drop-in help component manifests
+        id: component_manifests
         run: |
           python3 tools/component_codegen.py docs/components/examples/sample-help-card.json --check
           python3 tools/component_codegen.py docs/components/examples/sample-help-action.json --check
       - name: Enforce cross-project module portability
+        id: portability
         run: python3 -m unittest tools.test_module_portability
       - name: Run documentation compiler and validator regression tests
+        id: all_tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
+
+      - name: Export factual CI failure index for agent triage
+        if: failure()
+        env:
+          AYA_CI_OUTCOMES: >-
+            {"${id}":"${{ steps.fictional_guide.outcome }}","${id}":"${{ steps.inventory.outcome }}","${id}":"${{ steps.sample_reference.outcome }}","${id}":"${{ steps.translation.outcome }}","${id}":"${{ steps.filesystem.outcome }}","${id}":"${{ steps.packet_profiles.outcome }}","${id}":"${{ steps.understanding.outcome }}","${id}":"${{ steps.component_manifests.outcome }}","${id}":"${{ steps.portability.outcome }}","${id}":"${{ steps.all_tests.outcome }}"}
+        run: |
+          python3 tools/ci_failure_digest.py --outcomes-json "$AYA_CI_OUTCOMES" --output "$RUNNER_TEMP/aya-ci-failure.json"
+      - name: Upload concise machine-readable failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-reference-failure-index
+          path: ${{ runner.temp }}/aya-ci-failure.json
+          retention-days: 14
+          if-no-files-found: warn
