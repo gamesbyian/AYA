@@ -52,6 +52,23 @@ jobs:
         run: |
           python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version "$VERSION" --checksum-output aya-staging-sha256.txt
           gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version="$VERSION" --no-daemon --refresh-dependencies
+      - name: Record unsigned source, toolchain and AAR/POM evidence
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          JAVA_ID="$(java -version 2>&1 | sed -n '1p')"
+          GRADLE_ID="$(gradle --version | grep '^Gradle ')"
+          python3 tools/maven_preview_provenance.py \
+            --root aya/build/staging-maven \
+            --version "$VERSION" \
+            --checksums aya-staging-sha256.txt \
+            --source-sha "$GITHUB_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$GITHUB_RUN_ID" \
+            --attempt "$GITHUB_RUN_ATTEMPT" \
+            --java "$JAVA_ID" \
+            --gradle "$GRADLE_ID" \
+            --output aya-maven-preview-evidence.json
       - name: Upload unpublished versioned Maven repository and checksums
         uses: actions/upload-artifact@v4
         with:
@@ -59,4 +76,5 @@ jobs:
           path: |
             aya/build/staging-maven/
             aya-staging-sha256.txt
+            aya-maven-preview-evidence.json
           if-no-files-found: error
