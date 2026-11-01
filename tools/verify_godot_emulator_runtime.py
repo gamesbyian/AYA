@@ -153,6 +153,27 @@ def png_has_visible_content(data: bytes) -> bool:
     return False
 
 
+def save_synthetic_png(destination: Path, blob: bytes) -> None:
+    """Exclusively save a valid screenshot of the disposable first-party host."""
+    png_dimensions(blob)
+    if destination.is_symlink() or destination.exists():
+        raise EmulatorSmokeError("Refusing to overwrite existing screenshot")
+    if destination.parent.is_symlink():
+        raise EmulatorSmokeError("Refusing symlinked screenshot directory")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(destination, flags, 0o600)
+    except FileExistsError as exc:
+        raise EmulatorSmokeError("Refusing to overwrite existing screenshot") from exc
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(blob)
+    except OSError:
+        destination.unlink(missing_ok=True)
+        raise
+
+
 def capture_synthetic_screenshot(
     size: str, scale: str, destination: Path, *, run: Callable = subprocess.run,
     pause: Callable[[float], None] = time.sleep,
@@ -185,24 +206,13 @@ def capture_synthetic_screenshot(
         if attempts < 4:
             pause(2.0)
     else:
+        rejected = destination.with_name(destination.stem + "_rejected.png")
+        save_synthetic_png(rejected, blob)
         raise EmulatorSmokeError(
-            f"Android screenshot remains blank/unrendered after 4 captures at {size}"
+            f"Android screenshot remains blank/unrendered after 4 captures at {size}; "
+            f"rejected_capture={rejected.name}"
         )
-    if destination.parent.is_symlink():
-        raise EmulatorSmokeError("Refusing symlinked screenshot directory")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    # Exclusive creation prevents symlink following and foreign-file overwrite.
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(destination, flags, 0o600)
-    except FileExistsError as exc:
-        raise EmulatorSmokeError("Refusing to overwrite existing screenshot") from exc
-    try:
-        with os.fdopen(fd, "wb") as handle:
-            handle.write(blob)
-    except OSError:
-        destination.unlink(missing_ok=True)
-        raise
+    save_synthetic_png(destination, blob)
     return {
         "file": destination.name,
         "width_px": width,
@@ -471,7 +481,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--screenshots-dir", type=Path, default=None,
                         help="Optional artifact directory for disposable AYA-only screens")
     args = parser.parse_args(argv)
-    if args.report.is_symlink():
+    if args.report.is_symlink() or args.report.parent.is_symlink():
         parser.exit(2, "AYA Godot emulator smoke: unsafe symlinked report\n")
     try:
         result = smoke(args.apk, screenshots_dir=args.screenshots_dir)
@@ -481,8 +491,27 @@ def main(argv: list[str] | None = None) -> int:
             raise EmulatorSmokeError("Evidence report unexpectedly large")
         args.report.write_text(encoded, encoding="utf-8")
     except (OSError, EmulatorSmokeError) as exc:
-        print("AYA Godot emulator smoke: FAIL: " + str(exc)[:MAX_LOG_CHARS],
-              file=sys.stderr)
+        diagnostic = str(exc)[:MAX_LOG_CHARS]
+        evidence = {
+            "schema": "aya-godot-emulator-smoke-failure/v1",
+            "status": "failed",
+            "source": "disposable_first_party_godot_fixture",
+            "diagnostic": diagnostic,
+            "visual_acceptance": False,
+            "actual_assistant_ingestion_tested": False,
+            "physical_device_tested": False,
+            "human_visual_accessibility_reviewed": False,
+        }
+        try:
+            args.report.parent.mkdir(parents=True, exist_ok=True)
+            encoded = json.dumps(evidence, sort_keys=True, indent=2) + "\n"
+            if len(encoded.encode("utf-8")) > MAX_REPORT_BYTES:
+                raise EmulatorSmokeError("Failure evidence exceeds limit")
+            args.report.write_text(encoded, encoding="utf-8")
+        except (OSError, EmulatorSmokeError):
+            print("AYA Godot emulator smoke: failed to persist failure evidence",
+                  file=sys.stderr)
+        print("AYA Godot emulator smoke: FAIL: " + diagnostic, file=sys.stderr)
         return 1
     print("AYA Godot emulator smoke: PASS: real process/scene/bridge/card on "
           "two emulator layouts; recipient and user-interaction unverified")

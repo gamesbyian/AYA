@@ -49,3 +49,10 @@ python3 tools/verify_godot_emulator_runtime.py \
 The helper uses `adb`, so the emulator must already be running and report `sys.boot_completed=1`. Inspect JSON outcomes and Godot logcat when failures occur. A valid file alone is insufficient: look for a successful emulator CI run for the exact source SHA.
 
 The existing Godot/AYA UI, provider-compatibility, and public distribution release gates remain open until their own evidence is recorded.
+
+
+## Failed visual-evidence retention (disposable fixture only)
+
+If the compositor returns four valid but dark/unrendered Android screenshots, the CI probe now writes **one** bounded PNG with the suffix `_rejected.png`, preserving the last attempted image for inspection. It remains rejected: the process exits nonzero, the visual-layout record is never accepted, and the uploaded file is expressly not proof of readable UI. The test checks the expected foreground package before acquiring this synthetic screen, and it refuses to overwrite existing or symlinked screenshots. A system dialog or unrelated focused window fails without recording an image.
+
+The smoke CLI also writes a bounded `aya-godot-emulator-smoke-failure/v1` JSON report with `status=failed`, `visual_acceptance=false` and a concise diagnostic. The existing `if: always()` CI artifact step retains the rejected PNG and failure report even when screenshot acceptance fails. These are **disposable synthetic host** fixtures only. Do not use the collector to capture real user devices, agent replies, sensitive host data or third-party app UI. Green native plugin start and geometry do not establish visual accessibility, user interactions or assistant ingestion.

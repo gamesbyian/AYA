@@ -1,5 +1,6 @@
 """Offline, deterministic Android emulator smoke protocol negative controls."""
 import io
+import json
 import struct
 import zlib
 import tempfile
@@ -7,10 +8,11 @@ import unittest
 import zipfile
 from pathlib import Path
 from subprocess import CompletedProcess
+from unittest.mock import patch
 
 from verify_godot_emulator_runtime import (
     EmulatorSmokeError, FAILED_MARKER, PACKAGE, READY_MARKER,
-    inspect_log, parse_synthetic_viewport_frame, png_dimensions,
+    inspect_log, main, parse_synthetic_viewport_frame, png_dimensions,
     png_has_visible_content, smoke, verify_apk,
 )
 
@@ -173,9 +175,41 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         folder = Path(self.tmp.name) / "screens"
         with self.assertRaisesRegex(EmulatorSmokeError, "blank/unrendered"):
             self.execute(fake, screenshots_dir=folder)
-        self.assertFalse(folder.exists())
+        rejected = folder / "godot_412x892_font100_rejected.png"
+        self.assertTrue(rejected.is_file())
+        self.assertEqual(png_dimensions(rejected.read_bytes()), (412, 892))
+        self.assertFalse(png_has_visible_content(rejected.read_bytes()))
+        self.assertFalse((folder / "godot_412x892_font100.png").exists())
         self.assertEqual(fake.screenshot_calls, 4)
         self.assertIn(("adb", "shell", "wm", "size", "reset"), fake.commands)
+
+    def test_rejected_screenshot_is_exclusive_and_foreground_gated(self):
+        folder = Path(self.tmp.name) / "screens"
+        folder.mkdir()
+        rejected = folder / "godot_412x892_font100_rejected.png"
+        rejected.write_bytes(b"foreign occupant")
+        with self.assertRaisesRegex(EmulatorSmokeError, "Refusing to overwrite"):
+            self.execute(FakeADB(blank_png=True), screenshots_dir=folder)
+        self.assertEqual(rejected.read_bytes(), b"foreign occupant")
+        other = Path(self.tmp.name) / "other_screens"
+        with self.assertRaisesRegex(EmulatorSmokeError, "system dialog"):
+            self.execute(FakeADB(blank_png=True, focused_window=(
+                "Window{123 u0 com.android.systemui/Overlay}"
+            )), screenshots_dir=other)
+        self.assertFalse(other.exists())
+
+    def test_failure_report_never_claims_visual_acceptance(self):
+        report = Path(self.tmp.name) / "failed.json"
+        with patch("verify_godot_emulator_runtime.smoke",
+                   side_effect=EmulatorSmokeError("synthetic Godot failure")):
+            code = main(["--apk", str(self.apk), "--report", str(report)])
+        self.assertEqual(code, 1)
+        evidence = json.loads(report.read_text(encoding="utf-8"))
+        self.assertEqual(evidence["status"], "failed")
+        self.assertEqual(evidence["schema"], "aya-godot-emulator-smoke-failure/v1")
+        self.assertFalse(evidence["visual_acceptance"])
+        self.assertFalse(evidence["actual_assistant_ingestion_tested"])
+        self.assertIn("synthetic Godot failure", evidence["diagnostic"])
 
     def test_first_unrendered_frame_can_recover_on_later_capture(self):
         fake = FakeADB(blank_first=1)
