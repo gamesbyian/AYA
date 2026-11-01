@@ -22,7 +22,7 @@ def fake_runner(*, name=APP_ID, version="1.0.0", provider=True, receiver=True):
         if not (len(argv) == 5 and argv[3].endswith(".apk") and
                 argv[4] == "AndroidManifest.xml"):
             return Mock(returncode=1, stdout="", stderr="bad aapt xmltree argument order")
-        manifest = (("androidx.core.content.FileProvider\n" +
+        manifest = (("dev.aya.android.AyaFileProvider\n" +
                       name + ".aya.files\n") if provider else "")
         if receiver:
             manifest += "dev.aya.android.AyaShareSelectionReceiver\n"
@@ -80,6 +80,20 @@ class FlutterHostApkVerificationTests(TestCase):
             with self.subTest(runner=runner):
                 with self.assertRaises(ApkVerificationError):
                     self.check(runner)
+
+    def test_generic_host_file_provider_is_not_accepted_as_aya(self):
+        # An app's or engine's FileProvider must never stand in for AYA's
+        # own provider identity, even if strings match its authority.
+        def generic_provider(argv, **_kwargs):
+            result = fake_runner()(argv, **_kwargs)
+            if argv[2] == "xmltree":
+                result.stdout = result.stdout.replace(
+                    "dev.aya.android.AyaFileProvider",
+                    "androidx.core.content.FileProvider",
+                )
+            return result
+        with self.assertRaisesRegex(ApkVerificationError, "AyaFileProvider"):
+            self.check(generic_provider)
 
     def test_rejects_bad_aapt_output(self):
         with self.assertRaises(ApkVerificationError):

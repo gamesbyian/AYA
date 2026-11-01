@@ -120,7 +120,7 @@ jobs:
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -x "$AAPT"
           python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide "$GUIDE" --aapt "$AAPT"
-          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver --class dev.aya.android.AyaFileProvider
           sha256sum "$APK"
           echo 'Packaging evidence only: this is still a synthetic first-party host, not a separate maintainer or a physical-device acceptance test.'
       - uses: actions/upload-artifact@v4
