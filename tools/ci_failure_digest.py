@@ -30,7 +30,8 @@ def make_digest(outcomes: dict, environment: dict[str, str] | None = None) -> di
     if not isinstance(outcomes, dict) or not outcomes or len(outcomes) > MAX_STAGES:
         raise DigestError("Stage outcomes must be a nonempty bounded JSON object")
     if any(not isinstance(key, str) or not STAGE.fullmatch(key) or
-           value not in ALLOWED for key, value in outcomes.items()):
+           not isinstance(value, str) or value not in ALLOWED
+           for key, value in outcomes.items()):
         raise DigestError("Unknown stage ID or invalid observed outcome")
     env = os.environ if environment is None else environment
     repo = env.get("GITHUB_REPOSITORY", "")
