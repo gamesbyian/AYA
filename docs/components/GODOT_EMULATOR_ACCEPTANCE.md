@@ -6,7 +6,7 @@
 
 The CI exporter enables Android **x86-64** in the synthetic game's export preset, alongside its existing arm64 option. It bundles the test-only subclass `ci-host/runtime_probe_card.gd` as the scene root. That script delegates all UI construction to the reusable `AYACard` and, **on Android only**, checks that Godot registered the real AYA native singleton and that its constructed scene contains an enabled Ask button and multiline question input. It prints a fixed `AYA_CI_GODOT_RUNTIME_READY` marker after those checks. Failures print `AYA_CI_GODOT_RUNTIME_FAIL` and raise a Godot error. No question content, private device state or attachment bytes are logged.
 
-The downstream emulator job downloads the exact upstream APK artifact and runs on Android API 35 x86-64, starting the actual exported package `dev.aya.godot.cihost` twice on a disposable emulator:
+The downstream emulator job downloads the exact upstream APK artifact and runs on Android API 35 x86-64 using a lean AOSP/default image and supported SwiftShader software graphics instead of the runner's deprecated `swiftshader_indirect` default. Earlier headless Vulkan/GLES captures logged `bad color buffer handle` and produced all-black frames, so this is an empirical CI renderer stabilization, not an AYA app requirement. It starts the actual exported package `dev.aya.godot.cihost` twice on a disposable emulator:
 
 1. 412×892 pixels at 160 dpi and Android font scale 1.0.
 2. 320×700 pixels at 160 dpi and Android font scale 2.0.

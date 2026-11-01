@@ -239,9 +239,12 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: default
           arch: x86_64
           profile: pixel_6
+          # Modern supported software GPU mode; the default runner flag
+          # swiftshader_indirect is deprecated and produced black frames.
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
           script: python3 tools/verify_godot_emulator_runtime.py --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json" --screenshots-dir "$RUNNER_TEMP/aya-godot-screenshots"
       - name: Preserve minimal synthetic emulator evidence
