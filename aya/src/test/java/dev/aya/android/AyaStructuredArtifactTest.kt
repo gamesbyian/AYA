@@ -75,6 +75,23 @@ class AyaStructuredArtifactTest {
             task.copy(mimeType = "application/xml")) is AyaStructuredKitCheck.Rejected)
     }
 
+    @Test fun emptySectionIsRejectedRatherThanSentToAssistant() {
+        val empty = kit().replace(
+            "## Field semantics and bounds\n        Numeric values have documented units and bounds.",
+            "## Field semantics and bounds\n        "
+        )
+        assertTrue(AyaStructuredKitVerifier.verify(
+            empty, "dev.example.chart", "1.0", task
+        ) is AyaStructuredKitCheck.Rejected)
+        val headingOnly = kit().replace(
+            "## Host import and recovery\n        File > Import > Preview > Apply.",
+            "## Host import and recovery\n        "
+        )
+        assertTrue(AyaStructuredKitVerifier.verify(
+            headingOnly, "dev.example.chart", "1.0", task
+        ) is AyaStructuredKitCheck.Rejected)
+    }
+
     @Test fun taskRejectsFakeOrUnsafeFileContract() {
         for (badExtension in listOf("", "../json", ".JSON", ".a/b", ".zip\n")) {
             try {
@@ -100,6 +117,8 @@ class AyaStructuredArtifactTest {
         ))
         assertTrue(output.contains("App-specific Structured Artifact Kit"))
         assertTrue(output.contains("schema/version chart-3"))
+        assertTrue(output.contains("The host reports its importer expects"))
+        assertFalse(output.contains("The verified host importer"))
         assertTrue(output.contains("without adding an AYA wrapper"))
         assertTrue(output.contains("File > Import > Preview > Apply"))
         assertTrue(output.contains("## Interactions and precedence"))
