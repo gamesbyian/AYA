@@ -43,7 +43,7 @@ Deliver:
 
 ## Phase 3: React Native and Expo (P1)
 
-- Expo CNG guide-asset helper, Android-only Expo Modules API bridge and React Native card are source previews. A first-party synthetic Expo Android APK with staged native SDK, exact audited guide, merged manifest and DEX definitions has passed CI. Still require an isolated packaged consumer, independent adopting host and physical device acceptance before broad compatibility claims.
+- Expo CNG guide-asset helper, Android-only Expo Modules API bridge and React Native card are source previews. A first-party synthetic Expo Android APK with staged native SDK, exact audited guide, merged manifest and DEX definitions passed CI, as did an **out-of-tree npm-tarball synthetic consumer** under [PR #66](https://github.com/gamesbyian/AYA/pull/66). Independently authored adopting hosts and physical-device acceptance remain required for broad compatibility claims.
 - A publishable npm package and tested integration with ordinary React Native hosts remain pending. Verify custom development builds, Activity lifecycle and exact native dependency resolution before announcing compatibility.
 - Do not claim stock Expo Go can load arbitrary native modules; document precise support matrix and reject unsupported runtime environments with a helpful error.
 - Validate user-typed prompt and JS lifecycle without promising provider reception. Confirm no source-scanning, automatic permission escalation or implicit file attachments.
@@ -52,7 +52,7 @@ Deliver:
 ## Phase 4: visual scripting/game toolchains (P2)
 
 - **Godot 4:** Android v2 plugin, editor addon, `AyaHandoff` node, inspector fields from schema, `open_help(question)` method, `review_opened`/`rejected(reason)` signals. Android export-only; editor preview is a mock and must be labelled.
-- **Unity:** source-preview UPM Inspector action and Android Kotlin bridge passed Gradle/AAR and managed source C# preflight. A dedicated Visual Scripting Unit is still planned. Verify actual Unity Editor import, Unity Android export, IL2CPP/Mono boundaries, packaged guide/manifest and device lifecycle before claiming broadly installable Unity compatibility.
+- **Unity:** source-preview UPM Inspector action, Android Kotlin bridge and a dedicated **optional** `AYA/Help` Visual Scripting Unit are checked in. Native Gradle/AAR and managed source C# compiler/flow smoke pass against test-only Unity/VisualScripting signatures. Still verify actual Unity Editor and graph import, Android export, IL2CPP/Mono boundaries, packaged host guide/manifest and device lifecycle before claiming broadly installable Unity compatibility.
 - Document how UI controls and graph logic both connect to the same action. Never imply Godot/Unity desktop exports can use Android Sharesheet without a separate backend.
 - CI smoke tests where headless toolchains allow; interactive editor import, android export and real Android device acceptance are distinct.
 
