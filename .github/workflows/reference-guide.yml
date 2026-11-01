@@ -11,16 +11,10 @@ on:
       - 'README.md'
       - 'AGENTS.md'
       - '.github/workflows/reference-guide.yml'
+  # Always-on lightweight foundation: safe to require for every PR.
+  # Individual Android, Flutter, Expo, Godot and Unity native jobs still
+  # use their own impact-based filters. See docs/CI-MAIN-PROTECTION.md.
   pull_request:
-    paths:
-      - 'docs/**'
-      - 'tools/**'
-      - 'sample/**'
-      - 'aya/**'
-      - 'aya-compose/**'
-      - 'README.md'
-      - 'AGENTS.md'
-      - '.github/workflows/reference-guide.yml'
 
 concurrency:
   group: reference-guide-${{ github.ref }}
