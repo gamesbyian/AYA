@@ -6,6 +6,7 @@ on:
       - 'aya-unity/**'
       - 'integrations/unity/**'
       - 'tools/test_unity_adapter.py'
+      - 'tools/test_unity_visual_scripting.py'
       - 'tools/unity-managed-syntax/**'
       - '.github/workflows/unity.yml'
       - 'settings.gradle.kts'
@@ -15,6 +16,8 @@ on:
       - 'aya-unity/**'
       - 'integrations/unity/**'
       - 'tools/test_unity_adapter.py'
+      - 'tools/test_unity_visual_scripting.py'
+      - 'tools/unity-managed-syntax/**'
       - '.github/workflows/unity.yml'
       - 'settings.gradle.kts'
       - 'aya/**'
@@ -33,8 +36,12 @@ jobs:
         run: dotnet run --project tools/unity-managed-syntax/SourceSmoke.csproj --configuration Release -p:DefineConstants=UNITY_EDITOR
       - name: Compile and run managed API with testing-only Unity signatures (Android lane)
         run: dotnet run --project tools/unity-managed-syntax/SourceSmoke.csproj --configuration Release -p:DefineConstants=UNITY_ANDROID
+      - name: Compile and execute optional Visual Scripting graph node (Editor stubs)
+        run: dotnet run --project tools/unity-managed-syntax/VisualScriptingSmoke.csproj --configuration Release -p:DefineConstants=UNITY_EDITOR
+      - name: Compile and execute optional Visual Scripting graph node (Android stubs)
+        run: dotnet run --project tools/unity-managed-syntax/VisualScriptingSmoke.csproj --configuration Release -p:DefineConstants=UNITY_ANDROID
       - name: Document limitation
-        run: echo 'These stubs verify C# syntax, basic signatures and local rejection; they are NOT actual Unity engine assemblies or editor/export acceptance.'
+        run: echo 'These testing-only Unity/Visual Scripting API stubs verify managed C# source and fail-closed graph flow. Real Unity Editor/package assembly/API and exported Android player remain separately unverified.'
 
   android-native-bridge:
     runs-on: ubuntu-latest

@@ -8,7 +8,15 @@ Use `integrations/unity/com.aya.handoff/` as an embedded *source* package. Attac
 
 This `MonoBehaviour` is an action, **not an automatically created card**. The host must render the description, disclosure, output-use guidance, and a visible, accessible button. The host owns fonts, gamepad, TalkBack, safe areas, viewport scaling, layout and input. On desktop/editor and unsupported platforms the action returns a local `rejected` event. The `onLocalStatus(status, reason)` UnityEvent is *local state only*, never a callback for the user's AI answer.
 
-A developer can also call `AyaAndroidHelp.OpenHelp(questionOrNull, guideAsset, screenName, onLocalResult, askQuestion)` from C#, an existing button, or a Unity Visual Scripting **Invoke Member** node targeting the public `AyaUnityHelpButton.OpenHelp()` method. A custom Unity Visual Scripting Unit is **not implemented**; do not represent this public method as a certified custom graph node.
+A developer can call `AyaAndroidHelp.OpenHelp(questionOrNull, guideAsset, screenName, onLocalResult, askQuestion)` from C#, an existing button, or a Unity Visual Scripting **Invoke Member** node targeting the public `AyaUnityHelpButton.OpenHelp()` method.
+
+### Optional Visual Scripting graph Unit
+
+The source UPM package also includes `VisualScripting/AyaOpenReviewedHelpUnit.cs`: a **real `Unity.VisualScripting.Unit` subclass** exposed under `AYA/Help > Request Reviewed Help`, with a trigger control input, a typed `AyaUnityHelpButton` component input, and a `returned` control output. The output means only that the synchronous **request method returned**. It cannot mean that Android review opened, a recipient received text, or a model generated output. Use the component's existing `onLocalStatus` event to observe the local `review_opened`, `question_opened`, or `rejected` result, and never invent an agent-answer event. A missing component makes the node a no-op, and invalid/unconfigured components reject locally as before.
+
+`VisualScripting/Aya.Handoff.VisualScripting.asmdef` is a separate **optional assembly**, enabled only when the project has `com.unity.visualscripting` 1.7 to less than 2.0. It references `Aya.Handoff` and Unity's Core/Flow assemblies but is not a required dependency for regular Unity hosts. Install the relevant Visual Scripting package through the project Package Manager when you want nodes, then use Unity's Visual Scripting settings to regenerate units and find the `AYA/Help` category. Bind the component slot to a configured host `AyaUnityHelpButton`, including its truthful visible card copy and Android guide path; a graph node cannot author those independently.
+
+**Evidence limit:** CI compiles the actual optional Unit and executes a no-host/invalid-host source smoke in both Editor and Android conditional-compiler lanes against explicitly **test-only Visual Scripting and Unity API stubs**. This is source/API-shape evidence, not actual Unity Editor or Visual Scripting package assembly verification, IL2CPP or Mono export, or Android/device acceptance. Do not call the node independently tested in Unity until an actual Unity 2022.3+ Editor project and graph are imported and executed.
 
 ## Native dependency and APK identity
 
