@@ -68,6 +68,9 @@ class AppInventorSourceContractTest(unittest.TestCase):
         self.assertIn(action, self.workflow)
         self.assertIn("version: 2.1.2", self.workflow)
         self.assertIn("gradle :aya:assembleDebug", self.workflow)
+        self.assertIn("rush deps sync --dev-deps", self.workflow)
+        self.assertLess(self.workflow.index("rush deps sync --dev-deps"),
+                        self.workflow.index("rush deps tree"))
         self.assertIn("rush build", self.workflow)
         self.assertIn("zipfile.is_zipfile(file)", self.workflow)
         self.assertIn("any(name.endswith('.dex')", self.workflow)
