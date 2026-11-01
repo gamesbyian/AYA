@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Stage an audited exact-version AYA guide as a raw Godot 4.5 Android APK asset.
+"""Stage an audited exact-version guide as an explicit Godot Android raw asset.
 
-Godot res:// PCK resources are *not* equivalent to Activity.assets.open().
-Only the Android 4.5 Gradle template's proven assets/ source set is supported.
-Inspect the final APK separately; source staging is never release proof.
+Godot's Android 4.5 exporter first CLEARS its generated Gradle assets
+directory, then exports selected res:// project files back into APK assets.
+Therefore the guide must be a direct res://aya-guide.md project file with an
+explicit export include filter. Writing generated android/build/assets/
+would be destroyed during the real export, so that path must never be used.
+Inspect the final APK separately; source staging is not release proof.
 """
 from __future__ import annotations
 
@@ -16,7 +19,7 @@ from pathlib import Path
 from validate_guide import validate
 
 PRESET_FILE = "export_presets.cfg"
-TARGET = Path("android/build/assets/aya-guide.md")
+TARGET = Path("aya-guide.md")
 
 
 class StageError(ValueError):
@@ -51,6 +54,12 @@ def _android_preset(project: Path) -> tuple[str, str]:
         if opts_name not in config:
             raise StageError("Android preset options are missing")
         opts = config[opts_name]
+        included = {
+            name.strip()
+            for name in _unquote(config[section].get("include_filter", "")).split(",")
+        }
+        if TARGET.as_posix() not in included:
+            raise StageError("Godot export must explicitly include raw aya-guide.md")
         if _unquote(opts.get("gradle_build/use_gradle_build", "")) != "true":
             raise StageError("Android export must use the Godot Gradle build")
         app_id = _unquote(opts.get("package/unique_name", ""))
@@ -93,7 +102,7 @@ def stage(project: Path, guide: Path, *, check_only: bool = False) -> Path:
     if not build_gradle.is_file() or build_gradle.is_symlink():
         raise StageError("Install the Godot 4.5 Gradle Android build template first")
     target = project / TARGET
-    for path in (project / "android", template_root, template_root / "assets", target):
+    for path in (project / "android", template_root, target):
         if path.is_symlink():
             raise StageError("Refusing symlinked Godot APK-asset destination")
     if target.exists():
@@ -102,8 +111,7 @@ def stage(project: Path, guide: Path, *, check_only: bool = False) -> Path:
         return target
     if check_only:
         raise StageError("Matching native guide is absent; staging was not requested")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temp_name = tempfile.mkstemp(prefix=".aya-guide-", dir=target.parent)
+    descriptor, temp_name = tempfile.mkstemp(prefix=".aya-guide-", dir=project)
     try:
         with os.fdopen(descriptor, "wb") as fd:
             fd.write(source)
@@ -125,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, StageError) as exc:
         parser.exit(1, f"AYA Godot Android guide: FAIL: {exc}\n")
     print(f"AYA Godot Android guide: staged exact source bytes at {target}")
+    print("Godot 4.5 exporter must copy this explicitly included res:// file into APK assets")
     print("Scope: raw source staging only; verify final APK identity and guide")
     return 0
 
