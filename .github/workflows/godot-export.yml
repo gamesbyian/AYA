@@ -10,6 +10,8 @@ on:
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/verify_android_manifest_providers.py'
+      - 'tools/test_verify_android_manifest_providers.py'
       - '.github/workflows/godot-export.yml'
   push:
     branches: [main]
@@ -22,6 +24,8 @@ on:
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/verify_android_manifest_providers.py'
+      - 'tools/test_verify_android_manifest_providers.py'
       - '.github/workflows/godot-export.yml'
   workflow_dispatch:
 
@@ -158,9 +162,13 @@ jobs:
             --guide integrations/godot/ci-host/aya-guide.md --aapt "$AAPT"
           python3 tools/verify_android_adapter_apk.py --apk "$APK" \
             --class dev.aya.godot.AyaGodotPlugin \
-            --class dev.aya.android.AyaShareSelectionReceiver
+            --class dev.aya.android.AyaShareSelectionReceiver \
+            --class dev.aya.android.AyaFileProvider
           python3 tools/verify_android_manifest_metadata.py --apk "$APK" --aapt "$AAPT" \
             --name org.godotengine.plugin.v2.AYA --value dev.aya.godot.AyaGodotPlugin
+          python3 tools/verify_android_manifest_providers.py --apk "$APK" --aapt "$AAPT" \
+            --provider dev.aya.android.AyaFileProvider=dev.aya.godot.cihost.aya.files \
+            --provider androidx.core.content.FileProvider=dev.aya.godot.cihost.fileprovider
           sha256sum "$APK"
           echo 'Scope: actual Godot 4.5.1 debug Android export, not physical-device or assistant ingestion acceptance'
       - name: Upload Godot-generated APK for controlled device QA
