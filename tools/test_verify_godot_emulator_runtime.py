@@ -10,16 +10,19 @@ from subprocess import CompletedProcess
 
 from verify_godot_emulator_runtime import (
     EmulatorSmokeError, FAILED_MARKER, PACKAGE, READY_MARKER,
-    inspect_log, png_dimensions, smoke, verify_apk,
+    inspect_log, png_dimensions, png_has_visible_content, smoke, verify_apk,
 )
 
 
-def fake_png(width, height):
+def fake_png(width, height, blank=False):
     def chunk(kind, data):
         checksum = zlib.crc32(kind + data) & 0xffffffff
         return (struct.pack(">I", len(data)) + kind + data +
                 struct.pack(">I", checksum))
-    raw = (b"\x00" + b"\x00" * (width * 4)) * height
+    dark = b"\x00\x00\x00\xff"
+    light = b"\xff\xff\xff\xff"
+    row = dark * width if blank else dark * (width // 2) + light * (width - width // 2)
+    raw = (b"\x00" + row) * height
     return (
         b"\x89PNG\r\n\x1a\n" +
         chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)) +
@@ -31,7 +34,8 @@ def fake_png(width, height):
 class FakeADB:
     def __init__(self, *, marker=READY_MARKER, pid="3212", installed=True,
                  booted=True, fail_install=False, corrupt_png=False,
-                 immersive_supported=True, focused_window=None):
+                 immersive_supported=True, focused_window=None,
+                 blank_png=False, blank_first=0):
         self.commands = []
         self.marker = marker
         self.pid = pid
@@ -42,6 +46,9 @@ class FakeADB:
         self.immersive_supported = immersive_supported
         self.immersive_value = "null"
         self.focused_window = focused_window
+        self.blank_png = blank_png
+        self.blank_first = blank_first
+        self.screenshot_calls = 0
 
     def __call__(self, args, **kwargs):
         self.commands.append(tuple(args))
@@ -52,7 +59,9 @@ class FakeADB:
                      and c[-1] != "reset"]
             size = sizes[-1] if sizes else "412x892"
             width, height = (int(x) for x in size.split("x"))
-            image = b"not a PNG" if self.corrupt_png else fake_png(width, height)
+            self.screenshot_calls += 1
+            blank = self.blank_png or self.screenshot_calls <= self.blank_first
+            image = b"not a PNG" if self.corrupt_png else fake_png(width, height, blank=blank)
             return CompletedProcess(args, 0, image, b"")
         if "dumpsys window displays" in command:
             focused = self.focused_window or (
@@ -153,6 +162,32 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         with self.assertRaisesRegex(EmulatorSmokeError,
                                     "system dialog or non-host window"):
             self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+
+    def test_blank_frames_are_not_accepted_as_visual_evidence(self):
+        fake = FakeADB(blank_png=True)
+        folder = Path(self.tmp.name) / "screens"
+        with self.assertRaisesRegex(EmulatorSmokeError, "blank/unrendered"):
+            self.execute(fake, screenshots_dir=folder)
+        self.assertFalse(folder.exists())
+        self.assertEqual(fake.screenshot_calls, 4)
+        self.assertIn(("adb", "shell", "wm", "size", "reset"), fake.commands)
+
+    def test_first_unrendered_frame_can_recover_on_later_capture(self):
+        fake = FakeADB(blank_first=1)
+        folder = Path(self.tmp.name) / "screens"
+        results = self.execute(fake, screenshots_dir=folder)
+        self.assertEqual(results["layouts"][0]["screenshot"]["capture_attempts"], 2)
+        self.assertEqual(results["layouts"][1]["screenshot"]["capture_attempts"], 1)
+        self.assertEqual(fake.screenshot_calls, 3)
+        self.assertTrue(all(p["screenshot"]["fixture_contrast_detected"]
+                            for p in results["layouts"]))
+
+    def test_image_content_check_rejects_uniform_black_or_white(self):
+        self.assertFalse(png_has_visible_content(fake_png(50, 30, blank=True)))
+        self.assertTrue(png_has_visible_content(fake_png(50, 30)))
+        with self.assertRaisesRegex(EmulatorSmokeError, "image data"):
+            valid = fake_png(50, 30)
+            png_has_visible_content(valid.replace(b"IDAT", b"IXAT", 1))
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()

@@ -75,31 +75,119 @@ def png_dimensions(data: bytes) -> tuple[int, int]:
     raise EmulatorSmokeError("Screenshot PNG has no terminating IEND")
 
 
+MAX_DECODED_SCREENSHOT_BYTES = 24 * 1024 * 1024
+
+
+def png_has_visible_content(data: bytes) -> bool:
+    """Require a visible light/dark UI contrast in our specific synthetic host.
+
+    Android's screenshot service can return a perfectly valid, completely
+    black frame before Godot presents any rendered pixels. This is deliberately
+    a *test-fixture* guard, not a general accessibility or text-readability test.
+    """
+    width, height = png_dimensions(data)
+    if (data[24] != 8 or data[25] not in (2, 6) or
+            data[26:29] != b"\x00\x00\x00"):
+        raise EmulatorSmokeError("Unsupported Android PNG pixel encoding")
+    channels = 4 if data[25] == 6 else 3
+    stride = width * channels
+    expected = (stride + 1) * height
+    if expected > MAX_DECODED_SCREENSHOT_BYTES:
+        raise EmulatorSmokeError("Decoded screenshot exceeds size limit")
+    compressed = []
+    pos = len(PNG_SIGNATURE)
+    while pos < len(data):
+        length = struct.unpack(">I", data[pos:pos + 4])[0]
+        if data[pos + 4:pos + 8] == b"IDAT":
+            compressed.append(data[pos + 8:pos + 8 + length])
+        pos += 12 + length
+    try:
+        stream = zlib.decompressobj()
+        raw = stream.decompress(b"".join(compressed), expected + 1)
+        raw += stream.flush()
+    except zlib.error as exc:
+        raise EmulatorSmokeError("Android PNG image data cannot be decoded") from exc
+    if len(raw) != expected or not stream.eof or stream.unused_data:
+        raise EmulatorSmokeError("Android PNG decompressed image is incomplete")
+    offset = 0
+    previous = bytearray(stride)
+    dark = light = 0
+    for _ in range(height):
+        filter_type = raw[offset]
+        row = bytearray(raw[offset + 1:offset + 1 + stride])
+        offset += stride + 1
+        if filter_type not in (0, 1, 2, 3, 4):
+            raise EmulatorSmokeError("Unsupported screenshot PNG scanline filter")
+        if filter_type:
+            for i in range(stride):
+                left = row[i - channels] if i >= channels else 0
+                above = previous[i]
+                upper_left = previous[i - channels] if i >= channels else 0
+                if filter_type == 1:
+                    predictor = left
+                elif filter_type == 2:
+                    predictor = above
+                elif filter_type == 3:
+                    predictor = (left + above) // 2
+                else:
+                    p = left + above - upper_left
+                    da, db, dc = abs(p - left), abs(p - above), abs(p - upper_left)
+                    predictor = (left if da <= db and da <= dc else
+                                 above if db <= dc else upper_left)
+                row[i] = (row[i] + predictor) & 0xff
+        for i in range(0, stride, channels):
+            if channels == 4 and row[i + 3] < 128:
+                continue
+            brightness = max(row[i:i + 3])
+            if brightness <= 20:
+                dark += 1
+            elif brightness >= 80:
+                light += 1
+        if dark >= 32 and light >= 32:
+            return True
+        previous = row
+    return False
+
+
 def capture_synthetic_screenshot(
-    size: str, scale: str, destination: Path, *, run: Callable = subprocess.run
+    size: str, scale: str, destination: Path, *, run: Callable = subprocess.run,
+    pause: Callable[[float], None] = time.sleep,
 ) -> dict:
-    """Save a first-party empty-input scene only; never capture another app."""
+    """Capture visible pixels from our fixture, never another user app."""
     if destination.is_symlink() or destination.exists():
         raise EmulatorSmokeError("Refusing to overwrite existing screenshot")
-    try:
-        result = run(["adb", "exec-out", "screencap", "-p"],
-                     capture_output=True, check=False, timeout=40)
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        raise EmulatorSmokeError("Could not capture synthetic Godot screen") from exc
-    if result.returncode != 0:
-        raise EmulatorSmokeError("ADB screencap command failed")
-    blob = result.stdout
-    width, height = png_dimensions(blob)
     target_width, target_height = (int(part) for part in size.split("x"))
-    if sorted((width, height)) != sorted((target_width, target_height)):
+    blob = b""
+    width = height = 0
+    attempts = 0
+    # Godot can emit its scene-ready marker before the Vulkan first frame has
+    # been presented. Bounded retries verify pixels, not just process liveness.
+    for attempts in range(1, 5):
+        try:
+            result = run(["adb", "exec-out", "screencap", "-p"],
+                         capture_output=True, check=False, timeout=40)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise EmulatorSmokeError("Could not capture synthetic Godot screen") from exc
+        if result.returncode != 0:
+            raise EmulatorSmokeError("ADB screencap command failed")
+        blob = result.stdout
+        width, height = png_dimensions(blob)
+        if sorted((width, height)) != sorted((target_width, target_height)):
+            raise EmulatorSmokeError(
+                f"Screenshot dimensions {width}x{height} mismatch requested {size}"
+            )
+        if png_has_visible_content(blob):
+            break
+        if attempts < 4:
+            pause(2.0)
+    else:
         raise EmulatorSmokeError(
-            f"Screenshot dimensions {width}x{height} mismatch requested {size}"
+            f"Android screenshot remains blank/unrendered after 4 captures at {size}"
         )
     if destination.parent.is_symlink():
         raise EmulatorSmokeError("Refusing symlinked screenshot directory")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    # Exclusive creation prevents symlink following and foreign-file overwrite
-    # even when the destination appears between the preflight check and write.
+    # Exclusive creation prevents symlink following and foreign-file overwrite.
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
     try:
         fd = os.open(destination, flags, 0o600)
@@ -117,9 +205,12 @@ def capture_synthetic_screenshot(
         "height_px": height,
         "orientation": "portrait" if height >= width else "landscape",
         "sha256": hashlib.sha256(blob).hexdigest(),
+        "capture_attempts": attempts,
+        "fixture_contrast_detected": True,
         "capture": "adb exec-out screencap -p from disposable first-party fixture",
         "visual_accessibility_reviewed": False,
     }
+
 
 
 def inspect_log(log: str, package: str = PACKAGE) -> tuple[bool, bool]:
@@ -273,7 +364,7 @@ def smoke(
                     )
                 name = f"godot_{size}_font{int(float(scale) * 100)}.png"
                 screenshot = capture_synthetic_screenshot(
-                    size, scale, screenshots_dir / name, run=run
+                    size, scale, screenshots_dir / name, run=run, pause=pause
                 )
             outcomes.append({
                 "screenshot": screenshot,
