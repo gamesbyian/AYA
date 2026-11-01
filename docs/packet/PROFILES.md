@@ -22,7 +22,7 @@ Preserve `AyaCreativeTask` typed fields and prompt-first UX. Ensure the essentia
 
 ## Structured Artifact
 
-This profile currently has a documented [portable contract](../STRUCTURED_ARTIFACT_HANDOFF.md), but the generic Android structured-artifact entry point is not implemented. A packet should document true parser schema, field interactions, lock precedence, quantization, accepted extension/MIME and expected top-level shape. Include one valid minimal example, one realistic complex example and destructive invalid examples. The user returns through the ordinary host importer. Never fake a new Android API by misusing image requirements.
+This profile has a documented [portable contract](../STRUCTURED_ARTIFACT_HANDOFF.md) and an **unpublished native Android source-preview** implementation: `AyaStructuredTask`, `Aya.launchStructuredBundled()` and `AyaComponentAction.Structured`. The host must bundle an exact-installed-version, seven-section `aya-structured-kit/v1`; the guard also checks that schema revision, extension and MIME match the typed task. A packet should document the real parser schema, field interactions, lock precedence, quantization and top-level shape, including valid, complex and invalid examples. The user returns through the ordinary **host-owned importer** after independently validating the file. No AYA file importer, recipient verification or publicly released SDK is implied.
 
 ## Filesystem Automation
 
@@ -38,6 +38,6 @@ For all profiles, run a [controlled agent trial ledger](EVALUATION.md) on the ex
 
 The compiler can emit a bounded full-context `--brief-output` for request-only paths, but the host must explicitly use it and preserve final user edits. If this fails its length check, use full reviewed attachment and do not silently omit facts.
 
-The currently shipped SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative, Translation and Filesystem Handoffs have typed requests with guarded static kits where applicable. The packet compiler and optional `build_reference.py` fragment injection are developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
+The current unpublished Android SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative, Translation, Filesystem and Structured Artifact Handoffs have typed requests with guarded static kits where applicable. The packet compiler and optional `build_reference.py` fragment injection are developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
 
 Do not claim recipient interoperability or release readiness without dated, independent QA.
