@@ -5,6 +5,9 @@ on:
       - 'integrations/godot/**'
       - 'aya-godot/**'
       - 'aya/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
       - 'tools/test_stage_godot_android_guide.py'
       - 'tools/verify_flutter_host_apk.py'
@@ -19,6 +22,9 @@ on:
       - 'integrations/godot/**'
       - 'aya-godot/**'
       - 'aya/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
       - 'tools/test_stage_godot_android_guide.py'
       - 'tools/verify_flutter_host_apk.py'
@@ -64,6 +70,16 @@ jobs:
             --questions integrations/godot/ci-host/questions.json --strict
       - name: Stage both actual debug AARs through canonical Gradle build
         run: gradle :aya-godot:stageGodotAddon --no-daemon
+      - name: Verify both build variants and original editor addon are present
+        run: |
+          STAGED=aya-godot/build/godot-addon/AYA
+          for variant in debug release; do
+            test -s "$STAGED/bin/$variant/aya-$variant.aar"
+            test -s "$STAGED/bin/$variant/aya-godot-$variant.aar"
+          done
+          for file in plugin.cfg export_plugin.gd aya_card.gd; do
+            test -s "$STAGED/$file"
+          done
       - name: Install matching Godot Android SDK, NDK and build tools
         run: |
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
@@ -171,6 +187,13 @@ jobs:
             --provider androidx.core.content.FileProvider=dev.aya.godot.cihost.fileprovider
           sha256sum "$APK"
           echo 'Scope: actual Godot 4.5.1 debug Android export, not physical-device or assistant ingestion acceptance'
+      - name: Upload complete staged Godot addon for clean host integration QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-godot-debug-release-addon
+          path: aya-godot/build/godot-addon/AYA/
+          if-no-files-found: error
+          retention-days: 7
       - name: Upload Godot-generated APK for controlled device QA
         uses: actions/upload-artifact@v4
         with:
