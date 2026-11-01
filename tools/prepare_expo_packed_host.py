@@ -16,10 +16,17 @@ from pathlib import Path
 
 HOST_FILES = ("App.tsx", "app.json", "aya-guide.md")
 PACKAGES = (
-    ("aya-expo", "file:..", ("android/build.gradle", "expo-module.config.json", "src/index.ts")),
+    ("aya-expo", "file:..", (
+        "android/build.gradle",
+        "android/src/main/java/dev/aya/expo/AyaExpoModule.kt",
+        "expo-module.config.json", "src/index.ts",
+        "src/AyaHelpCard.tsx", "src/native.ts"
+    )),
     ("aya-expo-guide", "file:../../guide-plugin", ("app.plugin.js", "guide_asset.cjs")),
 )
 MAX_PACKAGE_BYTES = 16 * 1024 * 1024
+MAX_UNPACKED_BYTES = 64 * 1024 * 1024
+UNWANTED_PACKAGE_DIRS = {"node_modules", "ci-host", "test", "tests", "build", ".git"}
 
 
 class PackedHostError(ValueError):
@@ -44,6 +51,13 @@ def _tarball_metadata(path: Path, name: str, files: tuple[str, ...]) -> dict:
                 raise PackedHostError("Unsafe or unexpected npm tar paths: " + name)
             if len(names) != len(set(names)):
                 raise PackedHostError("Duplicate packed npm files: " + name)
+            if sum(item.size for item in members) > MAX_UNPACKED_BYTES:
+                raise PackedHostError("Unreasonably large unpacked npm package: " + name)
+            if any(
+                any(segment in UNWANTED_PACKAGE_DIRS for segment in Path(item.name).parts[1:-1])
+                for item in members
+            ):
+                raise PackedHostError("Internal source, tests or dependencies leaked into npm package: " + name)
             missing = set(("package/package.json", *(f"package/{item}" for item in files))) - set(names)
             if missing:
                 raise PackedHostError("Missing packaged source files in " + name + ": " + ", ".join(sorted(missing)))
