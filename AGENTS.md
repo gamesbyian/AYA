@@ -110,3 +110,8 @@ The CI-only Flutter host fixture at `integrations/flutter/aya_flutter/ci-host/` 
 ## Expo typed Android bridge and React Native card
 
 See [Expo native module source-preview](docs/components/EXPO_MODULE.md). Never use a custom Sharesheet, skip native AYA-RAS guide checks, infer assistant activity from `question_opened`/`review_opened`, or substitute Expo Go for a native Android host. The module must call `AyaComponentAction.Help` through an active Android Activity, and its JS wrapper must reject unsupported platform, missing native linkage, unsafe asset paths, malformed input and unknown statuses. The source-only TypeScript tests do not certify an Android APK until a matching staged AYA AAR, native reference, merged manifest and installed UI are verified.
+
+
+## Automatic Android skill selection
+
+For **every native Android implementation, review, test, regression, lifecycle, accessibility, storage, security, widget or performance task**, read and apply [Android evidence-first](.agents/skills/android-evidence-first/SKILL.md) without waiting for the owner to request it. During task discovery identify relevant specialist skill references in that file and, **if installed and available**, read the appropriate Google Android, Android Testing or Compose Performance skill; use official Android documentation otherwise. Apply narrow skills to the actual failure mode, not indiscriminately. The repository's normative specifications, agent ownership, security rules, CI policy and proof gates always take precedence. Record when a specialist skill materially changed the implementation or test plan; never treat a skill as proof of working behavior.
