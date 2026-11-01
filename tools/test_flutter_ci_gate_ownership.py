@@ -16,7 +16,7 @@ class FlutterCIGatesTest(unittest.TestCase):
         for expected in (
             "flutter analyze", "flutter test", "flutter pub get",
             "tools/component_codegen.py", "tools/validate_guide.py",
-            "tools/audit_reference.py", "tools/test_verify_flutter_host_apk.py",
+            "tools/audit_reference.py", "test_verify_flutter_host_apk.py",
         ):
             self.assertIn(expected, self.source, expected)
         self.assertNotIn("flutter build apk", self.source)
