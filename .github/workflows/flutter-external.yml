@@ -1,0 +1,95 @@
+name: Flutter AGP9 out-of-tree source package Android host
+on:
+  pull_request:
+    paths:
+      - 'integrations/flutter/aya_flutter/**'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'tools/test_flutter_builtin_migration.py'
+      - 'aya/**'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+      - '.github/workflows/flutter-external.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/flutter/aya_flutter/**'
+      - 'integrations/flutter/migration/prepare_host.py'
+      - 'tools/test_flutter_builtin_migration.py'
+      - 'aya/**'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+      - '.github/workflows/flutter-external.yml'
+
+concurrency:
+  group: aya-flutter-external-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  external-source-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Install Android platform
+        run: |
+          SDKROOT=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          echo "ANDROID_HOME=$SDKROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDKROOT" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --sdk_root="$SDKROOT" "platforms;android-35" "build-tools;35.0.0"
+      - name: Run fail-closed external-path migrator tests
+        run: python3 -m unittest discover -s tools -p 'test_flutter_builtin_migration.py'
+      - name: Stage native AYA SDK as unpublished Maven artifact
+        run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
+      - name: Prepare independent source package and generated host outside monorepo
+        run: |
+          HOST="$RUNNER_TEMP/aya-flutter-consumer"
+          PACKAGE="$RUNNER_TEMP/AYA Flutter package"
+          cp -R integrations/flutter/aya_flutter "$PACKAGE"
+          test -s "$PACKAGE/pubspec.yaml"
+          flutter create --project-name aya_flutter_ci_host --platforms android "$HOST"
+          python3 integrations/flutter/migration/prepare_host.py configure --host "$HOST" --source "$PACKAGE"
+          python3 tools/validate_guide.py --strict "$PACKAGE/ci-host/aya-guide.md"
+          python3 tools/audit_reference.py "$PACKAGE/ci-host/aya-guide.md" --inventory integrations/flutter/aya_flutter/ci-host/inventory.json --questions integrations/flutter/aya_flutter/ci-host/questions.json --strict
+          grep -F "path: '../AYA Flutter package'" "$HOST/pubspec.yaml"
+          test -s "$HOST/android/app/src/main/assets/aya-guide.md"
+          cmp "$HOST/android/app/src/main/assets/aya-guide.md" "$PACKAGE/ci-host/aya-guide.md"
+      - name: Build Flutter 3.47 AGP 9 built-in Kotlin APK from external source package
+        env:
+          AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
+          CI: '1'
+        run: |
+          cd "$RUNNER_TEMP/aya-flutter-consumer"
+          flutter pub get
+          flutter build apk --debug --no-pub
+      - name: Inspect exact APK guide, installed identity, native sharing and Flutter class
+        run: |
+          APK="$RUNNER_TEMP/aya-flutter-consumer/build/app/outputs/flutter-apk/app-debug.apk"
+          GUIDE="$RUNNER_TEMP/AYA Flutter package/ci-host/aya-guide.md"
+          AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -x "$AAPT"
+          python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide "$GUIDE" --aapt "$AAPT"
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver
+          sha256sum "$APK"
+          echo 'Out-of-tree synthetic source-package host only; external FlutterFlow Editor, real devices and recipient ingestion unverified.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aya-flutter-external-source-host
+          path: ${{ runner.temp }}/aya-flutter-consumer/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+          if-no-files-found: error

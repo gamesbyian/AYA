@@ -24,6 +24,7 @@ class BuiltinKotlinHostTest(unittest.TestCase):
             (self.source / rel).mkdir(parents=True)
         (self.source / "ci-host/aya-guide.md").write_text("fixture guide")
         (self.source / "ci-host/main.dart").write_text("void main() {}")
+        (self.source / "pubspec.yaml").write_text("name: aya_flutter\\nversion: 0.2.0-dev.1\\n")
         for rel in ("android/app/src/main", "android/gradle/wrapper", "lib"):
             (self.host / rel).mkdir(parents=True)
         (self.host / "pubspec.yaml").write_text(
@@ -58,7 +59,7 @@ class BuiltinKotlinHostTest(unittest.TestCase):
         self.assertIn("kotlin {", app)
         self.assertIn("JvmTarget.JVM_17", app)
         pubspec = (self.host / "pubspec.yaml").read_text()
-        self.assertIn("path: ..", pubspec)
+        self.assertIn("path: '../../source'", pubspec)
         self.assertEqual(pubspec.count("  aya_flutter:"), 1)
         self.assertIn("dev_dependencies:", pubspec)
         self.assertEqual((self.host / "android/app/src/main/assets/aya-guide.md").read_text(),
@@ -68,6 +69,28 @@ class BuiltinKotlinHostTest(unittest.TestCase):
         self.assertNotIn("android.builtInKotlin=false", props)
         self.assertIn("gradle-9.1.0-all.zip",
                       (self.host / "android/gradle/wrapper/gradle-wrapper.properties").read_text())
+
+    def test_external_source_package_with_spaces_is_resolved_from_host(self):
+        external = self.base / "external AYA package"
+        (external / "ci-host").mkdir(parents=True)
+        (external / "pubspec.yaml").write_text(
+            "name: aya_flutter\\nversion: 0.2.0-dev.1\\n"
+        )
+        (external / "ci-host/aya-guide.md").write_text("external fixture guide")
+        (external / "ci-host/main.dart").write_text("void main() {}")
+        migrator.configure(host=self.host, package=external)
+        pubspec = (self.host / "pubspec.yaml").read_text()
+        self.assertIn("path: '../../external AYA package'", pubspec)
+        self.assertEqual(
+            (self.host / "android/app/src/main/assets/aya-guide.md").read_text(),
+            "external fixture guide"
+        )
+
+    def test_missing_source_pubspec_fails_before_host_modification(self):
+        (self.source / "pubspec.yaml").unlink()
+        with self.assertRaisesRegex(RuntimeError, "source package pubspec missing"):
+            migrator.configure()
+        self.assertNotIn("aya_flutter:", (self.host / "pubspec.yaml").read_text())
 
     def test_changed_flutter_host_version_fails_without_packing_unmatched_guide(self):
         pub = self.host / "pubspec.yaml"

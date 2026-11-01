@@ -6,6 +6,7 @@ about the generated Flutter host: unexpected templates must fail for review.
 """
 from __future__ import annotations
 import argparse
+import os
 import re
 import shutil
 from pathlib import Path
@@ -42,6 +43,19 @@ def configure(host: Path | None = None, package: Path | None = None) -> None:
     package = package or SOURCE
     if not (host / "android").is_dir():
         raise RuntimeError("Flutter generated Android host missing; run flutter create first")
+    # The package need not be a sibling of the generated Flutter host.
+    # Compute a real relative path so this works for out-of-tree source
+    # package consumers; do not bake the AYA repository layout into the host.
+    host_root = host.resolve()
+    package_root = package.resolve()
+    if not (package_root / "pubspec.yaml").is_file():
+        raise RuntimeError("Flutter AYA source package pubspec missing")
+    relative_package = Path(os.path.relpath(package_root, host_root)).as_posix()
+    if any(ord(ch) < 32 for ch in relative_package):
+        raise RuntimeError("Invalid characters in Flutter package source path")
+    # Quote YAML string values (doubling any single quotes) to safely support
+    # spaces, colons and punctuation in a developer-owned directory path.
+    yaml_path = "'" + relative_package.replace("'", "''") + "'"
     pub = host / "pubspec.yaml"
     value = pub.read_text()
     if not re.search(r"(?m)^version:\s*1\.0\.0\+1\s*$", value):
@@ -49,7 +63,7 @@ def configure(host: Path | None = None, package: Path | None = None) -> None:
     # Match the top-level YAML key, not the suffix of dev_dependencies.
     value, count = re.subn(
         r"(?m)^dependencies:[ \\t]*$",
-        "dependencies:\\n  aya_flutter:\\n    path: ..",
+        "dependencies:\\n  aya_flutter:\\n    path: " + yaml_path,
         value,
     )
     if count != 1:
