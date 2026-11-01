@@ -27,8 +27,8 @@ SCENARIOS = (("412x892", "1.0"), ("320x700", "2.0"))
 MAX_LOG_CHARS = 800
 MAX_REPORT_BYTES = 16 * 1024
 MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024
-PNG_SIGNATURE = b"\\x89PNG\\r\\n\\x1a\\n"
-PNG_END = b"\\x00\\x00\\x00\\x00IEND\\xaeB\\x60\\x82"
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+PNG_END = b"\x00\x00\x00\x00IEND\xaeB\x60\x82"
 
 
 class EmulatorSmokeError(ValueError):
@@ -40,7 +40,7 @@ def png_dimensions(data: bytes) -> tuple[int, int]:
     if not isinstance(data, bytes) or not 60 <= len(data) <= MAX_SCREENSHOT_BYTES:
         raise EmulatorSmokeError("Invalid or unreasonably large screenshot bytes")
     if (not data.startswith(PNG_SIGNATURE) or data[8:16] !=
-            b"\\x00\\x00\\x00\\x0dIHDR" or not data.endswith(PNG_END)):
+            b"\x00\x00\x00\x0dIHDR" or not data.endswith(PNG_END)):
         raise EmulatorSmokeError("Android screencap returned malformed PNG framing")
     width, height = struct.unpack(">II", data[16:24])
     if not 1 <= width <= 4096 or not 1 <= height <= 4096 or b"IDAT" not in data:
@@ -260,7 +260,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.screenshots_dir is not None:
                 report.write("Bounded synthetic-scene PNG screenshots captured for "
                              "later **human visual review**; screenshot presence "
-                             "alone cannot certify visibility or accessibility.\\n\\n")
+                             "alone cannot certify visibility or accessibility.\n\n")
             report.write("No assistant app, local review, TalkBack or physical "
                          "device acceptance is implied.\n")
     return 0
