@@ -19,8 +19,8 @@ class GodotExportWorkflowContract(unittest.TestCase):
             "Godot_v4.5.1-stable_linux.x86_64.zip",
             "Godot_v4.5.1-stable_export_templates.tpz",
             "godot-editor/Godot_v4.5.1-stable_linux.x86_64",
-            "--headless --path integrations/godot --export-debug Android",
-            "integrations/godot/out/aya-godot-host-debug.apk",
+            '--headless --path "$AYA_GODOT_HOST" --export-debug Android',
+            '$AYA_GODOT_HOST/out/aya-godot-host-debug.apk',
             "gradle_build/use_gradle_build=true",
         ):
             self.assertIn(expected, self.workflow + self.preset)
@@ -29,6 +29,7 @@ class GodotExportWorkflowContract(unittest.TestCase):
         for path in (
             "integrations/godot/**", "aya-godot/**", "aya/**",
             "tools/stage_godot_android_guide.py",
+            "tools/prepare_godot_out_of_tree_host.py",
             "tools/verify_android_manifest_metadata.py",
             "tools/verify_android_manifest_providers.py",
             "tools/test_verify_android_manifest_providers.py",
@@ -36,6 +37,22 @@ class GodotExportWorkflowContract(unittest.TestCase):
         ):
             self.assertEqual(self.workflow.count("'" + path + "'"), 2, path)
         self.assertIn("workflow_dispatch:", self.workflow)
+
+    def test_host_is_external_with_staged_addon_and_exact_guide(self):
+        required = (
+            'HOST="$RUNNER_TEMP/aya-godot-packed-consumer"',
+            'tools/prepare_godot_out_of_tree_host.py',
+            '--staged-addon aya-godot/build/godot-addon/AYA',
+            'echo "AYA_GODOT_HOST=$HOST" >> "$GITHUB_ENV"',
+            '--project "$HOST" --guide "$HOST/ci-host/aya-guide.md"',
+            'APK="$AYA_GODOT_HOST/out/aya-godot-host-debug.apk"',
+            '--guide "$AYA_GODOT_HOST/ci-host/aya-guide.md" --aapt',
+            'path: ${{ runner.temp }}/aya-godot-packed-consumer/out/aya-godot-host-debug.apk',
+        )
+        for item in required:
+            self.assertIn(item, self.workflow)
+        self.assertNotIn('mkdir -p integrations/godot/android/build', self.workflow)
+        self.assertNotIn('cp -a aya-godot/build/godot-addon/AYA/. integrations/godot/', self.workflow)
 
     def test_external_templates_are_pinned_and_cachable(self):
         for digest in (
