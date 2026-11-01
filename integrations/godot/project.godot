@@ -9,6 +9,5 @@ enabled=PackedStringArray("res://addons/AYA/plugin.cfg")
 
 [rendering]
 
-# Godot's Android exporter requires ETC2/ASTC imported textures even on a
-# Linux CI host whose default rendering backend prefers desktop formats.
+; Godot Android exporter requires ETC2/ASTC textures on Linux CI.
 textures/vram_compression/import_etc2_astc=true
