@@ -33,7 +33,7 @@ A test must fail closed when the guide is absent, stale or inconsistent with ins
 ## Current independent gates
 
 - Expo has first-party APK/guide/manifest/DEX evidence. A clean npm tarball consumer is tracked separately and remains a synthetic host until an independently developed app is tested.
-- Flutter's AGP 9 migration is under separate review. Keep legacy and built-in Kotlin compatibility claims version- and evidence-specific.
+- Flutter's AGP 9 built-in Kotlin promoted source passed a first-party real-host APK test ([CI 41249286150](https://github.com/gamesbyian/AYA/actions/runs/41249286150)). Legacy KGP remains a **separately pinned source version**. External Flutter/FlutterFlow editors, actual devices and recipients remain unverified.
 - Godot has native AAR and headless editor evidence. Actual Android export with the host's raw APK guide and real editor integration are independent requirements.
 - Unity has native AAR and stand-in C# compilation evidence. Actual Unity Editor import, exported Android APK, Mono/IL2CPP and device lifecycle are unverified.
 
