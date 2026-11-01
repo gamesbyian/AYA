@@ -24,6 +24,7 @@ REQUIRED_CLASSES = {
         "dev/aya/android/AyaReferenceVerifier.class",
         "dev/aya/android/AyaComponentAction.class",
         "dev/aya/android/AyaShareSelectionReceiver.class",
+        "dev/aya/android/AyaFileProvider.class",
     ),
     "aya-compose": ("dev/aya/compose/AyaComposeKt.class",),
 }
