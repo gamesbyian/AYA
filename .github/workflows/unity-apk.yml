@@ -52,16 +52,22 @@ jobs:
       - name: Audit existing sample's exact-version host guide
         run: |
           python3 tools/validate_guide.py --strict sample/src/main/assets/aya-guide.md
+      - name: Scope synthetic game-engine host to Godot API 24 without changing AYA sample sources
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("sample/build.gradle.kts")
+          current = path.read_text(encoding="utf-8")
+          if current.count("minSdk = 23") != 1:
+              raise SystemExit("AYA sample minSdk source contract changed")
+          path.write_text(current.replace("minSdk = 23", "minSdk = 24"), encoding="utf-8")
+          PY
       - name: Inject both game-engine bridge AARs into one throwaway Android host
         run: |
           cat > "$RUNNER_TEMP/aya-unity-sample.init.gradle" <<'GRADLE'
           gradle.beforeProject { project ->
               if (project.path == ':sample') {
                   project.plugins.withId('com.android.application') {
-                      // This *synthetic* game-engine APK requires Godot 4.5's
-                      // Android 24 minimum. Keep the real sample/core minSdk 23.
-                      // Never suppress the manifest merger with overrideLibrary.
-                      project.android.defaultConfig.minSdk = 24
                       project.dependencies.add('implementation', project.project(':aya-unity'))
                       project.dependencies.add('implementation', project.project(':aya-godot'))
                   }
