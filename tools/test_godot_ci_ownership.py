@@ -37,7 +37,7 @@ class GodotCIOwnershipTests(unittest.TestCase):
     def test_real_headless_editor_and_binary_checks_are_retained(self):
         for required in (
             'aya_smoke.gd', 'aya_export_preflight.gd',
-            '--headless --path integrations/godot --editor --import --quit',
+            '--headless --path "$AYA_GODOT_HOST" --editor --import --quit',
             'tools/verify_flutter_host_apk.py',
             'tools/verify_android_adapter_apk.py',
             'tools/verify_android_manifest_metadata.py',
@@ -52,6 +52,7 @@ class GodotCIOwnershipTests(unittest.TestCase):
             'build.gradle.kts', 'settings.gradle.kts', 'gradle.properties',
             '.github/workflows/godot-export.yml',
             'tools/stage_godot_android_guide.py',
+            'tools/prepare_godot_out_of_tree_host.py',
         ):
             self.assertEqual(self.workflow.count("'"+path+"'"), 2, path)
         self.assertIn('workflow_dispatch:', self.workflow)
