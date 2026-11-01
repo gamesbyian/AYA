@@ -90,6 +90,15 @@ def validate(text: str) -> dict:
     for section in REQUIRED_SECTIONS:
         if headers.count(section) != 1:
             errors.append(f"Expected exactly one '## {section}' heading; found {headers.count(section)}.")
+    if headers != list(REQUIRED_SECTIONS):
+        errors.append("Major reference sections must be the twelve expected headings in order.")
+    matches = list(HEADER.finditer(body))
+    for index, heading in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(body)
+        content = body[heading.end():end]
+        if not any(line.strip() and not line.lstrip().startswith("#")
+                   for line in content.splitlines()):
+            errors.append(f"Section has no substantive content: {heading.group(1)}.")
     if not re.search(r"(?m)^# [^#\n]+", body):
         errors.append("Missing descriptive document title '# ...'.")
     if PLACEHOLDER.search(body) or any(PLACEHOLDER.search(v) for v in fields.values()):
