@@ -75,10 +75,17 @@ object AyaStructuredKitVerifier {
             fields["artifact_extension"] != task.fileExtension ||
             fields["artifact_mime"] != task.mimeType)
             return AyaStructuredKitCheck.Rejected("Structured kit output contract differs from task.")
-        val actual = lines.drop(end + 1).filter { it.startsWith("## ") }
-            .map { it.removePrefix("## ").trim() }
+        val body = lines.drop(end + 1)
+        val positions = body.indices.filter { body[it].startsWith("## ") }
+        val actual = positions.map { body[it].removePrefix("## ").trim() }
         if (actual != headings)
             return AyaStructuredKitCheck.Rejected("Structured kit sections are missing or reordered.")
+        if (positions.indices.any { index ->
+                val first = positions[index] + 1
+                val last = if (index + 1 < positions.size) positions[index + 1] else body.size
+                body.subList(first, last).none { it.isNotBlank() }
+            })
+            return AyaStructuredKitCheck.Rejected("Structured kit has an empty section.")
         if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""")
                 .containsMatchIn(kit))
             return AyaStructuredKitCheck.Rejected("Structured kit has unresolved placeholders.")
@@ -89,7 +96,7 @@ object AyaStructuredKitVerifier {
 internal object AyaStructuredDocument {
     fun prompt(task: AyaStructuredTask, direction: String?): String = buildString {
         appendLine("Create a host-importable " + task.artifactRole.trim() + " as a data file.")
-        appendLine("The verified host importer expects " + task.fileExtension +
+        appendLine("The host reports its importer expects " + task.fileExtension +
             " (" + task.mimeType + "), schema/version " + task.schemaVersion.trim() + ".")
         direction?.trim()?.takeIf { it.isNotBlank() }?.let {
             appendLine("My requested design or output:")
