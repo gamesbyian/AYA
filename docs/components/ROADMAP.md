@@ -51,14 +51,14 @@ Deliver:
 
 ## Phase 4: visual scripting/game toolchains (P2)
 
-- **Godot 4:** Android v2 plugin, editor addon, `AyaHandoff` node, inspector fields from schema, `open_help(question)` method, `review_opened`/`rejected(reason)` signals. Android export-only; editor preview is a mock and must be labelled.
+- **Godot 4:** Android v2 plugin and host-configurable `AYACard` script with inspector fields, guarded `openHelp` and local status signals. Godot 4.5.1 has a **real engine-produced Android APK** ([CI 41264756578](https://github.com/gamesbyian/AYA/actions/runs/41264756578)) and a downstream **Android 35 emulator boot/native-singleton/card readiness smoke** ([CI 41266974910](https://github.com/gamesbyian/AYA/actions/runs/41266974910)). The editor preview is intentionally inert; there is no verified independent game adopter, real tap/Copy/Share, physical device or assistant receipt.
 - **Unity:** source-preview UPM Inspector action, Android Kotlin bridge and a dedicated **optional** `AYA/Help` Visual Scripting Unit are checked in. Native Gradle/AAR and managed source C# compiler/flow smoke pass against test-only Unity/VisualScripting signatures. Still verify actual Unity Editor and graph import, Android export, IL2CPP/Mono boundaries, packaged host guide/manifest and device lifecycle before claiming broadly installable Unity compatibility.
 - Document how UI controls and graph logic both connect to the same action. Never imply Godot/Unity desktop exports can use Android Sharesheet without a separate backend.
 - CI smoke tests where headless toolchains allow; interactive editor import, android export and real Android device acceptance are distinct.
 
 ## Phase 5: beginner no-code + compatibility standard (P2)
 
-- Test MIT App Inventor and Kodular extension SDK feasibility, `.aix` output, assets packaging and tool version. If an editor cannot bundle verified guide assets or expose review, do not ship a broken partial adapter.
+- A **help-only MIT App Inventor v206 Rush 2.1.2 `.aix`** extension has compiled from the canonical AYA Android AAR and passed a real AIX descriptor/code archive audit ([CI 41267356990](https://github.com/gamesbyian/AYA/actions/runs/41267356990)). Its block API delegates to guarded `AyaComponentAction.Help` and reports only local UI state. Next: genuine App Inventor consuming project and built APK, correct native manifest/guide/provider assets, older bundled AndroidX compatibility, physical-device and user review acceptance. Kodular remains a separate unverified builder; never assume compatibility automatically.
 - Publish reusable editor screenshots/tutorials, self-implementation guide and behaviour-based conformance suite.
 - Establish simple non-proprietary compatibility claims and self-test output; voluntary public compatibility registry only with explicit evidence and expiration, not telemetry.
 
