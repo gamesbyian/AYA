@@ -61,6 +61,12 @@ jobs:
             --schema docs/filesystem/examples/harborfiles-recipe.schema.json \
             --example docs/filesystem/examples/harborfiles-delete.recipe.json \
             --snapshot docs/filesystem/examples/harborfiles-snapshot.json
+      - name: Validate fictional Structured Artifact Kit and output contract
+        id: structured
+        run: |
+          python3 tools/validate_structured_kit.py docs/structured/examples/chart-kit.md \
+            --app-id dev.example.chart --app-version 1.0 \
+            --schema-revision chart-3 --extension .json --mime-type application/json
       - name: Compile all five AYA packet profiles and bounded brief
         id: packet_profiles
         run: |
@@ -98,7 +104,7 @@ jobs:
         if: failure()
         env:
           AYA_CI_OUTCOMES: >-
-            {"fictional_guide":"${{ steps.fictional_guide.outcome }}","inventory":"${{ steps.inventory.outcome }}","sample_reference":"${{ steps.sample_reference.outcome }}","translation":"${{ steps.translation.outcome }}","filesystem":"${{ steps.filesystem.outcome }}","packet_profiles":"${{ steps.packet_profiles.outcome }}","understanding":"${{ steps.understanding.outcome }}","component_manifests":"${{ steps.component_manifests.outcome }}","portability":"${{ steps.portability.outcome }}","all_tests":"${{ steps.all_tests.outcome }}"}
+            {"fictional_guide":"${{ steps.fictional_guide.outcome }}","inventory":"${{ steps.inventory.outcome }}","sample_reference":"${{ steps.sample_reference.outcome }}","translation":"${{ steps.translation.outcome }}","filesystem":"${{ steps.filesystem.outcome }}","structured":"${{ steps.structured.outcome }}","packet_profiles":"${{ steps.packet_profiles.outcome }}","understanding":"${{ steps.understanding.outcome }}","component_manifests":"${{ steps.component_manifests.outcome }}","portability":"${{ steps.portability.outcome }}","all_tests":"${{ steps.all_tests.outcome }}"}
         run: |
           python3 tools/ci_failure_digest.py --outcomes-json "$AYA_CI_OUTCOMES" --output "$RUNNER_TEMP/aya-ci-failure.json"
       - name: Upload concise machine-readable failure evidence
