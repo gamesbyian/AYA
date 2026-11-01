@@ -30,6 +30,12 @@ The Gradle task builds both the plugin and the core SDK AARs for debug/release, 
 
 This prototype does not silently edit an unknown Godot build template or invent a universal way to put game-specific documents into Android assets. If the host uses a different asset path, the host developer must confirm and document it. Failing that gate blocks release.
 
+## Binary bridge packaging check
+
+The shared game-engine Android packaging workflow (`.github/workflows/unity-apk.yml`) injects both optional Unity and Godot Gradle library dependencies into an existing **first-party synthetic Android sample** and compiles one actual debug APK. It inspects the installed package/version, raw exact-version guide bytes, scoped AYA FileProvider and receiver, defined DEX classes for both bridges, and the exact `<application><meta-data>` Godot v2 registration pair `org.godotengine.plugin.v2.AYA = dev.aya.godot.AyaGodotPlugin`. The generic `tools/verify_android_manifest_metadata.py` parser rejects unrelated attributes, duplicate metadata registration and missing/mismatched values.
+
+This is **native Android library merge evidence**, not proof that Godot's `EditorExportPlugin` installed AARs, that Godot generated an APK, or that the Godot singleton runs on an actual Android device. Those acceptance gates remain open, including proper host-specific guide installation in the Android Gradle export.
+
 ## Acceptance before release
 
 - Android Gradle module compiles and staged addon contains all four debug/release AARs and editor scripts.

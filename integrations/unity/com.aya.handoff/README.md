@@ -55,8 +55,23 @@ completion. No automatic result import, AI account integration, backend,
 hidden file scan or answer watcher is included.
 
 A Unity Visual Scripting graph can invoke the public `OpenHelp()` method
-through its standard Invoke Member capability. A dedicated, independently
-verified custom AYA Visual Scripting Unit is **not included** in this preview.
+through its standard Invoke Member capability.
+
+When your Unity project also installs `com.unity.visualscripting` version
+1.7 or newer, the **optional** `Aya.Handoff.VisualScripting` assembly adds a
+real graph Unit called **AYA/Help > Request Reviewed Help**. Assign the
+configured `AyaUnityHelpButton` component to its `card` input and connect
+the `enter` trigger. Its `returned` output means only the component action
+was invoked synchronously, **not** that the Android review opened, an AI
+received the attachment or anything was generated. The host component's
+`onLocalStatus` event remains the only local acknowledgement.
+
+The custom Unit has source-level managed C# compilation checks using
+**test-only** Unity and Visual Scripting API signatures. Actual Unity Editor
+import, graph assembly compatibility and Unity-generated Android exports
+remain unverified; pin/test the actual Visual Scripting package version before
+using in a released game. The optional assembly is omitted if the Visual
+Scripting package is absent and it does not force the package onto adopters.
 
 See the [detailed Unity integration and release gates](https://github.com/gamesbyian/AYA/blob/main/docs/components/UNITY.md).
 Native AAR builds and synthetic C# compilation checks are already in CI;

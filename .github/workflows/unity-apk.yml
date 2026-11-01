@@ -1,21 +1,27 @@
-name: Unity bridge inside first-party Android APK
+name: Game-engine bridges in first-party Android APK
 on:
   pull_request:
     paths:
       - 'aya-unity/**'
+      - 'aya-godot/**'
       - 'aya/**'
       - 'sample/**'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/test_verify_android_manifest_metadata.py'
       - '.github/workflows/unity-apk.yml'
   push:
     branches: [main]
     paths:
       - 'aya-unity/**'
+      - 'aya-godot/**'
       - 'aya/**'
       - 'sample/**'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/test_verify_android_manifest_metadata.py'
       - '.github/workflows/unity-apk.yml'
 
 concurrency:
@@ -46,24 +52,36 @@ jobs:
       - name: Audit existing sample's exact-version host guide
         run: |
           python3 tools/validate_guide.py --strict sample/src/main/assets/aya-guide.md
-      - name: Inject Unity native AAR dependency into a throwaway sample Gradle invocation
+      - name: Scope synthetic game-engine host to Godot API 24 without changing AYA sample sources
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("sample/build.gradle.kts")
+          current = path.read_text(encoding="utf-8")
+          if current.count("minSdk = 23") != 1:
+              raise SystemExit("AYA sample minSdk source contract changed")
+          path.write_text(current.replace("minSdk = 23", "minSdk = 24"), encoding="utf-8")
+          PY
+      - name: Inject both game-engine bridge AARs into one throwaway Android host
         run: |
           cat > "$RUNNER_TEMP/aya-unity-sample.init.gradle" <<'GRADLE'
           gradle.beforeProject { project ->
               if (project.path == ':sample') {
                   project.plugins.withId('com.android.application') {
                       project.dependencies.add('implementation', project.project(':aya-unity'))
+                      project.dependencies.add('implementation', project.project(':aya-godot'))
                   }
               }
           }
           GRADLE
           gradle :sample:assembleDebug -I "$RUNNER_TEMP/aya-unity-sample.init.gradle" --no-daemon --stacktrace
-      - name: Inspect resulting APK guide, native receiver, and compiled Unity bridge
+      - name: Inspect resulting APK guide, receiver, both bridges and Godot v2 registration
         run: |
           APK=sample/build/outputs/apk/debug/sample-debug.apk
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -x "$AAPT"
           python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide sample/src/main/assets/aya-guide.md --aapt "$AAPT"
-          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.unity.AyaUnityBridge --class dev.aya.android.AyaShareSelectionReceiver
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.unity.AyaUnityBridge --class dev.aya.godot.AyaGodotPlugin --class dev.aya.android.AyaShareSelectionReceiver --class dev.aya.android.AyaFileProvider
+          python3 tools/verify_android_manifest_metadata.py --apk "$APK" --aapt "$AAPT" --name org.godotengine.plugin.v2.AYA --value dev.aya.godot.AyaGodotPlugin
           sha256sum "$APK"
-          echo 'Synthetic Android packaging only; this does not establish Unity Editor import or Unity-generated Android exports.'
+          echo 'Synthetic Android packaging only; this is neither a Unity nor a Godot engine-generated Android export, and proves no device/recipient behaviour.'

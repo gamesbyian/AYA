@@ -70,7 +70,7 @@ maven { url = uri(rootDir.resolve("libs/aya-maven")) }
 
 Then add `implementation("dev.aya:aya-android:0.1.0-SNAPSHOT")`. This is an experimental snapshot, not a stable public release. The sample CI builds once against `:aya` and once against the staged POM/AAR to verify resolution. Review the Unlicense, third-party dependency obligations and the unstable snapshot API before external distribution.
 
-Enable `android.useAndroidX=true` in the host's Gradle properties. AYA's manifest supplies the non-exported `FileProvider` authority `${applicationId}.aya.files`. Check the **merged manifest**, especially if your app defines other providers.
+Enable `android.useAndroidX=true` in the host's Gradle properties. AYA's manifest supplies the non-exported `dev.aya.android.AyaFileProvider` subclass with the existing `${applicationId}.aya.files` authority and restricted `@xml/aya_file_paths`. This class identity is deliberately **distinct** from AndroidX's generic `androidx.core.content.FileProvider`: Android merges provider declarations by class name, and multiple libraries using the generic class would collide on their respective authorities and path metadata. Keep the host's own FileProvider declarations intact and inspect the **merged APK manifest** to verify each provider has its own authority, paths, `android:exported="false"` and `android:grantUriPermissions="true"`. Never use broad `tools:replace` directives to silently substitute AYA's metadata for the host's. The AYA URI authority and reviewed Share/Copy behavior are unchanged.
 
 ## 2. Ship exactly the guide for the installed build
 

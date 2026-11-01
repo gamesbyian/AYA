@@ -103,7 +103,7 @@ jobs:
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -n "$AAPT" && test -x "$AAPT"
           python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md --aapt "$AAPT"
-          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver --class dev.aya.android.AyaFileProvider
       - name: Preserve experimental APK evidence
         uses: actions/upload-artifact@v4
         with:

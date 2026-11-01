@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="UnityApiStubs.cs" />
+    <Compile Include="VisualScriptingApiStubs.cs" />
+    <Compile Include="VisualScriptingSmokeMain.cs" />
+    <Compile Include="../../integrations/unity/com.aya.handoff/Runtime/AyaAndroidHelp.cs" />
+    <Compile Include="../../integrations/unity/com.aya.handoff/Runtime/AyaUnityHelpButton.cs" />
+    <Compile Include="../../integrations/unity/com.aya.handoff/VisualScripting/AyaOpenReviewedHelpUnit.cs" />
+  </ItemGroup>
+</Project>
