@@ -5,6 +5,8 @@ on:
       - 'integrations/app-inventor/**'
       - 'aya/**'
       - 'tools/test_app_inventor_adapter.py'
+      - 'tools/test_verify_appinventor_aix.py'
+      - 'tools/verify_appinventor_aix.py'
       - '.github/workflows/app-inventor.yml'
       - 'settings.gradle.kts'
       - 'build.gradle.kts'
@@ -15,6 +17,8 @@ on:
       - 'integrations/app-inventor/**'
       - 'aya/**'
       - 'tools/test_app_inventor_adapter.py'
+      - 'tools/test_verify_appinventor_aix.py'
+      - 'tools/verify_appinventor_aix.py'
       - '.github/workflows/app-inventor.yml'
       - 'settings.gradle.kts'
       - 'build.gradle.kts'
@@ -32,8 +36,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Fail closed on source, guide and one-way handoff boundaries
-        run: python3 -m unittest discover -s tools -p 'test_app_inventor_adapter.py'
+      - name: Fail closed on source, guide, AIX native shape and handoff boundaries
+        run: |
+          python3 -m unittest discover -s tools -p 'test_app_inventor_adapter.py'
+          python3 -m unittest discover -s tools -p 'test_verify_appinventor_aix.py'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -75,39 +81,8 @@ jobs:
           rush deps tree
           rush build
           find out -type f -maxdepth 2 -print
-          python3 - <<'PY'
-          from pathlib import Path
-          import zipfile
-          files = list(Path('out').glob('*.aix'))
-          if len(files) != 1:
-              raise SystemExit('Expected one real AIX produced by Rush 2')
-          file = files[0]
-          if file.stat().st_size < 1024 or not zipfile.is_zipfile(file):
-              raise SystemExit('AIX archive missing or malformed')
-          with zipfile.ZipFile(file) as archive:
-              if archive.testzip() is not None:
-                  raise SystemExit('Corrupt entry in generated AIX')
-              base = 'dev.aya.appinventor/'
-              required = {
-                  base + 'components.json',
-                  base + 'classes.jar',
-                  base + 'files/AndroidRuntime.jar',
-                  base + 'files/component_build_infos.json',
-              }
-              names = archive.namelist()
-              if len(names) != len(set(names)) or not required.issubset(names):
-                  raise SystemExit('AIX missing official Rush 2 entry layout')
-              if any(archive.getinfo(name).file_size == 0 for name in required):
-                  raise SystemExit('AIX contains an empty required descriptor or compiled code')
-              # Rush's AIX assembly writes classes.jar (not loose .dex).
-              # Official v2.1.2 lib/src/commands/build/aix.dart lists these.
-              with zipfile.ZipFile(__import__('io').BytesIO(archive.read(base + 'classes.jar'))) as inner:
-                  inner_names = inner.namelist()
-                  if not inner_names:
-                      raise SystemExit('AIX classes.jar contains no compiled code')
-                  print('AYA App Inventor AIX: genuine Rush output,', len(names),
-                        'entries and', len(inner_names), 'compiled code entries')
-          PY
+          python3 ../../../tools/verify_appinventor_aix.py \
+            --aix out/dev.aya.appinventor.aix
       - name: Preserve unpublished AIX and generated blocks reference
         uses: actions/upload-artifact@v4
         with:
