@@ -7,6 +7,8 @@ on:
       - 'aya/**'
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
+      - 'tools/prepare_expo_packed_host.py'
+      - 'tools/test_prepare_expo_packed_host.py'
       - 'tools/validate_guide.py'
       - '.github/workflows/expo-module.yml'
   push:
@@ -17,6 +19,8 @@ on:
       - 'aya/**'
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
+      - 'tools/prepare_expo_packed_host.py'
+      - 'tools/test_prepare_expo_packed_host.py'
       - '.github/workflows/expo-module.yml'
 
 concurrency:
@@ -75,20 +79,35 @@ jobs:
           python3 tools/audit_reference.py integrations/expo/aya-expo/ci-host/aya-guide.md --inventory integrations/expo/aya-expo/ci-host/inventory.json --questions integrations/expo/aya-expo/ci-host/questions.json --strict
           node --test integrations/expo/guide-plugin/test/*.test.cjs
           python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
-      - name: Install pinned Expo host with local unpublished modules
-        working-directory: integrations/expo/aya-expo/ci-host
-        run: npm install --no-fund --no-audit
-      - name: Run actual Expo Android CNG prebuild and verified guide plugin
-        working-directory: integrations/expo/aya-expo/ci-host
+      - name: Verify packed consumer isolation and negative controls
+        run: python3 -m unittest discover -s tools -p 'test_prepare_expo_packed_host.py'
+      - name: Pack unpublished npm modules and prepare out-of-tree host
+        env:
+          PACK_DIR: ${{ runner.temp }}/aya-expo-npm-tarballs
+          HOST_DIR: ${{ runner.temp }}/aya-expo-consumer
+        run: |
+          mkdir -p "$PACK_DIR"
+          npm pack ./integrations/expo/aya-expo --ignore-scripts --pack-destination "$PACK_DIR"
+          npm pack ./integrations/expo/guide-plugin --ignore-scripts --pack-destination "$PACK_DIR"
+          python3 tools/prepare_expo_packed_host.py --fixture integrations/expo/aya-expo/ci-host --destination "$HOST_DIR" --module-tarball "$PACK_DIR/aya-expo-0.1.0-dev.1.tgz" --guide-tarball "$PACK_DIR/aya-expo-guide-0.1.0-dev.1.tgz"
+          echo "AYA_EXPO_HOST=$HOST_DIR" >> "$GITHUB_ENV"
+      - name: Install pinned Expo host from packed modules outside AYA
+        run: |
+          cd "$AYA_EXPO_HOST"
+          npm install --no-fund --no-audit
+          npm ls aya-expo aya-expo-guide --depth=0
+      - name: Generate out-of-tree Expo CNG project from packaged modules
         env:
           CI: '1'
-        run: npx expo prebuild --platform android --no-install
-      - name: Compile native Expo/AYA host into a debug Android APK
-        working-directory: integrations/expo/aya-expo/ci-host/android
+        run: |
+          cd "$AYA_EXPO_HOST"
+          npx expo prebuild --platform android --no-install
+      - name: Compile packed Expo/AYA host into a debug Android APK
         env:
           AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
         run: |
-          cat > ../aya-maven.init.gradle <<'GRADLE'
+          cd "$AYA_EXPO_HOST/android"
+          cat > "$AYA_EXPO_HOST/aya-maven.init.gradle" <<'GRADLE'
           def staging = System.getenv('AYA_STAGING_MAVEN')
           if (!staging || !new File(staging).isDirectory()) {
               throw new GradleException("AYA staged Maven directory missing")
@@ -102,21 +121,18 @@ jobs:
               repositories.maven { url = uri(staging) }
           }
           GRADLE
-          ./gradlew :app:assembleDebug -I ../aya-maven.init.gradle --no-daemon --stacktrace
-      - name: Inspect actual installed package, guide bytes and native share manifest
+          ./gradlew :app:assembleDebug -I "$AYA_EXPO_HOST/aya-maven.init.gradle" --no-daemon --stacktrace
+      - name: Inspect final packed-consumer APK identity, guide and manifest
         run: |
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -n "$AAPT" && test -x "$AAPT"
-          python3 tools/verify_flutter_host_apk.py \
-            --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk \
-            --guide integrations/expo/aya-expo/ci-host/aya-guide.md \
-            --aapt "$AAPT"
-      - name: Verify Expo bridge and core share receiver are defined in actual APK DEX
-        run: python3 tools/verify_android_adapter_apk.py --apk integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver
-      - name: Upload synthetic host APK for controlled QA
+          python3 tools/verify_flutter_host_apk.py --apk "$AYA_EXPO_HOST/android/app/build/outputs/apk/debug/app-debug.apk" --guide integrations/expo/aya-expo/ci-host/aya-guide.md --aapt "$AAPT"
+      - name: Verify packed Expo bridge and core receiver are defined in APK DEX
+        run: python3 tools/verify_android_adapter_apk.py --apk "$AYA_EXPO_HOST/android/app/build/outputs/apk/debug/app-debug.apk" --class dev.aya.expo.AyaExpoModule --class dev.aya.android.AyaShareSelectionReceiver
+      - name: Upload packed-consumer synthetic host APK for controlled QA
         uses: actions/upload-artifact@v4
         with:
-          name: aya-expo-native-ci-host-debug
-          path: integrations/expo/aya-expo/ci-host/android/app/build/outputs/apk/debug/app-debug.apk
+          name: aya-expo-packed-consumer-debug
+          path: ${{ runner.temp }}/aya-expo-consumer/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
           if-no-files-found: error
