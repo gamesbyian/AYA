@@ -15,6 +15,12 @@ For each launch the script clears previous logcat content, starts the package th
 
 The script `tools/verify_godot_emulator_runtime.py` emits a bounded `aya-godot-emulator-smoke/v1` JSON artifact with the actual APK SHA-256 and observed test scenarios. Its negative-control unit tests cover missing APKs, failed installation, missing process, unrelated crashes, missing/failing markers and command failures.
 
+## Visual evidence for layout review
+
+After the synthetic host reports an enabled native AYA card and a live Godot process, CI captures **two raw Android PNG screenshots** using `adb exec-out screencap -p`: the 412×892/100%-font scenario and the 320×700/200%-font scenario. It checks the returned PNG framing, dimensions (accepting orientation changes), size and SHA-256 before saving the files. The same limited runtime JSON records each screenshot's actual width, height, orientation and digest. The artifact `aya-godot-emulator-runtime-evidence` contains the JSON and both PNGs.
+
+Screenshots are restricted to the disposable **first-party CI host**, which has no real user data or credentials, and are produced without selecting an AI target, opening an assistant, or sharing any attachment. They offer reproducible visual evidence for independent human/agent review of text clipping, button visibility, card density, keyboard affordances and scaling. The screenshot validator **does not assert those properties are good**, and screenshot dimensions and presence cannot certify TalkBack, tap targets, IME operation, contrast, accessibility, or usability. Record those verdicts only after inspecting the actual captures and testing interactions.
+
 ## Important boundaries
 
 This demonstrates **first-party Android emulator boot, Godot scene construction, native plugin availability and local Ask-card readiness** only when the actual CI run succeeds. It cannot establish real screen-reader accessibility, actual on-screen button geometry and tapability, opening editable Android review, Copy/Share semantics, Android lifecycle across real rotation, compatibility with a physical device, actual receipt by ChatGPT/Claude/Gemini, or third-party project integration.
@@ -31,7 +37,8 @@ After a successful Godot exporter workflow, download the `aya-godot-4-5-real-exp
 python3 -m unittest discover -s tools -p 'test_verify_godot_emulator_runtime.py'
 python3 tools/verify_godot_emulator_runtime.py \
   --apk /path/to/aya-godot-host-debug.apk \
-  --report /tmp/aya-godot-emulator-evidence.json
+  --report /tmp/aya-godot-emulator-evidence.json \\
+  --screenshots-dir /tmp/aya-godot-screenshots
 ```
 
 The helper uses `adb`, so the emulator must already be running and report `sys.boot_completed=1`. Inspect JSON outcomes and Godot logcat when failures occur. A valid file alone is insufficient: look for a successful emulator CI run for the exact source SHA.
