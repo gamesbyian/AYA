@@ -4,8 +4,11 @@ extends "res://addons/AYA/aya_card.gd"
 # Synthetic CI-host probe, deliberately OUTSIDE the reusable AYA addon.
 # Emits a public, payload-free success/failure marker once after Android
 # Godot scene construction. Never opens review or invokes a share target.
+var _synthetic_draw_count: int = 0
+
 func _ready() -> void:
     super._ready()
+    queue_redraw()
     if OS.has_feature("android") and not Engine.is_editor_hint():
         call_deferred("_verify_native_card")
 
@@ -47,6 +50,7 @@ func _verify_native_card() -> void:
 # If these high-contrast bands never reach Godot's own ViewportTexture, the
 # renderer/scene is not visually testable even though card nodes exist.
 func _draw() -> void:
+    _synthetic_draw_count += 1
     var midpoint: float = size.x * 0.5
     draw_rect(Rect2(0.0, 0.0, midpoint, size.y),
         Color(0.015, 0.015, 0.015, 1.0), true)
@@ -58,21 +62,25 @@ func _capture_synthetic_viewport_stats() -> void:
     # Synthetic fixture only: log pixel counts, never image bytes or user data.
     var source: Image = get_viewport().get_texture().get_image()
     if source == null or source.is_empty():
-        print("AYA_CI_GODOT_FRAME dark=0 light=0 valid=0")
+        print("AYA_CI_GODOT_FRAME dark=0 light=0 opaque=0 draws=",
+              _synthetic_draw_count, " valid=0")
         return
     source.convert(Image.FORMAT_RGBA8)
     source.resize(64, 64, Image.INTERPOLATE_BILINEAR)
     var dark := 0
     var light := 0
+    var opaque := 0
     for y in range(source.get_height()):
         for x in range(source.get_width()):
             var pixel: Color = source.get_pixel(x, y)
             if pixel.a < 0.5:
                 continue
+            opaque += 1
             var brightness: float = maxf(pixel.r, maxf(pixel.g, pixel.b))
             if brightness <= 0.08:
                 dark += 1
             elif brightness >= 0.31:
                 light += 1
-    print("AYA_CI_GODOT_FRAME dark=", dark,
-          " light=", light, " valid=", int(dark >= 16 and light >= 16))
+    print("AYA_CI_GODOT_FRAME dark=", dark, " light=", light,
+          " opaque=", opaque, " draws=", _synthetic_draw_count,
+          " valid=", int(dark >= 16 and light >= 16))

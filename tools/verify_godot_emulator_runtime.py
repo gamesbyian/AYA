@@ -25,7 +25,9 @@ PACKAGE = "dev.aya.godot.cihost"
 READY_MARKER = "AYA_CI_GODOT_RUNTIME_READY"
 FAILED_MARKER = "AYA_CI_GODOT_RUNTIME_FAIL"
 FRAME_MARKER = "AYA_CI_GODOT_FRAME"
-FRAME_PATTERN = re.compile(r"AYA_CI_GODOT_FRAME dark=(\d+) light=(\d+) valid=([01])")
+FRAME_PATTERN = re.compile(
+    r"AYA_CI_GODOT_FRAME dark=(\d+) light=(\d+) opaque=(\d+) draws=(\d+) valid=([01])"
+)
 SCENARIOS = (("412x892", "1.0"), ("320x700", "2.0"))
 MAX_LOG_CHARS = 800
 MAX_REPORT_BYTES = 16 * 1024
@@ -241,12 +243,14 @@ def parse_synthetic_viewport_frame(log: str) -> dict:
     match = FRAME_PATTERN.search(rows[0])
     if match is None:
         raise EmulatorSmokeError("Malformed Godot viewport pixel diagnostic")
-    dark, light, declared_valid = (int(part) for part in match.groups())
-    if (dark > 4096 or light > 4096 or dark + light > 4096 or
+    dark, light, opaque, draws, declared_valid = (int(part) for part in match.groups())
+    if (dark > 4096 or light > 4096 or opaque > 4096 or
+            dark + light > opaque or draws > 10000 or
             declared_valid != int(dark >= 16 and light >= 16)):
         raise EmulatorSmokeError("Inconsistent Godot viewport pixel diagnostic")
     return {
         "dark_samples": dark, "light_samples": light,
+        "opaque_samples": opaque, "draw_callback_count": draws,
         "visible_contrast": bool(declared_valid),
         "sample_grid": "64x64 first-party synthetic Godot viewport",
     }

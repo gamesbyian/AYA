@@ -37,7 +37,7 @@ class FakeADB:
                  booted=True, fail_install=False, corrupt_png=False,
                  immersive_supported=True, focused_window=None,
                  blank_png=False, blank_first=0,
-                 godot_frame="dark=1500 light=1500 valid=1"):
+                 godot_frame="dark=1500 light=1500 opaque=4096 draws=1 valid=1"):
         self.commands = []
         self.marker = marker
         self.pid = pid
@@ -195,13 +195,13 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         fake = FakeADB(blank_png=True)
         with self.assertRaisesRegex(EmulatorSmokeError, "Godot viewport contains UI pixels"):
             self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
-        fake = FakeADB(blank_png=True, godot_frame="dark=4096 light=0 valid=0")
+        fake = FakeADB(blank_png=True, godot_frame="dark=4096 light=0 opaque=4096 draws=1 valid=0")
         with self.assertRaisesRegex(EmulatorSmokeError, "Godot viewport is also blank"):
             self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
 
     def test_fail_closed_on_missing_or_contradictory_internal_evidence(self):
-        for value in (None, "invalid", "dark=4096 light=30 valid=1",
-                      "dark=1 light=1 valid=1"):
+        for value in (None, "invalid", "dark=4096 light=30 opaque=4096 draws=1 valid=1",
+                      "dark=1 light=1 opaque=4096 draws=1 valid=1"):
             with self.subTest(value=value):
                 with self.assertRaisesRegex(EmulatorSmokeError, "viewport pixel diagnostic"):
                     self.execute(FakeADB(godot_frame=value),
@@ -209,10 +209,20 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
 
     def test_synthetic_frame_marker_parser(self):
         result = parse_synthetic_viewport_frame(
-            "I/godot: AYA_CI_GODOT_FRAME dark=2000 light=100 valid=1"
+            "I/godot: AYA_CI_GODOT_FRAME dark=2000 light=100 opaque=4096 draws=1 valid=1"
         )
         self.assertTrue(result["visible_contrast"])
         self.assertEqual(result["dark_samples"], 2000)
+        self.assertEqual(result["opaque_samples"], 4096)
+        self.assertEqual(result["draw_callback_count"], 1)
+
+    def test_undrawn_or_transparent_godot_viewport_is_diagnosed(self):
+        undrawn = parse_synthetic_viewport_frame(
+            "AYA_CI_GODOT_FRAME dark=0 light=0 opaque=0 draws=0 valid=0"
+        )
+        self.assertEqual(undrawn["draw_callback_count"], 0)
+        self.assertEqual(undrawn["opaque_samples"], 0)
+        self.assertFalse(undrawn["visible_contrast"])
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()
