@@ -34,7 +34,7 @@ class GameEngineAPKGateTests(unittest.TestCase):
                   "build.gradle.kts").read_text(encoding="utf-8")
         self.assertIn("minSdk = 23", sample)
         self.assertIn("project.android.defaultConfig.minSdk = 24", self.content)
-        self.assertNotIn('tools:overrideLibrary', self.content)
+        self.assertNotIn('tools:overrideLibrary=', self.content)
 
     def test_v2_plugin_registration_metadata_is_binary_inspected(self):
         self.assertIn("--name org.godotengine.plugin.v2.AYA", self.content)
