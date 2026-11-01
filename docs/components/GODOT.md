@@ -1,6 +1,6 @@
 # Godot Android v2 AYA drop-in (prototype)
 
-Status: prototype Kotlin bridge and Godot editor addon under independent CI, including a pinned 4.5.1 headless editor parse and no-Android smoke check. This is NOT a tested Godot APK export, verified recipient handoff, published Asset Library plugin or generally installable addon yet. No binary AARs are committed.
+Status: **unpublished source adapter with actual first-party Android packaging and limited emulator startup evidence**. Godot 4.5.1 compiled an out-of-tree synthetic consuming host into a real Android APK, with its exact-version AYA guide, provider, plugin registration and native DEX independently checked. The APK subsequently launched on an Android 35 x86-64 emulator with a live native AYA singleton and enabled Ask card at two viewport/font configurations. This remains a first-party synthetic-host test: actual button/review/Copy/Share interaction, visual accessibility, independent adopting host, physical device and AI assistant ingestion are **not verified**. No binary AARs are committed and no Asset Library plugin is published.
 
 The design follows the official Godot Android v2 plugin documentation (https://docs.godotengine.org/en/stable/tutorials/platform/android/android_plugin.html) and the Godot Android Plugin Template (https://github.com/m4gr3d/Godot-Android-Plugin-Template). It targets Godot 4.2+ v2 architecture and compiles against Godot Android library 4.5.1.stable.
 
@@ -20,7 +20,7 @@ From the AYA repository root:
 
 The Gradle task builds both the plugin and the core SDK AARs for debug/release, then stages the addon at aya-godot/build/godot-addon/AYA. The editor export script declares both AARs and the core AndroidX/Kotlin dependencies. Keep the SDK binary and adapter versions together; do not replace one AAR independently.
 
-## Godot host installation (requires actual verification)
+## Godot host installation (independent consuming hosts require separate verification)
 
 1. Copy the complete staged AYA directory to the game project under res://addons/AYA, enable the addon under Godot Project Settings > Plugins.
 2. Install a matching Godot Android Gradle build template and enable Gradle Build for the Android export preset.
@@ -34,14 +34,14 @@ This prototype does not silently edit an unknown Godot build template or invent 
 
 The shared game-engine Android packaging workflow (`.github/workflows/unity-apk.yml`) injects both optional Unity and Godot Gradle library dependencies into an existing **first-party synthetic Android sample** and compiles one actual debug APK. It inspects the installed package/version, raw exact-version guide bytes, scoped AYA FileProvider and receiver, defined DEX classes for both bridges, and the exact `<application><meta-data>` Godot v2 registration pair `org.godotengine.plugin.v2.AYA = dev.aya.godot.AyaGodotPlugin`. The generic `tools/verify_android_manifest_metadata.py` parser rejects unrelated attributes, duplicate metadata registration and missing/mismatched values.
 
-This is **native Android library merge evidence**, not proof that Godot's `EditorExportPlugin` installed AARs, that Godot generated an APK, or that the Godot singleton runs on an actual Android device. Those acceptance gates remain open, including proper host-specific guide installation in the Android Gradle export.
+This workflow proves **native Android library merge** in a synthetic Android sample, not Godot-specific packaging. Separate [Godot 4.5.1 export CI](https://github.com/gamesbyian/AYA/actions/runs/41264756578) has since produced an actual Godot Gradle Android APK using an isolated first-party consuming project with the guide installed as an Android APK asset, scoped AYA FileProvider, Godot v2 plugin registration and required DEX definitions. A downstream [Android 35 emulator run](https://github.com/gamesbyian/AYA/actions/runs/41266974910) booted that exported APK twice and observed a live native singleton plus enabled card. See [exact evidence tiers](RELEASE-EVIDENCE.md), [status](STATUS.md) and [emulator acceptance protocol](GODOT_EMULATOR_ACCEPTANCE.md). These are **first-party acceptance tests**; an unrelated developer's Godot project, real UI interaction, physical-device accessibility and external AI ingestion remain unverified.
 
 ## Acceptance before release
 
 - Android Gradle module compiles and staged addon contains all four debug/release AARs and editor scripts.
-- Headless Godot 4.5.1 parser and scene smoke must verify multiline question input, Unicode/newline draft preservation, missing output-use instructions, and non-Android rejection (new checks pending CI).
-- Manual GUI editor import is still required for Godot 4.5 and 4.6: preview and inspector should render, scripts should parse, editor should not initiate a handoff, and Android export registration should load.
-- Exported APK has the correct AYA-RAS guide as a raw APK asset and matches installed app version. A missing/incorrect guide is rejected without fallback.
+- Headless Godot 4.5.1 parser/scene and native packaging checks are part of the established CI baseline; preserve their source, failure-mode and host-guide checks. Record separate evidence for actual user interaction, including multiline/Unicode draft behavior and invalid output-use instructions.
+- Manual GUI editor acceptance is still required for Godot 4.5 and 4.6 with an independently authored host: verify preview and inspector, addon enable/disable, graph/scene use and export registration without silently invoking a handoff.
+- First-party Godot-generated APK already passed exact guide/package/manifest/DEX checks. Repeat the same build and negative guide mismatch checks in an independently authored adopting host before release.
 - Multi-card request ID isolation, dismissal, rotation, unavailable engine singleton and no share-target behaviour are tested without claiming AI ingestion.
 - Large fonts, gamepad focus, screen readers, narrow phones, and IME behaviour satisfy the host's UX/accessibility requirements.
 - No automatic output retrieval or remote execution. File imports remain host-owned and independently validated.
