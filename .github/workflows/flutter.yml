@@ -1,4 +1,4 @@
-name: Flutter AYA source-preview checks
+name: Flutter Dart and AYA source-contract checks
 on:
   pull_request:
     paths:
@@ -44,13 +44,6 @@ jobs:
         working-directory: integrations/flutter/aya_flutter
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.9'
@@ -67,49 +60,13 @@ jobs:
         run: flutter analyze
       - name: Verify mocked native channel and review-first card
         run: flutter test
-      - name: Stage canonical Android SDK Maven AAR/POM
-        working-directory: .
-        run: gradle :aya:publishReleasePublicationToStagingRepository --no-daemon
       - name: Validate the actual CI host's AYA-RAS reference
         working-directory: .
         run: |
           python3 tools/validate_guide.py --strict integrations/flutter/aya_flutter/ci-host/aya-guide.md
           python3 tools/audit_reference.py integrations/flutter/aya_flutter/ci-host/aya-guide.md --inventory integrations/flutter/aya_flutter/ci-host/inventory.json --questions integrations/flutter/aya_flutter/ci-host/questions.json --strict
           python3 -m unittest discover -s tools -p 'test_verify_flutter_host_apk.py'
-      - name: Generate actual source-package Flutter Android consumer
-        run: flutter create --project-name aya_flutter_ci_host --platforms android example
-      - name: Configure AGP 9 built-in Kotlin and exact versioned APK guide
-        working-directory: .
-        run: python3 integrations/flutter/migration/prepare_host.py configure --host integrations/flutter/aya_flutter/example --source integrations/flutter/aya_flutter
-      - name: Compile actual Flutter Android APK with AYA native bridge
-        working-directory: integrations/flutter/aya_flutter/example
-        env:
-          AYA_STAGING_MAVEN: ${{ github.workspace }}/aya/build/staging-maven
-          CI: '1'
-        run: |
-          flutter pub get
-          flutter build apk --debug --no-pub
-      - name: Verify the host APK's installed guide and merged AYA components
-        working-directory: .
-        run: |
-          AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
-          test -n "$AAPT" && test -x "$AAPT"
-          python3 tools/verify_flutter_host_apk.py \
-            --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk \
-            --guide integrations/flutter/aya_flutter/ci-host/aya-guide.md \
-            --aapt "$AAPT"
-          python3 tools/verify_android_adapter_apk.py --apk integrations/flutter/aya_flutter/example/build/app/outputs/flutter-apk/app-debug.apk --class dev.aya.flutter.AyaFlutterPlugin --class dev.aya.android.AyaShareSelectionReceiver
-      - name: Confirm Flutter retained AGP 9 built-in Kotlin after build
-        working-directory: .
-        run: |
-          HOST=integrations/flutter/aya_flutter/example/android
-          grep -qx 'android.builtInKotlin=true' "$HOST/gradle.properties"
-          grep -qx 'android.newDsl=false' "$HOST/gradle.properties"
-          if grep -Fq 'id("kotlin-android")' "$HOST/app/build.gradle.kts" || grep -Fq 'id("org.jetbrains.kotlin.android")' "$HOST/app/build.gradle.kts"; then
-            echo 'Legacy Kotlin plugin reintroduced into AGP 9 application' >&2
-            exit 1
-          fi
-          if grep -Fq "apply plugin: 'kotlin-android'" integrations/flutter/aya_flutter/android/build.gradle || grep -Fq 'id("org.jetbrains.kotlin.android")' integrations/flutter/aya_flutter/android/build.gradle; then
-            echo 'Legacy Kotlin plugin reintroduced into source package' >&2
-            exit 1
-          fi
+      # Two separate native requirements remain in other workflows:
+      # flutter-external.yml builds the promoted source from an out-of-tree
+      # synthetic consumer, while flutter-builtin-kotlin.yml exercises the
+      # migration toolchain. Neither is replaced by Dart-only mocks here.
