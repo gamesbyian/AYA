@@ -9,6 +9,8 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_verify_godot_emulator_runtime.py'
+      - 'tools/verify_godot_emulator_runtime.py'
       - 'tools/test_stage_godot_android_guide.py'
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
@@ -26,6 +28,8 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_verify_godot_emulator_runtime.py'
+      - 'tools/verify_godot_emulator_runtime.py'
       - 'tools/test_stage_godot_android_guide.py'
       - 'tools/verify_flutter_host_apk.py'
       - 'tools/verify_android_adapter_apk.py'
@@ -201,3 +205,43 @@ jobs:
           path: integrations/godot/out/aya-godot-host-debug.apk
           if-no-files-found: error
           retention-days: 7
+
+  android-emulator-runtime:
+    name: Godot APK Android runtime / native singleton smoke
+    needs: real-godot-export
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run bounded emulator-smoke negative controls
+        run: python3 -m unittest discover -s tools -p 'test_verify_godot_emulator_runtime.py'
+      - uses: actions/download-artifact@v4
+        with:
+          name: aya-godot-4-5-real-export-debug
+          path: ${{ runner.temp }}/aya-godot-runtime-apk
+      - name: Verify actual exported APK download exists
+        run: test -s "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk"
+      - name: Enable Linux KVM acceleration when available
+        run: sudo chmod a+rw /dev/kvm || true
+      - name: Start Android 35 x86_64 and check actual Godot process/card
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            python3 tools/verify_godot_emulator_runtime.py \
+              --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" \
+              --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"
+      - name: Preserve minimal synthetic emulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-godot-emulator-runtime-evidence
+          path: ${{ runner.temp }}/aya-godot-emulator-evidence.json
+          if-no-files-found: ignore
+          retention-days: 14
