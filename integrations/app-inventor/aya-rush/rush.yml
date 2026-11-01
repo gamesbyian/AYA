@@ -1,0 +1,18 @@
+version: '0.1.0'
+min_sdk: 23
+homepage: https://github.com/gamesbyian/AYA
+license: https://unlicense.org
+
+# Staged from the canonical :aya:assembleDebug output by CI.
+# DO NOT commit an arbitrary AAR copied from another host or revision.
+dependencies:
+- aya-debug.aar
+- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+- androidx.core:core:1.15.0
+
+# App Inventor includes an older AndroidX Core that takes precedence.
+# Never assume the dependency below upgrades the consuming runtime.
+libraries:
+  aya-debug.aar: private
+  org.jetbrains.kotlin:kotlin-stdlib: private
+  androidx.core:core: provided
