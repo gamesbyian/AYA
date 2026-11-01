@@ -8,6 +8,11 @@ from pathlib import Path
 
 from prepare_expo_packed_host import PackedHostError, prepare
 
+MODULE_FILES = (
+    "android/build.gradle", "android/src/main/java/dev/aya/expo/AyaExpoModule.kt",
+    "expo-module.config.json", "src/index.ts", "src/AyaHelpCard.tsx", "src/native.ts"
+)
+
 
 class PackedExpoHostTest(unittest.TestCase):
     def setUp(self):
@@ -31,7 +36,7 @@ class PackedExpoHostTest(unittest.TestCase):
         }
         self.write_package()
         self.write_tgz(self.module, "aya-expo",
-                       ("android/build.gradle", "expo-module.config.json", "src/index.ts"))
+                       MODULE_FILES)
         self.write_tgz(self.guide, "aya-expo-guide",
                        ("app.plugin.js", "guide_asset.cjs"))
 
@@ -114,9 +119,14 @@ class PackedExpoHostTest(unittest.TestCase):
         with self.assertRaisesRegex(PackedHostError, "Unsafe or absent"):
             self.run_prepare()
 
+    def test_fails_if_package_leaks_test_or_node_modules(self):
+        self.write_tgz(self.module, "aya-expo", MODULE_FILES + ("node_modules/secret.js",))
+        with self.assertRaisesRegex(PackedHostError, "leaked into npm"):
+            self.run_prepare()
+
     def test_rejects_non_semantic_package_versions(self):
         self.write_tgz(self.module, "aya-expo",
-                       ("android/build.gradle", "expo-module.config.json", "src/index.ts"),
+                       MODULE_FILES,
                        version="not-a-version")
         with self.assertRaisesRegex(PackedHostError, "Incorrect package name or version"):
             self.run_prepare()
