@@ -52,8 +52,10 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
             archive.writestr("assets/aya-guide.md", b"not-actual-guide" * 75)
 
     def execute(self, runner=None, **kwargs):
+        options = {"poll_seconds": 0, "max_polls": 2}
+        options.update(kwargs)
         return smoke(self.apk, run=runner or FakeADB(), pause=lambda _: None,
-                     poll_seconds=0, max_polls=2, **kwargs)
+                     **options)
 
     def test_two_launches_with_distinct_font_and_size_settings(self):
         fake = FakeADB()
