@@ -19,6 +19,17 @@ class AyaShareIntentsTest {
     private val context: Context
         get() = InstrumentationRegistry.getInstrumentation().targetContext
 
+    @Test fun ayaProviderIsIndependentAndNotExported() {
+        // Android resolves this provider by its unique authority even when the
+        // host also declares a completely separate FileProvider component.
+        val provider = context.packageManager.resolveContentProvider(
+            "${context.packageName}.aya.files", 0
+        )
+        assertEquals(AyaFileProvider::class.java.name, provider?.name)
+        assertEquals(false, provider?.exported)
+        assertTrue(provider?.grantUriPermissions == true)
+    }
+
     @Test fun sharedFileIsUtf8AndGrantedReadOnly() {
         val payload = "AYA hello ✓\nHello 🌈"
         val intent = AyaShareIntents.create(context, payload)
