@@ -13,9 +13,14 @@ class GodotCIOwnershipTests(unittest.TestCase):
 
     def test_no_duplicate_editor_or_android_compiler_workflow(self):
         self.assertFalse((WORKFLOWS / "godot.yml").exists())
-        self.assertEqual(self.workflow.count("    runs-on: ubuntu-latest"), 1)
+        self.assertEqual(self.workflow.count("    runs-on: ubuntu-latest"), 2)
         self.assertEqual(self.workflow.count("gradle :aya-godot:stageGodotAddon"), 1)
         self.assertEqual(self.workflow.count("--export-debug Android"), 1)
+        self.assertIn("needs: real-godot-export", self.workflow)
+        runtime = self.workflow.split("  android-emulator-runtime:", 1)[1]
+        self.assertNotIn("stageGodotAddon", runtime)
+        self.assertIn("actions/download-artifact@v4", runtime)
+        self.assertIn("tools/verify_godot_emulator_runtime.py", runtime)
 
     def test_preserve_both_aar_variants_and_editor_source(self):
         for expected in (
