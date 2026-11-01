@@ -62,6 +62,19 @@ owner: example developer
 
 These headings and metadata are **structural** requirements; empty headings, invented schema descriptions or untested examples are not evidence that an actual host importer can accept any generated file. Use the host's real verified format, not the fixture.
 
+## Offline authoring validation
+
+Before bundling a structured kit, the developer can run the stdlib-only checker against a source-derived asset and independently verified installed package/version, extension, MIME and importer revision:
+
+```sh
+python3 tools/validate_structured_kit.py path/to/actual-host-kit.md \
+  --app-id dev.example.chart --app-version 1.0 \
+  --schema-revision chart-3 --extension .json \
+  --mime-type application/json
+```
+
+These arguments and the included [fictional chart kit](structured/examples/chart-kit.md) are examples, **not** claims that a real chart importer is implemented in AYA. This offline check rejects stale/foreign metadata, missing/empty sections, duplicates, unsafe file contracts, unresolved placeholders, symlink paths and oversized/malformed UTF-8 kits. It neither validates JSON Schema nor parses generated artifacts; actual importer compatibility, field semantics, examples, privacy and recipient ingestion must be verified separately.
+
 ## Required developer-authored schema and semantics
 
 The host integration must document:
