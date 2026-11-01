@@ -9,12 +9,12 @@ This guide is written for someone who knows what they want their app to do but h
 | Android Studio with ordinary XML layouts | An `AyaXmlCardView` element with labels and callbacks | Depends on the AYA Android module; not a one-click marketplace plugin |
 | Android Studio with Kotlin Views | An `AyaCardView` card or `AyaComponentAction.Help` call | The host must bundle a real guide and integrate the library |
 | Jetpack Compose | `AyaCard()` plus `rememberAyaLauncher()` | Separate `aya-compose` module; no public Maven release yet |
-| Godot 4 Android | The AYA addon + a configurable card/node | Godot editor/addon source exists; Android export and app-specific asset packaging need host verification |
+| Godot 4 Android | The AYA addon + a configurable card/node | Godot 4.5.1 exported a first-party Android APK, which then booted with the AYA card/native singleton in an Android 35 emulator; independent host adoption, real button/review/Share use, physical-device accessibility and recipient ingestion are unverified |
 | Flutter | `AyaHelpCard` or `AyaFlutter.openHelp` | Source plugin and CI APK compile; unpublished core AAR means manual native dependency setup |
 | FlutterFlow | Prepared Custom Widget / Action body templates | Templates are **not** a currently working published FlutterFlow widget |
-| React Native / Expo | Android-only Expo Modules source adapter and React Native card | First-party generated Expo Android APK, exact guide/manifest and compiled DEX verified; isolated npm tarball consumer remains a separate gate. No Expo Go or public npm release. |
-| Unity | Unpublished source UPM/Android bridge preview | Kotlin AAR, Java entry point and managed C# compilation against test-only Unity signatures passed; Unity Editor and actual exported Unity APK remain unverified. Follow [Unity preview](UNITY.md). |
-| App Inventor | Design/roadmap only | No implemented or tested drop-in adapter to install |
+| React Native / Expo | Android-only Expo Modules source adapter and React Native card | First-party APK and out-of-tree **synthetic** npm-tarball consumer APK/Metro bundle verified (S2+); no independently authored adopter, Expo Go support, physical-device or recipient acceptance, or public npm release |
+| Unity | Unpublished UPM Inspector/Android bridge and optional Visual Scripting Unit | Native AAR/sample APK packaging and C# test-stub compilation passed; actual Unity Editor/graph import, Unity-exported APK, Mono/IL2CPP, device and recipient use remain unverified. Follow [Unity preview](UNITY.md). |
+| MIT App Inventor | Help-only Rush 2.1.2 `.aix` extension source preview with guarded blocks | Genuine unpublished MIT App Inventor v206 AIX compiled and audited (S1); no App Inventor consuming APK, real editor/device acceptance or confirmed Kodular compatibility. See [App Inventor](APP_INVENTOR.md). |
 
 See the [live snapshot of source and verification evidence](STATUS.md) before trying another toolchain. If you are implementing the **AYA interaction convention without any AYA SDK**, see the [offline handoff trace verifier](../conformance/README.md). It checks declared event ordering and negative cases, not real app behavior or recipient ingestion.
 
@@ -44,7 +44,7 @@ Your app still needs to include the appropriate AYA module as an Android depende
 
 ## 4. Visual and game engines
 
-For Flutter, use [Flutter source integration](FLUTTER.md), remembering that the native Maven dependency is not publicly distributed yet. For FlutterFlow, the [prepared widget/action templates](FLUTTERFLOW.md) require both a published or otherwise resolved Android dependency and an actual editor/export test. For Godot 4, follow [the staged Android v2 addon instructions](GODOT.md). Do **not** assume putting `aya-guide.md` in a Godot `res://` package or Flutter `pubspec.yaml` makes it visible as an Android `Activity.assets` file.
+For Flutter, use [Flutter source integration](FLUTTER.md), remembering that the native Maven dependency is not publicly distributed yet. For FlutterFlow, the [prepared widget/action templates](FLUTTERFLOW.md) require both a published or otherwise resolved Android dependency and an actual editor/export test. For Godot 4, follow [the Android v2 addon instructions](GODOT.md) and distinguish its observed first-party [emulator startup](GODOT_EMULATOR_ACCEPTANCE.md) from unverified interaction or independent-host acceptance. Do **not** assume putting `aya-guide.md` in a Godot `res://` package or Flutter `pubspec.yaml` makes it visible as an Android `Activity.assets` file.
 
 The goal for visual builders is that an AYA card can become one more reusable component, and a headless AYA operation one more action-flow node. No engine adapter changes what the user must approve or gives the host automatic access to an AI reply.
 
