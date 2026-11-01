@@ -9,6 +9,8 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_prepare_godot_out_of_tree_host.py'
+      - 'tools/prepare_godot_out_of_tree_host.py'
       - 'tools/test_verify_godot_emulator_runtime.py'
       - 'tools/verify_godot_emulator_runtime.py'
       - 'tools/test_stage_godot_android_guide.py'
@@ -28,6 +30,8 @@ on:
       - 'settings.gradle.kts'
       - 'gradle.properties'
       - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_prepare_godot_out_of_tree_host.py'
+      - 'tools/prepare_godot_out_of_tree_host.py'
       - 'tools/test_verify_godot_emulator_runtime.py'
       - 'tools/verify_godot_emulator_runtime.py'
       - 'tools/test_stage_godot_android_guide.py'
@@ -128,21 +132,27 @@ jobs:
         with:
           path: ~/.local/share/godot/export_templates/4.5.1.stable/
           key: godot-4.5.1-android-export-1998af37f1387684
-      - name: Prepare clean Godot Android Gradle project and staged AYA addon
+      - name: Prepare isolated Godot consuming project outside AYA checkout
         run: |
+          python3 -m unittest discover -s tools -p 'test_prepare_godot_out_of_tree_host.py'
+          HOST="$RUNNER_TEMP/aya-godot-packed-consumer"
+          python3 tools/prepare_godot_out_of_tree_host.py \
+            --fixture integrations/godot \
+            --staged-addon aya-godot/build/godot-addon/AYA \
+            --destination "$HOST"
+          echo "AYA_GODOT_HOST=$HOST" >> "$GITHUB_ENV"
           TEMPLATES="$HOME/.local/share/godot/export_templates/4.5.1.stable"
           test -s "$TEMPLATES/android_source.zip"
-          mkdir -p integrations/godot/android/build integrations/godot/out
-          unzip -q "$TEMPLATES/android_source.zip" -d integrations/godot/android/build
-          printf '%s\n' '4.5.1.stable' > integrations/godot/android/.build_version
-          touch integrations/godot/android/build/.gdignore
-          cp -a aya-godot/build/godot-addon/AYA/. integrations/godot/addons/AYA/
-          test -s integrations/godot/addons/AYA/bin/debug/aya-godot-debug.aar
-          test -s integrations/godot/addons/AYA/bin/debug/aya-debug.aar
+          mkdir -p "$HOST/android/build" "$HOST/out"
+          unzip -q "$TEMPLATES/android_source.zip" -d "$HOST/android/build"
+          printf '%s\n' '4.5.1.stable' > "$HOST/android/.build_version"
+          touch "$HOST/android/build/.gdignore"
+          test -s "$HOST/addons/AYA/bin/debug/aya-godot-debug.aar"
+          test -s "$HOST/addons/AYA/bin/debug/aya-debug.aar"
           python3 tools/stage_godot_android_guide.py \
-            --project integrations/godot --guide integrations/godot/ci-host/aya-guide.md
+            --project "$HOST" --guide "$HOST/ci-host/aya-guide.md"
           python3 tools/stage_godot_android_guide.py \
-            --project integrations/godot --guide integrations/godot/ci-host/aya-guide.md --check
+            --project "$HOST" --guide "$HOST/ci-host/aya-guide.md" --check
       - name: Configure headless Godot editor Android SDK and disposable debug signing
         run: |
           keytool -genkeypair -keystore "$RUNNER_TEMP/aya-godot-debug.keystore" \
@@ -161,25 +171,25 @@ jobs:
           SETTINGS
       - name: Import actual Godot project and check editor plugin registration
         run: |
-          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --editor --import --quit
-          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_smoke.gd
-          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_export_preflight.gd
+          "$AYA_GODOT_EDITOR" --headless --path "$AYA_GODOT_HOST" --editor --import --quit
+          "$AYA_GODOT_EDITOR" --headless --path "$AYA_GODOT_HOST" --script res://aya_smoke.gd
+          "$AYA_GODOT_EDITOR" --headless --path "$AYA_GODOT_HOST" --script res://aya_export_preflight.gd
       - name: Export a genuine Godot Android Gradle-built debug APK
         env:
           GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/aya-godot-debug.keystore
           GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
           GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
         run: |
-          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --export-debug Android \
-            "$GITHUB_WORKSPACE/integrations/godot/out/aya-godot-host-debug.apk"
-          test -s integrations/godot/out/aya-godot-host-debug.apk
+          "$AYA_GODOT_EDITOR" --headless --path "$AYA_GODOT_HOST" --export-debug Android \
+            "$AYA_GODOT_HOST/out/aya-godot-host-debug.apk"
+          test -s "$AYA_GODOT_HOST/out/aya-godot-host-debug.apk"
       - name: Verify Godot-generated APK guide, v2 registration, native bridge and receiver
         run: |
-          APK=integrations/godot/out/aya-godot-host-debug.apk
+          APK="$AYA_GODOT_HOST/out/aya-godot-host-debug.apk"
           AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -x "$AAPT"
           python3 tools/verify_flutter_host_apk.py --apk "$APK" \
-            --guide integrations/godot/ci-host/aya-guide.md --aapt "$AAPT"
+            --guide "$AYA_GODOT_HOST/ci-host/aya-guide.md" --aapt "$AAPT"
           python3 tools/verify_android_adapter_apk.py --apk "$APK" \
             --class dev.aya.godot.AyaGodotPlugin \
             --class dev.aya.android.AyaShareSelectionReceiver \
@@ -202,7 +212,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aya-godot-4-5-real-export-debug
-          path: integrations/godot/out/aya-godot-host-debug.apk
+          path: ${{ runner.temp }}/aya-godot-packed-consumer/out/aya-godot-host-debug.apk
           if-no-files-found: error
           retention-days: 7
 
