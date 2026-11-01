@@ -1,5 +1,7 @@
 """Offline, deterministic Android emulator smoke protocol negative controls."""
 import io
+import struct
+import zlib
 import tempfile
 import unittest
 import zipfile
@@ -8,23 +10,46 @@ from subprocess import CompletedProcess
 
 from verify_godot_emulator_runtime import (
     EmulatorSmokeError, FAILED_MARKER, PACKAGE, READY_MARKER,
-    inspect_log, smoke, verify_apk,
+    inspect_log, png_dimensions, smoke, verify_apk,
 )
+
+
+def fake_png(width, height):
+    def chunk(kind, data):
+        checksum = zlib.crc32(kind + data) & 0xffffffff
+        return (struct.pack(">I", len(data)) + kind + data +
+                struct.pack(">I", checksum))
+    raw = (b"\\x00" + b"\\x00" * (width * 4)) * height
+    return (
+        b"\\x89PNG\\r\\n\\x1a\\n" +
+        chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)) +
+        chunk(b"IDAT", zlib.compress(raw, level=6)) +
+        chunk(b"IEND", b"")
+    )
 
 
 class FakeADB:
     def __init__(self, *, marker=READY_MARKER, pid="3212", installed=True,
-                 booted=True, fail_install=False):
+                 booted=True, fail_install=False, corrupt_png=False):
         self.commands = []
         self.marker = marker
         self.pid = pid
         self.installed = installed
         self.booted = booted
         self.fail_install = fail_install
+        self.corrupt_png = corrupt_png
 
     def __call__(self, args, **kwargs):
         self.commands.append(tuple(args))
         command = " ".join(args)
+        if "exec-out screencap -p" in command:
+            sizes = [c[-1] for c in self.commands if
+                     len(c) == 5 and c[1:4] == ("shell", "wm", "size")
+                     and c[-1] != "reset"]
+            size = sizes[-1] if sizes else "412x892"
+            width, height = (int(x) for x in size.split("x"))
+            image = b"not a PNG" if self.corrupt_png else fake_png(width, height)
+            return CompletedProcess(args, 0, image, b"")
         if "getprop sys.boot_completed" in command:
             out = "1\n" if self.booted else "0\n"
         elif "install -r" in command:
@@ -72,6 +97,37 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         self.assertNotIn(("adb", "shell", "input", "tap"), fake.commands)
         self.assertFalse(evidence["actual_assistant_ingestion_tested"])
         self.assertFalse(evidence["local_review_or_share_tested"])
+
+    def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
+        fake = FakeADB()
+        folder = Path(self.tmp.name) / "screens"
+        evidence = self.execute(fake, screenshots_dir=folder)
+        self.assertEqual(len(list(folder.glob("*.png"))), 2)
+        for item in evidence["layouts"]:
+            screen = item["screenshot"]
+            self.assertEqual(screen["visual_accessibility_reviewed"], False)
+            self.assertEqual(len(screen["sha256"]), 64)
+            png = (folder / screen["file"]).read_bytes()
+            self.assertEqual(png_dimensions(png),
+                             (screen["width_px"], screen["height_px"]))
+        self.assertEqual(sum("exec-out screencap -p" in " ".join(c)
+                             for c in fake.commands), 2)
+
+    def test_cannot_silently_accept_corrupted_or_missing_png(self):
+        with self.assertRaisesRegex(EmulatorSmokeError, "Invalid or unreasonably"):
+            png_dimensions(b"broken")
+        fake = FakeADB(corrupt_png=True)
+        with self.assertRaisesRegex(EmulatorSmokeError, "Invalid or unreasonably"):
+            self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+
+    def test_existing_screenshot_is_never_overwritten(self):
+        folder = Path(self.tmp.name) / "screens"
+        folder.mkdir()
+        path = folder / "godot_412x892_font100.png"
+        path.write_text("foreign")
+        with self.assertRaisesRegex(EmulatorSmokeError, "Refusing to overwrite"):
+            self.execute(FakeADB(), screenshots_dir=folder)
+        self.assertEqual(path.read_text(), "foreign")
 
     def test_rejects_absent_or_invalid_apk(self):
         with self.assertRaisesRegex(EmulatorSmokeError, "valid APK ZIP"):
