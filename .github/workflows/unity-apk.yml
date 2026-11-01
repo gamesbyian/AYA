@@ -58,6 +58,10 @@ jobs:
           gradle.beforeProject { project ->
               if (project.path == ':sample') {
                   project.plugins.withId('com.android.application') {
+                      // This *synthetic* game-engine APK requires Godot 4.5's
+                      // Android 24 minimum. Keep the real sample/core minSdk 23.
+                      // Never suppress the manifest merger with overrideLibrary.
+                      project.android.defaultConfig.minSdk = 24
                       project.dependencies.add('implementation', project.project(':aya-unity'))
                       project.dependencies.add('implementation', project.project(':aya-godot'))
                   }
