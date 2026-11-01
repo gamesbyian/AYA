@@ -77,14 +77,14 @@ class AyaStructuredArtifactTest {
 
     @Test fun emptySectionIsRejectedRatherThanSentToAssistant() {
         val empty = kit().replace(
-            "## Field semantics and bounds\n        Numeric values have documented units and bounds.",
+            "## Field semantics and bounds\nNumeric values have documented units and bounds.",
             "## Field semantics and bounds\n        "
         )
         assertTrue(AyaStructuredKitVerifier.verify(
             empty, "dev.example.chart", "1.0", task
         ) is AyaStructuredKitCheck.Rejected)
         val headingOnly = kit().replace(
-            "## Host import and recovery\n        File > Import > Preview > Apply.",
+            "## Host import and recovery\nFile > Import > Preview > Apply.",
             "## Host import and recovery\n        "
         )
         assertTrue(AyaStructuredKitVerifier.verify(
