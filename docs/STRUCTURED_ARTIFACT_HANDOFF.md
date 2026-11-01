@@ -2,7 +2,7 @@
 
 **Shared authoring:** use the [Common Packet Authoring Standard](packet/AUTHORING_STANDARD.md), [Structured profile](packet/PROFILES.md#structured-artifact) and [Module Portability Standard](MODULE_PORTABILITY.md). The host supplies its own verified schema, field semantics, dependencies, actual import route and version constraints. AYA's profile does not know any host-specific recipe format.
 
-**Implementation status:** this document specifies the portable handoff contract and a future generic Android typed entry point. The Android library **does not yet provide** a dedicated `AyaStructuredTask` launcher. Browser/PWA developers may implement the pattern using their platform's existing share/copy/save APIs; no particular browser integration is asserted or supported by this document. Neither route guarantees third-party assistant file ingestion.
+**Implementation status:** the **unpublished Android source SDK** now provides `AyaStructuredTask`, `AyaStructuredKitVerifier`, `Aya.launchStructuredBundled()` and `AyaComponentAction.Structured`. The launcher uses the canonical installed-version AYA-RAS guard, a second exact-version kit check, editable local review, and deliberate Copy/Share; no host importer, automatic reply retrieval, browser/PWA adapter, third-party assistant attachment acceptance, physical-device or publicly distributed library is implied. Browser/PWA developers may independently implement the one-way convention using their platform's APIs.
 
 ## Purpose and suitable hosts
 
@@ -12,16 +12,53 @@ A typical flow is: host feature → optional AYA card → editable brief and app
 
 The host must have an operational, safe importer. If it cannot parse, validate or apply the requested output, it must not advertise that workflow merely because the agent could produce JSON. An AYA-generated packet is documentation, not an import implementation.
 
-## Portable structured task contract (future SDK)
+## Portable structured task contract (unpublished Android SDK)
 
-A future `AyaStructuredTask` could carry:
-- `artifactRole`, file extension, exact MIME type and `schemaVersion`, taken from the shipped host importer;
-- truthful `importInstructions` and expected apply/preview/undo behavior;
-- a user-editable `prompt` and bounded, user-reviewed `hostContext`;
-- a source-derived version-matched reference defining top-level shape, typed fields, defaults, bounds, conditional fields, interaction rules, expected output and negative examples;
-- optionally the current artifact **only with a separate, unchecked-by-default user consent choice**.
+`AyaStructuredTask` carries the host-verified `artifactRole`, lower-case `fileExtension`, `mimeType`, `schemaVersion` and true `importInstructions`. The runtime receives an editable direction, an exact-version AYA-RAS guide, and a separate developer-authored `aya-structured-kit/v1` asset. It reads at most 1 MiB of kit, caps the combined reviewed package at 2 MiB, checks installed package/version, rejects unsafe kit paths and malformed UTF-8, then opens the normal local question or review dialog. The host creates, validates, previews and applies any returned file; AYA does not receive or import it.
 
-Do not implement structured tasks by misusing image-generation requirements. Do not invent `AyaStructuredTask` calls in samples before the API actually exists. Enforce host/build identity, byte limits, user-approved final text consistency and truthful Copy/Save/manual-paste fallbacks.
+An optional **current artifact** is intentionally **not** accepted by this API yet. Any future attachment must use a separate unchecked-by-default user approval and a bounded, auditable payload. Do not misuse image-generation requirements to describe structured files.
+
+## Source-preview Android usage
+
+```kotlin
+val task = AyaStructuredTask(
+    artifactRole = "chart configuration",
+    fileExtension = ".json",
+    mimeType = "application/json",
+    schemaVersion = "chart-3",
+    importInstructions = "File > Import > Preview > Apply"
+)
+val result = Aya.launchStructuredBundled(
+    activity = activity,
+    task = task,
+    kitAsset = "aya-structured-kit.md",
+    guideAsset = "aya-guide.md",
+    direction = "Create a horizontal categorical chart"
+)
+// This result describes opening local UI, never agent receipt or import.
+```
+
+The sample values above belong to a **fictional feature**, not an AYA output format. The integrating host bundles its independently audited asset with this exact seven-section format:
+
+```markdown
+---
+schema_version: aya-structured-kit/v1
+app_id: dev.example.chart
+app_version: 1.0
+schema_revision: chart-3
+source_revision: example-build
+owner: example developer
+---
+## Artifact output contract
+## Field semantics and bounds
+## Interactions and precedence
+## State preservation and migration
+## Worked valid and invalid examples
+## Agent clarification and safety
+## Host import and recovery
+```
+
+These headings and metadata are **structural** requirements; empty headings, invented schema descriptions or untested examples are not evidence that an actual host importer can accept any generated file. Use the host's real verified format, not the fixture.
 
 ## Required developer-authored schema and semantics
 
@@ -42,7 +79,7 @@ A strict-root native format must be returned unchanged: do **not** wrap it in an
 ## Transport-agnostic authoring and delivery
 
 Use a platform-appropriate, user-approved path:
-- **Android:** review and Copy or `ACTION_SEND` with disclosed URI permissions. Core AYA's existing launcher types do not constitute a specialized structured-artifact API.
+- **Android:** `Aya.launchStructuredBundled()` provides the version-checked, typed source-preview path through review/Copy/`ACTION_SEND` with disclosed temporary URI permissions. The host still owns output/import behavior; no general marketplace component is published.
 - **Browser/PWA:** user-initiated Share with `navigator.canShare` checks where supported, or Copy/Save for manual attachment. Browser file-sharing availability does not imply Android Sharesheet compatibility.
 - **Other integrations:** preserve the same editable preview, version consistency, consent and manual return boundary, without claiming unimplemented platform support.
 
@@ -59,4 +96,4 @@ The receiving agent might reply in prose, include code fences, omit the attachme
 
 ## Future work
 
-A reusable typed Android structured-artifact launcher, a fictional demonstration fixture, and associated compiler/parser/recipient QA may be added as independent changes. No host-specific branches, branded menus, format implementations or integration-status promises belong in this portable module.
+The typed Android launcher and Kotlin negative tests now exist as unpublished source. Remaining work includes independent consuming-host APK/device acceptance, real validated output parser/importer round trips, optional current-artifact consent design, visual-builder adapter wiring, dated recipient trials and public distribution. No host-specific branches, branded menus or proprietary formats belong in this portable module.
