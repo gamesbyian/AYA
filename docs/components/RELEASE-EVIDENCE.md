@@ -39,3 +39,10 @@ A test must fail closed when the guide is absent, stale or inconsistent with ins
 - Unity has native AAR and stand-in C# compilation evidence. Actual Unity Editor import, exported Android APK, Mono/IL2CPP and device lifecycle are unverified.
 
 Use [the adapter status ledger](STATUS.md) for the latest evidence and issues [#21](https://github.com/gamesbyian/AYA/issues/21), [#14](https://github.com/gamesbyian/AYA/issues/14), [#4](https://github.com/gamesbyian/AYA/issues/4), and [#5](https://github.com/gamesbyian/AYA/issues/5) for unresolved release gates.
+
+
+## November 1 structural guard and rejected screenshot delta
+
+The typed structured-file handoff from [#93](https://github.com/gamesbyian/AYA/pull/93) gained the merged developer-side offline kit validator [#95](https://github.com/gamesbyian/AYA/pull/95) and runtime empty-section rejection [#98](https://github.com/gamesbyian/AYA/pull/98). PR #98 passed all **14 exact-head CI checks**, including installed Android instrumentation and cross-framework builds. This is structural validation only: S3 independent importer acceptance, S4 physical devices, S5 genuine assistant ingestion and S6 stable public distribution remain unverified.
+
+The prior Godot visual candidate [#86](https://github.com/gamesbyian/AYA/pull/86) and its transparent-target successor [#96](https://github.com/gamesbyian/AYA/pull/96) were both closed unmerged. The genuine Godot 4.5.1 APK exporter passed on [run 41280997628](https://github.com/gamesbyian/AYA/actions/runs/41280997628), but the Android 35 compositor still captured blank 412×892 frames; Godot reported no dark, light or opaque samples despite three fixture draw callbacks. The specific transparent-viewport workaround is rejected for this CI environment, not a claim about every Godot Android renderer. [Draft #100](https://github.com/gamesbyian/AYA/pull/100) adds rejected-screen evidence retention but remains unqualified. Neither an APK build nor a failed retained PNG meets S4 visual accessibility or recipient acceptance.
