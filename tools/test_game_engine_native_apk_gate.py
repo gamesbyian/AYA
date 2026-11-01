@@ -33,7 +33,7 @@ class GameEngineAPKGateTests(unittest.TestCase):
         sample = (Path(__file__).resolve().parents[1] / "sample" /
                   "build.gradle.kts").read_text(encoding="utf-8")
         self.assertIn("minSdk = 23", sample)
-        self.assertIn("project.android.defaultConfig.minSdk = 24", self.content)
+        self.assertIn('current.replace("minSdk = 23", "minSdk = 24")', self.content)
         self.assertNotIn('tools:overrideLibrary=', self.content)
 
     def test_v2_plugin_registration_metadata_is_binary_inspected(self):
