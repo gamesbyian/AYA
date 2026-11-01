@@ -10,7 +10,8 @@ from subprocess import CompletedProcess
 
 from verify_godot_emulator_runtime import (
     EmulatorSmokeError, FAILED_MARKER, PACKAGE, READY_MARKER,
-    inspect_log, png_dimensions, png_has_visible_content, smoke, verify_apk,
+    inspect_log, parse_synthetic_viewport_frame, png_dimensions,
+    png_has_visible_content, smoke, verify_apk,
 )
 
 
@@ -35,7 +36,8 @@ class FakeADB:
     def __init__(self, *, marker=READY_MARKER, pid="3212", installed=True,
                  booted=True, fail_install=False, corrupt_png=False,
                  immersive_supported=True, focused_window=None,
-                 blank_png=False, blank_first=0):
+                 blank_png=False, blank_first=0,
+                 godot_frame="dark=1500 light=1500 valid=1"):
         self.commands = []
         self.marker = marker
         self.pid = pid
@@ -49,6 +51,7 @@ class FakeADB:
         self.blank_png = blank_png
         self.blank_first = blank_first
         self.screenshot_calls = 0
+        self.godot_frame = godot_frame
 
     def __call__(self, args, **kwargs):
         self.commands.append(tuple(args))
@@ -88,7 +91,9 @@ class FakeADB:
                 return CompletedProcess(args, 1, "", "")
             out = self.pid + "\n"
         elif "logcat -d" in command:
-            out = "I/Godot: " + self.marker + "\n" if self.marker else "I/Godot: launching\n"
+            out = ("I/Godot: " + self.marker + "\n" +
+                   ("I/Godot: AYA_CI_GODOT_FRAME " + self.godot_frame + "\n"
+                    if self.godot_frame is not None else "")) if self.marker else "I/Godot: launching\n"
         else:
             out = ""
         return CompletedProcess(args, 0, out, "")
@@ -185,6 +190,29 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
     def test_image_content_check_rejects_uniform_black_or_white(self):
         self.assertFalse(png_has_visible_content(fake_png(50, 30, blank=True)))
         self.assertTrue(png_has_visible_content(fake_png(50, 30)))
+
+    def test_distinguishes_internal_viewport_from_android_compositor(self):
+        fake = FakeADB(blank_png=True)
+        with self.assertRaisesRegex(EmulatorSmokeError, "Godot viewport contains UI pixels"):
+            self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+        fake = FakeADB(blank_png=True, godot_frame="dark=4096 light=0 valid=0")
+        with self.assertRaisesRegex(EmulatorSmokeError, "Godot viewport is also blank"):
+            self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+
+    def test_fail_closed_on_missing_or_contradictory_internal_evidence(self):
+        for value in (None, "invalid", "dark=4096 light=30 valid=1",
+                      "dark=1 light=1 valid=1"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(EmulatorSmokeError, "viewport pixel diagnostic"):
+                    self.execute(FakeADB(godot_frame=value),
+                                 screenshots_dir=Path(self.tmp.name) / "screens")
+
+    def test_synthetic_frame_marker_parser(self):
+        result = parse_synthetic_viewport_frame(
+            "I/godot: AYA_CI_GODOT_FRAME dark=2000 light=100 valid=1"
+        )
+        self.assertTrue(result["visible_contrast"])
+        self.assertEqual(result["dark_samples"], 2000)
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()

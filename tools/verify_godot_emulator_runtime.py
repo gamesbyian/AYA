@@ -24,6 +24,8 @@ from typing import Callable
 PACKAGE = "dev.aya.godot.cihost"
 READY_MARKER = "AYA_CI_GODOT_RUNTIME_READY"
 FAILED_MARKER = "AYA_CI_GODOT_RUNTIME_FAIL"
+FRAME_MARKER = "AYA_CI_GODOT_FRAME"
+FRAME_PATTERN = re.compile(r"AYA_CI_GODOT_FRAME dark=(\d+) light=(\d+) valid=([01])")
 SCENARIOS = (("412x892", "1.0"), ("320x700", "2.0"))
 MAX_LOG_CHARS = 800
 MAX_REPORT_BYTES = 16 * 1024
@@ -230,6 +232,26 @@ def inspect_log(log: str, package: str = PACKAGE) -> tuple[bool, bool]:
     return ready, failed
 
 
+
+def parse_synthetic_viewport_frame(log: str) -> dict:
+    """Parse only bounded synthetic pixel counts; no private log text."""
+    rows = [line for line in log.splitlines() if FRAME_MARKER in line]
+    if len(rows) != 1:
+        raise EmulatorSmokeError("Godot viewport pixel diagnostic missing or duplicated")
+    match = FRAME_PATTERN.search(rows[0])
+    if match is None:
+        raise EmulatorSmokeError("Malformed Godot viewport pixel diagnostic")
+    dark, light, declared_valid = (int(part) for part in match.groups())
+    if (dark > 4096 or light > 4096 or dark + light > 4096 or
+            declared_valid != int(dark >= 16 and light >= 16)):
+        raise EmulatorSmokeError("Inconsistent Godot viewport pixel diagnostic")
+    return {
+        "dark_samples": dark, "light_samples": light,
+        "visible_contrast": bool(declared_valid),
+        "sample_grid": "64x64 first-party synthetic Godot viewport",
+    }
+
+
 def verify_apk(apk: Path) -> str:
     if not apk.is_file() or apk.is_symlink():
         raise EmulatorSmokeError("Expected a real regular Godot-generated APK")
@@ -356,6 +378,7 @@ def smoke(
                     line.strip()[-240:] for line in geometry_log.splitlines()
                     if "AYA_CI_GODOT_GEOMETRY" in line
                 ][-2:]
+                godot_frame = parse_synthetic_viewport_frame(geometry_log)
                 # Process readiness does not prove the AYA card is foreground.
                 # A system fullscreen confirmation or Launcher ANR can hide it.
                 windows = adb("shell", "dumpsys", "window", "displays")
@@ -369,16 +392,24 @@ def smoke(
                     raise EmulatorSmokeError(
                         f"Android system dialog or non-host window obscures "
                         f"AYA screenshot at {size}; focused_window={state}; "
-                        f"synthetic_geometry={geometry}"
+                        f"synthetic_geometry={geometry}; "
+                        f"godot_viewport={godot_frame}"
                     )
                 name = f"godot_{size}_font{int(float(scale) * 100)}.png"
                 try:
                     screenshot = capture_synthetic_screenshot(
                         size, scale, screenshots_dir / name, run=run, pause=pause
                     )
+                    if not godot_frame["visible_contrast"]:
+                        raise EmulatorSmokeError(
+                            "Android screenshot has contrast but synthetic Godot viewport does not"
+                        )
+                    screenshot["synthetic_godot_frame"] = godot_frame
                 except EmulatorSmokeError as exc:
                     raise EmulatorSmokeError(
-                        f"{exc}; synthetic_geometry={geometry}"
+                        f"{exc}; synthetic_geometry={geometry}; "
+                        f"godot_viewport={godot_frame}; "
+                        f"diagnosis={'Godot viewport is also blank/low contrast' if not godot_frame['visible_contrast'] else 'Godot viewport contains UI pixels; Android capture/compositor remains blank'}"
                     ) from exc
             outcomes.append({
                 "screenshot": screenshot,

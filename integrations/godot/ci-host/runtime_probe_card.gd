@@ -37,7 +37,31 @@ func _verify_native_card() -> void:
           " viewport=", viewport_rect.size,
           " render_driver=", RenderingServer.get_current_rendering_driver_name())
     if geometry_ok:
+        _capture_synthetic_viewport_stats()
         print("AYA_CI_GODOT_RUNTIME_READY")
     else:
         print("AYA_CI_GODOT_RUNTIME_FAIL")
         push_error("AYA card exists but has no visible Android viewport geometry")
+
+func _capture_synthetic_viewport_stats() -> void:
+    # Synthetic fixture only: log pixel counts, never image bytes or user data.
+    var source: Image = get_viewport().get_texture().get_image()
+    if source == null or source.is_empty():
+        print("AYA_CI_GODOT_FRAME dark=0 light=0 valid=0")
+        return
+    source.convert(Image.FORMAT_RGBA8)
+    source.resize(64, 64, Image.INTERPOLATE_BILINEAR)
+    var dark := 0
+    var light := 0
+    for y in range(source.get_height()):
+        for x in range(source.get_width()):
+            var pixel: Color = source.get_pixel(x, y)
+            if pixel.a < 0.5:
+                continue
+            var brightness: float = maxf(pixel.r, maxf(pixel.g, pixel.b))
+            if brightness <= 0.08:
+                dark += 1
+            elif brightness >= 0.31:
+                light += 1
+    print("AYA_CI_GODOT_FRAME dark=", dark,
+          " light=", light, " valid=", int(dark >= 16 and light >= 16))

@@ -17,6 +17,8 @@ The script `tools/verify_godot_emulator_runtime.py` emits a bounded `aya-godot-e
 
 ## Visual evidence for layout review
 
+The synthetic fixture reads its own **Godot ViewportTexture** after `frame_post_draw`, samples a 64×64 image and prints only fixed-format dark/light counts. These are cross-checked against Android's independent `screencap`. If the Godot viewport contains contrasting UI pixels while Android's capture is black, the diagnostic implicates Android composition/capture; if both are blank, investigate Godot rendering first. Missing or contradictory viewport diagnostics fail visual acceptance. Nothing logs image bytes or user content, and pixel counts alone do not certify accessibility.
+
 The **synthetic CI host** anchors its AYA card to the full viewport and requests Godot's GL Compatibility renderer on Android to reduce Vulkan/software-GPU black-frame failures in headless emulation. These are disposable test-fixture settings, not requirements of the reusable AYA addon or adopting hosts. Developers must validate the renderer and layout of their own Godot project.
 
 
