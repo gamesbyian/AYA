@@ -1,0 +1,39 @@
+# Godot Android runtime acceptance: synthetic emulator smoke
+
+**Scope:** a disposable first-party Godot 4.5.1 Android debug APK built and independently inspected by the real [Godot exporter workflow](../../.github/workflows/godot-export.yml). This lane is a **separate runtime test** of the *same* APK, not a second expensive Gradle build or a receiving-assistant test.
+
+## Exactly what is exercised
+
+The CI exporter enables Android **x86-64** in the synthetic game's export preset, alongside its existing arm64 option. It bundles the test-only subclass `ci-host/runtime_probe_card.gd` as the scene root. That script delegates all UI construction to the reusable `AYACard` and, **on Android only**, checks that Godot registered the real AYA native singleton and that its rendered scene contains an enabled Ask button and multiline question input. It prints a fixed `AYA_CI_GODOT_RUNTIME_READY` marker after those checks. Failures print `AYA_CI_GODOT_RUNTIME_FAIL` and raise a Godot error. No question content, private device state or attachment bytes are logged.
+
+The downstream emulator job downloads the exact upstream APK artifact and runs on Android API 35 x86-64, starting the actual exported package `dev.aya.godot.cihost` twice on a disposable emulator:
+
+1. 412×892 pixels at 160 dpi and Android font scale 1.0.
+2. 320×700 pixels at 160 dpi and Android font scale 2.0.
+
+For each launch the script clears previous logcat content, starts the package through Android's public launcher, checks for a live process, and demands the **new** runtime marker. It refuses absent markers, a missing process, a test failure marker, or an app-specific Android fatal exception. It resets emulator settings after the test, even on error.
+
+The script `tools/verify_godot_emulator_runtime.py` emits a bounded `aya-godot-emulator-smoke/v1` JSON artifact with the actual APK SHA-256 and observed test scenarios. Its negative-control unit tests cover missing APKs, failed installation, missing process, unrelated crashes, missing/failing markers and command failures.
+
+## Important boundaries
+
+This demonstrates **first-party Android emulator boot, Godot scene construction, native plugin availability and local Ask-card readiness** only when the actual CI run succeeds. It cannot establish real screen-reader accessibility, actual on-screen button geometry and tapability, opening editable Android review, Copy/Share semantics, Android lifecycle across real rotation, compatibility with a physical device, actual receipt by ChatGPT/Claude/Gemini, or third-party project integration.
+
+The 200% system font setting tests startup under that configuration. It does not prove text remains unclipped or readable. Real accessibility testing requires snapshots and interaction on actual UI surfaces, and separate physical-device validation.
+
+The reusable Android and Godot modules remain unchanged by the fixture. The scene's test marker is not a production telemetry feature or an agent-response tracker.
+
+## Reproducing
+
+After a successful Godot exporter workflow, download the `aya-godot-4-5-real-export-debug` artifact and install it on a clean Android API 35 x86-64 emulator. From the repository root:
+
+```sh
+python3 -m unittest discover -s tools -p 'test_verify_godot_emulator_runtime.py'
+python3 tools/verify_godot_emulator_runtime.py \
+  --apk /path/to/aya-godot-host-debug.apk \
+  --report /tmp/aya-godot-emulator-evidence.json
+```
+
+The helper uses `adb`, so the emulator must already be running and report `sys.boot_completed=1`. Inspect JSON outcomes and Godot logcat when failures occur. A valid file alone is insufficient: look for a successful emulator CI run for the exact source SHA.
+
+The existing Godot/AYA UI, provider-compatibility, and public distribution release gates remain open until their own evidence is recorded.

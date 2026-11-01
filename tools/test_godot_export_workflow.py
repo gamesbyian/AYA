@@ -80,9 +80,20 @@ class GodotExportWorkflowContract(unittest.TestCase):
         self.assertIn("textures/vram_compression/import_etc2_astc=true",
                       self.project_settings)
 
-    def test_one_expensive_godot_export_job(self):
-        self.assertEqual(self.workflow.count("    runs-on: ubuntu-latest"), 1)
+    def test_one_native_build_and_artifact_reusing_emulator_job(self):
+        self.assertEqual(self.workflow.count("    runs-on: ubuntu-latest"), 2)
         self.assertEqual(self.workflow.count("--export-debug Android"), 1)
+        self.assertIn("needs: real-godot-export", self.workflow)
+        self.assertIn("actions/download-artifact@v4", self.workflow)
+        self.assertIn("reactivecircus/android-emulator-runner@v2", self.workflow)
+        runtime = self.workflow.split("  android-emulator-runtime:", 1)[1]
+        self.assertNotIn("stageGodotAddon", runtime)
+        self.assertNotIn("--export-debug Android", runtime)
+        self.assertIn("tools/verify_godot_emulator_runtime.py", runtime)
+        self.assertIn('script: python3 tools/verify_godot_emulator_runtime.py --apk ', runtime)
+        self.assertIn(' --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"', runtime)
+        self.assertNotIn('script: |\\n            python3 tools/verify_godot_emulator_runtime.py', runtime)
+        self.assertIn("aya-godot-emulator-runtime-evidence", runtime)
         self.assertNotIn("continue-on-error: true", self.workflow)
         self.assertIn("Scope: actual Godot 4.5.1 debug Android export", self.workflow)
 
