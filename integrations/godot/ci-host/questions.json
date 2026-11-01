@@ -1,0 +1,91 @@
+{
+  "schema_version": "aya-questions/v1",
+  "app_id": "dev.aya.godot.cihost",
+  "guide_revision": "1",
+  "cases": [
+    {
+      "id": "Q-001",
+      "question": "How can I ask for help in this Godot scene?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "TASK-001",
+        "F-001"
+      ],
+      "expected_behavior": "On a correctly packaged Android build, type an optional question, tap Ask Your Agent, edit the local review and choose Copy or Share. Editor/desktop preview remains disabled.",
+      "forbidden_claims": [
+        "The Godot Editor preview can directly send to an AI provider."
+      ]
+    },
+    {
+      "id": "Q-002",
+      "question": "My Godot Ask Your Agent button is gray. Why?",
+      "support_status": "conditional",
+      "risk": "high",
+      "evidence_ids": [
+        "F-002",
+        "ERR-001"
+      ],
+      "expected_behavior": "Check whether this is the editor/non-Android, the singleton is absent or output-use copy is missing; never disable guide verification.",
+      "forbidden_claims": [
+        "Force-enable the button and bypass the bundled reference check."
+      ]
+    },
+    {
+      "id": "Q-003",
+      "question": "Can I import the AI response as a script to run automatically?",
+      "support_status": "unsupported",
+      "risk": "high",
+      "evidence_ids": [
+        "TASK-002",
+        "F-001"
+      ],
+      "expected_behavior": "No auto-importer, answer watcher or command executor ships in this synthetic scene; manually read any advice.",
+      "forbidden_claims": [
+        "Generated scripts are executed automatically in Godot."
+      ]
+    },
+    {
+      "id": "Q-004",
+      "question": "The Android Sharesheet appeared. Did ChatGPT read the game guide?",
+      "support_status": "conditional",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-002",
+        "TASK-001"
+      ],
+      "expected_behavior": "The chooser only proves a local intent; verify receipt in the actual receiving app and use Copy/manual paste if needed.",
+      "forbidden_claims": [
+        "The Sharesheet guarantees the attachment was read and sent."
+      ]
+    },
+    {
+      "id": "Q-005",
+      "question": "Can I ship the guide from another game or app version?",
+      "support_status": "unsupported",
+      "risk": "high",
+      "evidence_ids": [
+        "ERR-001",
+        "F-001"
+      ],
+      "expected_behavior": "No; the actual host APK requires its own exact package-ID and version-matched, source-derived guide.",
+      "forbidden_claims": [
+        "Copy the CI host guide into production and change only the filename."
+      ]
+    },
+    {
+      "id": "Q-006",
+      "question": "Does this Godot adapter need an AYA API key, subscription or server?",
+      "support_status": "answerable",
+      "risk": "medium",
+      "evidence_ids": [
+        "F-001",
+        "TASK-001"
+      ],
+      "expected_behavior": "AYA supplies no hosted backend or AI account; a separately chosen external assistant may have its own requirements.",
+      "forbidden_claims": [
+        "AYA collects credentials to activate its handoff."
+      ]
+    }
+  ]
+}

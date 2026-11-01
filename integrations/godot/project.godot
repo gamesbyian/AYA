@@ -6,3 +6,8 @@ run/main_scene="res://aya_smoke.tscn"
 
 [editor_plugins]
 enabled=PackedStringArray("res://addons/AYA/plugin.cfg")
+
+[rendering]
+
+; Godot Android exporter requires ETC2/ASTC textures on Linux CI.
+textures/vram_compression/import_etc2_astc=true

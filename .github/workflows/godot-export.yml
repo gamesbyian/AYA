@@ -1,0 +1,180 @@
+name: Godot 4.5 actual Android addon export and APK acceptance
+on:
+  pull_request:
+    paths:
+      - 'integrations/godot/**'
+      - 'aya-godot/**'
+      - 'aya/**'
+      - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_stage_godot_android_guide.py'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+      - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/verify_android_manifest_providers.py'
+      - 'tools/test_verify_android_manifest_providers.py'
+      - '.github/workflows/godot-export.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/godot/**'
+      - 'aya-godot/**'
+      - 'aya/**'
+      - 'tools/stage_godot_android_guide.py'
+      - 'tools/test_stage_godot_android_guide.py'
+      - 'tools/verify_flutter_host_apk.py'
+      - 'tools/verify_android_adapter_apk.py'
+      - 'tools/verify_android_manifest_metadata.py'
+      - 'tools/verify_android_manifest_providers.py'
+      - 'tools/test_verify_android_manifest_providers.py'
+      - '.github/workflows/godot-export.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: aya-godot-real-export-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  real-godot-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    env:
+      GODOT_VERSION: '4.5.1'
+      GODOT_TEMPLATE_DIGEST: '1998af37f1387684e2c211cdb483daf492fc64dc6b12096bddcdca25b6910c86'
+      GODOT_EDITOR_DIGEST: '02ec53d1cc7dbb9cc6355393c61b9ab43d1244751a124f10248a4802830788cd'
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Fail early on stale Godot guide, preset or wrong APK source path
+        run: |
+          python3 -m unittest discover -s tools -p 'test_stage_godot_android_guide.py'
+          python3 tools/validate_guide.py --strict integrations/godot/ci-host/aya-guide.md
+          python3 tools/audit_reference.py integrations/godot/ci-host/aya-guide.md \
+            --inventory integrations/godot/ci-host/inventory.json \
+            --questions integrations/godot/ci-host/questions.json --strict
+      - name: Stage both actual debug AARs through canonical Gradle build
+        run: gradle :aya-godot:stageGodotAddon --no-daemon
+      - name: Install matching Godot Android SDK, NDK and build tools
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -x "$SDKMANAGER"
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
+            "platform-tools" "platforms;android-35" "build-tools;35.0.0" \
+            "ndk;28.1.13356709"
+      - name: Install official pinned Godot 4.5.1 editor
+        run: |
+          curl --fail --location --silent --show-error --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip" \
+            --output "$RUNNER_TEMP/godot-editor.zip"
+          echo "$GODOT_EDITOR_DIGEST  $RUNNER_TEMP/godot-editor.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/godot-editor"
+          unzip -q "$RUNNER_TEMP/godot-editor.zip" -d "$RUNNER_TEMP/godot-editor"
+          chmod +x "$RUNNER_TEMP/godot-editor/Godot_v4.5.1-stable_linux.x86_64"
+          echo "AYA_GODOT_EDITOR=$RUNNER_TEMP/godot-editor/Godot_v4.5.1-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Restore content-addressed Android export templates
+        id: godot-template-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.local/share/godot/export_templates/4.5.1.stable/
+          key: godot-4.5.1-android-export-1998af37f1387684
+      - name: Fetch and verify official matching Godot Android export templates
+        if: steps.godot-template-cache.outputs.cache-hit != 'true'
+        run: |
+          curl --fail --location --silent --show-error --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" \
+            --output "$RUNNER_TEMP/godot-templates.tpz"
+          echo "$GODOT_TEMPLATE_DIGEST  $RUNNER_TEMP/godot-templates.tpz" | sha256sum -c -
+          DIR="$HOME/.local/share/godot/export_templates/4.5.1.stable"
+          mkdir -p "$DIR"
+          unzip -p "$RUNNER_TEMP/godot-templates.tpz" templates/android_source.zip > "$DIR/android_source.zip"
+          unzip -p "$RUNNER_TEMP/godot-templates.tpz" templates/android_debug.apk > "$DIR/android_debug.apk"
+          unzip -p "$RUNNER_TEMP/godot-templates.tpz" templates/android_release.apk > "$DIR/android_release.apk"
+          printf '%s\n' '4.5.1.stable' > "$DIR/version.txt"
+          test -s "$DIR/android_source.zip"
+          test -s "$DIR/android_debug.apk"
+      - name: Cache verified extracted Android templates before doing expensive export
+        if: steps.godot-template-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.local/share/godot/export_templates/4.5.1.stable/
+          key: godot-4.5.1-android-export-1998af37f1387684
+      - name: Prepare clean Godot Android Gradle project and staged AYA addon
+        run: |
+          TEMPLATES="$HOME/.local/share/godot/export_templates/4.5.1.stable"
+          test -s "$TEMPLATES/android_source.zip"
+          mkdir -p integrations/godot/android/build integrations/godot/out
+          unzip -q "$TEMPLATES/android_source.zip" -d integrations/godot/android/build
+          printf '%s\n' '4.5.1.stable' > integrations/godot/android/.build_version
+          touch integrations/godot/android/build/.gdignore
+          cp -a aya-godot/build/godot-addon/AYA/. integrations/godot/addons/AYA/
+          test -s integrations/godot/addons/AYA/bin/debug/aya-godot-debug.aar
+          test -s integrations/godot/addons/AYA/bin/debug/aya-debug.aar
+          python3 tools/stage_godot_android_guide.py \
+            --project integrations/godot --guide integrations/godot/ci-host/aya-guide.md
+          python3 tools/stage_godot_android_guide.py \
+            --project integrations/godot --guide integrations/godot/ci-host/aya-guide.md --check
+      - name: Configure headless Godot editor Android SDK and disposable debug signing
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/aya-godot-debug.keystore" \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 365 \
+            -storepass android -keypass android \
+            -dname "CN=AYA Debug Test,O=AYA,C=US" -noprompt
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<SETTINGS
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$RUNNER_TEMP/aya-godot-debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          SETTINGS
+      - name: Import actual Godot project and check editor plugin registration
+        run: |
+          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --editor --import --quit
+          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_smoke.gd
+          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_export_preflight.gd
+      - name: Export a genuine Godot Android Gradle-built debug APK
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/aya-godot-debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --export-debug Android \
+            "$GITHUB_WORKSPACE/integrations/godot/out/aya-godot-host-debug.apk"
+          test -s integrations/godot/out/aya-godot-host-debug.apk
+      - name: Verify Godot-generated APK guide, v2 registration, native bridge and receiver
+        run: |
+          APK=integrations/godot/out/aya-godot-host-debug.apk
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -x "$AAPT"
+          python3 tools/verify_flutter_host_apk.py --apk "$APK" \
+            --guide integrations/godot/ci-host/aya-guide.md --aapt "$AAPT"
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" \
+            --class dev.aya.godot.AyaGodotPlugin \
+            --class dev.aya.android.AyaShareSelectionReceiver \
+            --class dev.aya.android.AyaFileProvider
+          python3 tools/verify_android_manifest_metadata.py --apk "$APK" --aapt "$AAPT" \
+            --name org.godotengine.plugin.v2.AYA --value dev.aya.godot.AyaGodotPlugin
+          python3 tools/verify_android_manifest_providers.py --apk "$APK" --aapt "$AAPT" \
+            --provider dev.aya.android.AyaFileProvider=dev.aya.godot.cihost.aya.files \
+            --provider androidx.core.content.FileProvider=dev.aya.godot.cihost.fileprovider
+          sha256sum "$APK"
+          echo 'Scope: actual Godot 4.5.1 debug Android export, not physical-device or assistant ingestion acceptance'
+      - name: Upload Godot-generated APK for controlled device QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-godot-4-5-real-export-debug
+          path: integrations/godot/out/aya-godot-host-debug.apk
+          if-no-files-found: error
+          retention-days: 7
