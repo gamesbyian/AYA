@@ -81,7 +81,7 @@ jobs:
           AAPT=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name aapt -type f | sort -V | tail -n 1)
           test -x "$AAPT"
           python3 tools/verify_flutter_host_apk.py --apk "$APK" --guide sample/src/main/assets/aya-guide.md --aapt "$AAPT"
-          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.unity.AyaUnityBridge --class dev.aya.godot.AyaGodotPlugin --class dev.aya.android.AyaShareSelectionReceiver
+          python3 tools/verify_android_adapter_apk.py --apk "$APK" --class dev.aya.unity.AyaUnityBridge --class dev.aya.godot.AyaGodotPlugin --class dev.aya.android.AyaShareSelectionReceiver --class dev.aya.android.AyaFileProvider
           python3 tools/verify_android_manifest_metadata.py --apk "$APK" --aapt "$AAPT" --name org.godotengine.plugin.v2.AYA --value dev.aya.godot.AyaGodotPlugin
           sha256sum "$APK"
           echo 'Synthetic Android packaging only; this is neither a Unity nor a Godot engine-generated Android export, and proves no device/recipient behaviour.'
