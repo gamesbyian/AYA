@@ -47,8 +47,13 @@ This is a native **manifest-component identity change**, so prebuilt hosts that 
 AYA-RAS v1 identifies `app_id`, `app_version_min`,
 `app_version_max`, `platform`, `locale`, `source_revision` and
 other provenance. The **runtime** currently enforces app ID, Android
-platform, nonblank provenance, 12 sections and an exact match of both
-version bounds to the installed `versionName`. It **does not** assert that
+platform, nonblank provenance, **exactly twelve ordered sections with nonempty
+body content** and an exact match of both version bounds to the installed
+`versionName`. Earlier unpublished source previews accepted guides that
+contained only twelve headings; those structurally hollow assets now fail
+closed. Adopters of source snapshots must regenerate substantive, audited
+guide bodies rather than relying on heading-only placeholders. This remains
+an authoring-integrity check, not semantic fact checking. It **does not** assert that
 `locale` equals the Android device locale, detect the host's feature flags,
 check a document hash against source, or choose the correct asset
 automatically. A valid but semantically incorrect same-package/version

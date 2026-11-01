@@ -22,17 +22,29 @@ class AyaReferenceVerifierTest {
         ---
         # AYA Sample
         ## Scope and version
+        Guide content for Scope and version.
         ## Quick orientation
+        Guide content for Quick orientation.
         ## Navigation map
+        Guide content for Navigation map.
         ## Task recipes
+        Guide content for Task recipes.
         ## Features and settings
+        Guide content for Features and settings.
         ## Troubleshooting
+        Guide content for Troubleshooting.
         ## Limitations and unsupported behavior
+        Guide content for Limitations and unsupported behavior.
         ## Privacy and data handling
+        Guide content for Privacy and data handling.
         ## Glossary and synonyms
+        Guide content for Glossary and synonyms.
         ## Evidence and provenance
+        Guide content for Evidence and provenance.
         ## Unknowns and escalation
+        Guide content for Unknowns and escalation.
         ## Assistant answer policy
+        Guide content for Assistant answer policy.
         """.trimIndent()
 
     @Test fun acceptsExactHostPackageAndVersion() {
@@ -68,6 +80,38 @@ class AyaReferenceVerifierTest {
     @Test fun refusesMissingSection() {
         val changed = validGuide().replace("## Troubleshooting", "## Troubleshoot")
         assertTrue(AyaReferenceVerifier.verify(changed, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+    }
+
+    @Test fun rejectsSectionWithNoActualContent() {
+        val empty = validGuide().replace(
+            "Guide content for Troubleshooting.", ""
+        )
+        assertTrue(AyaReferenceVerifier.verify(empty, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+        val headingOnly = validGuide().replace(
+            "Guide content for Task recipes.", "### Merely a subsection title"
+        )
+        assertTrue(AyaReferenceVerifier.verify(headingOnly, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+    }
+
+    @Test fun rejectsReorderedRepeatedOrUnexpectedSections() {
+        val swapped = validGuide()
+            .replace("## Quick orientation", "## TEMPORARY")
+            .replace("## Navigation map", "## Quick orientation")
+            .replace("## TEMPORARY", "## Navigation map")
+        assertTrue(AyaReferenceVerifier.verify(swapped, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+        val extra = validGuide().replace(
+            "## Navigation map", "## Unrecognized section\nExtra\n## Navigation map"
+        )
+        assertTrue(AyaReferenceVerifier.verify(extra, "dev.aya.sample", "1.0.0")
+            is AyaReferenceCheck.Rejected)
+        val repeated = validGuide().replace(
+            "## Navigation map", "## Troubleshooting\nExtra\n## Navigation map"
+        )
+        assertTrue(AyaReferenceVerifier.verify(repeated, "dev.aya.sample", "1.0.0")
             is AyaReferenceCheck.Rejected)
     }
 

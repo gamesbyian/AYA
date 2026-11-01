@@ -56,12 +56,23 @@ object AyaReferenceVerifier {
         if (required.any { values[it].isNullOrBlank() }) {
             return AyaReferenceCheck.Rejected("Reference provenance is incomplete.")
         }
-        val body = lines.drop(end + 1).joinToString("\n")
-        if (body.isBlank()) return AyaReferenceCheck.Rejected("Reference document is empty.")
-        val headings = body.lineSequence().filter { it.startsWith("## ") }.map { it.removePrefix("## ").trim() }.toList()
-        if (requiredSections.any { section -> headings.count { it == section } != 1 }) {
-            return AyaReferenceCheck.Rejected("Reference document is missing required sections.")
-        }
+        val body = lines.drop(end + 1)
+        if (body.none { it.isNotBlank() })
+            return AyaReferenceCheck.Rejected("Reference document is empty.")
+        val positions = body.indices.filter { body[it].startsWith("## ") }
+        val headings = positions.map { body[it].removePrefix("## ").trim() }
+        if (headings != requiredSections)
+            return AyaReferenceCheck.Rejected("Reference sections are missing, repeated or out of order.")
+        // Exact-version metadata alone cannot make an empty help guide useful.
+        // Require content in EACH section, not merely the twelve headings.
+        if (positions.indices.any { index ->
+                val start = positions[index] + 1
+                val stop = if (index + 1 < positions.size) positions[index + 1] else body.size
+                body.subList(start, stop).none { line ->
+                    line.isNotBlank() && !line.trimStart().startsWith("#")
+                }
+            })
+            return AyaReferenceCheck.Rejected("Reference contains an empty section.")
         if (Regex("<[A-Za-z][^>\\n]{2,80}>").containsMatchIn(guide)) {
             return AyaReferenceCheck.Rejected("Reference contains unresolved authoring placeholders.")
         }
