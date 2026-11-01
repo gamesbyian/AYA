@@ -35,6 +35,12 @@ The original actual-engine export exposed an SDK-level manifest collision: Godot
 
 An exported Godot APK, if this exact CI succeeds, establishes **S2 first-party actual-engine packaging** for this setup: guide, merged AYA FileProvider/receiver, native v2 plugin registration and compiled DEX type. It does **not** establish S3 independently authored adopter, S4 physical Android interaction/accessibility, S5 actual assistant receipt, or S6 public installable distribution.
 
+## Out-of-tree staged-addon consumer verification
+
+The authoritative Godot 4.5.1 CI job additionally constructs its **first-party synthetic consuming game in a new directory under `runner.temp`**, outside the AYA checkout. `tools/prepare_godot_out_of_tree_host.py` copies only an explicit short list of test-game scene, project/preset, source-derived guide/inventory and held-out questions from the AYA fixture; it installs **the built debug and release AARs and addon scripts** from `aya-godot/build/godot-addon/AYA`, not the neighbouring repository's development copy. It rejects pre-existing destinations, missing/oversized binaries, source symlinks, copied generated `android/` or `.godot/` directories and unrelated files.
+
+The official hash-pinned Godot Android Gradle template, editor import, exact guide staging, real Android export, final APK identity/provider/DEX checks and downstream **Android emulator startup** all run against this isolated consuming directory. This proves the packaged addon can be installed into an otherwise clean first-party Godot 4.5 project without depending on AYA's source checkout layout. The copied scene was nevertheless **authored by AYA maintainers**, so this is **S2+ synthetic packaged-consumer evidence** if the real CI succeeds, not a separately developed S3 adopter, GUI editor import acceptance or a public addon marketplace package.
+
 ## Independent acceptance still necessary
 
 For an actual Godot host, repeat import/export using a clean project and project-authored guide. Exercise a live Android Activity, desktop/editor/non-Android rejection, long Unicode/multiline questions, repeated taps and multiple card instances, Cancel/Copy/Share, no receiver, stale guide, TalkBack, large fonts, IME and gamepad control. The `aya_local_status` signal means only local UI state and never confirms the recipient read an attachment. All agent-generated outputs remain untrusted and manually handled by the host; no automatic result-return path exists.
