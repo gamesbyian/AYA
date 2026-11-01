@@ -101,6 +101,8 @@ class GodotAndroidGuideTests(unittest.TestCase):
         original = self.guide.read_text()
         self.guide.write_text(original.replace(
             "app_version_min: 1.0.0", "app_version_min: 9.9.9"
+        ).replace(
+            "app_version_max: 1.0.0", "app_version_max: 9.9.9"
         ))
         with self.assertRaisesRegex(StageError, "differ from Godot export preset"):
             stage(self.project, self.guide)
