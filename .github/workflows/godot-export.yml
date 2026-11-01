@@ -239,16 +239,24 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: default
           arch: x86_64
-          profile: pixel_6
+          # Smaller legacy device geometry avoids rasterizing Pixel 6's
+          # 1080x2400 GPU buffers on a headless software-only CI runner.
+          profile: Nexus 4
+          cores: 4
+          # Modern supported software GPU mode; the default runner flag
+          # swiftshader_indirect is deprecated and produced black frames.
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim
           disable-animations: true
-          script: python3 tools/verify_godot_emulator_runtime.py --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"
+          script: python3 tools/verify_godot_emulator_runtime.py --apk "$RUNNER_TEMP/aya-godot-runtime-apk/aya-godot-host-debug.apk" --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json" --screenshots-dir "$RUNNER_TEMP/aya-godot-screenshots"
       - name: Preserve minimal synthetic emulator evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: aya-godot-emulator-runtime-evidence
-          path: ${{ runner.temp }}/aya-godot-emulator-evidence.json
+          path: |
+            ${{ runner.temp }}/aya-godot-emulator-evidence.json
+            ${{ runner.temp }}/aya-godot-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 14
