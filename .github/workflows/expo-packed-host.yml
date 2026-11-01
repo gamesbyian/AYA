@@ -8,6 +8,8 @@ on:
       - 'aya/**'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_flutter_host_apk.py'
+      - 'tools/prepare_expo_packed_host.py'
+      - 'tools/test_prepare_expo_packed_host.py'
   push:
     branches: [main]
     paths:
@@ -17,6 +19,8 @@ on:
       - 'aya/**'
       - 'tools/verify_android_adapter_apk.py'
       - 'tools/verify_flutter_host_apk.py'
+      - 'tools/prepare_expo_packed_host.py'
+      - 'tools/test_prepare_expo_packed_host.py'
 
 concurrency:
   group: expo-packed-host-${{ github.ref }}
@@ -54,31 +58,17 @@ jobs:
         run: |
           python3 tools/validate_guide.py --strict integrations/expo/aya-expo/ci-host/aya-guide.md
           python3 tools/audit_reference.py integrations/expo/aya-expo/ci-host/aya-guide.md --inventory integrations/expo/aya-expo/ci-host/inventory.json --questions integrations/expo/aya-expo/ci-host/questions.json --strict
-      - name: Package both AYA Expo modules into local npm tarballs
+      - name: Reject unsafe packed packages and accidental source-linked consumers
+        run: python3 -m unittest discover -s tools -p 'test_prepare_expo_packed_host.py'
+      - name: Pack both unpublished Expo modules without executing package scripts
         run: |
           mkdir -p "$RUNNER_TEMP/aya-packs"
-          npm pack --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/aya-expo
-          npm pack --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/guide-plugin
-          test -s "$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz"
-          test -s "$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz"
-          tar -tzf "$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz" | sort | tee "$RUNNER_TEMP/expo-packed-files.txt"
-          grep -Fx 'package/expo-module.config.json' "$RUNNER_TEMP/expo-packed-files.txt"
-          grep -Fx 'package/android/src/main/java/dev/aya/expo/AyaExpoModule.kt' "$RUNNER_TEMP/expo-packed-files.txt"
-          grep -Fx 'package/src/AyaHelpCard.tsx' "$RUNNER_TEMP/expo-packed-files.txt"
-          grep -Fx 'package/src/native.ts' "$RUNNER_TEMP/expo-packed-files.txt"
-          tar -tzf "$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz" | sort | tee "$RUNNER_TEMP/guide-packed-files.txt"
-          grep -Fx 'package/app.plugin.js' "$RUNNER_TEMP/guide-packed-files.txt"
-          grep -Fx 'package/guide_asset.cjs' "$RUNNER_TEMP/guide-packed-files.txt"
-          if grep -E '/(ci-host|test|node_modules)/' "$RUNNER_TEMP/expo-packed-files.txt" "$RUNNER_TEMP/guide-packed-files.txt"; then
-            echo 'Source preview tarball contains internal CI fixtures or dependencies' >&2
-            exit 1
-          fi
-      - name: Create isolated consumer outside the AYA checkout
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/aya-expo
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/aya-packs" ./integrations/expo/guide-plugin
+      - name: Prepare a bounded, truly out-of-tree consumer from exact tarball contents
         run: |
-          HOST="$RUNNER_TEMP/aya-expo-packed-consumer"
-          cp -R integrations/expo/aya-expo/ci-host "$HOST"
-          cd "$HOST"
-          npm pkg set "dependencies.aya-expo=file:$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz" "dependencies.aya-expo-guide=file:$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz"
+          python3 tools/prepare_expo_packed_host.py --fixture integrations/expo/aya-expo/ci-host --destination "$RUNNER_TEMP/aya-expo-packed-consumer" --module-tarball "$RUNNER_TEMP/aya-packs/aya-expo-0.1.0-dev.1.tgz" --guide-tarball "$RUNNER_TEMP/aya-packs/aya-expo-guide-0.1.0-dev.1.tgz"
+          cd "$RUNNER_TEMP/aya-expo-packed-consumer"
           npm install --no-fund --no-audit
           npm ls aya-expo aya-expo-guide
           node - <<'NODE'
