@@ -190,8 +190,21 @@ def smoke(
     if "package:" not in adb("shell", "pm", "path", PACKAGE):
         raise EmulatorSmokeError("Expected Godot test package was not installed")
 
+    # First immersive launch can show a system "Viewing full screen" overlay,
+    # leaving screenshots of the OS instead of the tested AYA card.
+    previous_immersive = adb(
+        "shell", "settings", "get", "secure",
+        "immersive_mode_confirmations", allow_failure=True,
+    ).strip()
     outcomes = []
     try:
+        adb("shell", "settings", "put", "secure",
+            "immersive_mode_confirmations", "confirmed")
+        if adb("shell", "settings", "get", "secure",
+               "immersive_mode_confirmations").strip() != "confirmed":
+            raise EmulatorSmokeError(
+                "Could not suppress Android immersive first-use overlay"
+            )
         for size, scale in scenarios:
             if not re.fullmatch(r"[1-9]\d{1,3}x[1-9]\d{1,3}", size):
                 raise EmulatorSmokeError("Invalid emulator display size")
@@ -258,7 +271,17 @@ def smoke(
                 "process_alive": True,
             })
     finally:
-        # Reset the disposable emulator, even when the runtime test fails.
+        # Restore test-only Android setting even if runtime or screenshot fails.
+        try:
+            if previous_immersive and previous_immersive != "null":
+                adb("shell", "settings", "put", "secure",
+                    "immersive_mode_confirmations", previous_immersive,
+                    allow_failure=True)
+            else:
+                adb("shell", "settings", "delete", "secure",
+                    "immersive_mode_confirmations", allow_failure=True)
+        except EmulatorSmokeError:
+            pass
         for args in (
             ("shell", "am", "force-stop", PACKAGE),
             ("shell", "wm", "size", "reset"),

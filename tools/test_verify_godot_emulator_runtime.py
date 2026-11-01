@@ -30,7 +30,8 @@ def fake_png(width, height):
 
 class FakeADB:
     def __init__(self, *, marker=READY_MARKER, pid="3212", installed=True,
-                 booted=True, fail_install=False, corrupt_png=False):
+                 booted=True, fail_install=False, corrupt_png=False,
+                 immersive_supported=True):
         self.commands = []
         self.marker = marker
         self.pid = pid
@@ -38,6 +39,8 @@ class FakeADB:
         self.booted = booted
         self.fail_install = fail_install
         self.corrupt_png = corrupt_png
+        self.immersive_supported = immersive_supported
+        self.immersive_value = "null"
 
     def __call__(self, args, **kwargs):
         self.commands.append(tuple(args))
@@ -50,7 +53,16 @@ class FakeADB:
             width, height = (int(x) for x in size.split("x"))
             image = b"not a PNG" if self.corrupt_png else fake_png(width, height)
             return CompletedProcess(args, 0, image, b"")
-        if "getprop sys.boot_completed" in command:
+        if "settings get secure immersive_mode_confirmations" in command:
+            out = self.immersive_value + "\n"
+        elif "settings put secure immersive_mode_confirmations" in command:
+            if self.immersive_supported:
+                self.immersive_value = args[-1]
+            out = ""
+        elif "settings delete secure immersive_mode_confirmations" in command:
+            self.immersive_value = "null"
+            out = ""
+        elif "getprop sys.boot_completed" in command:
             out = "1\n" if self.booted else "0\n"
         elif "install -r" in command:
             out = "Failure\n" if self.fail_install else "Success\n"
@@ -97,6 +109,26 @@ class GodotEmulatorSmokeTest(unittest.TestCase):
         self.assertNotIn(("adb", "shell", "input", "tap"), fake.commands)
         self.assertFalse(evidence["actual_assistant_ingestion_tested"])
         self.assertFalse(evidence["local_review_or_share_tested"])
+
+    def test_system_immersive_overlay_is_disabled_then_setting_restored(self):
+        fake = FakeADB()
+        self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+        confirm = ("adb", "shell", "settings", "put", "secure",
+                   "immersive_mode_confirmations", "confirmed")
+        self.assertIn(confirm, fake.commands)
+        self.assertLess(fake.commands.index(confirm),
+                        next(i for i, cmd in enumerate(fake.commands)
+                             if "monkey" in cmd))
+        self.assertIn(("adb", "shell", "settings", "delete", "secure",
+                       "immersive_mode_confirmations"), fake.commands)
+        self.assertEqual(fake.immersive_value, "null")
+
+    def test_rejects_unsuppressed_system_immersive_overlay(self):
+        fake = FakeADB(immersive_supported=False)
+        with self.assertRaisesRegex(EmulatorSmokeError, "immersive first-use overlay"):
+            self.execute(fake, screenshots_dir=Path(self.tmp.name) / "screens")
+        self.assertFalse((Path(self.tmp.name) / "screens").exists())
+        self.assertIn(("adb", "shell", "wm", "size", "reset"), fake.commands)
 
     def test_visual_evidence_uses_actual_binary_png_and_two_distinct_layouts(self):
         fake = FakeADB()
