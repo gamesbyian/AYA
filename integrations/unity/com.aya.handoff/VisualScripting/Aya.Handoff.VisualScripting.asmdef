@@ -1,0 +1,25 @@
+{
+  "name": "Aya.Handoff.VisualScripting",
+  "rootNamespace": "Aya.Handoff.VisualScripting",
+  "references": [
+    "Aya.Handoff",
+    "Unity.VisualScripting.Core",
+    "Unity.VisualScripting.Flow"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "autoReferenced": false,
+  "defineConstraints": [
+    "AYA_VISUAL_SCRIPTING_AVAILABLE"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.visualscripting",
+      "expression": "[1.7.0,2.0.0)",
+      "define": "AYA_VISUAL_SCRIPTING_AVAILABLE"
+    }
+  ],
+  "noEngineReferences": false
+}
