@@ -69,6 +69,9 @@ jobs:
         working-directory: integrations/app-inventor/aya-rush
         run: |
           rush --version
+          # Fresh runners have no App Inventor v206 runtime; Rush's setup
+          # action installs the CLI, not the 140 MB compiler/runtime bundle.
+          rush deps sync --dev-deps
           rush deps tree
           rush build
           find out -type f -maxdepth 2 -print
