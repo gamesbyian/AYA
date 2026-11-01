@@ -348,6 +348,14 @@ def smoke(
                 )
             screenshot = None
             if screenshots_dir is not None:
+                # Report only the disposable fixture's public geometry,
+                # never screenshot input or host/user payload content.
+                geometry_log = adb("logcat", "-d", "-v", "brief", "-t",
+                                   "10000", allow_failure=True)
+                geometry = [
+                    line.strip()[-240:] for line in geometry_log.splitlines()
+                    if "AYA_CI_GODOT_GEOMETRY" in line
+                ][-2:]
                 # Process readiness does not prove the AYA card is foreground.
                 # A system fullscreen confirmation or Launcher ANR can hide it.
                 windows = adb("shell", "dumpsys", "window", "displays")
@@ -360,12 +368,18 @@ def smoke(
                     state = focused[0][:180] if focused else "not reported"
                     raise EmulatorSmokeError(
                         f"Android system dialog or non-host window obscures "
-                        f"AYA screenshot at {size}; focused_window={state}"
+                        f"AYA screenshot at {size}; focused_window={state}; "
+                        f"synthetic_geometry={geometry}"
                     )
                 name = f"godot_{size}_font{int(float(scale) * 100)}.png"
-                screenshot = capture_synthetic_screenshot(
-                    size, scale, screenshots_dir / name, run=run, pause=pause
-                )
+                try:
+                    screenshot = capture_synthetic_screenshot(
+                        size, scale, screenshots_dir / name, run=run, pause=pause
+                    )
+                except EmulatorSmokeError as exc:
+                    raise EmulatorSmokeError(
+                        f"{exc}; synthetic_geometry={geometry}"
+                    ) from exc
             outcomes.append({
                 "screenshot": screenshot,
                 "size_px": size,

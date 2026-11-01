@@ -241,7 +241,10 @@ jobs:
           api-level: 35
           target: default
           arch: x86_64
-          profile: pixel_6
+          # Smaller legacy device geometry avoids rasterizing Pixel 6's
+          # 1080x2400 GPU buffers on a headless software-only CI runner.
+          profile: Nexus 4
+          cores: 4
           # Modern supported software GPU mode; the default runner flag
           # swiftshader_indirect is deprecated and produced black frames.
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim
