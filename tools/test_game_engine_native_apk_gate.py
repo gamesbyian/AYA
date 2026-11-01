@@ -29,6 +29,13 @@ class GameEngineAPKGateTests(unittest.TestCase):
             self.assertIn(symbol, self.content)
         self.assertIn("tools/verify_flutter_host_apk.py", self.content)
 
+    def test_synthetic_game_host_sets_godot_minimum_without_weakening_core(self):
+        sample = (Path(__file__).resolve().parents[1] / "sample" /
+                  "build.gradle.kts").read_text(encoding="utf-8")
+        self.assertIn("minSdk = 23", sample)
+        self.assertIn("project.android.defaultConfig.minSdk = 24", self.content)
+        self.assertNotIn('tools:overrideLibrary', self.content)
+
     def test_v2_plugin_registration_metadata_is_binary_inspected(self):
         self.assertIn("--name org.godotengine.plugin.v2.AYA", self.content)
         self.assertIn("--value dev.aya.godot.AyaGodotPlugin", self.content)
