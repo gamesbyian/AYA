@@ -104,7 +104,7 @@ jobs:
         if: failure()
         env:
           AYA_CI_OUTCOMES: >-
-            {"${id}":"${{ steps.fictional_guide.outcome }}","${id}":"${{ steps.inventory.outcome }}","${id}":"${{ steps.sample_reference.outcome }}","${id}":"${{ steps.translation.outcome }}","${id}":"${{ steps.filesystem.outcome }}","${id}":"${{ steps.packet_profiles.outcome }}","${id}":"${{ steps.understanding.outcome }}","${id}":"${{ steps.component_manifests.outcome }}","${id}":"${{ steps.portability.outcome }}","${id}":"${{ steps.all_tests.outcome }}"}
+            {"fictional_guide":"${{ steps.fictional_guide.outcome }}","inventory":"${{ steps.inventory.outcome }}","sample_reference":"${{ steps.sample_reference.outcome }}","translation":"${{ steps.translation.outcome }}","filesystem":"${{ steps.filesystem.outcome }}","packet_profiles":"${{ steps.packet_profiles.outcome }}","understanding":"${{ steps.understanding.outcome }}","component_manifests":"${{ steps.component_manifests.outcome }}","portability":"${{ steps.portability.outcome }}","all_tests":"${{ steps.all_tests.outcome }}"}
         run: |
           python3 tools/ci_failure_digest.py --outcomes-json "$AYA_CI_OUTCOMES" --output "$RUNNER_TEMP/aya-ci-failure.json"
       - name: Upload concise machine-readable failure evidence
