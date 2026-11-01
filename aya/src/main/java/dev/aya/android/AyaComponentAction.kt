@@ -70,6 +70,26 @@ sealed class AyaComponentAction {
                 askDirection = askDirection
             )
     }
+    /** Structured output request; only the host can recognize or import the result. */
+    data class Structured(
+        val task: AyaStructuredTask,
+        val kitAsset: String = "aya-structured-kit.md",
+        val guideAsset: String = "aya-guide.md",
+        val screenName: String? = "Importable artifact",
+        val askDirection: Boolean = true
+    ) : AyaComponentAction() {
+        override fun launch(activity: Activity, text: String?): AyaBundledLaunchResult =
+            Aya.launchStructuredBundled(
+                activity = activity,
+                task = task,
+                kitAsset = kitAsset,
+                guideAsset = guideAsset,
+                screenName = screenName,
+                direction = text,
+                askDirection = askDirection
+            )
+    }
+
     /**
      * Filesystem recipe-authoring handoff for hosts with a REAL importer.
      * The optional snapshot is host-scanned, explicitly approved by the user,

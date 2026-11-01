@@ -36,7 +36,7 @@ The SDK now exposes `Aya.launchFilesystemBundled()` with `AyaFilesystemTask`, a 
 
 AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**: a procedural-design preset, editor layout, visualization configuration, animation sequence, or another host-importable artifact. A source-derived, version-matched schema and field-interaction guide can accompany an editable brief and an optional user-approved current artifact. The person saves the result and explicitly imports it into their host app. AYA does not monitor replies or import files automatically.
 
-The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) defines a portable, schema-driven pattern for Android and browser/PWA hosts. **A generic Android structured-artifact entry point is not yet implemented**; each host must provide its own real schema, importer and manual return flow.
+The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) defines a portable, schema-driven pattern for Android and browser/PWA hosts. **An unpublished, generic Android structured-artifact launcher now exists**: `AyaStructuredTask`, `Aya.launchStructuredBundled()` and `AyaComponentAction.Structured` verify the installed-version guide and a host-authored kit, then show editable local review/Copy/Share. Each adopting host must supply its actual schema and independently validated importer; no automatic return or public binary package is provided.
 
 **Module independence:** AYA's modules describe reusable host *capabilities*, not any external app or repository. See the [Module Portability Standard](docs/MODULE_PORTABILITY.md) for the separation between generic AYA contracts and app-specific packets authored by each adopting developer.
 
