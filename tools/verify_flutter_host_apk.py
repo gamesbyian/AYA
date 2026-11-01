@@ -85,7 +85,7 @@ def check_apk(
 
     xml = aapt_dump("xmltree", str(apk_path), "AndroidManifest.xml")
     for expected in (
-        "androidx.core.content.FileProvider",
+        "dev.aya.android.AyaFileProvider",
         package_id + ".aya.files",
         "dev.aya.android.AyaShareSelectionReceiver",
     ):
