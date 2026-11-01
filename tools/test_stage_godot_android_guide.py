@@ -33,7 +33,7 @@ class GodotAndroidGuideTests(unittest.TestCase):
 
     def test_stages_exact_bytes_and_check_only_is_idempotent(self):
         target = stage(self.project, self.guide)
-        self.assertEqual(target, self.build / "assets" / "aya-guide.md")
+        self.assertEqual(target, self.project / "aya-guide.md")
         self.assertEqual(target.read_bytes(), self.guide.read_bytes())
         self.assertEqual(stage(self.project, self.guide, check_only=True), target)
         self.assertEqual(stage(self.project, self.guide), target)
@@ -41,7 +41,7 @@ class GodotAndroidGuideTests(unittest.TestCase):
     def test_check_only_does_not_create_guide(self):
         with self.assertRaisesRegex(StageError, "staging was not requested"):
             stage(self.project, self.guide, check_only=True)
-        self.assertFalse((self.build / "assets").exists())
+        self.assertFalse((self.project / "aya-guide.md").exists())
 
     def test_mismatched_host_identity_refuses_before_writing(self):
         self.rewrite('package/unique_name="dev.aya.godot.cihost"',
@@ -59,6 +59,18 @@ class GodotAndroidGuideTests(unittest.TestCase):
                      "gradle_build/use_gradle_build=false")
         with self.assertRaisesRegex(StageError, "must use the Godot Gradle build"):
             stage(self.project, self.guide)
+
+    def test_generated_gradle_assets_are_not_used_or_overwritten(self):
+        # Godot's engine clears android/build/assets BEFORE exporting. Any
+        # guide staged there would disappear; the source project owns the
+        # raw .md file, and Godot exports it after the clear.
+        generated = self.build / "assets"
+        generated.mkdir()
+        foreign = generated / "aya-guide.md"
+        foreign.write_text("stale generated artifact")
+        actual = stage(self.project, self.guide)
+        self.assertEqual(actual, self.project / "aya-guide.md")
+        self.assertEqual(foreign.read_text(), "stale generated artifact")
 
     def test_missing_template_refuses(self):
         (self.build / "build.gradle").unlink()
@@ -82,20 +94,24 @@ class GodotAndroidGuideTests(unittest.TestCase):
             stage(self.project, self.guide)
 
     def test_no_implicit_foreign_file_overwrite(self):
-        target = self.build / "assets" / "aya-guide.md"
-        target.parent.mkdir()
+        target = self.project / "aya-guide.md"
         target.write_text("foreign user file")
         with self.assertRaisesRegex(StageError, "refusing silent overwrite"):
             stage(self.project, self.guide)
         self.assertEqual(target.read_text(), "foreign user file")
 
-    def test_symlinked_target_parent_refuses(self):
-        other = self.root / "other"
-        other.mkdir()
-        (self.build / "assets").symlink_to(other, target_is_directory=True)
+    def test_symlinked_guide_target_refuses(self):
+        other = self.root / "foreign.md"
+        other.write_text("unrelated file")
+        (self.project / "aya-guide.md").symlink_to(other)
         with self.assertRaisesRegex(StageError, "symlinked"):
             stage(self.project, self.guide)
-        self.assertEqual(list(other.iterdir()), [])
+        self.assertEqual(other.read_text(), "unrelated file")
+
+    def test_export_filter_must_include_raw_guide(self):
+        self.rewrite('include_filter="aya-guide.md"', 'include_filter=""')
+        with self.assertRaisesRegex(StageError, "explicitly include raw"):
+            stage(self.project, self.guide)
 
     def test_stale_or_malformed_guide_refuses(self):
         original = self.guide.read_text()
