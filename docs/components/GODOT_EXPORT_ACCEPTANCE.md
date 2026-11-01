@@ -25,6 +25,8 @@
 
 `.github/workflows/godot-export.yml` pins Godot 4.5.1 editor and export-template bytes to the SHA-256 digests published by the official `godotengine/godot-builds` 4.5.1 release, and pins compatible Android build dependencies. The official template archive is approximately 1.36 GB, so extraction of only the Android templates is cached under a content-addressed key. The first run must fetch and validate the complete official archive; no unverified mirror or lighter surrogate counts as Godot's exporter.
 
+Godot 4.5's `platform/android/export/export_plugin.cpp` treats missing ETC2/ASTC texture imports as a project configuration failure, **without filling in the diagnostic text**. On Linux headless CI this previously appeared as a blank "Cannot export project ... due to configuration errors" message. The fixture now explicitly enables `textures/vram_compression/import_etc2_astc=true` in `project.godot`, checked by the export-workflow regression test. This is a documented Android exporter prerequisite, not a bypass of application or version validation.
+
 The fixture's own independently authored guide inventory and gold questions are at `integrations/godot/ci-host/` and must pass the same strict AYA-RAS lint and reference audit as any other host. This demonstrates host-specific documentation **for the synthetic CI scene**, not for a real adopting game.
 
 An exported Godot APK, if this exact CI succeeds, establishes **S2 first-party actual-engine packaging** for this setup: guide, merged AYA FileProvider/receiver, native v2 plugin registration and compiled DEX type. It does **not** establish S3 independently authored adopter, S4 physical Android interaction/accessibility, S5 actual assistant receipt, or S6 public installable distribution.
