@@ -117,7 +117,7 @@ def smoke(
     *,
     run: Callable = subprocess.run,
     pause: Callable[[float], None] = time.sleep,
-    max_polls: int = 25,
+    max_polls: int = 40,
     poll_seconds: float = 2.0,
     scenarios: tuple[tuple[str, str], ...] = SCENARIOS,
     screenshots_dir: Path | None = None,
@@ -163,25 +163,45 @@ def smoke(
             adb("shell", "settings", "put", "system", "font_scale", scale)
             adb("shell", "am", "force-stop", PACKAGE)
             adb("logcat", "-c")
-            adb("shell", "monkey", "-p", PACKAGE, "-c",
-                "android.intent.category.LAUNCHER", "1")
+            launch_feedback = adb("shell", "monkey", "-p", PACKAGE, "-c",
+                                  "android.intent.category.LAUNCHER", "1")
             observed = False
+            last_log = ""
+            last_pid = ""
             for _ in range(max_polls):
-                log = adb("logcat", "-d", "-v", "brief", "-t", "3000")
+                log = adb("logcat", "-d", "-v", "brief", "-t", "10000")
+                last_log = log
                 ready, failed = inspect_log(log)
                 if failed:
                     raise EmulatorSmokeError(
                         f"Native Godot plugin/runtime failure marker at {size} scale {scale}"
                     )
                 pid = adb("shell", "pidof", "-s", PACKAGE, allow_failure=True).strip()
+                last_pid = pid
                 if ready and pid and all(part.isdecimal() for part in pid.split()):
                     observed = True
                     break
                 pause(poll_seconds)
             if not observed:
+                # Factual, bounded diagnostics from this dedicated CI emulator;
+                # don't infer the cause from a missing marker alone.
+                relevant = [
+                    line.strip() for line in last_log.splitlines()
+                    if any(word in line.lower() for word in
+                           ("godot", "aya_ci_", "fatal exception", "androidruntime"))
+                ][-10:]
+                activity = adb("shell", "dumpsys", "activity", "activities",
+                               allow_failure=True)
+                resumed = [
+                    line.strip() for line in activity.splitlines()
+                    if "resumedactivity" in line.lower() or PACKAGE in line
+                ][-3:]
                 raise EmulatorSmokeError(
                     f"Godot Android runtime marker and live process not observed "
-                    f"at {size} scale {scale}"
+                    f"at {size} scale {scale}; last_pid={last_pid or 'absent'}, "
+                    f"launch={launch_feedback.strip()[:100]!r}, "
+                    f"recent_godot_log={str(relevant)[-340:]}, "
+                    f"activity={str(resumed)[-170:]}"
                 )
             screenshot = None
             if screenshots_dir is not None:
