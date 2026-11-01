@@ -139,6 +139,7 @@ jobs:
         run: |
           "$AYA_GODOT_EDITOR" --headless --path integrations/godot --editor --import --quit
           "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_smoke.gd
+          "$AYA_GODOT_EDITOR" --headless --path integrations/godot --script res://aya_export_preflight.gd
       - name: Export a genuine Godot Android Gradle-built debug APK
         env:
           GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/aya-godot-debug.keystore
