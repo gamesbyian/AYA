@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import struct
 import re
 import subprocess
 import sys
@@ -25,10 +26,61 @@ FAILED_MARKER = "AYA_CI_GODOT_RUNTIME_FAIL"
 SCENARIOS = (("412x892", "1.0"), ("320x700", "2.0"))
 MAX_LOG_CHARS = 800
 MAX_REPORT_BYTES = 16 * 1024
+MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024
+PNG_SIGNATURE = b"\\x89PNG\\r\\n\\x1a\\n"
+PNG_END = b"\\x00\\x00\\x00\\x00IEND\\xaeB\\x60\\x82"
 
 
 class EmulatorSmokeError(ValueError):
     pass
+
+
+def png_dimensions(data: bytes) -> tuple[int, int]:
+    """Reject obviously incomplete/mismatched raw ADB screenshot captures."""
+    if not isinstance(data, bytes) or not 60 <= len(data) <= MAX_SCREENSHOT_BYTES:
+        raise EmulatorSmokeError("Invalid or unreasonably large screenshot bytes")
+    if (not data.startswith(PNG_SIGNATURE) or data[8:16] !=
+            b"\\x00\\x00\\x00\\x0dIHDR" or not data.endswith(PNG_END)):
+        raise EmulatorSmokeError("Android screencap returned malformed PNG framing")
+    width, height = struct.unpack(">II", data[16:24])
+    if not 1 <= width <= 4096 or not 1 <= height <= 4096 or b"IDAT" not in data:
+        raise EmulatorSmokeError("Screenshot has invalid dimensions or no image data")
+    return width, height
+
+
+def capture_synthetic_screenshot(
+    size: str, scale: str, destination: Path, *, run: Callable = subprocess.run
+) -> dict:
+    """Save a first-party empty-input scene only; never capture another app."""
+    if destination.is_symlink() or destination.exists():
+        raise EmulatorSmokeError("Refusing to overwrite existing screenshot")
+    try:
+        result = run(["adb", "exec-out", "screencap", "-p"],
+                     capture_output=True, check=False, timeout=40)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise EmulatorSmokeError("Could not capture synthetic Godot screen") from exc
+    if result.returncode != 0:
+        raise EmulatorSmokeError("ADB screencap command failed")
+    blob = result.stdout
+    width, height = png_dimensions(blob)
+    target_width, target_height = (int(part) for part in size.split("x"))
+    if sorted((width, height)) != sorted((target_width, target_height)):
+        raise EmulatorSmokeError(
+            f"Screenshot dimensions {width}x{height} mismatch requested {size}"
+        )
+    if destination.parent.is_symlink():
+        raise EmulatorSmokeError("Refusing symlinked screenshot directory")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(blob)
+    return {
+        "file": destination.name,
+        "width_px": width,
+        "height_px": height,
+        "orientation": "portrait" if height >= width else "landscape",
+        "sha256": hashlib.sha256(blob).hexdigest(),
+        "capture": "adb exec-out screencap -p from disposable first-party fixture",
+        "visual_accessibility_reviewed": False,
+    }
 
 
 def inspect_log(log: str, package: str = PACKAGE) -> tuple[bool, bool]:
@@ -68,6 +120,7 @@ def smoke(
     max_polls: int = 25,
     poll_seconds: float = 2.0,
     scenarios: tuple[tuple[str, str], ...] = SCENARIOS,
+    screenshots_dir: Path | None = None,
 ) -> dict:
     if not 1 <= max_polls <= 100 or not 0 <= poll_seconds <= 5:
         raise EmulatorSmokeError("Invalid bounded emulator polling configuration")
@@ -130,7 +183,14 @@ def smoke(
                     f"Godot Android runtime marker and live process not observed "
                     f"at {size} scale {scale}"
                 )
+            screenshot = None
+            if screenshots_dir is not None:
+                name = f"godot_{size}_font{int(float(scale) * 100)}.png"
+                screenshot = capture_synthetic_screenshot(
+                    size, scale, screenshots_dir / name, run=run
+                )
             outcomes.append({
+                "screenshot": screenshot,
                 "size_px": size,
                 "density_dpi": 160,
                 "android_font_scale": scale,
@@ -172,11 +232,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("--screenshots-dir", type=Path, default=None,
+                        help="Optional artifact directory for disposable AYA-only screens")
     args = parser.parse_args(argv)
     if args.report.is_symlink():
         parser.exit(2, "AYA Godot emulator smoke: unsafe symlinked report\n")
     try:
-        result = smoke(args.apk)
+        result = smoke(args.apk, screenshots_dir=args.screenshots_dir)
         args.report.parent.mkdir(parents=True, exist_ok=True)
         encoded = json.dumps(result, sort_keys=True, indent=2) + "\n"
         if len(encoded.encode("utf-8")) > MAX_REPORT_BYTES:
@@ -195,6 +257,10 @@ def main(argv: list[str] | None = None) -> int:
             report.write("Observed a live first-party Godot process, available "
                          "native AYA singleton and enabled Ask card at "
                          "412x892 and 320x700 (200% Android font setting).\n\n")
+            if args.screenshots_dir is not None:
+                report.write("Bounded synthetic-scene PNG screenshots captured for "
+                             "later **human visual review**; screenshot presence "
+                             "alone cannot certify visibility or accessibility.\\n\\n")
             report.write("No assistant app, local review, TalkBack or physical "
                          "device acceptance is implied.\n")
     return 0
