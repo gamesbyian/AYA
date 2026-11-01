@@ -49,3 +49,8 @@ python3 tools/verify_godot_emulator_runtime.py \
 The helper uses `adb`, so the emulator must already be running and report `sys.boot_completed=1`. Inspect JSON outcomes and Godot logcat when failures occur. A valid file alone is insufficient: look for a successful emulator CI run for the exact source SHA.
 
 The existing Godot/AYA UI, provider-compatibility, and public distribution release gates remain open until their own evidence is recorded.
+
+
+## Narrow GLES render-target experiment
+
+[Godot issue #74828](https://github.com/godotengine/godot/issues/74828) described a black GLES screen on Android emulators that changed when using a transparent RGBA8 render target instead of opaque RGB10_A2. That earlier bug was fixed before Godot 4.5.1, so this is **a bounded hypothesis**, not a proven diagnosis of the present SwiftShader failure. In the disposable first-party fixture only, set the documented [Viewport.transparent_bg](https://docs.godotengine.org/en/4.5/classes/class_viewport.html) property before constructing the UI. The fixture still draws a fully opaque high-contrast background; assert both the internal frame statistics and actual Android screenshots, and never count the mere presence of the backdrop as full AYA UI accessibility. Do not copy this graphics setting into the addon or recommend it for integrating apps without their own testing.

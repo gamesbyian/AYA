@@ -7,6 +7,11 @@ extends "res://addons/AYA/aya_card.gd"
 var _synthetic_draw_count: int = 0
 
 func _ready() -> void:
+    # Fixture-only hypothesis based on upstream GLES emulator issue #74828:
+    # opaque RGB10_A2 targets have historically failed on Android emulators,
+    # while a transparent background can use an RGBA8 target.
+    # This must not be applied to reusable AYA or real consuming projects.
+    get_viewport().transparent_bg = true
     super._ready()
     queue_redraw()
     if OS.has_feature("android") and not Engine.is_editor_hint():
