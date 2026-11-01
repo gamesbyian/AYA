@@ -27,7 +27,7 @@ Apply this skill only to **native Android** work. In repositories containing bot
 8. Collect accessible, concise CI artifacts: exact run URL/head SHA, failing test, log excerpt, screenshot/trace and reproduction instructions. Distinguish automated emulator, physical device and owner-approved visual evidence.
 
 ## Safety and delivery
-- Preserve user data; do not silently reset databases, replace files, delete torrent payloads or bypass Android storage/URI permission boundaries to make a test pass.
+- Preserve user data; do not silently reset databases, overwrite or delete user-owned files or bypass Android storage/URI permission boundaries to make a test pass.
 - Prefer existing app architecture, verified Android APIs and conventional libraries. Do not scaffold new architectural layers or install dependencies solely because a generic skill recommends them.
 - Put discoveries in the existing owning issue/queue/evidence ledger. Coordinate concurrent owners; keep changes scoped and separately reviewed.
 - When real-device, provider, protected-host or signing acceptance cannot be performed, mark the result **unverified** and provide the minimal exact user action needed to complete it.
