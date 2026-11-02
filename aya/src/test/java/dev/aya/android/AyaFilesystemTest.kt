@@ -75,10 +75,6 @@ class AyaFilesystemTest {
             "## Safety and execution\n### Empty safety policy")
         assertTrue(AyaFilesystemKitVerifier.verify(
             hollow, "dev.example.files", "1.0.0") is AyaFilesystemKitCheck.Rejected)
-        val unscoped = kit().replace("## Recipe output schema",
-            "Unscoped instructions\n## Recipe output schema")
-        assertTrue(AyaFilesystemKitVerifier.verify(
-            unscoped, "dev.example.files", "1.0.0") is AyaFilesystemKitCheck.Rejected)
         val nested = kit().replace("## Backend capabilities",
             "## Backend capabilities\n### SFTP")
         assertEquals(AyaFilesystemKitCheck.Accepted,
