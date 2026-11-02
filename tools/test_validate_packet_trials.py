@@ -58,6 +58,8 @@ class PacketTrialTests(unittest.TestCase):
     def test_legacy_v1_is_readable_but_cannot_claim_release_readiness(self):
         report = assess_trials(sample(self.packet), self.packet, strict=False)
         self.assertEqual(report["passed"], 1)
+        self.assertEqual(report["attachments_reported_ingested"], 1)
+        self.assertEqual(report["attachments_confirmed_ingested"], 0)
         self.assertFalse(report["release_gate_pass"])
         self.assertEqual(report["unqualified_trial_ids"], ["CASE-001"])
         with self.assertRaisesRegex(TrialError, "release gate failed"):
@@ -71,6 +73,8 @@ class PacketTrialTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 report = assess_trials(ledger, self.packet, strict=False)
                 self.assertEqual(report["passed"], 1)
+                self.assertEqual(report["attachments_reported_ingested"], 1)
+                self.assertEqual(report["attachments_confirmed_ingested"], 0)
                 self.assertFalse(report["release_gate_pass"])
                 with self.assertRaisesRegex(TrialError, "release gate failed"):
                     assess_trials(ledger, self.packet)
@@ -80,6 +84,7 @@ class PacketTrialTests(unittest.TestCase):
         ledger = declared_real_sample(self.packet)
         result = assess_trials(ledger, self.packet)
         self.assertTrue(result["release_gate_pass"])
+        self.assertEqual(result["attachments_confirmed_ingested"], 1)
         self.assertEqual(result["real_recipient_trials"], 1)
         self.assertFalse(result["unqualified_trial_ids"])
 
