@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "aya/**"
+      - "qa-external-receiver/**"
       - "sample/**"
       - ".github/workflows/android-emulator.yml"
   workflow_dispatch:
