@@ -81,6 +81,22 @@ class AyaFilesystemTest {
             AyaFilesystemKitVerifier.verify(nested, "dev.example.files", "1.0.0"))
     }
 
+    @Test fun snapshotRequiresRealUtcCalendarDate() {
+        val original = "2026-10-30T20:00:00Z"
+        for (invalid in listOf(
+            "2026-02-29T20:00:00Z", "2026-11-31T20:00:00Z",
+            "2026-13-01T20:00:00Z", "2026-10-30T25:00:00Z",
+            "2026-10-30T20:61:00Z", "2026-10-30T20:00:00+00:00"
+        )) {
+            val changed = snapshot().replace(original, invalid)
+            assertTrue(invalid, AyaFilesystemSnapshotVerifier.verify(
+                changed, "dev.example.files", "1.0.0") is AyaFilesystemSnapshotCheck.Rejected)
+        }
+        val leapDay = snapshot().replace(original, "2024-02-29T20:00:00Z")
+        assertEquals(AyaFilesystemSnapshotCheck.Accepted,
+            AyaFilesystemSnapshotVerifier.verify(leapDay, "dev.example.files", "1.0.0"))
+    }
+
     @Test fun snapshotSizeAndEntryCountReject() {
         assertTrue(AyaFilesystemSnapshotVerifier.verify(
             snapshot() + " ".repeat(512 * 1024), "dev.example.files", "1.0.0"
