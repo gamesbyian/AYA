@@ -92,6 +92,27 @@ class AyaStructuredArtifactTest {
         ) is AyaStructuredKitCheck.Rejected)
     }
 
+    @Test fun headingOnlyAndUnscopedContentFailClosedWithOfflineValidatorParity() {
+        val body = "## Field semantics and bounds\\nNumeric values have documented units and bounds."
+        val missingProse = kit().replace(body,
+            "## Field semantics and bounds\\n### A plausible nested heading")
+        assertTrue(AyaStructuredKitVerifier.verify(
+            missingProse, "dev.example.chart", "1.0", task
+        ) is AyaStructuredKitCheck.Rejected)
+
+        val beforeFirstSection = kit().replace("## Artifact output contract",
+            "Unscoped instructions that should not be shared\\n## Artifact output contract")
+        assertTrue(AyaStructuredKitVerifier.verify(
+            beforeFirstSection, "dev.example.chart", "1.0", task
+        ) is AyaStructuredKitCheck.Rejected)
+
+        val realNestedContent = kit().replace("## Field semantics and bounds",
+            "## Field semantics and bounds\\n### Scalar bounds")
+        assertEquals(AyaStructuredKitCheck.Accepted,
+            AyaStructuredKitVerifier.verify(realNestedContent,
+                "dev.example.chart", "1.0", task))
+    }
+
     @Test fun taskRejectsFakeOrUnsafeFileContract() {
         for (badExtension in listOf("", "../json", ".JSON", ".a/b", ".zip\n")) {
             try {
