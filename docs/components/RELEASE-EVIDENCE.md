@@ -13,7 +13,7 @@ This is a common acceptance checklist for **every** optional AYA host adapter. A
 | S5 | Controlled complete text/attachment receipt in dated individual AI recipient app versions | Specific recipient ingestion validated |
 | S6 | Reproducible, versioned publicly resolvable artifacts, verified checksums/provenance, install and rollback instructions | Public distribution supported |
 
-Never infer S3 from a relocated copy of a first-party fixture or S5 from Android chooser launch. S6 distribution does not imply S4 accessibility or S5 receiver ingestion. An AYA project-specific developer packet must be authored from the actual host, not AYA's fictional examples.
+Never infer S3 from a relocated copy of a first-party fixture or S5 from Android chooser launch. For packet-level assistant trials, `aya-packet-trials/v2` explicitly separates real recipient observations from synthetic and documentation-only cases. A v1 record remains analyzable but cannot qualify for a release pass; a synthetically declared v2 `real_recipient` shape also does not substitute for reviewable test evidence. S6 distribution does not imply S4 accessibility or S5 receiver ingestion. An AYA project-specific developer packet must be authored from the actual host, not AYA's fictional examples.
 
 ## Required acceptance record
 
