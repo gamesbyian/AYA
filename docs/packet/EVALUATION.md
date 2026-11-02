@@ -1,6 +1,8 @@
 # Controlled AYA packet evaluation
 
-The [packet source compiler](README.md) verifies structure, provenance declarations, required dependencies, and size. It does **not** prove that an LLM read the packet, understood it, or produced an acceptable result. Use the existing [help evaluation protocol](../reference/EVALUATION_PROTOCOL.md) and this cross-module procedure for real-world acceptance.
+The [packet source compiler](README.md) verifies structure, provenance declarations, required dependencies, and size. It does **not** prove that an LLM read the packet, understood it, or produced an acceptable result. The trial ledger supports all five compiled profiles: `help`, `creative`, `structured`, `translation` and `filesystem`. Filesystem trials additionally require checking the host's real recipe parser, user approval and refusal of unsafe destructive proposals; a simulated deletion or model answer alone cannot establish execution safety.
+
+Use the existing [help evaluation protocol](../reference/EVALUATION_PROTOCOL.md) and this cross-module procedure for real-world acceptance.
 
 ## Trial procedure
 

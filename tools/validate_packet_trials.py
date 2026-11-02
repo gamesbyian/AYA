@@ -13,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-PROFILES = {"help", "creative", "structured", "translation"}
+PROFILES = {"help", "creative", "structured", "translation", "filesystem"}
 VERDICTS = {"pass", "fail", "unknown"}
 SEVERITIES = {"P0", "P1", "P2", "P3"}
 

@@ -43,6 +43,24 @@ class PacketTrialTests(unittest.TestCase):
         self.assertTrue(report["release_gate_pass"])
         self.assertEqual(report["passed"], 1)
 
+    def test_filesystem_profile_uses_same_strict_real_outcome_gate(self):
+        ledger = sample(self.packet)
+        ledger["profile"] = "filesystem"
+        ledger["cases"][0]["user_goal"] = "Create a safe file cleanup recipe"
+        ledger["cases"][0]["expected_result"] = "Host parser accepts recipe and explicit review"
+        self.assertEqual("filesystem", assess_trials(ledger, self.packet)["profile"])
+        ledger["cases"][0]["attachment_ingested"] = False
+        with self.assertRaisesRegex(TrialError, "Cannot claim pass"):
+            assess_trials(ledger, self.packet)
+        ledger["cases"][0]["verdict"] = "unknown"
+        self.assertFalse(assess_trials(ledger, self.packet, strict=False)["release_gate_pass"])
+
+    def test_unknown_profile_still_rejected(self):
+        ledger = sample(self.packet)
+        ledger["profile"] = "unrecognized"
+        with self.assertRaisesRegex(TrialError, "Unknown profile"):
+            assess_trials(ledger, self.packet)
+
     def test_wrong_packet_bytes_are_rejected(self):
         with self.assertRaisesRegex(TrialError, "exact evaluated packet"):
             assess_trials(sample(self.packet), b"changed packet")
