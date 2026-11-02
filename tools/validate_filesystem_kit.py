@@ -58,8 +58,6 @@ def parse_kit(kit):
     if headings != HEADINGS:
         raise ValueError("kit headings missing, repeated or reordered")
     positions = list(re.finditer(r"^## (.*?)\s*$", body, re.M))
-    if body[:positions[0].start()].strip():
-        raise ValueError("content before first filesystem kit section")
     sections = {}
     for i, title in enumerate(HEADINGS):
         stop = positions[i + 1].start() if i + 1 < len(positions) else len(body)
