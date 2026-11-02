@@ -4,9 +4,8 @@
         android:label="AYA External URI QA Receiver"
         android:allowBackup="false"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
-        <activity
+        <receiver
             android:name=".ReceiverActivity"
-            android:exported="true"
-            android:noHistory="true" />
+            android:exported="true" />
     </application>
 </manifest>
