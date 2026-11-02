@@ -62,10 +62,13 @@ class AyaExternalUriGrantTest {
         val denied = sendToSeparateApp(ungranted)
         assertEquals("Without an Android grant, cross-UID reads must be denied",
             "denied", denied.getString("status"))
+        assertTrue("Receiver must have a different Android UID",
+            denied.getInt("receiver_uid") != context.applicationInfo.uid)
 
         // Deliver the exact AYA-produced intent, including its ClipData grant.
         val accepted = sendToSeparateApp(reviewedShare)
         assertEquals("read", accepted.getString("status"))
+        assertEquals(denied.getInt("receiver_uid"), accepted.getInt("receiver_uid"))
         assertEquals(text.toByteArray(Charsets.UTF_8).size, accepted.getInt("bytes"))
         val expectedHash = MessageDigest.getInstance("SHA-256")
             .digest(text.toByteArray(Charsets.UTF_8))
