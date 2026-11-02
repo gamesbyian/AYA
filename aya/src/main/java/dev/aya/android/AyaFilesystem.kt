@@ -60,8 +60,6 @@ object AyaFilesystemKitVerifier {
         val actual = positions.map { body[it].removePrefix("## ").trim() }
         if (actual != headings)
             return AyaFilesystemKitCheck.Rejected("Filesystem kit sections missing or reordered.")
-        if (body.take(positions.first()).any { it.isNotBlank() })
-            return AyaFilesystemKitCheck.Rejected("Unexpected content before first filesystem kit section.")
         if (positions.indices.any { index ->
                 val first = positions[index] + 1
                 val last = if (index + 1 < positions.size) positions[index + 1] else body.size
