@@ -49,7 +49,7 @@ python3 tools/build_reference.py host-reference-fragments/ app/src/main/assets/a
 
 **Important limitation:** A compiled AYA packet does not automatically get attached to a conversation. The host must deliberately package it into its version-matched guide, translation kit, or task-specific export. AYA still shares one approved TXT attachment; the normal app importer handles returned files. The current SDK has no general-purpose runtime parser of the `aya-packet/v1` format.
 
-See [controlled cross-module evaluation](EVALUATION.md) and the offline `tools/validate_packet_trials.py` gate for reproducible, byte-matched assistant trials. No model responses are observed by AYA itself.
+See [controlled cross-module evaluation](EVALUATION.md) and the offline `tools/validate_packet_trials.py` gate for reproducible, byte-matched assistant trials. Use the v2 evidence classification for any release-readiness claim; historical v1 records remain readable but unqualified. Synthetic fixtures cannot pass the release gate. No model responses are observed by AYA itself.
 
 ## Release gates
 
