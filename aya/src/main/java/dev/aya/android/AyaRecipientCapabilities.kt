@@ -1,5 +1,10 @@
 package dev.aya.android
 
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+
 /**
  * Local, read-only developer QA evidence about Android recipient behavior.
  *
@@ -46,10 +51,21 @@ data class AyaRecipientEvidence(
         require(androidSdk in 23..100)
         require(evidenceId.isNotBlank() && evidenceId.length <= 240)
         if (level == AyaEvidenceLevel.DEVICE_QA) {
-            require(testedDateUtc != null &&
-                testedDateUtc.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
-                "Device QA evidence requires a date in UTC YYYY-MM-DD"
+            require(testedDateUtc != null && isValidUtcCalendarDate(testedDateUtc)) {
+                "Device QA evidence requires a real UTC calendar date YYYY-MM-DD"
             }
+        }
+    }
+
+    companion object {
+        private fun isValidUtcCalendarDate(value: String): Boolean {
+            if (!Regex("""\d{4}-\d{2}-\d{2}""").matches(value)) return false
+            val parser = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).apply {
+                isLenient = false
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val position = ParsePosition(0)
+            return parser.parse(value, position) != null && position.index == value.length
         }
     }
 }
