@@ -8,7 +8,7 @@ A host app offers a normal **Automation > Import recipe** workflow and optionall
 
 1. Follow [AYA-AUF](../understanding/README.md), [Director consultation](../understanding/CONSULTATION.md), [AYA-RAS](../reference/INDEX.md) and the [common packet authoring standard](../packet/AUTHORING_STANDARD.md). Confirm the installed build actually includes a safe recipe importer/executor. An intention or plan is insufficient.
 2. Read [Host authoring standard](AUTHORING.md), including schema provenance, backend truth matrix, capability limits, conflict handling and operation-level safety.
-3. Bundle an exact-version `aya-guide.md` and `aya-filesystem-kit.md`. Validate the kit offline and check the actual importer with independently constructed positive and negative tests.
+3. Bundle an exact-version `aya-guide.md` and `aya-filesystem-kit.md`. The offline and Android kit verifiers reject empty or heading-only sections (including hollow safety instructions). They cannot verify the truth or completeness of a safety policy. Check the actual importer with independently constructed positive and negative tests.
 4. If offering context, generate an on-device [Filesystem Snapshot](SNAPSHOTS.md) from the host's already authorized backend; ask the user before scanning or sharing. Do not include passwords or raw URLs with credentials.
 5. Call the typed Android handoff below. It validates the guide, kit and optional bounded snapshot before opening review. The end user still selects a recipient or Copy.
 6. Verify on real target devices and recipient versions, using [QA and failure gates](TEST_PLAN.md). The host importer is a separate safety release gate.

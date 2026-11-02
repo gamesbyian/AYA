@@ -57,11 +57,14 @@ def parse_kit(kit):
     headings = re.findall(r"^## (.*?)\s*$", body, re.M)
     if headings != HEADINGS:
         raise ValueError("kit headings missing, repeated or reordered")
+    positions = list(re.finditer(r"^## (.*?)\s*$", body, re.M))
     sections = {}
     for i, title in enumerate(HEADINGS):
-        start = body.index("## " + title) + len("## " + title)
-        stop = body.index("## " + HEADINGS[i + 1]) if i + 1 < len(HEADINGS) else len(body)
-        sections[title] = body[start:stop].strip()
+        stop = positions[i + 1].start() if i + 1 < len(positions) else len(body)
+        sections[title] = body[positions[i].end():stop].strip()
+        if not any(line.strip() and not line.lstrip().startswith("#")
+                   for line in sections[title].splitlines()):
+            raise ValueError("empty or heading-only filesystem kit section: " + title)
         if len(sections[title]) < 35:
             raise ValueError("kit section too thin: " + title)
     if re.search(r"<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>", kit):

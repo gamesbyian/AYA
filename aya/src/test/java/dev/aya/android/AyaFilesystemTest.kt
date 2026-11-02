@@ -70,6 +70,17 @@ class AyaFilesystemTest {
             "{not json}", "dev.example.files", "1.0.0") is AyaFilesystemSnapshotCheck.Rejected)
     }
 
+    @Test fun hollowSafetyFilesystemKitContentRejects() {
+        val hollow = kit().replace("## Safety and execution\nMust preview and confirm deletion.",
+            "## Safety and execution\n### Empty safety policy")
+        assertTrue(AyaFilesystemKitVerifier.verify(
+            hollow, "dev.example.files", "1.0.0") is AyaFilesystemKitCheck.Rejected)
+        val nested = kit().replace("## Backend capabilities",
+            "## Backend capabilities\n### SFTP")
+        assertEquals(AyaFilesystemKitCheck.Accepted,
+            AyaFilesystemKitVerifier.verify(nested, "dev.example.files", "1.0.0"))
+    }
+
     @Test fun snapshotSizeAndEntryCountReject() {
         assertTrue(AyaFilesystemSnapshotVerifier.verify(
             snapshot() + " ".repeat(512 * 1024), "dev.example.files", "1.0.0"

@@ -62,6 +62,20 @@ class FilesystemKitTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 parse_kit(mutated)
 
+    def test_hollow_safety_sections_rejected(self):
+        kit = (BASE / "harborfiles-kit.md").read_text()
+        prefix, rest = kit.split("## Safety and execution\n", 1)
+        original, suffix = rest.split("## Worked examples\n", 1)
+        self.assertTrue(original.strip())
+        for replacement in ("\n", "### Safety policies that are never actually stated\n"):
+            with self.subTest(replacement=replacement), self.assertRaisesRegex(
+                    ValueError, "empty or heading-only"):
+                parse_kit(prefix + "## Safety and execution\n" + replacement +
+                          "## Worked examples\n" + suffix)
+        self.assertEqual(parse_kit(kit.replace("## Backend capabilities",
+                                                "## Backend capabilities\n### SFTP", 1))[0]["app_id"],
+                         "dev.harborfiles.demo")
+
     def test_snapshot_schema_rejects_unknown_fields_and_oversize_entries(self):
         schema = json.loads((BASE.parent / "schemas/aya-filesystem-snapshot-v1.schema.json").read_text())
         item = copy.deepcopy(SNAP)

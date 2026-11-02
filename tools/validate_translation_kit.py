@@ -42,14 +42,16 @@ def parse(text):
     if metadata["schema_version"] != "aya-translation-kit/v1":
         raise ValueError("unsupported version")
     body = "\n".join(lines[end + 1:])
-    headings = re.findall(r"^## (.+?)\s*$", body, flags=re.M)
-    if headings != REQUIRED:
+    matches = list(re.finditer(r"^## (.+?)\s*$", body, flags=re.M))
+    if [match.group(1) for match in matches] != REQUIRED:
         raise ValueError("missing, repeated or reordered H2 sections")
     sections = {}
     for i, title in enumerate(REQUIRED):
-        start = body.index("## " + title) + len("## " + title)
-        stop = body.index("## " + REQUIRED[i + 1]) if i + 1 < len(REQUIRED) else len(body)
-        sections[title] = body[start:stop]
+        stop = matches[i + 1].start() if i + 1 < len(matches) else len(body)
+        sections[title] = body[matches[i].end():stop]
+        if not any(line.strip() and not line.lstrip().startswith("#")
+                   for line in sections[title].splitlines()):
+            raise ValueError("empty or heading-only translation kit section: " + title)
     def json_block(section):
         found = re.search(r"^\x60{3}json\s*\n(.*?)\n\x60{3}\s*$", sections[section], re.M | re.S)
         if not found:
