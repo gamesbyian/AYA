@@ -1,5 +1,12 @@
 name: Android library and consumer integration
 on:
+  workflow_dispatch:
+    inputs:
+      upload_sample_apk:
+        description: "Explicitly retain the AYA sample APK for testing"
+        type: boolean
+        required: false
+        default: false
   push:
     branches: [main]
     paths:
@@ -99,12 +106,15 @@ jobs:
           python3 -m unittest discover -s tools -p 'test_validate_staged_maven.py'
           python3 tools/validate_staged_maven.py --root aya/build/staging-maven --version 0.1.0-preview.1 --checksum-output aya-staging-sha256.txt
           gradle :sample:assembleDebug -Paya.consumePublished=true -Paya.version=0.1.0-preview.1 --no-daemon
+      # Routine integration CI only needs to compile/test this APK. Do not
+      # retain a new binary for every changing commit.
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_sample_apk && github.ref == 'refs/heads/main'
         with:
           name: aya-sample-debug-apk
           path: sample/build/outputs/apk/debug/sample-debug.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         with:
           name: aya-maven-staging-repository
