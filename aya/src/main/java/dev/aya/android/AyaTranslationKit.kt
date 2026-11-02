@@ -65,11 +65,21 @@ object AyaTranslationKitVerifier {
                 .any { values[it].isNullOrBlank() }) {
             return AyaTranslationKitCheck.Rejected("Translation kit provenance is incomplete.")
         }
-        val headings = lines.drop(end + 1).filter { it.startsWith("## ") }
-            .map { it.removePrefix("## ").trim() }
+        val body = lines.drop(end + 1)
+        val positions = body.indices.filter { body[it].startsWith("## ") }
+        val headings = positions.map { body[it].removePrefix("## ").trim() }
         if (headings != requiredSections) {
             return AyaTranslationKitCheck.Rejected("Translation kit is missing a required section.")
         }
+        if (body.take(positions.first()).any { it.isNotBlank() })
+            return AyaTranslationKitCheck.Rejected("Unexpected content before first translation kit section.")
+        if (positions.indices.any { index ->
+                val first = positions[index] + 1
+                val last = if (index + 1 < positions.size) positions[index + 1] else body.size
+                body.subList(first, last).none {
+                    it.isNotBlank() && !it.trimStart().startsWith("#")
+                }
+            }) return AyaTranslationKitCheck.Rejected("Translation kit has an empty or heading-only section.")
         if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""").containsMatchIn(kit)) {
             return AyaTranslationKitCheck.Rejected("Translation kit contains unresolved placeholders.")
         }
