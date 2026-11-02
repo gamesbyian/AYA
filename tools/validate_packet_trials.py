@@ -48,7 +48,7 @@ def assess_trials(ledger: dict, packet: bytes, strict: bool = True) -> dict:
     if ledger.get("packet_sha256") != digest:
         raise TrialError("Ledger must refer to the exact evaluated packet bytes")
     profile = ledger.get("profile")
-    if profile not in PROFILES:
+    if not isinstance(profile, str) or profile not in PROFILES:
         raise TrialError("Unknown profile")
     require_string(ledger, "host_app_version", "ledger")
     cases = ledger.get("cases")
@@ -80,20 +80,24 @@ def assess_trials(ledger: dict, packet: bytes, strict: bool = True) -> dict:
             raise TrialError("Actual attachment ingestion must be recorded: " + identifier)
         if type(case.get("host_outcome_verified")) is not bool:
             raise TrialError("Host outcome validation must be recorded: " + identifier)
-        if case.get("verdict") not in VERDICTS or case.get("severity") not in SEVERITIES:
+        if (not isinstance(case.get("verdict"), str) or case["verdict"] not in VERDICTS or
+                not isinstance(case.get("severity"), str) or case["severity"] not in SEVERITIES):
             raise TrialError("Invalid verdict or severity: " + identifier)
         if not isinstance(case.get("forbidden_claims"), list) or not all(
                 isinstance(x, str) for x in case["forbidden_claims"]):
             raise TrialError("Missing forbidden-claims list: " + identifier)
         if is_v2:
             kind = case.get("evidence_kind")
-            if kind not in EVIDENCE_KINDS:
+            if not isinstance(kind, str) or kind not in EVIDENCE_KINDS:
                 raise TrialError("Invalid or missing trial evidence kind: " + identifier)
             transport = case.get("transport")
-            if transport not in TRANSPORTS:
+            if not isinstance(transport, str) or transport not in TRANSPORTS:
                 raise TrialError("Invalid or missing recipient transport: " + identifier)
             if type(case.get("recipient_input_verified")) is not bool:
                 raise TrialError("Actual recipient input receipt must be recorded: " + identifier)
+            if transport not in ATTACHMENT_TRANSPORTS and case["attachment_ingested"]:
+                raise TrialError("Text-only transport cannot claim attachment ingestion: " +
+                                 identifier)
             if kind == "real_recipient":
                 real_recipient_trials += 1
                 pkg = require_string(case, "recipient_package", identifier)
