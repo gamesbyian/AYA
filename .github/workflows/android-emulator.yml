@@ -35,7 +35,9 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
+          script: |
+            gradle :qa-external-receiver:installDebug --no-daemon --stacktrace
+            gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
 
       - name: Preserve Android UI test evidence
         if: always()
