@@ -12,7 +12,7 @@
 
 [**Android integration guide**](docs/INTEGRATION.md) · [**API compatibility and variants**](docs/API_COMPATIBILITY.md) · [**Quick explanation and use cases**](docs/DISCOVERABILITY.md) · [**Reference packet authoring**](docs/reference/INDEX.md) · [**Privacy and security**](docs/SECURITY.md)
 
-**Help, Creative, Translation Kit, and optional Filesystem Automation Handoffs.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
+**Help, Creative, Structured Artifact, Translation Kit, and optional Filesystem Automation handoffs.** Image requests now let users choose between text-only sharing and an optional full reference attachment. AYA also supports an image-generation request prepared from the host's verified artwork requirements and the user's creative direction. See [Creative Handoff specification](docs/CREATIVE_HANDOFF.md). The user generates/saves artwork in their chosen AI app and imports it via the host's existing picker. AYA never observes the result.
 
 **A reusable Android bring-your-own-AI handoff component.** AYA prepares an application-specific, version-aware reference plus the user's question, lets the user review/edit it, and shares a self-contained text document with ChatGPT, Claude, or another compatible Android share target.
 
@@ -34,7 +34,7 @@ The SDK now exposes `Aya.launchFilesystemBundled()` with `AyaFilesystemTask`, a 
 
 ## Structured artifact handoffs
 
-AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**: a procedural-design preset, editor layout, visualization configuration, animation sequence, or another host-importable artifact. A source-derived, version-matched schema and field-interaction guide can accompany an editable brief and an optional user-approved current artifact. The person saves the result and explicitly imports it into their host app. AYA does not monitor replies or import files automatically.
+AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**: a procedural-design preset, editor layout, visualization configuration, animation sequence, or another host-importable artifact. A source-derived, version-matched schema and field-interaction guide can accompany an editable brief. The current Android SDK does **not** attach an existing user artifact; that would require a separately reviewed, user-consented future attachment mechanism. The person saves the result and explicitly imports it into their host app. AYA does not monitor replies or import files automatically.
 
 The [structured artifact handoff profile](docs/STRUCTURED_ARTIFACT_HANDOFF.md) defines a portable, schema-driven pattern for Android and browser/PWA hosts. **An unpublished, generic Android structured-artifact launcher now exists**: `AyaStructuredTask`, `Aya.launchStructuredBundled()` and `AyaComponentAction.Structured` verify the installed-version guide and a host-authored kit, then show editable local review/Copy/Share. Each adopting host must supply its actual schema and independently validated importer; no automatic return or public binary package is provided.
 
