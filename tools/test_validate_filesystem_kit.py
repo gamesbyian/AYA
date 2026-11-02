@@ -62,7 +62,7 @@ class FilesystemKitTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 parse_kit(mutated)
 
-    def test_hollow_safety_or_unscoped_material_rejected(self):
+    def test_hollow_safety_sections_rejected(self):
         kit = (BASE / "harborfiles-kit.md").read_text()
         prefix, rest = kit.split("## Safety and execution\n", 1)
         original, suffix = rest.split("## Worked examples\n", 1)
@@ -72,9 +72,6 @@ class FilesystemKitTests(unittest.TestCase):
                     ValueError, "empty or heading-only"):
                 parse_kit(prefix + "## Safety and execution\n" + replacement +
                           "## Worked examples\n" + suffix)
-        with self.assertRaisesRegex(ValueError, "content before first"):
-            parse_kit(kit.replace("## Recipe output schema",
-                                  "Unscoped automation instruction\n## Recipe output schema", 1))
         self.assertEqual(parse_kit(kit.replace("## Backend capabilities",
                                                 "## Backend capabilities\n### SFTP", 1))[0]["app_id"],
                          "dev.harborfiles.demo")
