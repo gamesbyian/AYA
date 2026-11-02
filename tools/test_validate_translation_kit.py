@@ -23,6 +23,22 @@ class TranslationKitAuthoringTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "H2"):
             parse(text.replace("## Agent instructions", "## Other instructions"))
 
+    def test_hollow_heading_only_or_unscoped_sections_rejected(self):
+        text = KIT.read_text(encoding="utf-8")
+        start, rest = text.split("## Rosetta and glossary\n", 1)
+        original, tail = rest.split("## Style and meaning constraints\n", 1)
+        self.assertTrue(original.strip())
+        for replacement in ("\n", "### Only a descriptive subheading\n"):
+            with self.subTest(body=replacement), self.assertRaisesRegex(
+                    ValueError, "empty or heading-only"):
+                parse(start + "## Rosetta and glossary\n" + replacement +
+                      "## Style and meaning constraints\n" + tail)
+        with self.assertRaisesRegex(ValueError, "content before first"):
+            parse(text.replace("## Output schema", "Unscoped instructions\n## Output schema", 1))
+        self.assertEqual(parse(text.replace("## Rosetta and glossary",
+                                            "## Rosetta and glossary\n### Terminology", 1))[0]["app_id"],
+                         "dev.parcelpad.demo")
+
     def test_example_cannot_change_approved_placeholders(self):
         with tempfile.TemporaryDirectory() as tmp:
             changed = json.loads(PACK.read_text(encoding="utf-8"))
