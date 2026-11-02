@@ -41,7 +41,7 @@ A minimal *synthetic example* of the extra fields for a real-recipient-shaped re
 }
 ```
 
-The validator checks **self-reported structure**, not the external truth of observations, existence of the referenced APK, assistant versions, or reviewer independence. Even a well-formed real-recipient declaration requires an actual independently reviewable observation. An emulator real-recipient trial does not automatically establish physical-device S4 or general S5 compatibility. Scope every conclusion to the exact versions, account state and transport tested.
+The report distinguishes `attachments_reported_ingested` (all declared records, including fixtures and legacy v1) from `attachments_confirmed_ingested` (the older field name, now counted **only** from explicitly classified v2 real-recipient cases). Neither count automatically verifies the truth of the underlying observation, and a record claiming success still requires independent review. The validator checks **self-reported structure**, not the external truth of observations, existence of the referenced APK, assistant versions, or reviewer independence. Even a well-formed real-recipient declaration requires an actual independently reviewable observation. An emulator real-recipient trial does not automatically establish physical-device S4 or general S5 compatibility. Scope every conclusion to the exact versions, account state and transport tested.
 
 ## Limits
 
