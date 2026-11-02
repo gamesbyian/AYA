@@ -104,8 +104,10 @@ jobs:
           name: aya-sample-debug-apk
           path: sample/build/outputs/apk/debug/sample-debug.apk
           if-no-files-found: error
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: aya-maven-staging-repository
           path: aya/build/staging-maven/
           if-no-files-found: error
+          retention-days: 7

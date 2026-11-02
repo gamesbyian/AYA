@@ -47,3 +47,4 @@ jobs:
             sample/build/outputs/androidTest-results/connected/
             sample/build/reports/androidTests/connected/
           if-no-files-found: ignore
+          retention-days: 14
