@@ -41,8 +41,9 @@ class AyaExternalUriGrantTest {
             "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
         )
         intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+        // Explicit broadcast avoids Android background-activity-start restrictions.
+        // URI grants are scoped to this receiver and expire after dispatch.
+        context.sendBroadcast(intent)
         assertTrue("Independent receiver failed to respond", done.await(20, TimeUnit.SECONDS))
         return result.get() ?: throw AssertionError("Receiver returned no evidence")
     }
