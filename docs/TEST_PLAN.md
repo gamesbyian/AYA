@@ -8,7 +8,7 @@ Run `python3 tools/validate_understanding.py docs/understanding/examples/parcelp
 
 ## Shared Packet Authoring checks
 
-Run the [Packet compiler](packet/README.md) on the fictional four-profile fixture, then independently test against real host builds before release:
+Run the [Packet compiler](packet/README.md) on the fictional five-profile fixture, then independently test against real host builds before release:
 
 ```sh
 python3 tools/packet_compiler.py --source docs/packet/examples/parcelpad-facts.json \
@@ -54,7 +54,7 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 - Real target trials: distinguish target offered, text seen, guide read, **image actually generated**, image saved, and manual import; no automatic success callback exists. Record findings only in controlled QA, never user-runtime analytics.
 
 
-- Run `gradle :aya:connectedDebugAndroidTest` on a configured emulator/device; verify the FileProvider URI reads with grant and **from an independent foreign package** cannot be read without grant. Existing tests cover local URI contents, flags, and scope; external-package denial remains a separate test case.
+- Run `gradle :qa-external-receiver:installDebug` **before** `gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest` on a configured emulator/device. `AyaExternalUriGrantTest` uses two genuinely installed packages with distinct UIDs. AYA's own content URI must be denied to the foreign app without Android grant flags/ClipData and the **same URI** must yield identical document bytes (verified via SHA-256) when dispatched with AYA's explicit read grant. The external fixture returns only a digest, byte count and denial status through a test-scoped `ResultReceiver`. A missing receiver, failed callback or unreadable granted file must fail CI.
 - Question-first composer: blank/general question, editable host-suggested question, multiline text, keyboard/focus, back/cancel, host `askQuestion=false` path.
 - Cancelling or editing the preview changes exactly what is copied/shared, including multiline and Unicode content.
 - AYA sends the final question both in the attachment and in bounded `EXTRA_TEXT`, never restoring a question removed in review.
@@ -63,6 +63,8 @@ Run `gradle :aya:testDebugUnitTest :aya:assembleDebug :aya:assembleDebugAndroidT
 - Missing target, denied chooser, bad FileProvider setup, cache failures and Activity recreation fail gracefully.
 - TalkBack, full-size font, keyboard focus, touch reachability, landscape and 320x700/412x892 screen snapshots.
 - Confirm no unexpected internet permission, credential collection, analytics, or background network calls.
+
+This verifies a platform-grant boundary against a disposable **non-assistant QA fixture** on an emulator. It does not verify external AI-app attachment ingestion, user-chosen Sharesheet routing, physical-device acceptance, Android 29 permissions or general provider security certification. Never distribute `qa-external-receiver` as an AYA SDK/host dependency or silently install it on user devices.
 
 ## Recipient matrix
 In addition to recipient interoperability trials, test `AyaRecipientCapabilityRegistry`: unverified intent filters, published documentation, exact QA match, account state unknown, app/Android version mismatch, contradicting test observations and absence of entries. Do not let published feature claims become verified ingestion. Test `AyaAssistContext.populate()` in Android instrumentation for JSON-LD and absence of URI grants, and its conservative size limits in unit/device tests. Document real image-generation capability separately from ingestion.
