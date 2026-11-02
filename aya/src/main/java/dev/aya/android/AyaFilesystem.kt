@@ -55,10 +55,20 @@ object AyaFilesystemKitVerifier {
         if (listOf("schema_revision", "source_revision", "owner").any {
                 values[it].isNullOrBlank()
             }) return AyaFilesystemKitCheck.Rejected("Filesystem kit provenance incomplete.")
-        val actual = lines.drop(end + 1).filter { it.startsWith("## ") }
-            .map { it.removePrefix("## ").trim() }
+        val body = lines.drop(end + 1)
+        val positions = body.indices.filter { body[it].startsWith("## ") }
+        val actual = positions.map { body[it].removePrefix("## ").trim() }
         if (actual != headings)
             return AyaFilesystemKitCheck.Rejected("Filesystem kit sections missing or reordered.")
+        if (body.take(positions.first()).any { it.isNotBlank() })
+            return AyaFilesystemKitCheck.Rejected("Unexpected content before first filesystem kit section.")
+        if (positions.indices.any { index ->
+                val first = positions[index] + 1
+                val last = if (index + 1 < positions.size) positions[index + 1] else body.size
+                body.subList(first, last).none {
+                    it.isNotBlank() && !it.trimStart().startsWith("#")
+                }
+            }) return AyaFilesystemKitCheck.Rejected("Filesystem kit has an empty or heading-only section.")
         if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""")
                 .containsMatchIn(kit))
             return AyaFilesystemKitCheck.Rejected("Filesystem kit contains unresolved placeholders.")
