@@ -48,6 +48,7 @@ class ReceiverActivity : Activity() {
             }
         }
         result.putString("status", status)
+        result.putInt("receiver_uid", android.os.Process.myUid())
         callback?.send(if (status == "read") Activity.RESULT_OK else Activity.RESULT_CANCELED, result)
         finish()
     }
