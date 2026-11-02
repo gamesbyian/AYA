@@ -91,6 +91,14 @@ object AyaFilesystemSnapshotVerifier {
                 scan.opt("truncated") !is Boolean || doc.optJSONObject("scope") == null ||
                 doc.optJSONObject("summary") == null || doc.optJSONArray("entries") == null)
                 return AyaFilesystemSnapshotCheck.Rejected("Snapshot lacks required shape.")
+            // A host-supplied snapshot must not claim a complete scan despite failures.
+            // A complete scan may still have a truncated *listing* if disclosed.
+            val errors = scan.optJSONArray("errors")
+                ?: return AyaFilesystemSnapshotCheck.Rejected("Snapshot scan errors must be an array.")
+            if (scan.optString("status") == "complete" && errors.length() > 0)
+                return AyaFilesystemSnapshotCheck.Rejected("Complete snapshot reports scan errors.")
+            if (scan.optBoolean("truncated") && scan.optString("truncation_reason").isBlank())
+                return AyaFilesystemSnapshotCheck.Rejected("Truncated snapshot needs a reason.")
             if (doc.getJSONArray("entries").length() > 2500)
                 return AyaFilesystemSnapshotCheck.Rejected("Snapshot has too many entries.")
             AyaFilesystemSnapshotCheck.Accepted
