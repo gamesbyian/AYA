@@ -11,6 +11,8 @@ on:
       - '.github/workflows/unity.yml'
       - 'settings.gradle.kts'
       - 'aya/**'
+      - '!aya/src/test/**'
+      - '!aya/src/androidTest/**'
   pull_request:
     paths:
       - 'aya-unity/**'
@@ -21,6 +23,8 @@ on:
       - '.github/workflows/unity.yml'
       - 'settings.gradle.kts'
       - 'aya/**'
+      - '!aya/src/test/**'
+      - '!aya/src/androidTest/**'
 
 jobs:
   managed-csharp-source-smoke:
