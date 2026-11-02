@@ -34,17 +34,57 @@ def sample(packet: bytes, verdict="pass"):
     }
 
 
+def declared_real_sample(packet: bytes, verdict="pass", transport="text_and_txt_reference"):
+    # Synthetic assertions for validator structure. These values are NOT QA evidence.
+    ledger = sample(packet, verdict)
+    ledger["schema_version"] = "aya-packet-trials/v2"
+    case = ledger["cases"][0]
+    case.update({
+        "evidence_kind": "real_recipient",
+        "transport": transport,
+        "recipient_package": "org.example.testreceiver",
+        "android_api_level": 35,
+        "device_kind": "android_emulator",
+        "host_artifact_sha256": "0" * 64,
+        "recipient_input_verified": verdict == "pass",
+    })
+    return ledger
+
+
 class PacketTrialTests(unittest.TestCase):
     def setUp(self):
         self.packet = b"synthetic packet bytes only"
 
-    def test_structural_pass_is_not_real_model_evidence(self):
-        report = assess_trials(sample(self.packet), self.packet)
-        self.assertTrue(report["release_gate_pass"])
+    def test_legacy_v1_is_readable_but_cannot_claim_release_readiness(self):
+        report = assess_trials(sample(self.packet), self.packet, strict=False)
         self.assertEqual(report["passed"], 1)
+        self.assertFalse(report["release_gate_pass"])
+        self.assertEqual(report["unqualified_trial_ids"], ["CASE-001"])
+        with self.assertRaisesRegex(TrialError, "release gate failed"):
+            assess_trials(sample(self.packet), self.packet)
+
+    def test_v2_synthetic_or_documentation_trial_never_passes_release(self):
+        for kind in ("synthetic_fixture", "documentation_only"):
+            ledger = declared_real_sample(self.packet)
+            case = ledger["cases"][0]
+            case["evidence_kind"] = kind
+            with self.subTest(kind=kind):
+                report = assess_trials(ledger, self.packet, strict=False)
+                self.assertEqual(report["passed"], 1)
+                self.assertFalse(report["release_gate_pass"])
+                with self.assertRaisesRegex(TrialError, "release gate failed"):
+                    assess_trials(ledger, self.packet)
+
+    def test_v2_structurally_real_claim_is_possible_but_not_qa_proof(self):
+        # This only checks self-reported ledger shape, NOT physical/assistant truth.
+        ledger = declared_real_sample(self.packet)
+        result = assess_trials(ledger, self.packet)
+        self.assertTrue(result["release_gate_pass"])
+        self.assertEqual(result["real_recipient_trials"], 1)
+        self.assertFalse(result["unqualified_trial_ids"])
 
     def test_filesystem_profile_uses_same_strict_real_outcome_gate(self):
-        ledger = sample(self.packet)
+        ledger = declared_real_sample(self.packet)
         ledger["profile"] = "filesystem"
         ledger["cases"][0]["user_goal"] = "Create a safe file cleanup recipe"
         ledger["cases"][0]["expected_result"] = "Host parser accepts recipe and explicit review"
@@ -54,6 +94,67 @@ class PacketTrialTests(unittest.TestCase):
             assess_trials(ledger, self.packet)
         ledger["cases"][0]["verdict"] = "unknown"
         self.assertFalse(assess_trials(ledger, self.packet, strict=False)["release_gate_pass"])
+
+    def test_text_only_real_declared_receipt_does_not_require_attachment(self):
+        ledger = declared_real_sample(self.packet, transport="text_only")
+        ledger["cases"][0]["attachment_ingested"] = False
+        self.assertTrue(assess_trials(ledger, self.packet)["release_gate_pass"])
+        ledger["cases"][0]["recipient_input_verified"] = False
+        with self.assertRaisesRegex(TrialError, "Cannot claim pass"):
+            assess_trials(ledger, self.packet)
+
+    def test_text_only_cannot_claim_file_attachment_ingestion(self):
+        ledger = declared_real_sample(self.packet, transport="text_only")
+        with self.assertRaisesRegex(TrialError, "cannot claim attachment"):
+            assess_trials(ledger, self.packet)
+
+    def test_reference_transport_without_actual_ingestion_rejected(self):
+        ledger = declared_real_sample(self.packet)
+        ledger["cases"][0]["attachment_ingested"] = False
+        with self.assertRaisesRegex(TrialError, "Cannot claim pass"):
+            assess_trials(ledger, self.packet)
+
+    def test_real_evidence_requires_verifiable_android_metadata(self):
+        base = declared_real_sample(self.packet)
+        changes = [
+            ("recipient_package", "not-a-package"),
+            ("android_api_level", True),
+            ("android_api_level", 0),
+            ("device_kind", "browser"),
+            ("host_artifact_sha256", "not-a-digest"),
+            ("transport", "copy-magic"),
+            ("evidence_kind", "unclassified"),
+            ("evidence_kind", []),
+            ("transport", []),
+        ]
+        for key, invalid in changes:
+            with self.subTest(key=key, invalid=invalid), self.assertRaises(TrialError):
+                ledger = copy.deepcopy(base)
+                ledger["cases"][0][key] = invalid
+                assess_trials(ledger, self.packet)
+
+    def test_unqualified_mixed_ledger_cannot_be_promoted_by_real_case(self):
+        ledger = declared_real_sample(self.packet)
+        fixture = copy.deepcopy(ledger["cases"][0])
+        fixture["id"] = "CASE-002"
+        fixture["evidence_kind"] = "synthetic_fixture"
+        ledger["cases"].append(fixture)
+        report = assess_trials(ledger, self.packet, strict=False)
+        self.assertEqual(report["real_recipient_trials"], 1)
+        self.assertEqual(report["unqualified_trial_ids"], ["CASE-002"])
+        self.assertFalse(report["release_gate_pass"])
+
+    def test_untrusted_invalid_profile_and_verdict_types_fail_cleanly(self):
+        for key, value in (("profile", []), ("profile", {})):
+            ledger = declared_real_sample(self.packet)
+            ledger[key] = value
+            with self.assertRaises(TrialError):
+                assess_trials(ledger, self.packet)
+        for key in ("verdict", "severity"):
+            ledger = declared_real_sample(self.packet)
+            ledger["cases"][0][key] = []
+            with self.assertRaises(TrialError):
+                assess_trials(ledger, self.packet)
 
     def test_unknown_profile_still_rejected(self):
         ledger = sample(self.packet)
