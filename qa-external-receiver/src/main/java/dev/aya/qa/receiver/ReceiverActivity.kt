@@ -1,6 +1,7 @@
 package dev.aya.qa.receiver
 
-import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -12,10 +13,9 @@ import java.security.MessageDigest
  * Test-only independent Android app/UID. A ResultReceiver reports a digest,
  * never the shared document body. It cannot grant permissions to itself.
  */
-class ReceiverActivity : Activity() {
+class ReceiverActivity : BroadcastReceiver() {
     @Suppress("DEPRECATION")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onReceive(context: Context, intent: Intent) {
         val callback = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra(EXTRA_CALLBACK, ResultReceiver::class.java)
         } else {
@@ -31,7 +31,7 @@ class ReceiverActivity : Activity() {
             "invalid_uri"
         } else {
             try {
-                val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 if (bytes == null) {
                     "unreadable"
                 } else {
@@ -49,8 +49,7 @@ class ReceiverActivity : Activity() {
         }
         result.putString("status", status)
         result.putInt("receiver_uid", android.os.Process.myUid())
-        callback?.send(if (status == "read") Activity.RESULT_OK else Activity.RESULT_CANCELED, result)
-        finish()
+        callback?.send(if (status == "read") 1 else 0, result)
     }
 
     companion object {
