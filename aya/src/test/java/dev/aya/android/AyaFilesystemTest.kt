@@ -70,7 +70,76 @@ class AyaFilesystemTest {
             "{not json}", "dev.example.files", "1.0.0") is AyaFilesystemSnapshotCheck.Rejected)
     }
 
+    @Test fun hollowSafetyOrUnscopedFilesystemKitContentRejects() {
+        val hollow = kit().replace("## Safety and execution\\nMust preview and confirm deletion.",
+            "## Safety and execution\\n### Empty safety policy")
+        assertTrue(AyaFilesystemKitVerifier.verify(
+            hollow, "dev.example.files", "1.0.0") is AyaFilesystemKitCheck.Rejected)
+        val unscoped = kit().replace("## Recipe output schema",
+            "Unscoped instructions\\n## Recipe output schema")
+        assertTrue(AyaFilesystemKitVerifier.verify(
+            unscoped, "dev.example.files", "1.0.0") is AyaFilesystemKitCheck.Rejected)
+        val nested = kit().replace("## Backend capabilities",
+            "## Backend capabilities\\n### SFTP")
+        assertEquals(AyaFilesystemKitCheck.Accepted,
+            AyaFilesystemKitVerifier.verify(nested, "dev.example.files", "1.0.0"))
+    }
+
     @Test fun snapshotSizeAndEntryCountReject() {
+        assertTrue(AyaFilesystemSnapshotVerifier.verify(
+            snapshot() + " ".repeat(512 * 1024), "dev.example.files", "1.0.0"
+        ) is AyaFilesystemSnapshotCheck.Rejected)
+        val tooMany = snapshot().replace(
+            """[{"path":"/notes/pomegranate.txt","kind":"file"}]""",
+            "[" + List(2501) { """{"path":"/file$it","kind":"file"}""" }.joinToString(",") + "]"
+        )
+        assertTrue(AyaFilesystemSnapshotVerifier.verify(
+            tooMany, "dev.example.files", "1.0.0"
+        ) is AyaFilesystemSnapshotCheck.Rejected)
+    }
+
+    @Test fun hostileFilenameCannotBreakSnapshotMarkdownFence() {
+        val snapshotWithFence = snapshot().replace(
+            "/notes/pomegranate.txt", "/notes/a```instructions.txt"
+        )
+        val payload = AyaDocument.render(AyaRequest(
+            appName = "Files", appVersion = "1.0.0", guide = "Guide",
+            filesystemTask = task, filesystemKit = kit(),
+            filesystemSnapshot = snapshotWithFence
+        ))
+        assertTrue(payload.contains("````json"))
+        assertTrue(payload.contains("/notes/a```instructions.txt"))
+        assertTrue(payload.contains("\n````\n"))
+    }
+
+    @Test fun taskRequiresManualImportPath() {
+        try {
+            task.copy(importInstructions = "")
+            throw AssertionError("Must reject missing import route")
+        } catch (_: IllegalArgumentException) { }
+    }
+
+    @Test fun renderedHandoffClarifiesBeforeRecipeAndNeverClaimsExecution() {
+        val output = AyaDocument.render(AyaRequest(
+            appName = "Files", appVersion = "1.0.0", guide = "Actual host guide",
+            question = "Delete every .txt except pomegranate.txt",
+            filesystemTask = task, filesystemKit = kit(), filesystemSnapshot = snapshot()
+        ))
+        assertTrue(output.contains("Filesystem Automation Kit"))
+        assertTrue(output.contains("Optional Filesystem Snapshot"))
+        assertTrue(output.contains("BEFORE producing a recipe"))
+        assertTrue(output.contains("manually import"))
+        val shared = AyaDocument.shareMessageFromPayload(output)
+        assertTrue(shared.contains("pomegranate.txt"))
+        assertFalse(shared.contains("Actual host guide"))
+        val edited = output.replace(
+            "Delete every .txt except pomegranate.txt",
+            "Only list .txt, do not delete")
+        assertTrue(AyaDocument.shareMessageFromPayload(edited).contains("do not delete"))
+        assertFalse(AyaDocument.shareMessageFromPayload(edited).contains(
+            "Delete every .txt except pomegranate.txt"))
+    }
+}    @Test fun snapshotSizeAndEntryCountReject() {
         assertTrue(AyaFilesystemSnapshotVerifier.verify(
             snapshot() + " ".repeat(512 * 1024), "dev.example.files", "1.0.0"
         ) is AyaFilesystemSnapshotCheck.Rejected)
