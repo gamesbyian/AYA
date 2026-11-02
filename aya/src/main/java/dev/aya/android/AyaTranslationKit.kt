@@ -71,8 +71,6 @@ object AyaTranslationKitVerifier {
         if (headings != requiredSections) {
             return AyaTranslationKitCheck.Rejected("Translation kit is missing a required section.")
         }
-        if (body.take(positions.first()).any { it.isNotBlank() })
-            return AyaTranslationKitCheck.Rejected("Unexpected content before first translation kit section.")
         if (positions.indices.any { index ->
                 val first = positions[index] + 1
                 val last = if (index + 1 < positions.size) positions[index + 1] else body.size
