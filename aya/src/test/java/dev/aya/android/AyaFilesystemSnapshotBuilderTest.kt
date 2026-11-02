@@ -69,6 +69,14 @@ class AyaFilesystemSnapshotBuilderTest {
         assertTrue(check() is AyaFilesystemSnapshotCheck.Rejected)
     }
 
+    @Test fun builderRefusesImpossibleTimestampEvenWithCorrectUtcShape() {
+        try {
+            AyaFilesystemSnapshotBuilder.build(input().copy(
+                generatedAtUtc = "2026-02-30T20:00:00Z"))
+            throw AssertionError("Builder must reject impossible UTC calendar date")
+        } catch (_: IllegalArgumentException) { }
+    }
+
     @Test fun partialScanExplicitlyRecordsErrors() {
         val doc = JSONObject(AyaFilesystemSnapshotBuilder.build(input().copy(
             status = AyaFilesystemScanStatus.PARTIAL,

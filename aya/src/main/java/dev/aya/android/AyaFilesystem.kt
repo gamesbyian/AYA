@@ -1,6 +1,10 @@
 package dev.aya.android
 
 import org.json.JSONObject
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 /** An app-specific, data-only recipe request. AYA never runs or imports it. */
 data class AyaFilesystemTask(
@@ -81,6 +85,21 @@ sealed class AyaFilesystemSnapshotCheck {
 
 /** Bounded, exact-app JSON verification; host owns scanning, redaction and consent. */
 object AyaFilesystemSnapshotVerifier {
+    /**
+     * Reject impossible dates before an agent uses snapshot age to reason about
+     * stale filesystem state. SimpleDateFormat is available below Android API 26.
+     */
+    private fun validUtcTimestamp(value: String): Boolean {
+        if (!Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""").matches(value))
+            return false
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT).apply {
+            isLenient = false
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val position = ParsePosition(0)
+        return parser.parse(value, position) != null && position.index == value.length
+    }
+
     fun verify(json: String, packageId: String, version: String): AyaFilesystemSnapshotCheck {
         if (json.toByteArray(Charsets.UTF_8).size > 512 * 1024)
             return AyaFilesystemSnapshotCheck.Rejected("Snapshot exceeds 512 KiB.")
@@ -90,9 +109,8 @@ object AyaFilesystemSnapshotVerifier {
                 doc.optString("app_id") != packageId || version.isBlank() ||
                 doc.optString("app_version") != version)
                 return AyaFilesystemSnapshotCheck.Rejected("Snapshot schema or app identity mismatch.")
-            if (!Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""")
-                    .matches(doc.optString("generated_at_utc")))
-                return AyaFilesystemSnapshotCheck.Rejected("Snapshot needs a UTC timestamp.")
+            if (!validUtcTimestamp(doc.optString("generated_at_utc")))
+                return AyaFilesystemSnapshotCheck.Rejected("Snapshot needs a valid UTC timestamp.")
             val scan = doc.optJSONObject("scan")
                 ?: return AyaFilesystemSnapshotCheck.Rejected("Snapshot scan status missing.")
             if (scan.optString("status") !in listOf("complete", "partial", "failed") ||
