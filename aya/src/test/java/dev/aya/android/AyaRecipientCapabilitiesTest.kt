@@ -78,6 +78,19 @@ class AyaRecipientCapabilitiesTest {
     @Test(expected = IllegalArgumentException::class)
     fun qaMustHaveUtcTestDate() { record().copy(testedDateUtc = null) }
 
+    @Test fun qaRejectsImpossibleDatesAndAcceptsLeapDay() {
+        for (invalid in listOf(
+            "2026-02-29", "2026-11-31", "2026-13-01", "2026-00-01",
+            "2026-12-32", "2026-10-29T00:00:00Z", "2026-1-2"
+        )) {
+            try {
+                record().copy(testedDateUtc = invalid)
+                throw AssertionError("Should reject invalid UTC date: $invalid")
+            } catch (_: IllegalArgumentException) { }
+        }
+        assertEquals("2024-02-29", record().copy(testedDateUtc = "2024-02-29").testedDateUtc)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun nonPackageGarbageIsRejected() { record().copy(packageName = "https://example.org") }
 

@@ -17,7 +17,7 @@ The registry supports *developer QA* and future user-visible compatibility guida
 - `AyaTransport`: `TEXT_ONLY`, `TEXT_AND_TXT_REFERENCE`, `TXT_REFERENCE_ONLY`, `IMAGE_ATTACHMENT`, `MULTIPLE_ATTACHMENTS`, or `PROCESS_TEXT`
 - `AyaCapabilityResult` (`SUPPORTED` / `UNSUPPORTED`)
 - `AyaEvidenceLevel` (`DECLARED_INTENT_FILTER`, `PUBLISHED_DOCUMENTATION`, `DEVICE_QA`)
-- `evidenceId` and mandatory UTC `testedDateUtc` for device QA
+- `evidenceId` and mandatory strict real UTC calendar date `testedDateUtc` for device QA (YYYY-MM-DD; impossible days/months reject)
 
 `registry.assess(packageName, appVersionName, androidSdk, accountState, transport)` returns `UNKNOWN`, `VERIFIED_SUPPORTED`, `VERIFIED_UNSUPPORTED` or `CONFLICTING`, plus exact QA evidence IDs. Only exact `DEVICE_QA` matches can produce verified support/unsupported; unknown account state always returns UNKNOWN. Conflicting observations must not be auto-resolved in favour of a provider.
 
