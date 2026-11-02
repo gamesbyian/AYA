@@ -7,6 +7,15 @@
 - **In progress:** included in the initial integration branch; do not announce as a stable released artifact until merged and CI/device checks pass.
 - **Planned:** specification only, not available to install.
 
+## Next acceptance queue (2026-11-02)
+
+The November 2 structural/QA regressions are merged; see [the evidence ledger](STATUS.md#november-2-source-guard-and-acceptance-ledger-reconciliation). They **do not** complete release acceptance. Prioritize, in order:
+
+1. Obtain an independently authored Android consuming-host APK with actual host-provided exact-version guide and safe real importers. Exercise complete handoff and, for structured/translation/filesystem output, actual parser and user-approved return/import journeys. Do not use a fictional fixture as a production importer.
+2. Perform real-device accessibility and recipient acceptance under a recorded device/API, assistant package/version, account state and Share/Copy mode. Verify 320×700 and 412×892 layout, 200% text, TalkBack/keyboard/IME, and whether the assistant actually ingests content. **Do not infer this from synthetic CI.**
+3. Resolve the Godot [rejected screenshot and independent visual gate](https://github.com/gamesbyian/AYA/pull/100) before claiming portrait UI/interaction acceptance; keep its diagnostic branch unmerged until screenshots are actually readable.
+4. Prepare reproducible signed release/distribution evidence for the versioned AAR and adapters, avoiding marketplace/install claims until native dependencies resolve for external consumers. Separately require the baseline `docs` check through administrator [issue #73](https://github.com/gamesbyian/AYA/issues/73) and prove a failing-check merge is blocked.
+
 ## Phase 0: contracts, gap audit and core foundation (P0, this change)
 
 Deliver:
