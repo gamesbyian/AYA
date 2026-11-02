@@ -103,6 +103,11 @@ class PacketTrialTests(unittest.TestCase):
         with self.assertRaisesRegex(TrialError, "Cannot claim pass"):
             assess_trials(ledger, self.packet)
 
+    def test_text_only_cannot_claim_file_attachment_ingestion(self):
+        ledger = declared_real_sample(self.packet, transport="text_only")
+        with self.assertRaisesRegex(TrialError, "cannot claim attachment"):
+            assess_trials(ledger, self.packet)
+
     def test_reference_transport_without_actual_ingestion_rejected(self):
         ledger = declared_real_sample(self.packet)
         ledger["cases"][0]["attachment_ingested"] = False
@@ -119,6 +124,8 @@ class PacketTrialTests(unittest.TestCase):
             ("host_artifact_sha256", "not-a-digest"),
             ("transport", "copy-magic"),
             ("evidence_kind", "unclassified"),
+            ("evidence_kind", []),
+            ("transport", []),
         ]
         for key, invalid in changes:
             with self.subTest(key=key, invalid=invalid), self.assertRaises(TrialError):
@@ -136,6 +143,18 @@ class PacketTrialTests(unittest.TestCase):
         self.assertEqual(report["real_recipient_trials"], 1)
         self.assertEqual(report["unqualified_trial_ids"], ["CASE-002"])
         self.assertFalse(report["release_gate_pass"])
+
+    def test_untrusted_invalid_profile_and_verdict_types_fail_cleanly(self):
+        for key, value in (("profile", []), ("profile", {})):
+            ledger = declared_real_sample(self.packet)
+            ledger[key] = value
+            with self.assertRaises(TrialError):
+                assess_trials(ledger, self.packet)
+        for key in ("verdict", "severity"):
+            ledger = declared_real_sample(self.packet)
+            ledger["cases"][0][key] = []
+            with self.assertRaises(TrialError):
+                assess_trials(ledger, self.packet)
 
     def test_unknown_profile_still_rejected(self):
         ledger = sample(self.packet)
