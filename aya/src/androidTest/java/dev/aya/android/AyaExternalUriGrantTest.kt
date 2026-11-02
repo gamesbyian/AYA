@@ -41,8 +41,10 @@ class AyaExternalUriGrantTest {
             "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
         )
         intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
-        // Explicit broadcast avoids Android background-activity-start restrictions.
-        // URI grants are scoped to this receiver and expire after dispatch.
+        // An APK freshly installed by CI may be in Android's stopped-package state.
+        // An explicit, narrowly targeted QA broadcast is allowed to wake this fixture.
+        // The URI grant is temporary and scoped to the receiving package.
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
         context.sendBroadcast(intent)
         assertTrue("Independent receiver failed to respond", done.await(20, TimeUnit.SECONDS))
         return result.get() ?: throw AssertionError("Receiver returned no evidence")
