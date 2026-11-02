@@ -73,7 +73,7 @@ python3 tools/validate_structured_kit.py path/to/actual-host-kit.md \
   --mime-type application/json
 ```
 
-These arguments and the included [fictional chart kit](structured/examples/chart-kit.md) are examples, **not** claims that a real chart importer is implemented in AYA. This offline check rejects stale/foreign metadata, missing/empty sections, duplicates, unsafe file contracts, unresolved placeholders, symlink paths and oversized/malformed UTF-8 kits. It neither validates JSON Schema nor parses generated artifacts; actual importer compatibility, field semantics, examples, privacy and recipient ingestion must be verified separately.
+These arguments and the included [fictional chart kit](structured/examples/chart-kit.md) are examples, **not** claims that a real chart importer is implemented in AYA. This offline check rejects stale/foreign metadata, missing/empty or **heading-only** sections, unexpected material before the first section, duplicates, unsafe file contracts, unresolved placeholders, symlink paths and oversized/malformed UTF-8 kits. The Android verifier enforces the same section-content boundary. It neither validates JSON Schema nor parses generated artifacts; actual importer compatibility, field semantics, examples, privacy and recipient ingestion must be verified separately.
 
 ## Required developer-authored schema and semantics
 
