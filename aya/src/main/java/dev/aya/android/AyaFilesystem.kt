@@ -90,7 +90,7 @@ object AyaFilesystemSnapshotVerifier {
      * stale filesystem state. SimpleDateFormat is available below Android API 26.
      */
     private fun validUtcTimestamp(value: String): Boolean {
-        if (!Regex("""\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z""").matches(value))
+        if (!Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""").matches(value))
             return false
         val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT).apply {
             isLenient = false
