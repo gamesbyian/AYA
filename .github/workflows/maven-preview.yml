@@ -78,3 +78,4 @@ jobs:
             aya-staging-sha256.txt
             aya-maven-preview-evidence.json
           if-no-files-found: error
+          retention-days: 30
