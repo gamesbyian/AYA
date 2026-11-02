@@ -45,8 +45,6 @@ def parse(text):
     matches = list(re.finditer(r"^## (.+?)\s*$", body, flags=re.M))
     if [match.group(1) for match in matches] != REQUIRED:
         raise ValueError("missing, repeated or reordered H2 sections")
-    if body[:matches[0].start()].strip():
-        raise ValueError("content before first translation kit section")
     sections = {}
     for i, title in enumerate(REQUIRED):
         stop = matches[i + 1].start() if i + 1 < len(matches) else len(body)
