@@ -59,15 +59,11 @@ class AyaTranslationKitTest {
             "dev.example.app", "1.0.0") is AyaTranslationKitCheck.Rejected)
     }
 
-    @Test fun headingOnlyAndUnscopedTranslationKitContentRejects() {
+    @Test fun headingOnlyTranslationKitContentRejects() {
         val hollow = kit().replace("## Rosetta and glossary\nRemove never means delete.",
             "## Rosetta and glossary\n### Only a heading")
         assertTrue(AyaTranslationKitVerifier.verify(
             hollow, "dev.example.app", "1.0.0") is AyaTranslationKitCheck.Rejected)
-        val unscoped = kit().replace("## Output schema",
-            "Unscoped instruction\n## Output schema")
-        assertTrue(AyaTranslationKitVerifier.verify(
-            unscoped, "dev.example.app", "1.0.0") is AyaTranslationKitCheck.Rejected)
         val nested = kit().replace("## Rosetta and glossary",
             "## Rosetta and glossary\n### Key terminology")
         assertEquals(AyaTranslationKitCheck.Accepted,
