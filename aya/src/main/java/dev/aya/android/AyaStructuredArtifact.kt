@@ -80,10 +80,15 @@ object AyaStructuredKitVerifier {
         val actual = positions.map { body[it].removePrefix("## ").trim() }
         if (actual != headings)
             return AyaStructuredKitCheck.Rejected("Structured kit sections are missing or reordered.")
+        // Match the offline authoring validator: no stray material before section one.
+        if (body.take(positions.first()).any { it.isNotBlank() })
+            return AyaStructuredKitCheck.Rejected("Unexpected content before first structured kit section.")
         if (positions.indices.any { index ->
                 val first = positions[index] + 1
                 val last = if (index + 1 < positions.size) positions[index + 1] else body.size
-                body.subList(first, last).none { it.isNotBlank() }
+                body.subList(first, last).none {
+                    it.isNotBlank() && !it.trimStart().startsWith("#")
+                }
             })
             return AyaStructuredKitCheck.Rejected("Structured kit has an empty section.")
         if (Regex("""<(?:TODO|REPLACE|APP_ID|APP_VERSION|INSERT)[^>\n]{0,80}>""")

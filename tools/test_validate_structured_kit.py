@@ -51,14 +51,25 @@ class StructuredKitValidatorTest(unittest.TestCase):
             with self.subTest(error=error), self.assertRaisesRegex(ValueError, error):
                 validate(fixture().replace(original, modified, 1))
 
-    def test_empty_section_and_duplicate_sections_rejected(self):
-        body = fixture().replace(
-            "## Field semantics and bounds\nFictional source-derived content for Field semantics and bounds.",
-            "## Field semantics and bounds\n\n")
-        with self.assertRaisesRegex(ValueError, "empty section"):
-            validate(body)
+    def test_empty_heading_only_and_duplicate_sections_rejected(self):
+        original = ("## Field semantics and bounds\n"
+                    "Fictional source-derived content for Field semantics and bounds.")
+        for replacement in ("## Field semantics and bounds\n\n",
+                            "## Field semantics and bounds\n### Only a subheading\n",
+                            "## Field semantics and bounds\n# Only a title\n"):
+            with self.subTest(replacement=replacement), self.assertRaisesRegex(
+                    ValueError, "empty or heading-only"):
+                validate(fixture().replace(original, replacement))
         with self.assertRaisesRegex(ValueError, "sections"):
             validate(fixture() + "\n## Host import and recovery\nDuplicate")
+
+    def test_pre_section_material_rejected_but_subheadings_with_prose_allowed(self):
+        with self.assertRaisesRegex(ValueError, "content before first"):
+            validate(fixture().replace("## Artifact output contract",
+                                       "Unscoped note\n## Artifact output contract", 1))
+        valid = fixture().replace("## Artifact output contract\n",
+                                  "## Artifact output contract\n### Root format\n", 1)
+        self.assertEqual(validate(valid)["app_id"], "dev.example.chart")
 
     def test_size_invalid_utf8_symlink_and_missing_file_fail_closed(self):
         with self.assertRaisesRegex(ValueError, "1 MiB"):

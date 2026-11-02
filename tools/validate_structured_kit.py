@@ -76,8 +76,11 @@ def validate(text: str, *, app_id: str | None = None,
             raise ValueError("content before first structured kit section")
     if tuple(seen) != HEADINGS:
         raise ValueError("missing, repeated or reordered structured kit sections")
-    if any(not "".join(body).strip() for body in bodies):
-        raise ValueError("structured kit contains an empty section")
+    # A nested Markdown heading, however plausible, is not an output contract.
+    # Keep this criterion aligned with the installed Android verifier.
+    if any(not any(line.strip() and not line.lstrip().startswith("#")
+                   for line in body) for body in bodies):
+        raise ValueError("structured kit contains an empty or heading-only section")
     return values
 
 def validate_file(path: Path, **kwargs: str | None) -> dict[str, str]:
