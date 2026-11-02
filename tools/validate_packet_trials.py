@@ -57,6 +57,7 @@ def assess_trials(ledger: dict, packet: bytes, strict: bool = True) -> dict:
     counts = {key: 0 for key in VERDICTS}
     seen = set()
     ingested = 0
+    real_ingested = 0
     high_risk_failures = []
     real_recipient_trials = 0
     unqualified_cases = []
@@ -125,6 +126,8 @@ def assess_trials(ledger: dict, packet: bytes, strict: bool = True) -> dict:
                              identifier)
         if case["attachment_ingested"]:
             ingested += 1
+            if is_v2 and kind == "real_recipient":
+                real_ingested += 1
         counts[case["verdict"]] += 1
         if case["verdict"] == "fail" and case["severity"] in {"P0", "P1"}:
             high_risk_failures.append(identifier)
@@ -139,7 +142,9 @@ def assess_trials(ledger: dict, packet: bytes, strict: bool = True) -> dict:
     report = {
         "schema_version": version,
         "packet_sha256": digest, "profile": profile,
-        "cases": len(cases), "attachments_confirmed_ingested": ingested,
+        "cases": len(cases),
+        "attachments_reported_ingested": ingested,
+        "attachments_confirmed_ingested": real_ingested,
         "passed": counts["pass"], "failed": counts["fail"],
         "unknown": counts["unknown"], "critical_failures": high_risk_failures,
         "real_recipient_trials": real_recipient_trials,
