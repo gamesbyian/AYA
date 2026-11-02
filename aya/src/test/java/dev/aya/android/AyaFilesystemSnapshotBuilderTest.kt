@@ -1,5 +1,6 @@
 package dev.aya.android
 
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -44,6 +45,28 @@ class AyaFilesystemSnapshotBuilderTest {
                 throw AssertionError("Must reject invalid snapshot")
             } catch (_: IllegalArgumentException) { }
         }
+    }
+
+    @Test fun standaloneMalformedSnapshotCannotLieAboutCompleteness() {
+        // Exercise the public verifier directly: callers need not use the builder.
+        val doc = JSONObject(AyaFilesystemSnapshotBuilder.build(input()))
+        val scan = doc.getJSONObject("scan")
+        fun check(): AyaFilesystemSnapshotCheck = AyaFilesystemSnapshotVerifier.verify(
+            doc.toString(), "dev.example.files", "1.0.0")
+
+        scan.put("errors", JSONArray().put(JSONObject().put("kind", "permission")))
+        assertTrue(check() is AyaFilesystemSnapshotCheck.Rejected)
+        scan.put("status", "partial")
+        assertEquals(AyaFilesystemSnapshotCheck.Accepted, check())
+        scan.put("errors", JSONArray())
+        scan.put("status", "complete")
+        scan.put("truncated", true)
+        assertTrue(check() is AyaFilesystemSnapshotCheck.Rejected)
+        scan.put("truncation_reason", "listing entries omitted for privacy")
+        // A complete scan and a shortened exported listing are not contradictory.
+        assertEquals(AyaFilesystemSnapshotCheck.Accepted, check())
+        scan.remove("errors")
+        assertTrue(check() is AyaFilesystemSnapshotCheck.Rejected)
     }
 
     @Test fun partialScanExplicitlyRecordsErrors() {
