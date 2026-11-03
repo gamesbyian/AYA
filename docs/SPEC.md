@@ -2,7 +2,7 @@
 
 ## Cross-platform expansion (2026-11-03, experimental)
 
-The AYA convention and module profiles are platform-neutral. Android remains the canonical tested runtime; an optional native Apple source preview is documented in [Apple research](apple/RESEARCH.md), [architecture](apple/ARCHITECTURE.md) and [acceptance plan](apple/PLAN.md). The initial `integrations/apple/AYAApple` SwiftPM implementation validates an exact iOS installed-version guide and carries user-reviewed text for the iOS Share Sheet. It does not certify a complete native host UI, output importer, third-party assistant ingestion, App Intents, or actual iOS compilation until the platform-specific CI passes. Do not assume Android Intent URI rules or Android `platform` guide metadata apply on iOS.
+The AYA convention and module profiles are platform-neutral. Android remains the canonical tested runtime; an optional native Apple source preview is documented in [Apple research](apple/RESEARCH.md), [architecture](apple/ARCHITECTURE.md) and [acceptance plan](apple/PLAN.md). The initial `integrations/apple/AYAApple` SwiftPM implementation validates an exact iOS installed-version guide and carries user-reviewed text for the iOS Share Sheet. It does not certify a complete native host UI, output importer, third-party assistant ingestion, App Intents, or installed-host testing. Xcode iOS Simulator SDK source compilation passed [run 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) at PR #119 head; this is S1 compilation, not an installed iOS app. Do not assume Android Intent URI rules or Android `platform` guide metadata apply on iOS.
 
 ## Shared packet authoring
 

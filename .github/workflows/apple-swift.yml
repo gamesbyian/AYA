@@ -3,12 +3,18 @@ name: Apple Swift package
 on:
   pull_request:
     paths:
-      - 'integrations/apple/**'
+      - 'integrations/apple/AYAApple/Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/AYAApple/Tests/**'
+      - 'integrations/apple/AYAApple/Examples/**'
       - '.github/workflows/apple-swift.yml'
   push:
     branches: [main]
     paths:
-      - 'integrations/apple/**'
+      - 'integrations/apple/AYAApple/Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/AYAApple/Tests/**'
+      - 'integrations/apple/AYAApple/Examples/**'
       - '.github/workflows/apple-swift.yml'
   workflow_dispatch:
 
