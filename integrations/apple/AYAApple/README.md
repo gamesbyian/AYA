@@ -2,7 +2,7 @@
 
 Native Apple adapter for the [AYA portable interaction convention](../../../README.md). See [research](../../../docs/apple/RESEARCH.md), [architecture](../../../docs/apple/ARCHITECTURE.md) and [acceptance plan](../../../docs/apple/PLAN.md).
 
-**Status on 2026-11-03:** Portable Swift protocol source and UIKit outgoing Share Sheet/clipboard helper. Local Linux SwiftPM tests have been exercised for the Foundation validator, but **no Xcode/iOS Simulator build or genuine AI app receiver test yet**. There is no release artifact, native AYA review card or host importer yet. This package does not implement App Intents or observe external responses.
+**Status on 2026-11-03:** Portable Swift protocol source and UIKit outgoing Share Sheet/clipboard helper. Local and CI SwiftPM tests passed for the Foundation validator, and [Xcode CI 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) **compiled the native iOS Simulator SDK slice**. No installed iOS app, Share Sheet interaction or genuine AI receiver test yet. There is no release artifact, native AYA review card or host importer yet. This package does not implement App Intents or observe external responses.
 
 ```sh
 cd integrations/apple/AYAApple
@@ -18,4 +18,4 @@ A real host must load a bundled source-verified `aya-guide.md`, pass `Bundle.mai
 
 The returned generated artifact is never automatically acquired: the host must separately implement a user-owned Files/import path and validation/confirmation. Use Apple security-scoped URLs and coordinated reads, and never treat a filename or AYA marker as authorization. The basic design requires no app group, domain, account, assistant service or AI API key.
 
-**Important:** SwiftPM Linux compilation excludes `#if os(iOS)` and does **not** validate UIKit. Any production claim waits for Xcode iOS Simulator and genuine-device testing as set out in the plan.
+**Evidence limit:** SwiftPM Linux compilation excludes `#if os(iOS)`; independent native Xcode iOS Simulator SDK compilation **did** pass, but this does not demonstrate an installed host, interactive Share Sheet, accessible UI, real assistant ingestion or physical-device compatibility.
