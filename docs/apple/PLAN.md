@@ -10,7 +10,7 @@
 - [x] Define platform-neutral semantics and Apple-specific identity/transport/input boundaries.
 - [x] Add a SwiftPM first-party source preview with guarded iOS reference, editable draft representation, approved-text data contract and UIKit plain-text/.txt sharing entry points.
 - [x] Run portable Swift unit tests on Linux for reference identity, version, section completeness, duplicates, unresolved placeholders, user-edited approval, empty/oversized cases. **Local Linux test only.**
-- [ ] Qualify actual iOS `UIKit` compilation with Xcode on macOS runner. `#if os(iOS)` is excluded from Linux tests. Do not merge an iOS API claim without Xcode evidence.
+- [x] Qualify actual iOS `UIKit` compilation with Xcode on macOS runner: [run 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) passed both Linux Swift unit tests and a genuine Xcode iOS Simulator SDK compile at merged PR #119 head `987eeee8`. **No installed iOS app or synthetic recipient was run.**
 - [ ] Shared language-neutral JSON fixtures comparing Android and iOS guide acceptance and key handoff semantics.
 - [ ] Add CI selectivity: cheap portable tests on relevant changes, costly simulator/native tests only when Apple native source/manifest changes; keep always-on repository `docs` check.
 
