@@ -1,5 +1,9 @@
 # AYA product/engineering specification (draft 1)
 
+## Cross-platform expansion (2026-11-03, experimental)
+
+The AYA convention and module profiles are platform-neutral. Android remains the canonical tested runtime; an optional native Apple source preview is documented in [Apple research](apple/RESEARCH.md), [architecture](apple/ARCHITECTURE.md) and [acceptance plan](apple/PLAN.md). The initial `integrations/apple/AYAApple` SwiftPM implementation validates an exact iOS installed-version guide and carries user-reviewed text for the iOS Share Sheet. It does not certify a complete native host UI, output importer, third-party assistant ingestion, App Intents, or actual iOS compilation until the platform-specific CI passes. Do not assume Android Intent URI rules or Android `platform` guide metadata apply on iOS.
+
 ## Shared packet authoring
 
 Developer-side [AYA Packet Authoring System](packet/README.md) standardizes how host-specific evidence becomes assistant-readable context. The typed fact source, independent coverage inventory, task profiles, dependency-safe scoped exports and checked compilation are build-time tools. The existing AYA-RAS guide and user-approved Android sharing remain canonical; no runtime packet router, agent API, output watcher or importer is implied. Evidence-based quality and actual recipient ingestion remain separate release gates.

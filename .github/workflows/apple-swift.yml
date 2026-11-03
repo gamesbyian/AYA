@@ -1,0 +1,68 @@
+name: Apple Swift package
+
+on:
+  pull_request:
+    paths:
+      - 'integrations/apple/**'
+      - '.github/workflows/apple-swift.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/apple/**'
+      - '.github/workflows/apple-swift.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-swift-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  portable-swift:
+    name: Swift reference contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: integrations/apple/AYAApple
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain identity
+        run: swift --version
+      - name: SwiftPM protocol and approval tests
+        run: swift test --parallel
+
+  ios-native-build:
+    name: iOS SDK compile
+    needs: portable-swift
+    runs-on: macos-15
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: integrations/apple/AYAApple
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode toolchain and package scheme
+        run: |
+          xcodebuild -version
+          xcodebuild -list
+      - name: Build real iOS Simulator SDK slice (not a device or receiver test)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -scheme AYAApple \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-apple-derived" \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee "$RUNNER_TEMP/aya-apple-xcodebuild.log"
+      - name: Retain bounded build diagnostic log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-xcodebuild-failure
+          path: ${{ runner.temp }}/aya-apple-xcodebuild.log
+          if-no-files-found: ignore
+          retention-days: 7
