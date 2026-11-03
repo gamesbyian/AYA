@@ -30,6 +30,10 @@ A test must fail closed when the guide is absent, stale or inconsistent with ins
 5. Test receiving assistant app versions independently: whether the actual complete reviewed text and intended file are visible. A chooser opening only demonstrates a local Android dispatch.
 6. Review provenance, version compatibility, stable installation and uninstallation, rollback and source-package license conditions before any public release claim.
 
+## Apple platform extension (2026-11-03)
+
+[PR #119](https://github.com/gamesbyian/AYA/pull/119) merged an optional Apple Swift Package foundation. Exact-head [CI 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) passed portable Swift tests and **Xcode iOS Simulator SDK compilation**, which qualifies **S1 source/build** only. This does **not** prove an installed iOS consuming app, user-approved UI flow, import route, physical iPhone/iPad or assistant ingestion. The Android-specific S2 APK definition above must be mapped to an actual *iOS app bundle and simulator installation* for Apple; do not claim Android APK evidence on Apple. Independently authored consumer, device, recipient and publication evidence remain progressively separate, tracked in [Apple plan](../apple/PLAN.md) and [issue #120](https://github.com/gamesbyian/AYA/issues/120).
+
 ## Current independent gates
 
 - Expo has S2+ evidence: a genuine npm-tarball consumer created outside the checkout, with complete real Android APK, identity/guide/manifest/DEX inspection ([CI 41259561589](https://github.com/gamesbyian/AYA/actions/runs/41259561589)) and separately exported Metro JavaScript ([CI 41259561573](https://github.com/gamesbyian/AYA/actions/runs/41259561573)). The test host is still authored by AYA maintainers; independent adopting developers, physical devices and AI recipients are unverified.
