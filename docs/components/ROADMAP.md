@@ -71,6 +71,10 @@ Deliver:
 - Publish reusable editor screenshots/tutorials, self-implementation guide and behaviour-based conformance suite.
 - Establish simple non-proprietary compatibility claims and self-test output; voluntary public compatibility registry only with explicit evidence and expiration, not telemetry.
 
+## Parallel Apple platform track (P0/P1; proposed 2026-11-03)
+
+An experimental [SwiftPM source preview](../../integrations/apple/AYAApple/README.md) and [Apple research](../apple/RESEARCH.md) / [architecture](../apple/ARCHITECTURE.md) / [acceptance plan](../apple/PLAN.md) establish the native iOS/iPadOS lane. It reuses existing application-understanding, packet, module and output-import semantics; native iOS transports and Apple entitlement/lifecycle details remain in adapters. Initial guarded reference and approval model has four passing **Linux** Swift tests. A targeted Xcode iOS Simulator compile has been dispatched via dedicated workflow but must finish before UIKit build acceptance is claimed. Next milestone is an accessible SwiftUI card, full review and first-party real iOS sample with user-selected Files output imports. Provider compatibility must be established independently. Keep this as a **parallel** track; the existing Android release gates and PRs remain active and are not implicitly replaced.
+
 ## Shared engineering tasks, all phases
 
 **Truth:** Each adapter must run AYA-AUF consultation/modeling, real-version inventory and provenance, AYA-RAS strict validation, Packet Compiler where applicable, independent held-out question evaluation, and cross-module card guidance audit. Builder UI cannot derive semantic truth from control names alone.
