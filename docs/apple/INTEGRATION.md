@@ -1,0 +1,33 @@
+# iOS and iPadOS native AYA integration (source preview)
+
+**Verified status:** [PR #122](https://github.com/gamesbyian/AYA/pull/122) merged the reusable native SwiftUI card, explicit Files import helpers, host-neutral content routing and a *first-party* XcodeGen iOS sample. [Run 41760530755](https://github.com/gamesbyian/AYA/actions/runs/41760530755) passed portable Swift tests, native iOS SDK compilation, first-party iOS Simulator app **build**, and exact bundled guide/installed bundle ID and marketing-version byte checks. These are source and packaging results. Installed app/UI acceptance, iPhone/iPad accessibility and external assistant ingestion remain separate gates in [issue #120](https://github.com/gamesbyian/AYA/issues/120).
+
+## Requirements
+
+The optional Swift Package is at [integrations/apple/AYAApple](../../integrations/apple/AYAApple). It exposes two products: AYAProtocol (Foundation-only reference, approval and import registry) and AYAApple (native UIKit and SwiftUI interfaces). The provisional deployment floor is iOS 16. No external AI SDK, model account, server, entitlement or private URL scheme is required by AYA.
+
+An adopting host must source-author and bundle its **own** AYA-RAS reference from observed host features and the actual installed version. Do not copy the fictional example into a real app. Metadata must specify platform ios, the actual Bundle.main.bundleIdentifier and exact CFBundleShortVersionString, current evidence, and all twelve nonempty sections. Validate using: python3 tools/validate_guide.py --platform ios --strict path/to/aya-guide.md. With no platform argument the existing linter continues to require Android. Use [AYA-RAS](../reference/AUTHORING_STANDARD.md), [host understanding](../understanding/README.md) and [packet standards](../packet/AUTHORING_STANDARD.md).
+
+The [fictional first-party consuming host](../../integrations/apple/sample) has an XcodeGen project spec. On a Mac with Xcode and XcodeGen, run xcodegen generate in that folder, then build its AYAAppleHost scheme for an iOS Simulator. The demo's JSON layout schema and controls are *not* generic AYA conventions.
+
+## User-facing card and outbound handoff
+
+A native host loads its installed guide from its bundle, then creates an AYAHelpCard with that guide, truthful explanation and required outputInstructions. The optional onImportRequested closure must open a real host-owned file picker; without a callback no fake import button is shown.
+
+Ask verifies the *actual* running bundle identity/version, supported iOS guide platform, provenance metadata and filled reference sections. Failure blocks review and sharing. A successful check opens a complete editable review. Cancel does not share. Copy puts the **current edited text** on the clipboard. Share as text and Share full .txt file are distinct user-selected modes; they do not secretly combine types, pick a provider or assert successful receipt. The underlying UIKit helper can also be used by non-SwiftUI hosts.
+
+The .txt mode writes a uniquely named private cache document. It is not deleted immediately when the Share Sheet closes, because a receiver could still need it; expiry cleanup requires a separate qualified policy. Neither app destination, provider sign-in state nor AI reply is inspected. Text in clipboard or a third-party destination is a user-authorized disclosure.
+
+## User-owned output return
+
+The native Files import helper reads only the URL the user selected with Apple's document picker. It uses scoped permission, NSFileCoordinator, an off-main bounded read, a private data snapshot and SHA-256 fingerprint (local diagnostic only, never provenance). The default cap is 4 MiB, absolute cap 16 MiB. The optional AYAImportPickerButton wraps the native SwiftUI fileImporter; alternatively the host can use its own picker, as in the sample.
+
+A host must register its own **real format/content probes and validators** in the shared AYAImportRegistry, then interpret the returned outcome: unrecognized, unusable, ambiguous or ready. The ready outcome only means **ready to open the host's own independent preview and confirmation**, never automatic apply. The registry is app-wide so a user who picks an output file through the wrong AYA card can be routed to the correct importer. Optional marker, filename, UTType and fingerprint are untrusted hints, not proof of origin or execution authority. The host owns preview, impact/dry-run, state change, rollback and recovery; see [Output Return and Import](../OUTPUT_RETURN_IMPORT.md). Destructive filesystem plans also require the stronger [filesystem safety protocol](../filesystem/AUTHORING.md).
+
+The fictional sample recognizes only a three-field layout JSON object with demo marker v1, integer columns 1 through 3 and accent warm or cool, and changes in-memory state only after its separate Apply confirmation. It cannot edit arbitrary apps or files.
+
+## Evidence and further work
+
+Source compilation and first-party .app packaging are **not** installed-simulator interaction, independent adoption, actual physical-device accessibility, or a third-party assistant receiving and using approved text. These need dated, separately scoped tests. Follow [Apple research](RESEARCH.md), [architecture](ARCHITECTURE.md), [plan](PLAN.md), [component evidence levels](../components/RELEASE-EVIDENCE.md) and [issue #120](https://github.com/gamesbyian/AYA/issues/120). Any recipient compatibility report must specify iOS/device build, assistant name/version, signed-in state, exact transfer mode, observed prompt/file bytes and limitations.
+
+Do not add background file watchers, scan another app's sandbox, claim a Share Sheet choice implies an AI consumed its content, or use App Intents as an unreviewed shortcut around host authorization.
