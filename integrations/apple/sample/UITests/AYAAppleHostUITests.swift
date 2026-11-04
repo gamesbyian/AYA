@@ -35,10 +35,12 @@ final class AYAAppleHostUITests: XCTestCase {
         let copy = app.buttons["aya.copy"]
         XCTAssertTrue(copy.waitForExistence(timeout: 15))
         copy.tap()
-        let confirmation = app.staticTexts[
-            "Copied the current approved text. Paste it into an assistant manually."
-        ]
+        let confirmation = app.alerts["Copied to clipboard"]
         XCTAssertTrue(confirmation.waitForExistence(timeout: 10))
+        XCTAssertTrue(confirmation.staticTexts[
+            "The current approved text is on the clipboard. Paste it into your chosen assistant."
+        ].exists)
+        confirmation.buttons["OK"].tap()
         app.buttons["aya.cancel"].tap()
     }
 
