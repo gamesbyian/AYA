@@ -93,22 +93,7 @@ struct ContentView: View {
                         }
                         #endif
                     }
-                    if let importError {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Cannot use this file")
-                                .font(.headline)
-                                .accessibilityAddTraits(.isHeader)
-                            Text(importError)
-                                .font(.footnote)
-                                .accessibilityIdentifier("host.import.error")
-                            Button("Dismiss import error") { self.importError = nil }
-                                .frame(minHeight: 44)
-                                .accessibilityIdentifier("host.import.error.dismiss")
-                        }
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
-                    }
+
 
                 }
                 .padding(16)
@@ -130,6 +115,19 @@ struct ContentView: View {
                         }
                     }
                 }
+            }
+            .alert(
+                "Cannot use this file",
+                isPresented: Binding(
+                    get: { importError != nil },
+                    set: { if !$0 { importError = nil } }
+                )
+            ) {
+                Button("Dismiss import error") { importError = nil }
+                    .accessibilityIdentifier("host.import.error.dismiss")
+            } message: {
+                Text(importError ?? "")
+                    .accessibilityIdentifier("host.import.error")
             }
             .confirmationDialog(
                 "Apply imported layout to this demo?",
