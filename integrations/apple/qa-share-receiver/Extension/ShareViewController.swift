@@ -80,14 +80,14 @@ final class ShareViewController: UIViewController {
                 // Apple owns the temporary file and may delete it as soon as
                 // this callback exits, so hash the bytes before returning.
                 guard let self else { return }
-                if let error { self.show(status: "file_error", detail: String(describing: type(of: error))); return }
+                if let error { self.show(status: "file_error", detail: String(describing: Swift.type(of: error))); return }
                 guard let url else { self.show(status: "missing_file"); return }
                 self.receiveFile(url, kind: "file")
             }
         } else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
             provider.loadItem(forTypeIdentifier: UTType.plainText.identifier, options: nil) { [weak self] item, error in
                 guard let self else { return }
-                if let error { self.show(status: "text_error", detail: String(describing: type(of: error))); return }
+                if let error { self.show(status: "text_error", detail: String(describing: Swift.type(of: error))); return }
                 if let text = item as? String {
                     self.receive(Data(text.utf8), kind: "text")
                 } else if let data = item as? Data {
@@ -108,7 +108,7 @@ final class ShareViewController: UIViewController {
             let data = try handle.read(upToCount: Self.maxBytes + 1) ?? Data()
             receive(data, kind: kind)
         } catch {
-            show(status: "read_error", detail: String(describing: type(of: error)))
+            show(status: "read_error", detail: String(describing: Swift.type(of: error)))
         }
     }
 

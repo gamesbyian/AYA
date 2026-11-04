@@ -1,0 +1,74 @@
+name: Apple independent Share QA receiver
+on:
+  pull_request:
+    paths:
+      - 'integrations/apple/qa-share-receiver/**'
+      - '.github/workflows/apple-share-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/apple/qa-share-receiver/**'
+      - '.github/workflows/apple-share-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-share-qa-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  external-share-extension:
+    name: Real iOS QA app + extension packaging
+    runs-on: macos-15
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: integrations/apple/qa-share-receiver
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify native toolchain
+        run: xcodebuild -version
+      - name: Generate independent Xcode project
+        run: |
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          xcodegen generate
+      - name: Compile genuine iOS Simulator app and Share Extension
+        run: |
+          set -o pipefail
+          xcodebuild -project AYAShareQA.xcodeproj -scheme AYAShareQAHost \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-share-qa-derived" \
+            CODE_SIGNING_ALLOWED=NO build \
+            2>&1 | tee "$RUNNER_TEMP/aya-share-qa-build.log"
+      - name: Verify packaged foreign app and bounded activation types
+        run: |
+          python3 - <<'PY'
+          import os, plistlib
+          from pathlib import Path
+          app = Path(os.environ["RUNNER_TEMP"]) / "aya-share-qa-derived/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+          ext = app / "PlugIns/AYAShareQAExtension.appex"
+          assert app.is_dir() and ext.is_dir(), "A genuine bundled foreign app and .appex are required"
+          ai = plistlib.loads((app / "Info.plist").read_bytes())
+          ei = plistlib.loads((ext / "Info.plist").read_bytes())
+          assert ai["CFBundleIdentifier"] == "org.example.aya.shareqa", ai
+          assert ei["CFBundleIdentifier"] == "org.example.aya.shareqa.extension", ei
+          ns = ei["NSExtension"]
+          assert ns["NSExtensionPointIdentifier"] == "com.apple.share-services"
+          assert ns["NSExtensionPrincipalClass"].endswith(".ShareViewController")
+          rules = ns["NSExtensionAttributes"]["NSExtensionActivationRule"]
+          assert isinstance(rules, dict), "No permissive TRUEPREDICATE activation"
+          assert rules["NSExtensionActivationSupportsText"] is True
+          assert rules["NSExtensionActivationSupportsFileWithMaxCount"] == 1
+          print("Checked independent .app/.appex identities and narrow text/file share activation")
+          print("Build/packaging evidence only; no Share Sheet or received byte test")
+          PY
+      - name: Preserve bounded failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-share-qa-compile-failure
+          path: ${{ runner.temp }}/aya-share-qa-build.log
+          if-no-files-found: ignore
+          retention-days: 7
