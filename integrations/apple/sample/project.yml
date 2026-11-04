@@ -32,8 +32,24 @@ targets:
     dependencies:
       - package: AYAApple
         product: AYAApple
+  AYAAppleHostUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: UITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.example.ayalantern.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+    dependencies:
+      - target: AYAAppleHost
 schemes:
   AYAAppleHost:
     build:
       targets:
         AYAAppleHost: all
+    test:
+      targets:
+        - AYAAppleHostUITests

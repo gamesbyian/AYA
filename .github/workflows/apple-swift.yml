@@ -46,7 +46,7 @@ jobs:
     name: iOS SDK and first-party host build
     needs: portable-swift
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: integrations/apple/AYAApple
@@ -98,6 +98,31 @@ jobs:
           assert packaged == guide, "packaged iOS AYA guide does not match source"
           print(f"Verified {app.name} bundle ID, installed version and {len(guide)} exact guide bytes")
           PY
+      - name: Install, launch, and UI-test a genuine iOS Simulator host
+        run: |
+          set -euo pipefail
+          SIM_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next((v["udid"] for arr in d["devices"].values() for v in arr if v.get("isAvailable") and v.get("name","").startswith("iPhone")), ""))')"
+          if [ -z "$SIM_ID" ]; then
+            echo "No available iPhone simulator runtime" >&2
+            exit 2
+          fi
+          echo "Testing native AYA sample on simulator $SIM_ID"
+          xcrun simctl boot "$SIM_ID" || true
+          xcrun simctl bootstatus "$SIM_ID" -b
+          APP="$RUNNER_TEMP/aya-apple-sample-derived/Build/Products/Debug-iphonesimulator/AYAAppleHost.app"
+          xcrun simctl install "$SIM_ID" "$APP"
+          xcrun simctl launch "$SIM_ID" org.example.ayalantern
+          set -o pipefail
+          xcodebuild \
+            -project ../sample/AYAAppleHost.xcodeproj \
+            -scheme AYAAppleHost \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/aya-apple-sample-derived" \
+            -resultBundlePath "$RUNNER_TEMP/aya-apple-ui.xcresult" \
+            CODE_SIGNING_ALLOWED=NO \
+            test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ui-test.log"
       - name: Retain bounded build diagnostic log on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -106,5 +131,7 @@ jobs:
           path: |
             ${{ runner.temp }}/aya-apple-xcodebuild.log
             ${{ runner.temp }}/aya-apple-sample-build.log
+            ${{ runner.temp }}/aya-apple-ui-test.log
+            ${{ runner.temp }}/aya-apple-ui.xcresult
           if-no-files-found: ignore
           retention-days: 7
