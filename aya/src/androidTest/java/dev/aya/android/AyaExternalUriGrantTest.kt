@@ -96,6 +96,8 @@ class AyaExternalUriGrantTest {
             putExtra(Intent.EXTRA_STREAM, uri)
         }
         val denied = sendToSeparateApp(ungranted)
+        assertTrue("Neutral negative control unexpectedly acquired a read-grant flag",
+            !denied.getBoolean("received_grant_flag"))
         // Android may surface an ungranted provider lookup as either a
         // SecurityException ("denied") or an unreadable URI. The negative
         // alone proves nothing about the file's existence. Require the
@@ -112,6 +114,8 @@ class AyaExternalUriGrantTest {
 
         // Deliver the exact AYA-produced intent, including its ClipData grant.
         val accepted = sendToSeparateApp(reviewedShare)
+        assertTrue("Original share must reach the Activity with read grant",
+            accepted.getBoolean("received_grant_flag"))
         assertEquals("read", accepted.getString("status"))
         assertEquals(denied.getInt("receiver_uid"), accepted.getInt("receiver_uid"))
         assertEquals(text.toByteArray(Charsets.UTF_8).size, accepted.getInt("bytes"))

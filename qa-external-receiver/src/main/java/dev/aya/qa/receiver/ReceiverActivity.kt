@@ -57,6 +57,10 @@ class ReceiverActivity : Activity() {
         result.putString("status", status)
         result.putInt("receiver_uid", android.os.Process.myUid())
         result.putBoolean("receiver_ack", true)
+        result.putBoolean(
+            "received_grant_flag",
+            intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0
+        )
         Log.i("AYA_URI_QA", "foreign Activity read status=" + status +
             " byteCount=" + result.getInt("bytes", 0))
         try {
