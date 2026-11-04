@@ -111,6 +111,10 @@ class GodotExportWorkflowContract(unittest.TestCase):
         self.assertIn(' --report "$RUNNER_TEMP/aya-godot-emulator-evidence.json"', runtime)
         self.assertNotIn('script: |\\n            python3 tools/verify_godot_emulator_runtime.py', runtime)
         self.assertIn("aya-godot-emulator-runtime-evidence", runtime)
+        self.assertIn('--screenshots-dir "$RUNNER_TEMP/aya-godot-screenshots"', runtime)
+        self.assertIn('${{ runner.temp }}/aya-godot-screenshots/*.png', runtime)
+        self.assertIn('tools/verify_godot_emulator_runtime.py', self.workflow)
+        self.assertEqual(self.workflow.count("--export-debug Android"), 1)
         self.assertNotIn("continue-on-error: true", self.workflow)
         self.assertIn("Scope: actual Godot 4.5.1 debug Android export", self.workflow)
 
