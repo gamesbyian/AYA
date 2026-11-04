@@ -2,6 +2,7 @@ package dev.aya.android
 
 import android.content.ComponentName
 import android.os.ResultReceiver
+import android.util.Log
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -45,7 +46,10 @@ class AyaExternalUriGrantTest {
         // Activity stack. A BroadcastReceiver cannot qualify that contract.
         // The separate disposable Activity reads and returns only metadata.
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        Log.i("AYA_URI_QA", "test dispatch foreign Activity with grant=" +
+            (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0))
         context.startActivity(intent)
+        Log.i("AYA_URI_QA", "test startActivity returned, awaiting receiver callback")
         assertTrue("Independent Activity did not return evidence", done.await(20, TimeUnit.SECONDS))
         val evidence = result.get() ?: throw AssertionError("Receiver Activity returned no bundle")
         assertTrue("Separate receiver Activity never processed the intent", evidence.getBoolean("receiver_ack"))

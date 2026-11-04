@@ -38,7 +38,12 @@ jobs:
           disable-animations: true
           script: |
             gradle :qa-external-receiver:installDebug --no-daemon --stacktrace
-            gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
+            if ! gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace; then
+              echo "::group::Bounded external-receiver emulator evidence"
+              adb logcat -d -v brief -s AYA_URI_QA:I ActivityTaskManager:W AndroidRuntime:E '*:S' | tail -n 160 || true
+              echo "::endgroup::"
+              exit 1
+            fi
 
       - name: Preserve Android UI test evidence
         if: always()

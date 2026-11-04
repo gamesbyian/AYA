@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.ResultReceiver
+import android.util.Log
 import java.security.MessageDigest
 
 /**
@@ -22,6 +23,8 @@ class ReceiverActivity : Activity() {
         } else {
             intent.getParcelableExtra<ResultReceiver>(EXTRA_CALLBACK)
         }
+        Log.i("AYA_URI_QA", "foreign Activity created; callbackPresent=" + (callback != null)
+            + " grantFlag=" + (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0))
         val uri = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
@@ -54,7 +57,10 @@ class ReceiverActivity : Activity() {
         result.putString("status", status)
         result.putInt("receiver_uid", android.os.Process.myUid())
         result.putBoolean("receiver_ack", true)
+        Log.i("AYA_URI_QA", "foreign Activity read status=" + status +
+            " byteCount=" + result.getInt("bytes", 0))
         callback?.send(if (status == "read") 1 else 0, result)
+        Log.i("AYA_URI_QA", "foreign Activity sent callback; callbackPresent=" + (callback != null))
         finish()
     }
 
