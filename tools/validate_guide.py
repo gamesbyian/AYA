@@ -35,7 +35,7 @@ HEADER = re.compile(r"(?m)^## (.+?)\s*$")
 META_LINE = re.compile(r"^([a-z][a-z0-9_]*):\s*(.*?)\s*$")
 
 
-def validate(text: str) -> dict:
+def validate(text: str, expected_platform: str = "android") -> dict:
     errors: list[str] = []
     warnings: list[str] = []
     if text.startswith("\ufeff"):
@@ -70,8 +70,10 @@ def validate(text: str) -> dict:
             errors.append(f"Missing metadata: {key}")
     if fields.get("schema_version") != "aya-reference/v1":
         errors.append("schema_version must be aya-reference/v1.")
-    if fields.get("platform", "").lower() != "android":
-        errors.append("platform must be android for the current AYA Android library.")
+    if expected_platform not in ("android", "ios"):
+        raise ValueError("expected_platform must be android or ios")
+    if fields.get("platform", "").lower() != expected_platform:
+        errors.append(f"platform must be {expected_platform} for this target.")
     if fields.get("app_id") and not re.fullmatch(r"[a-zA-Z_][\w]*(\.[a-zA-Z_][\w]*)+", fields["app_id"]):
         errors.append("app_id must be a dotted Android package identifier.")
     if fields.get("app_version_min") and fields.get("app_version_max"):
@@ -124,9 +126,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("guide", type=Path, help="UTF-8 Markdown guide to verify")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable report")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as failures")
+    parser.add_argument("--platform", choices=("android", "ios"), default="android",
+                        help="Target guide platform; defaults to Android for backward compatibility")
     args = parser.parse_args(argv)
     try:
-        result = validate(args.guide.read_text(encoding="utf-8"))
+        result = validate(args.guide.read_text(encoding="utf-8"), expected_platform=args.platform)
     except (OSError, UnicodeError) as exc:
         print(f"Cannot read guide: {exc}", file=sys.stderr)
         return 2
