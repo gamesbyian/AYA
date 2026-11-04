@@ -8,7 +8,7 @@ import PackageDescription
 let appleSource = "integrations/apple/AYAApple"
 
 let package = Package(
-    name: "AYAApple",
+    name: "AYA",
     platforms: [.iOS(.v16)],
     products: [
         .library(name: "AYAProtocol", targets: ["AYAProtocol"]),
