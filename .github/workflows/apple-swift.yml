@@ -98,6 +98,17 @@ jobs:
           assert packaged == guide, "packaged iOS AYA guide does not match source"
           print(f"Verified {app.name} bundle ID, installed version and {len(guide)} exact guide bytes")
           PY
+      - name: Build disposable external Share Extension for genuine receipt tests
+        run: |
+          set -o pipefail
+          cd ../qa-share-receiver
+          xcodegen generate
+          xcodebuild -project AYAShareQA.xcodeproj -scheme AYAShareQAHost \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-share-qa-derived" \
+            CODE_SIGNING_ALLOWED=NO build \
+            2>&1 | tee "$RUNNER_TEMP/aya-share-qa-build.log"
+          test -d "$RUNNER_TEMP/aya-share-qa-derived/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app/PlugIns/AYAShareQAExtension.appex"
       - name: Install, launch, and UI-test a genuine iOS Simulator host
         run: |
           set -euo pipefail
@@ -110,6 +121,8 @@ jobs:
           xcrun simctl boot "$SIM_ID" || true
           xcrun simctl bootstatus "$SIM_ID" -b
           APP="$RUNNER_TEMP/aya-apple-sample-derived/Build/Products/Debug-iphonesimulator/AYAAppleHost.app"
+          RECEIVER="$RUNNER_TEMP/aya-share-qa-derived/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+          xcrun simctl install "$SIM_ID" "$RECEIVER"
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
           set -o pipefail
@@ -156,6 +169,7 @@ jobs:
             ${{ runner.temp }}/aya-apple-xcodebuild.log
             ${{ runner.temp }}/aya-apple-sample-build.log
             ${{ runner.temp }}/aya-apple-ui-test.log
+            ${{ runner.temp }}/aya-share-qa-build.log
             ${{ runner.temp }}/aya-apple-ui.xcresult
             ${{ runner.temp }}/aya-apple-ipad-ui-test.log
             ${{ runner.temp }}/aya-apple-ipad-ui.xcresult
