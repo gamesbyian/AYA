@@ -13,8 +13,7 @@ public struct AYAHelpCard: View {
     private let outputInstructions: String
     private let onImportRequested: (() -> Void)?
     @State private var question = ""
-    @State private var reviewText = ""
-    @State private var showingReview = false
+    @State private var pendingReview: AYAPendingReview?
     @State private var errorMessage: String?
     @FocusState private var questionFocused: Bool
 
@@ -76,8 +75,8 @@ public struct AYAHelpCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(.secondary.opacity(0.55), lineWidth: 1)
         }
-        .sheet(isPresented: $showingReview) {
-            AYAReviewSheet(initialText: reviewText, outputInstructions: outputInstructions)
+        .sheet(item: $pendingReview) { review in
+            AYAReviewSheet(initialText: review.initialText, outputInstructions: outputInstructions)
         }
         .alert("Unable to prepare AYA", isPresented: Binding(
             get: { errorMessage != nil },
@@ -105,12 +104,18 @@ public struct AYAHelpCard: View {
                 guide: guide, installedAppID: appID, installedVersion: appVersion
             )
             let draft = AYAReviewDraft(reference: reference, suggestedQuestion: question)
-            reviewText = draft.initialText
-            showingReview = true
+            // The sheet is driven by its own immutable payload, avoiding a
+            // stale empty review when state and presentation change together.
+            pendingReview = AYAPendingReview(initialText: draft.initialText)
         } catch {
             errorMessage = "The app's bundled help reference is missing, invalid, or not made for this installed version. Nothing was shared."
         }
     }
+}
+
+private struct AYAPendingReview: Identifiable {
+    let id = UUID()
+    let initialText: String
 }
 
 @available(iOS 16.0, *)
