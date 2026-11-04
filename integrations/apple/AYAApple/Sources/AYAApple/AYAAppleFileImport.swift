@@ -47,9 +47,23 @@ public enum AYAAppleFileImport {
                 do {
                     let handle = try FileHandle(forReadingFrom: fileURL)
                     defer { try? handle.close() }
-                    // Bound the read even if a File Provider lies about its size.
-                    let data = try handle.read(upToCount: maximumBytes + 1) ?? Data()
-                    guard data.count <= maximumBytes else { throw AYAAppleImportError.tooLarge }
+                    // NSFileCoordinator has supplied a readable snapshot,
+                    // but one FileHandle read is not guaranteed to reach EOF.
+                    // Keep collecting short chunks until EOF, enforcing the
+                    // cap using one extra byte. Never validate a truncated
+                    // prefix as if it were the complete external artifact.
+                    var data = Data()
+                    while true {
+                        try Task.checkCancellation()
+                        let remainingIncludingOverflowByte = maximumBytes + 1 - data.count
+                        let request = min(64 * 1024, remainingIncludingOverflowByte)
+                        guard let chunk = try handle.read(upToCount: request),
+                              !chunk.isEmpty else { break }
+                        guard chunk.count <= maximumBytes - data.count else {
+                            throw AYAAppleImportError.tooLarge
+                        }
+                        data.append(chunk)
+                    }
                     readResult = .success(data)
                 } catch {
                     readResult = .failure(error)
