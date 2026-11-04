@@ -83,6 +83,16 @@ struct ContentView: View {
                             showFilePicker = true
                         }
                     )
+                    .transformEnvironment(\.dynamicTypeSize) { size in
+                        #if DEBUG
+                        // Deterministic first-party accessibility fixture.
+                        // The override is absent in Release and never reaches
+                        // the SDK or an independently adopting host.
+                        if ProcessInfo.processInfo.arguments.contains("AYA_UI_TEST_LARGE_TYPE") {
+                            size = .accessibility3
+                        }
+                        #endif
+                    }
                     if let importError {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Cannot use this file")
@@ -99,16 +109,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
                     }
-                    .transformEnvironment(\.dynamicTypeSize) { size in
-                        #if DEBUG
-                        // Deterministic first-party accessibility fixture.
-                        // The override is absent in Release and never reaches
-                        // the SDK or an independently adopting host.
-                        if ProcessInfo.processInfo.arguments.contains("AYA_UI_TEST_LARGE_TYPE") {
-                            size = .accessibility3
-                        }
-                        #endif
-                    }
+
                 }
                 .padding(16)
                 .frame(maxWidth: 560)
