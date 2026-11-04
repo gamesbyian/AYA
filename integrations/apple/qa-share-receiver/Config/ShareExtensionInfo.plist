@@ -12,6 +12,8 @@
   <string>$(MARKETING_VERSION)</string>
   <key>CFBundleVersion</key>
   <string>$(CURRENT_PROJECT_VERSION)</string>
+  <key>CFBundleName</key>
+  <string>AYA Share QA Extension</string>
   <key>CFBundleDisplayName</key>
   <string>AYA QA Receiver</string>
   <key>NSExtension</key>
