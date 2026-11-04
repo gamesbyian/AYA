@@ -2,7 +2,7 @@
 
 ## Mission
 
-AYA is an Android BYO-assistant, one-way help and creative handoff. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload and sends one file through Android's public Sharesheet. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
+AYA is a platform-neutral BYO-assistant, one-way help and creative handoff **convention** with Android and experimental iOS adapters. The user selects a third-party assistant. The host app supplies a precise, *installed-version-matched* reference and optionally a question/screen hint. AYA previews the exact payload for explicit Copy/Share; each platform uses its own public sharing facilities. Do not introduce model hosting, hidden telemetry, proprietary assistant dependencies, or unsupported claims about what recipients do.
 
 ## Apple/iOS platform expansion (source preview)
 
