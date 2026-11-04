@@ -106,4 +106,22 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
+
+    func testOversizedForeignJSONCannotBypassByteCap() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-oversized")
+
+        let alert = app.alerts["Cannot use this file"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 30),
+                      "Foreign JSON above the size cap must surface a host-owned error")
+        XCTAssertTrue(alert.staticTexts["The selected file exceeds the host's size limit."].exists,
+                      "A valid but oversized JSON must fail the bounded read, not just host semantics")
+        XCTAssertFalse(app.buttons["Apply to demo"].exists,
+                       "The oversize rejection exposed an Apply action")
+        alert.buttons["Dismiss import error"].tap()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+        XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
+    }
 }
