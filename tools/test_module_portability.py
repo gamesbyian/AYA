@@ -14,7 +14,7 @@ EXTENSIONS = {
     ".md", ".json", ".kt", ".java", ".dart", ".gd", ".py", ".xml",
     ".yml", ".yaml", ".ts", ".tsx", ".js", ".jsx", ".cjs", ".mjs",
     ".gradle", ".kts", ".cs", ".sh", ".html", ".css", ".svg",
-    ".toml", ".properties",
+    ".toml", ".properties", ".swift", ".plist", ".entitlements",
 }
 IGNORE = {"tools/test_module_portability.py"}
 GENERATED_OR_EXTERNAL_DIRS = {
@@ -52,7 +52,7 @@ class ModulePortabilityTest(unittest.TestCase):
     def test_all_supported_adapter_languages_are_scanned(self):
         self.assertTrue({
             ".ts", ".tsx", ".js", ".cjs", ".mjs", ".gradle", ".kts",
-            ".cs", ".gd", ".dart", ".kt", ".svg",
+            ".cs", ".gd", ".dart", ".kt", ".svg", ".swift", ".plist",
         }.issubset(EXTENSIONS))
 
     def test_guard_rejects_real_host_references(self):
