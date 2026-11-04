@@ -9,8 +9,9 @@ import android.os.Bundle
 import java.security.MessageDigest
 
 /**
- * Test-only independent Android app/UID. A ResultReceiver reports a digest,
- * never the shared document body. It cannot grant permissions to itself.
+ * Test-only independent Android app/UID. An ordered-broadcast result reports
+ * only a read status, byte count, digest and UID, never the document body.
+ * The receiving app cannot grant URI permission to itself.
  */
 class ReceiverActivity : BroadcastReceiver() {
     @Suppress("DEPRECATION")
