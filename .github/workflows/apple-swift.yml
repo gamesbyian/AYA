@@ -136,6 +136,10 @@ jobs:
           mkdir -p "$QA_DATA/Documents"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":3,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-valid.json"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}' > "$QA_DATA/Documents/aya-layout-invalid.json"
+          # NSNumber bridging makes JSON boolean/float values castable as Int;
+          # they must not satisfy the fictional host's integer-only schema.
+          printf '%s\n' '{"aya_demo_layout":"v1","columns":true,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-boolean.json"
+          printf '%s\n' '{"aya_demo_layout":"v1","columns":1.0,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-float.json"
           # Deliberately VALID JSON with only the host's three expected keys.
           # Its trailing whitespace makes the user-picked artifact one byte
           # beyond the 4 MiB default cap. If a read or cap is bypassed, the
@@ -150,6 +154,8 @@ jobs:
           PY
           test -s "$QA_DATA/Documents/aya-layout-valid.json"
           test -s "$QA_DATA/Documents/aya-layout-invalid.json"
+          test -s "$QA_DATA/Documents/aya-layout-boolean.json"
+          test -s "$QA_DATA/Documents/aya-layout-float.json"
           test -s "$QA_DATA/Documents/aya-layout-oversized.json"
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
