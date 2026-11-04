@@ -64,15 +64,22 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
     private func assertRejectedWithoutApply(
         _ app: XCUIApplication, message: String, why: String, timeout: TimeInterval = 20
     ) {
-        // The error is persistent, accessible host UI rather than an iOS
-        // system alert competing with dismissal of the Files presentation.
-        let title = app.staticTexts["host.import.error.title"]
-        XCTAssertTrue(title.waitForExistence(timeout: timeout), why)
-        XCTAssertEqual(title.label, "Cannot use this file")
-        XCTAssertEqual(app.staticTexts["host.import.error"].label, message)
+        // Validate user-visible accessible text, not merely an implementation
+        // detail. On a failure retain the *actual* hierarchy: it distinguishes
+        // a still-open Files picker, missing state and overwritten child IDs.
+        let title = app.staticTexts["Cannot use this file"]
+        if !title.waitForExistence(timeout: timeout) {
+            XCTFail("\(why). AX hierarchy: \(app.debugDescription)")
+            return
+        }
+        XCTAssertEqual(title.identifier, "host.import.error.title")
+        let explanation = app.staticTexts[message]
+        XCTAssertTrue(explanation.exists, "Wrong or inaccessible file rejection: \(app.debugDescription)")
+        XCTAssertEqual(explanation.identifier, "host.import.error")
         XCTAssertFalse(app.buttons["Apply to demo"].exists, "Invalid import exposed Apply")
-        let dismiss = app.buttons["host.import.error.dismiss"]
+        let dismiss = app.buttons["Dismiss import error"]
         XCTAssertTrue(dismiss.isHittable)
+        XCTAssertEqual(dismiss.identifier, "host.import.error.dismiss")
         dismiss.tap()
     }
 

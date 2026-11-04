@@ -129,8 +129,9 @@ struct ContentView: View {
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.regularMaterial)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("host.import.error.panel")
+                    // Only leaf elements carry identifiers: a container-level
+                    // identifier can propagate to children in SwiftUI and
+                    // make their stable accessibility names unqueryable.
                 }
             }
             .navigationTitle("AYA Sample")
