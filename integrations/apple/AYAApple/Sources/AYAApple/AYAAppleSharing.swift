@@ -47,6 +47,32 @@ public enum AYAShareRepresentation: Equatable {
         UIPasteboard.general.string = packet.text
     }
 
+    /// Best-effort cleanup only when making another share. Restricts removal
+    /// to our own private cache directory, genuine UUID-named regular files
+    /// older than seven days; never follows symlinks or deletes user documents.
+    private static func pruneExpiredPrivateShares(in directory: URL, using manager: FileManager) {
+        let keys: Set<URLResourceKey> = [
+            .isRegularFileKey, .isSymbolicLinkKey, .contentModificationDateKey
+        ]
+        guard let urls = try? manager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: Array(keys),
+            options: [.skipsHiddenFiles]
+        ) else { return }
+        let now = Date()
+        for url in urls {
+            guard let attributes = try? url.resourceValues(forKeys: keys),
+                  AYATemporaryShareRetention.canPrune(
+                    name: url.lastPathComponent,
+                    isRegularFile: attributes.isRegularFile == true,
+                    isSymbolicLink: attributes.isSymbolicLink == true,
+                    modifiedAt: attributes.contentModificationDate,
+                    now: now
+                  ) else { continue }
+            try? manager.removeItem(at: url)
+        }
+    }
+
     private static func writeTemporaryDocument(_ text: String) throws -> URL {
         let fileManager = FileManager.default
         guard let cache = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else {
@@ -54,6 +80,7 @@ public enum AYAShareRepresentation: Equatable {
         }
         let directory = cache.appendingPathComponent("AYA", isDirectory: true)
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        pruneExpiredPrivateShares(in: directory, using: fileManager)
         let name = "aya-\(UUID().uuidString).txt"
         let destination = directory.appendingPathComponent(name)
         try Data(text.utf8).write(to: destination, options: [.atomic])
