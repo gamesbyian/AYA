@@ -78,8 +78,27 @@ struct ContentView: View {
                         guide: guide,
                         explanation: "Ask an assistant for guidance or a demo-layout JSON proposal.",
                         outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
-                        onImportRequested: { showFilePicker = true }
+                        onImportRequested: {
+                            importError = nil
+                            showFilePicker = true
+                        }
                     )
+                    if let importError {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Cannot use this file")
+                                .font(.headline)
+                                .accessibilityAddTraits(.isHeader)
+                            Text(importError)
+                                .font(.footnote)
+                                .accessibilityIdentifier("host.import.error")
+                            Button("Dismiss import error") { self.importError = nil }
+                                .frame(minHeight: 44)
+                                .accessibilityIdentifier("host.import.error.dismiss")
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
+                    }
                     .transformEnvironment(\.dynamicTypeSize) { size in
                         #if DEBUG
                         // Deterministic first-party accessibility fixture.
@@ -129,14 +148,7 @@ struct ContentView: View {
             } message: {
                 Text("The proposed layout changes this sample to \(proposedLayout?.columns ?? 1) columns with a \(proposedLayout?.accent ?? "warm") accent. No files are modified.")
             }
-            .alert("Cannot use this file", isPresented: Binding(
-                get: { importError != nil },
-                set: { if !$0 { importError = nil } }
-            )) {
-                Button("OK", role: .cancel) { importError = nil }
-            } message: {
-                Text(importError ?? "The import could not be completed.")
-            }
+
         }
     }
 
