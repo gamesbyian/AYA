@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "aya/**"
+      - "qa-external-receiver/**"
       - "sample/**"
       - ".github/workflows/android-emulator.yml"
   workflow_dispatch:
@@ -35,7 +36,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: gradle :aya:connectedDebugAndroidTest :sample:connectedDebugAndroidTest --no-daemon --stacktrace
+          script: bash tools/run_android_emulator_qa.sh
 
       - name: Preserve Android UI test evidence
         if: always()
