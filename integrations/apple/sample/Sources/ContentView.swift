@@ -78,7 +78,10 @@ struct ContentView: View {
                         guide: guide,
                         explanation: "Ask an assistant for guidance or a demo-layout JSON proposal.",
                         outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
-                        onImportRequested: { showFilePicker = true }
+                        onImportRequested: {
+                            importError = nil
+                            showFilePicker = true
+                        }
                     )
                     .transformEnvironment(\.dynamicTypeSize) { size in
                         #if DEBUG
@@ -90,6 +93,8 @@ struct ContentView: View {
                         }
                         #endif
                     }
+
+
                 }
                 .padding(16)
                 .frame(maxWidth: 560)
@@ -111,6 +116,19 @@ struct ContentView: View {
                     }
                 }
             }
+            .alert(
+                "Cannot use this file",
+                isPresented: Binding(
+                    get: { importError != nil },
+                    set: { if !$0 { importError = nil } }
+                )
+            ) {
+                Button("Dismiss import error") { importError = nil }
+                    .accessibilityIdentifier("host.import.error.dismiss")
+            } message: {
+                Text(importError ?? "")
+                    .accessibilityIdentifier("host.import.error")
+            }
             .confirmationDialog(
                 "Apply imported layout to this demo?",
                 isPresented: Binding(
@@ -129,14 +147,7 @@ struct ContentView: View {
             } message: {
                 Text("The proposed layout changes this sample to \(proposedLayout?.columns ?? 1) columns with a \(proposedLayout?.accent ?? "warm") accent. No files are modified.")
             }
-            .alert("Cannot use this file", isPresented: Binding(
-                get: { importError != nil },
-                set: { if !$0 { importError = nil } }
-            )) {
-                Button("OK", role: .cancel) { importError = nil }
-            } message: {
-                Text(importError ?? "The import could not be completed.")
-            }
+
         }
     }
 
