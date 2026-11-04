@@ -1,6 +1,6 @@
 # Native iOS Files return: independent local-provider acceptance
 
-**Status (2026-11-04): implementation and installed-simulator tests in [PR #139](https://github.com/gamesbyian/AYA/pull/139), not yet accepted.** This is a disposable, fictional cross-app test fixture. It is separate from the already verified [outbound iOS QA receiver](RECEIVER_QA.md).
+**Status (2026-11-04): [PR #139 / CI 41890208508](https://github.com/gamesbyian/AYA/actions/runs/41890208508) passed the valid foreign pick/Cancel/Apply journey but failed visible malformed-file rejection. [Replacement draft #147](https://github.com/gamesbyian/AYA/pull/147) carries the complete flow plus a host-owned persistent accessible error panel and strict size/type negatives; acceptance is pending its exact-head native CI.** This is a disposable, fictional cross-app test fixture. It is separate from the already verified [outbound iOS QA receiver](RECEIVER_QA.md).
 
 ## What the imported file can and cannot authorize
 
