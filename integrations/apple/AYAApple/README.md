@@ -1,21 +1,23 @@
-# AYA Apple Swift Package (initial source preview)
+# AYAApple: native iOS and iPadOS source package
 
-Native Apple adapter for the [AYA portable interaction convention](../../../README.md). See [research](../../../docs/apple/RESEARCH.md), [architecture](../../../docs/apple/ARCHITECTURE.md) and [acceptance plan](../../../docs/apple/PLAN.md).
+Optional Apple transport and SwiftUI component for the [AYA platform-neutral interaction convention](../../../README.md). The package has no AI service, account, network dependency or requirement to adopt AYA's implementation.
 
-**Status on 2026-11-03:** Portable Swift protocol source and UIKit outgoing Share Sheet/clipboard helper. Local and CI SwiftPM tests passed for the Foundation validator, and [Xcode CI 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) **compiled the native iOS Simulator SDK slice**. No installed iOS app, Share Sheet interaction or genuine AI receiver test yet. There is no release artifact, native AYA review card or host importer yet. This package does not implement App Intents or observe external responses.
+**Status as of 2026-11-03/04:** Native SwiftUI help card, complete editable review, explicit Copy and text/.txt Share Sheet handoff, Files import snapshot and content-based host routing are **implemented in source**. [PR #122 and run 41760530755](https://github.com/gamesbyian/AYA/actions/runs/41760530755) passed Swift unit tests, actual Xcode iOS SDK compilation and built a real first-party example .app with exact guide bytes and installed bundle identity/version. Installed iPhone Simulator interaction is qualified separately by [PR #123](https://github.com/gamesbyian/AYA/pull/123), with genuine assistant/provider acceptance, physical-device VoiceOver and independent host integration still outstanding.
 
-```sh
-cd integrations/apple/AYAApple
-swift test
-```
+Two library products are available via Swift Package Manager:
 
-Two source targets:
+- AYAProtocol (Foundation only): exact iOS AYA-RAS identity/version/section checks, bounded user-edited approval packet, generic output import registry and conservative private-share cache expiry policy. No UI or assistant backend.
+- AYAApple (iOS/UIKit/SwiftUI): AYAHelpCard, system review/Copy/Share text or one .txt file, a native outgoing UIKit helper, user-picked Files snapshot with security-scoped coordinated off-main read and SHA-256, and the optional AYAImportPickerButton. Imported bytes never apply themselves.
 
-- `AYAProtocol` (`Foundation` only): `AYAReference(guide:installedAppID:installedVersion:)` checks `aya-reference/v1` metadata, `platform: ios`, current app identity/version, 12 populated standard sections and obvious unresolved placeholders. `AYAReviewDraft` constructs the initial review text and `approve(editedText:)` produces a bounded `AYAApprovedPacket` containing **only** what the user actually approved. These structural checks do not prove the reference accurately describes the host.
-- `AYAApple` (iOS/UIKit conditional): `AYAAppleSharing.present(packet:representation:from:anchoredTo:)` offers a native share sheet with either full plain text or a uniquely named `.txt` document. iPad source-view anchoring is required. `copyApprovedText` is a separate explicit clipboard action. There is no destination targeting, network call or result tracking.
+For portable unit tests:
 
-A real host must load a bundled source-verified `aya-guide.md`, pass `Bundle.main.bundleIdentifier` and `CFBundleShortVersionString` to `AYAReference`, show **editable review of the entire exact packet before approval**, and call the native helper only when the user explicitly selects Copy or Share. The package cannot enforce visual review if an integrating developer calls `approve` without showing it; this requires integration and UI testing. For `textDocument` the helper writes a private UTF-8 cache file; do not delete it immediately on activity dismissal, when a receiver may still read it.
+    cd integrations/apple/AYAApple
+    swift test
 
-The returned generated artifact is never automatically acquired: the host must separately implement a user-owned Files/import path and validation/confirmation. Use Apple security-scoped URLs and coordinated reads, and never treat a filename or AYA marker as authorization. The basic design requires no app group, domain, account, assistant service or AI API key.
+For real native sample compilation, see the [iOS integration guide](../../../docs/apple/INTEGRATION.md) and [fictional XcodeGen sample](../sample). An adopter must author its own source-verified iOS guide with actual Bundle ID/version, truthful instructions, and host-owned output validation, preview and separate confirmation.
 
-**Evidence limit:** SwiftPM Linux compilation excludes `#if os(iOS)`; independent native Xcode iOS Simulator SDK compilation **did** pass, but this does not demonstrate an installed host, interactive Share Sheet, accessible UI, real assistant ingestion or physical-device compatibility.
+Sharing a .txt file writes one private, uniquely named temporary document. It is not removed immediately on Share Sheet dismissal; on a later share the helper performs best-effort cleanup only of regular AYA UUID-named .txt files in its own cache older than seven days. Apple may independently clear cache. This policy does not scan other apps, manage user documents or prove the receiver has read the file.
+
+The portable output registry's ready decision is permission to open the host's own validation/impact preview, **never** permission to execute. Wrong-card detection, ambiguous format choices and malicious output safety remain host responsibilities. Clipboard contents are an explicit disclosure surface; a Share Sheet destination does not establish successful AI ingestion.
+
+**Release boundary:** Source/build evidence and first-party packaging are not physical iPhone/iPad UX, signed public distribution, real recipient compatibility or a certification of the host's reference truth. Consult [Apple research](../../../docs/apple/RESEARCH.md), [architecture](../../../docs/apple/ARCHITECTURE.md), [plan](../../../docs/apple/PLAN.md) and [issue #120](https://github.com/gamesbyian/AYA/issues/120).
