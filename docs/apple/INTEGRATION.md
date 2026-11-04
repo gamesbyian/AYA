@@ -16,7 +16,7 @@ A native host loads its installed guide from its bundle, then creates an AYAHelp
 
 Ask verifies the *actual* running bundle identity/version, supported iOS guide platform, provenance metadata and filled reference sections. Failure blocks review and sharing. A successful check opens a complete editable review. Cancel does not share. Copy puts the **current edited text** on the clipboard. Share as text and Share full .txt file are distinct user-selected modes; they do not secretly combine types, pick a provider or assert successful receipt. The underlying UIKit helper can also be used by non-SwiftUI hosts.
 
-The .txt mode writes a uniquely named private cache document. It is not deleted immediately when the Share Sheet closes, because a receiver could still need it; expiry cleanup requires a separate qualified policy. Neither app destination, provider sign-in state nor AI reply is inspected. Text in clipboard or a third-party destination is a user-authorized disclosure.
+The .txt mode writes a uniquely named private cache document. It is not deleted immediately when the Share Sheet closes, because a receiver could still need it. On the **next** AYA document share the helper best-effort prunes only regular UUID-named .txt files in its private cache older than seven days, using a portable, unit-tested selection policy; the OS may also purge cache independently. No cleanup happens on a guaranteed schedule. Neither app destination, provider sign-in state nor AI reply is inspected. Text in clipboard or a third-party destination is a user-authorized disclosure.
 
 ## User-owned output return
 
