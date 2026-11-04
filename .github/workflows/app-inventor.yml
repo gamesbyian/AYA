@@ -4,6 +4,8 @@ on:
     paths:
       - 'integrations/app-inventor/**'
       - 'aya/**'
+      - '!aya/src/test/**'
+      - '!aya/src/androidTest/**'
       - 'tools/test_app_inventor_adapter.py'
       - 'tools/test_verify_appinventor_aix.py'
       - 'tools/verify_appinventor_aix.py'
@@ -16,6 +18,8 @@ on:
     paths:
       - 'integrations/app-inventor/**'
       - 'aya/**'
+      - '!aya/src/test/**'
+      - '!aya/src/androidTest/**'
       - 'tools/test_app_inventor_adapter.py'
       - 'tools/test_verify_appinventor_aix.py'
       - 'tools/verify_appinventor_aix.py'
