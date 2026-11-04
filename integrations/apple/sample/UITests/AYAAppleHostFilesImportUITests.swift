@@ -61,6 +61,21 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         }
     }
 
+    private func assertRejectedWithoutApply(
+        _ app: XCUIApplication, message: String, why: String, timeout: TimeInterval = 20
+    ) {
+        // The error is persistent, accessible host UI rather than an iOS
+        // system alert competing with dismissal of the Files presentation.
+        let title = app.staticTexts["host.import.error.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: timeout), why)
+        XCTAssertEqual(title.label, "Cannot use this file")
+        XCTAssertEqual(app.staticTexts["host.import.error"].label, message)
+        XCTAssertFalse(app.buttons["Apply to demo"].exists, "Invalid import exposed Apply")
+        let dismiss = app.buttons["host.import.error.dismiss"]
+        XCTAssertTrue(dismiss.isHittable)
+        dismiss.tap()
+    }
+
     func testUserPickedForeignJSONRequiresExplicitApply() throws {
         let app = XCUIApplication()
         app.launch()
@@ -94,15 +109,11 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
         selectForeignDocument(app, stem: "aya-layout-invalid")
-        let alert = app.alerts["Cannot use this file"]
-        XCTAssertTrue(alert.waitForExistence(timeout: 20),
-                      "Invalid foreign JSON must produce an immediately visible host-owned alert")
-        let expected = "This file is not a valid Lantern demo-layout JSON."
-        XCTAssertTrue(alert.staticTexts[expected].exists,
-                      "Host failed to explain why the selected foreign JSON was rejected")
-        XCTAssertFalse(app.buttons["Apply to demo"].exists,
-                       "Invalid JSON offered Apply")
-        alert.buttons["Dismiss import error"].tap()
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "Invalid foreign JSON must produce immediately visible host-owned feedback"
+        )
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
@@ -113,14 +124,12 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
         selectForeignDocument(app, stem: "aya-layout-oversized")
 
-        let alert = app.alerts["Cannot use this file"]
-        XCTAssertTrue(alert.waitForExistence(timeout: 30),
-                      "Foreign JSON above the size cap must surface a host-owned error")
-        XCTAssertTrue(alert.staticTexts["The selected file exceeds the host's size limit."].exists,
-                      "A valid but oversized JSON must fail the bounded read, not just host semantics")
-        XCTAssertFalse(app.buttons["Apply to demo"].exists,
-                       "The oversize rejection exposed an Apply action")
-        alert.buttons["Dismiss import error"].tap()
+        assertRejectedWithoutApply(
+            app,
+            message: "The selected file exceeds the host's size limit.",
+            why: "A valid but oversized JSON must fail the capped read",
+            timeout: 30
+        )
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
@@ -132,12 +141,11 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         for filename in ["aya-layout-boolean", "aya-layout-float"] {
             selectForeignDocument(app, stem: filename)
 
-            let alert = app.alerts["Cannot use this file"]
-            XCTAssertTrue(alert.waitForExistence(timeout: 20),
-                          "\(filename) must fail the host's integer-only JSON schema")
-            XCTAssertTrue(alert.staticTexts["This file is not a valid Lantern demo-layout JSON."].exists)
-            XCTAssertFalse(app.buttons["Apply to demo"].exists)
-            alert.buttons["Dismiss import error"].tap()
+            assertRejectedWithoutApply(
+                app,
+                message: "This file is not a valid Lantern demo-layout JSON.",
+                why: "\(filename) must fail the integer-only host schema"
+            )
             XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
             XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
         }
