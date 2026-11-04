@@ -6,7 +6,7 @@
 
 Swift Package Manager resolves a remote Git repository as a package when a `Package.swift` is in its **repository root**. The original native iOS package lives in `integrations/apple/AYAApple`, and remains convenient for *local path dependency* and first-party XcodeGen sample builds. That nested layout alone is not an ordinary remote "Add Package Dependency" URL. The new **root `Package.swift`** declares the same `AYAProtocol` and `AYAApple` products and points its targets at their **existing nested source files**, so there is only one code implementation, no copied framework binary, no account, and no network dependency.
 
-The root and nested manifests use the same minimum Swift tools and iOS 16 platform floor. CI compares their public target/product names and compiles root Swift tests, then constructs a **separate test-only SwiftPM consumer outside the repository checkout** and imports `AYAProtocol` to prove the package does not depend on sibling GitHub files or implicit workspace linkage. The native `AYAApple` target still requires the separate Xcode/iOS Simulator acceptance lane; a Linux consumer test only proves pure Swift source import/approval behavior.
+The root and nested manifests use the same minimum Swift tools and iOS 16 platform floor. The **root package identity is `AYA`** (the Git repository name); the nested local package is named `AYAApple`. The exported **products** remain `AYAProtocol` and `AYAApple` in both. SwiftPM `.product(..., package:)` references must use the dependency's identity, not the library product name. CI compares their public target/product names and compiles root Swift tests, then constructs a **separate test-only SwiftPM consumer outside the repository checkout** and imports `AYAProtocol` to prove the package does not depend on sibling GitHub files or implicit workspace linkage. The native `AYAApple` target still requires the separate Xcode/iOS Simulator acceptance lane; a Linux consumer test only proves pure Swift source import/approval behavior.
 
 ## Xcode and SwiftPM adoption
 
@@ -27,8 +27,8 @@ dependencies: [
 Then add the relevant product:
 
 ```swift
-.product(name: "AYAProtocol", package: "AYAApple")
-// or .product(name: "AYAApple", package: "AYAApple")
+.product(name: "AYAProtocol", package: "AYA")
+// or .product(name: "AYAApple", package: "AYA")
 ```
 
 The angle-bracket revision above is a developer placeholder, **not** a currently published version. No SemVer release/tag should be claimed until a concrete tagged revision has passed source, native iPhone/iPad, independent consuming host, privacy and artifact integrity checks. A package-version range such as `from: "1.0.0"` must **not** be suggested while no qualifying AYA Apple release has been tagged.
