@@ -18,6 +18,7 @@ The fixture files are:
 
 - `aya-layout-valid.json`: exact documented fictional host format, 3 columns and cool accent
 - `aya-layout-invalid.json`: same nominal format but an out-of-range column count and unsupported accent
+- `aya-layout-boolean.json` / `aya-layout-float.json`: otherwise valid demo JSON whose `columns` field is `true` or `1.0`. These values must fail the strict integer field contract even though Swift Foundation's usual `as? Int` casts would accept them as `1`.
 - `aya-layout-oversized.json`: otherwise valid three-field JSON with trailing whitespace, exactly **4 MiB + 1 byte**. If the importer silently truncated it or ignored its cap, the host validator would otherwise accept the payload; the test requires the **size-specific** error before any preview or Apply.
 
 The QA app itself makes no network calls, telemetry requests, writes to the host's data, or user-facing production changes. Neither QA fixture is an AI output.
@@ -31,6 +32,7 @@ The QA app itself makes no network calls, telemetry requests, writes to the host
 | Cancel | Closing the host preview leaves the old 1-column, warm-accent state |
 | Apply | A second explicit selection and positive Apply changes only the fictional host's 3-column/cool-accent state |
 | Invalid foreign JSON | No route to Apply is offered; error is visible; prior state persists |
+| Invalid JSON numeric types | Files-selected Boolean and floating-point values in integer-only `columns` cannot trigger a preview or Apply, even when bridged numeric casts would coerce them |
 | Valid JSON beyond default cap | A real picker-selected 4 MiB + 1 byte document from the independent QA provider raises the explicit file-size error, offers no Apply and preserves prior state |
 | No Files provider / dismissed picker | Missing recipient or Cancel does not produce a fake imported file or mutation; a test must fail, not silently skip absent fixture |
 | Future negative cases | No scope, revoked provider, file mutated during coordination, custom >16 MiB cap, wrong card and multiple matching host formats all reject or require correct host-directed confirmation |
