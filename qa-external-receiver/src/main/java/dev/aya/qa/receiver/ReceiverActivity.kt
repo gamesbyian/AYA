@@ -1,21 +1,27 @@
 package dev.aya.qa.receiver
 
-import android.content.BroadcastReceiver
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.ResultReceiver
 import java.security.MessageDigest
 
 /**
- * Test-only independent Android app/UID. An ordered-broadcast result reports
- * only a read status, byte count, digest and UID, never the document body.
- * The receiving app cannot grant URI permission to itself.
+ * Disposable, external-UID share Activity. The system grants a read-only
+ * FileProvider URI only for a granted incoming Intent. No document body is
+ * sent to the synthetic test callback and no user app depends on this APK.
  */
-class ReceiverActivity : BroadcastReceiver() {
+class ReceiverActivity : Activity() {
     @Suppress("DEPRECATION")
-    override fun onReceive(context: Context, intent: Intent) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val callback = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra(EXTRA_CALLBACK, ResultReceiver::class.java)
+        } else {
+            intent.getParcelableExtra<ResultReceiver>(EXTRA_CALLBACK)
+        }
         val uri = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
@@ -26,7 +32,7 @@ class ReceiverActivity : BroadcastReceiver() {
             "invalid_uri"
         } else {
             try {
-                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 if (bytes == null) {
                     "unreadable"
                 } else {
@@ -39,17 +45,20 @@ class ReceiverActivity : BroadcastReceiver() {
             } catch (_: SecurityException) {
                 "denied"
             } catch (_: Exception) {
+                // Some Android providers report an ungranted URI as an
+                // unreadable file instead of a SecurityException. The
+                // *same URI* must still pass the granted positive control.
                 "unreadable"
             }
         }
         result.putString("status", status)
         result.putInt("receiver_uid", android.os.Process.myUid())
         result.putBoolean("receiver_ack", true)
-        // The sending instrumentation test receives these metadata-only
-        // extras from Android's ordered broadcast. No document body leaves
-        // this process through the evidence channel.
-        setResultExtras(result)
-        setResultCode(if (status == "read") 1 else 0)
+        callback?.send(if (status == "read") 1 else 0, result)
+        finish()
     }
 
+    companion object {
+        const val EXTRA_CALLBACK = "dev.aya.qa.receiver.RESULT_CALLBACK"
+    }
 }

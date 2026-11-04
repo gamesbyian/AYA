@@ -1,8 +1,7 @@
 package dev.aya.android
 
 import android.content.ComponentName
-import android.content.BroadcastReceiver
-import android.app.Activity
+import android.os.ResultReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -32,29 +31,24 @@ class AyaExternalUriGrantTest {
     private fun sendToSeparateApp(intent: Intent): Bundle {
         val done = CountDownLatch(1)
         val result = AtomicReference<Bundle>()
-        // The system invokes this local final ordered-broadcast receiver even
-        // when the external receiver is missing. This makes absent delivery an
-        // explicit failed assertion instead of a missing Parcelable callback.
-        val finalReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                result.set(getResultExtras(false))
+        val callback = object : ResultReceiver(Handler(Looper.getMainLooper())) {
+            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                result.set(resultData)
                 done.countDown()
             }
         }
         intent.component = ComponentName(
             "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
         )
-        // A fresh CI APK may still be in Android's stopped-package state.
-        // Ordered delivery returns evidence without a Parcelable callback
-        // crossing the test and foreign-app process boundary.
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-        context.sendOrderedBroadcast(
-            intent, null, finalReceiver, Handler(Looper.getMainLooper()),
-            Activity.RESULT_OK, null, Bundle()
-        )
-        assertTrue("Ordered broadcast did not complete", done.await(20, TimeUnit.SECONDS))
-        val evidence = result.get() ?: throw AssertionError("Ordered broadcast returned no bundle")
-        assertTrue("Foreign receiver never handled the broadcast", evidence.getBoolean("receiver_ack"))
+        intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
+        // FileProvider's intent URI grant is lifetime-scoped to a receiving
+        // Activity stack. A BroadcastReceiver cannot qualify that contract.
+        // The separate disposable Activity reads and returns only metadata.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        assertTrue("Independent Activity did not return evidence", done.await(20, TimeUnit.SECONDS))
+        val evidence = result.get() ?: throw AssertionError("Receiver Activity returned no bundle")
+        assertTrue("Separate receiver Activity never processed the intent", evidence.getBoolean("receiver_ack"))
         return evidence
     }
 
