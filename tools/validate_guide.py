@@ -77,9 +77,9 @@ def validate(text: str, expected_platform: str = "android") -> dict:
     app_id = fields.get("app_id")
     if app_id:
         if expected_platform == "android":
-            if not re.fullmatch(r"[a-zA-Z_][\\w]*(\\.[a-zA-Z_][\\w]*)+", app_id):
+            if not re.fullmatch(r"[a-zA-Z_][\w]*(\.[a-zA-Z_][\w]*)+", app_id):
                 errors.append("app_id must be a dotted Android package identifier.")
-        elif not re.fullmatch(r"[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*", app_id):
+        elif not re.fullmatch(r"[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*", app_id):
             errors.append("app_id must use the iOS bundle ID character set (letters, numbers, hyphens, periods).")
     if fields.get("app_version_min") and fields.get("app_version_max"):
         if fields["app_version_min"] != fields["app_version_max"]:
