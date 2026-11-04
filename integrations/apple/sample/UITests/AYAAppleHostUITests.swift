@@ -36,7 +36,16 @@ final class AYAAppleHostUITests: XCTestCase {
         XCTAssertTrue(copy.waitForExistence(timeout: 15))
         copy.tap()
         let confirmation = app.alerts["Copied to clipboard"]
-        XCTAssertTrue(confirmation.waitForExistence(timeout: 10))
+        if !confirmation.waitForExistence(timeout: 10) {
+            // Retain bounded synthetic diagnostics, without logging full
+            // question/reference contents or changing the acceptance gate.
+            let titles = app.alerts.allElementsBoundByIndex.map(\.label)
+            let visibleButtons = app.buttons.allElementsBoundByIndex
+                .map(\.label).filter { !$0.isEmpty }.prefix(20)
+            print("AYA Copy: expected success alert missing; visible alerts: \(titles)")
+            print("AYA Copy: visible button labels: \(Array(visibleButtons))")
+        }
+        XCTAssertTrue(confirmation.exists, "Explicit Copy needs visible confirmation")
         XCTAssertTrue(confirmation.staticTexts[
             "The current approved text is on the clipboard. Paste it into your chosen assistant."
         ].exists)
