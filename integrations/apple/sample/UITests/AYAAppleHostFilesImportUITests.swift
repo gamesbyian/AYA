@@ -83,12 +83,13 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
         selectForeignDocument(app, stem: "aya-layout-invalid")
-        let rejected = app.alerts["Cannot use this file"]
+        let rejected = app.staticTexts["host.import.error"]
         XCTAssertTrue(rejected.waitForExistence(timeout: 20),
-                      "Invalid foreign JSON was not refused by the host's own validator")
+                      "Invalid foreign JSON produced no visible host-owned rejection")
+        XCTAssertEqual(rejected.label, "This file is not a valid Lantern demo-layout JSON.")
         XCTAssertFalse(app.buttons["Apply to demo"].exists,
                        "Invalid JSON offered Apply")
-        rejected.buttons["OK"].tap()
+        app.buttons["host.import.error.dismiss"].tap()
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
