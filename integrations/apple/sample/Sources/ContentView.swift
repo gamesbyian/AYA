@@ -108,6 +108,31 @@ struct ContentView: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if let error = importError {
+                    // A persistent, immediately readable host-owned error
+                    // surface. System alert presentation can conflict with
+                    // dismissal of the OS Files picker on older iOS runtimes.
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Cannot use this file")
+                            .font(.headline)
+                            .accessibilityIdentifier("host.import.error.title")
+                        Text(error)
+                            .font(.subheadline)
+                            .accessibilityIdentifier("host.import.error")
+                        Button("Dismiss import error") {
+                            importError = nil
+                        }
+                        .frame(minHeight: 44)
+                        .accessibilityIdentifier("host.import.error.dismiss")
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.regularMaterial)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("host.import.error.panel")
+                }
+            }
             .navigationTitle("AYA Sample")
             .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.json]) { result in
                 switch result {
@@ -123,19 +148,6 @@ struct ContentView: View {
                         }
                     }
                 }
-            }
-            .alert(
-                "Cannot use this file",
-                isPresented: Binding(
-                    get: { importError != nil },
-                    set: { if !$0 { importError = nil } }
-                )
-            ) {
-                Button("Dismiss import error") { importError = nil }
-                    .accessibilityIdentifier("host.import.error.dismiss")
-            } message: {
-                Text(importError ?? "")
-                    .accessibilityIdentifier("host.import.error")
             }
             .confirmationDialog(
                 "Apply imported layout to this demo?",
