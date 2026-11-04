@@ -27,6 +27,25 @@ class ReferenceValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(ios, expected_platform="unknown")
 
+    def test_ios_real_bundle_id_hyphens_are_allowed(self):
+        ios = self.good.replace("platform: android", "platform: ios")
+        ios = ios.replace("app_id: ", "app_id: ", 1)
+        original = validate(self.good)
+        original_id = original["metadata"]["app_id"]
+        hyphenated = ios.replace(f"app_id: {original_id}", "app_id: com.example.aya-host")
+        result = validate(hyphenated, expected_platform="ios")
+        self.assertTrue(result["ok"], result["errors"])
+        self.assertFalse(validate(hyphenated)["ok"], "Android default must reject iOS identity/platform")
+        for invalid in ("com.example.bad_id", "com/example/app", "com.example.app!", "com..example"):
+            candidate = hyphenated.replace("app_id: com.example.aya-host", f"app_id: {invalid}")
+            self.assertFalse(validate(candidate, expected_platform="ios")["ok"], invalid)
+
+    def test_case_wrong_platform_is_rejected_for_runtime_parity(self):
+        upper = self.good.replace("platform: android", "platform: Android")
+        self.assertFalse(validate(upper)["ok"])
+        ios_upper = self.good.replace("platform: android", "platform: IOS")
+        self.assertFalse(validate(ios_upper, expected_platform="ios")["ok"])
+
     def test_missing_section_fails(self):
         result = validate(self.good.replace("## Navigation map", "## Navigation"))
         self.assertFalse(result["ok"])
