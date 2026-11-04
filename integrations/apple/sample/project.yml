@@ -38,6 +38,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: UITests
+      - path: Resources/aya-guide.md
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.example.ayalantern.uitests

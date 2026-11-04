@@ -54,6 +54,7 @@ jobs:
           ei = plistlib.loads((ext / "Info.plist").read_bytes())
           assert ai["CFBundleIdentifier"] == "org.example.aya.shareqa", ai
           assert ei["CFBundleIdentifier"] == "org.example.aya.shareqa.extension", ei
+          assert isinstance(ei.get("CFBundleName"), str) and ei["CFBundleName"].strip(), "Share Extension must be installable (nonempty CFBundleName)"
           ns = ei["NSExtension"]
           assert ns["NSExtensionPointIdentifier"] == "com.apple.share-services"
           assert ns["NSExtensionPrincipalClass"].endswith(".ShareViewController")
