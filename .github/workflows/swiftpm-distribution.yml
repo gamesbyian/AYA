@@ -1,0 +1,97 @@
+name: SwiftPM root manifest and external consumer smoke
+
+on:
+  pull_request:
+    paths:
+      - 'Package.swift'
+      - 'integrations/apple/AYAApple/Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/AYAApple/Tests/**'
+      - '.github/workflows/swiftpm-distribution.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Package.swift'
+      - 'integrations/apple/AYAApple/Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/AYAApple/Tests/**'
+      - '.github/workflows/swiftpm-distribution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swiftpm-root-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  root-manifest-consumer:
+    name: Root package and out-of-tree consumer
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift toolchain
+        run: swift --version
+      - name: Test the root package using the original Swift sources
+        run: swift test --parallel
+      - name: Verify root and nested products have identical public names
+        run: |
+          swift package dump-package > "$RUNNER_TEMP/aya-root-package.json"
+          (cd integrations/apple/AYAApple && swift package dump-package) > "$RUNNER_TEMP/aya-nested-package.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = json.loads((Path(os.environ["RUNNER_TEMP"]) / "aya-root-package.json").read_text())
+          nested = json.loads((Path(os.environ["RUNNER_TEMP"]) / "aya-nested-package.json").read_text())
+          def names(manifest, kind):
+              return sorted(x["name"] for x in manifest[kind])
+          for kind in ("products", "targets"):
+              assert names(root, kind) == names(nested, kind), f"Package {kind} drift"
+          assert names(root, "products") == ["AYAApple", "AYAProtocol"]
+          print("Root and nested SwiftPM targets/products agree")
+          PY
+      - name: Compile a completely external SwiftPM package consumer
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root = Path(os.environ["GITHUB_WORKSPACE"])
+          dest = Path(os.environ["RUNNER_TEMP"]) / "aya-swiftpm-foreign-consumer"
+          (dest / "Sources/ForeignConsumer").mkdir(parents=True, exist_ok=True)
+          (dest / "Tests/ForeignConsumerTests").mkdir(parents=True, exist_ok=True)
+          (dest / "Package.swift").write_text(
+              '// swift-tools-version: 5.9\n'
+              'import PackageDescription\n'
+              'let package = Package(\n'
+              '  name: "IndependentHost",\n'
+              '  products: [.library(name: "ForeignConsumer", targets: ["ForeignConsumer"])],\n'
+              '  dependencies: [.package(path: ' + repr(str(root)).replace("'", '"') + ')],\n'
+              '  targets: [\n'
+              '    .target(name: "ForeignConsumer", dependencies: ['
+              '.product(name: "AYAProtocol", package: "AYAApple")]),\n'
+              '    .testTarget(name: "ForeignConsumerTests", dependencies: ["ForeignConsumer"])\n'
+              '  ]\n'
+              ')\n', encoding="utf-8"
+          )
+          (dest / "Sources/ForeignConsumer/ForeignConsumer.swift").write_text(
+              'import AYAProtocol\n'
+              'public enum ForeignConsumer {\n'
+              '  public static func approved(_ text: String) throws -> String {\n'
+              '    try AYAApprovedPacket(editedText: text).text\n'
+              '  }\n'
+              '}\n', encoding="utf-8"
+          )
+          (dest / "Tests/ForeignConsumerTests/ForeignConsumerTests.swift").write_text(
+              'import XCTest\nimport ForeignConsumer\n'
+              'final class ForeignConsumerTests: XCTestCase {\n'
+              '  func testExactlyApprovedTextAndBlankRejection() throws {\n'
+              '    XCTAssertEqual(try ForeignConsumer.approved("  Hello, user  "), "  Hello, user  ")\n'
+              '    XCTAssertThrowsError(try ForeignConsumer.approved(" \\n "))\n'
+              '  }\n'
+              '}\n', encoding="utf-8"
+          )
+          print("Created a separate test-only SwiftPM client outside the AYA checkout")
+          PY
+          swift test --package-path "$RUNNER_TEMP/aya-swiftpm-foreign-consumer" --parallel
