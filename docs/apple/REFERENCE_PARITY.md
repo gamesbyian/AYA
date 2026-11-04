@@ -17,8 +17,9 @@ The shared reference case matrix is `integrations/apple/AYAApple/Tests/AYAProtoc
 
 - Portable Python: `python3 -m unittest tools.test_apple_reference_parity`
 - Portable SwiftPM from `integrations/apple/AYAApple`: `swift test`
+- Android JVM from the repository root: `gradle :aya:testDebugUnitTest --tests 'dev.aya.android.AyaReferenceCrossPlatformParityTest'` (also included in the normal Android unit-test suite). Android reads **the same fictional Swift/Python matrix** from the source tree and reverses only the platform-mismatch case. It also rejects guides over 2 MiB **of UTF-8 bytes**, aligned with Swift's reference limit and the Android share transport ceiling. A passing test is structural/identity evidence, not proof of an app's guide truth or of recipient ingestion.
 - iOS Simulator SDK and first-party host still require the targeted `apple-swift.yml` Xcode build; the reference matrix is not a UI or Share Sheet test.
 
-Each mutation must target exactly one substring in the fixture. Both languages reject stale cases where an intended substring silently disappears. Add a case here when evolving the AYA-RAS reference schema. Changes to required major sections, metadata validation or exact-version semantics need coordinated authoring/runtime tests and a review of Android's separate reference verifier; do not accidentally accept an Android guide for an iOS host.
+Each mutation must target exactly one substring in the fixture. Both languages reject stale cases where an intended substring silently disappears. Add a case here when evolving the AYA-RAS reference schema. Changes to required major sections, metadata validation, exact-version semantics or Unicode length handling need coordinated Python/Swift/Android runtime tests; do not accidentally accept one OS's guide in the other OS's host. Android consumes the matrix as a **test-only** cross-language contract. No production Android runtime code depends on Apple packaging or resources.
 
 This is a reusable contract test across at least two plausible host classes. All examples are fictional. Nothing in the fixture grants access to another app, a user's private files, a model or an importer.
