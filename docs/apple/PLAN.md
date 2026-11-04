@@ -30,7 +30,7 @@
 - [ ] On real iPhone and iPad, test large type, VoiceOver, keyboard, offline and background/foreground conditions. Simulators alone don't qualify as physical devices.
 - [ ] Maintain dated *per app/version/iOS/account/transport* acceptance rows for ChatGPT, Claude, Gemini and any other actually exercised receiver. Never infer attachment consumption from an advertised Share Sheet destination.
 - [ ] Independently authored native host with genuine source-derived guide, host importer, clean SwiftPM resolution and complete manual output round trip.
-- [ ] Signed reproducible app integration / source release, package provenance, install/uninstall and upgrade path, check no entitlement/domain/payment is required for basic function.
+- [ ] [Root-level SwiftPM Git URL discovery and external pure-Swift consumer smoke](DISTRIBUTION.md) implemented in [PR #140](https://github.com/gamesbyian/AYA/pull/140), **pending exact-head CI and separate native adopter acceptance**. Signed reproducible app integration / SemVer source release, package provenance, install/uninstall and upgrade path remain open; check no entitlement/domain/payment is required for basic function.
 - [ ] Add App Intents only for justified read-only / prepare operations after host acceptance. Validate Shortcuts discoverability and execute refusal for destructive requests; evaluate `AppIntentsTesting` on supported Xcode.
 - [ ] Consider SwiftUI `ShareLink` / `Transferable` alternate instead of default UIKit only after an observed receiver-compatibility benefit and equal review semantics.
 - [ ] Consider an inbound Share Extension only if a specific receiving workflow cannot reasonably be served by the host's own file picker.
