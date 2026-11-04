@@ -118,8 +118,7 @@ private struct AYAReviewSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editedText: String
     @State private var sharing: AYASharingPresentation?
-    @State private var errorMessage: String?
-    @State private var copied = false
+    @State private var notice: AYAReviewNotice?
     let outputInstructions: String
 
     init(initialText: String, outputInstructions: String) {
@@ -151,7 +150,10 @@ private struct AYAReviewSheet: View {
                     Button {
                         withApprovedPacket { packet in
                             AYAAppleSharing.copyApprovedText(packet)
-                            copied = true
+                            notice = AYAReviewNotice(
+                                title: "Copied to clipboard",
+                                message: "The current approved text is on the clipboard. Paste it into your chosen assistant."
+                            )
                         }
                     } label: {
                         Label("Copy current text", systemImage: "doc.on.doc")
@@ -191,18 +193,12 @@ private struct AYAReviewSheet: View {
             .sheet(item: $sharing) { item in
                 AYAActivitySheet(controller: item.controller)
             }
-            .alert(copied ? "Copied to clipboard" : "Cannot share", isPresented: Binding(
-                get: { copied || errorMessage != nil },
-                set: { if !$0 { copied = false; errorMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) {
-                    copied = false
-                    errorMessage = nil
-                }
-            } message: {
-                Text(copied
-                    ? "The current approved text is on the clipboard. Paste it into your chosen assistant."
-                    : (errorMessage ?? "The current text could not be shared."))
+            .alert(item: $notice) { item in
+                Alert(
+                    title: Text(item.title),
+                    message: Text(item.message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
         .presentationDetents([.large])
@@ -213,7 +209,10 @@ private struct AYAReviewSheet: View {
             let packet = try AYAApprovedPacket(editedText: editedText)
             action(packet)
         } catch {
-            errorMessage = "The reviewed text is blank or larger than 2 MiB."
+            notice = AYAReviewNotice(
+                title: "Cannot share",
+                message: "The reviewed text is blank or larger than 2 MiB."
+            )
         }
     }
 
@@ -225,10 +224,19 @@ private struct AYAReviewSheet: View {
                 )
                 sharing = AYASharingPresentation(controller: controller)
             } catch {
-                errorMessage = "The approved document could not be prepared. Copy the text instead."
+                notice = AYAReviewNotice(
+                    title: "Cannot share",
+                    message: "The approved document could not be prepared. Copy the text instead."
+                )
             }
         }
     }
+}
+
+private struct AYAReviewNotice: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }
 
 #if os(iOS)
