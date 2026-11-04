@@ -71,8 +71,17 @@ class AyaExternalUriGrantTest {
             putExtra(Intent.EXTRA_STREAM, uri)
         }
         val denied = sendToSeparateApp(ungranted)
-        assertEquals("Without an Android grant, cross-UID reads must be denied",
-            "denied", denied.getString("status"))
+        // Android may surface an ungranted provider lookup as either a
+        // SecurityException ("denied") or an unreadable URI. The negative
+        // alone proves nothing about the file's existence. Require the
+        // granted *same URI* below to return the exact original bytes.
+        val ungrantedStatus = denied.getString("status")
+        assertTrue(
+            "Foreign app unexpectedly read ungranted URI or supplied invalid status: $ungrantedStatus",
+            ungrantedStatus == "denied" || ungrantedStatus == "unreadable"
+        )
+        assertTrue("Ungranted read must not include document digest", !denied.containsKey("sha256"))
+        assertTrue("Ungranted read must not include document bytes", !denied.containsKey("bytes"))
         assertTrue("Receiver must have a different Android UID",
             denied.getInt("receiver_uid") != context.applicationInfo.uid)
 
