@@ -61,6 +61,32 @@ final class AYAAppleHostUITests: XCTestCase {
         app.buttons["aya.cancel"].tap()
     }
 
+    func testLargeTypeReviewActionsRemainReachable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["AYA_UI_TEST_LARGE_TYPE"]
+        app.launch()
+
+        let ask = app.buttons["aya.ask"]
+        XCTAssertTrue(ask.waitForExistence(timeout: 20), "Large-type AYA card missing")
+        XCTAssertTrue(ask.isHittable, "Ask cannot be reached at large type")
+        XCTAssertGreaterThanOrEqual(ask.frame.height, 44, "Ask target is too small")
+        ask.tap()
+
+        let review = app.textViews["aya.review"]
+        XCTAssertTrue(review.waitForExistence(timeout: 15), "Full reviewed reference missing")
+        let text = try XCTUnwrap(review.value as? String)
+        XCTAssertTrue(text.contains("Scope and version"), "Large-type review lost reference content")
+
+        for identifier in ["aya.copy", "aya.share.text", "aya.share.document"] {
+            let action = app.buttons[identifier]
+            XCTAssertTrue(action.waitForExistence(timeout: 10), "\(identifier) missing")
+            XCTAssertGreaterThanOrEqual(action.frame.height, 44, "\(identifier) tap target too small")
+            XCTAssertTrue(action.isHittable, "\(identifier) not reachable at large type")
+        }
+        app.buttons["aya.cancel"].tap()
+        XCTAssertTrue(ask.waitForExistence(timeout: 10))
+    }
+
     func testStaleBundledGuideFailsBeforeReview() throws {
         let app = XCUIApplication()
         app.launchArguments = ["AYA_UI_TEST_STALE_GUIDE"]
