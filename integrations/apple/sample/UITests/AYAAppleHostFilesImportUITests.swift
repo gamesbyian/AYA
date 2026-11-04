@@ -124,4 +124,22 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
+
+    func testBooleanAndFloatingColumnsNeverPassIntegerSchema() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        for filename in ["aya-layout-boolean", "aya-layout-float"] {
+            selectForeignDocument(app, stem: filename)
+
+            let alert = app.alerts["Cannot use this file"]
+            XCTAssertTrue(alert.waitForExistence(timeout: 20),
+                          "\(filename) must fail the host's integer-only JSON schema")
+            XCTAssertTrue(alert.staticTexts["This file is not a valid Lantern demo-layout JSON."].exists)
+            XCTAssertFalse(app.buttons["Apply to demo"].exists)
+            alert.buttons["Dismiss import error"].tap()
+            XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+            XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
+        }
+    }
 }
