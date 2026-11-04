@@ -40,6 +40,15 @@ struct ContentView: View {
               let contents = try? String(contentsOf: url, encoding: .utf8) else {
             return "" // AYAHelpCard rejects, never exports fabricated guidance.
         }
+        #if DEBUG
+        // Synthetic negative control. A compiled debug fixture with a stale
+        // bundled reference must never reach user review or outbound sharing.
+        if ProcessInfo.processInfo.arguments.contains("AYA_UI_TEST_STALE_GUIDE") {
+            return contents.replacingOccurrences(
+                of: "app_version_min: 1.0.0", with: "app_version_min: 0.0.0"
+            )
+        }
+        #endif
         return contents
     }()
 
