@@ -18,6 +18,15 @@ class ReferenceValidationTests(unittest.TestCase):
         self.assertTrue(result["ok"], result["errors"])
         self.assertEqual(result["sections_found"], len(REQUIRED_SECTIONS))
 
+    def test_ios_reference_requires_explicit_platform(self):
+        ios = self.good.replace("platform: android", "platform: ios")
+        accepted = validate(ios, expected_platform="ios")
+        self.assertTrue(accepted["ok"], accepted["errors"])
+        self.assertFalse(validate(ios)["ok"], "Android default must remain strict")
+        self.assertFalse(validate(self.good, expected_platform="ios")["ok"])
+        with self.assertRaises(ValueError):
+            validate(ios, expected_platform="unknown")
+
     def test_missing_section_fails(self):
         result = validate(self.good.replace("## Navigation map", "## Navigation"))
         self.assertFalse(result["ok"])
