@@ -122,6 +122,7 @@ private struct AYAPendingReview: Identifiable {
 private struct AYAReviewSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editedText: String
+    @FocusState private var editorFocused: Bool
     @State private var sharing: AYASharingPresentation?
     @State private var notice: AYAReviewNotice?
     let outputInstructions: String
@@ -140,6 +141,7 @@ private struct AYAReviewSheet: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 TextEditor(text: $editedText)
+                    .focused($editorFocused)
                     .frame(height: max(180, geometry.size.height * 0.42))
                     .font(.body.monospaced())
                     .scrollContentBackground(.hidden)
@@ -199,6 +201,11 @@ private struct AYAReviewSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .accessibilityIdentifier("aya.cancel")
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done editing") { editorFocused = false }
+                        .accessibilityIdentifier("aya.review.done-editing")
                 }
             }
             .sheet(item: $sharing) { item in
