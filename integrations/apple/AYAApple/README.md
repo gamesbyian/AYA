@@ -9,6 +9,8 @@ Two library products are available via Swift Package Manager:
 - AYAProtocol (Foundation only): exact iOS AYA-RAS identity/version/section checks, bounded user-edited approval packet, generic output import registry and conservative private-share cache expiry policy. No UI or assistant backend.
 - AYAApple (iOS/UIKit/SwiftUI): AYAHelpCard, system review/Copy/Share text or one .txt file, a native outgoing UIKit helper, user-picked Files snapshot with security-scoped coordinated off-main read and SHA-256, and the optional AYAImportPickerButton. Imported bytes never apply themselves.
 
+**Remote Swift Package discovery:** The repository root now also contains `Package.swift` referencing this package's *same* sources, so Xcode's **Add Package Dependencies** can use `https://github.com/gamesbyian/AYA.git` pinned to a tested **commit revision**. The nested manifest here remains for local development and the first-party example. See [distribution/source-preview boundaries](../../../docs/apple/DISTRIBUTION.md); there is no public SemVer-tagged Apple SDK release yet.
+
 For portable unit tests:
 
     cd integrations/apple/AYAApple
