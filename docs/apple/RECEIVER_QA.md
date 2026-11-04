@@ -1,6 +1,6 @@
 # Native iOS Share Sheet receiver QA: separate-app acceptance contract
 
-**Status: implementation design, 2026-11-04. No foreign iOS share receiver is yet built or device-tested.** This is a first-party, disposable *test fixture* for a generic AYA transport, not a runtime component, provider-specific bridge, or claimed assistant compatibility. It follows [Apple transport architecture](ARCHITECTURE.md), [Apple prior art](RESEARCH.md) and [release evidence levels](../components/RELEASE-EVIDENCE.md).
+**Status: native fixture built and packaged, 2026-11-04. Foreign Share Sheet receipt remains unverified.** [PR #132 / CI 41778363523](https://github.com/gamesbyian/AYA/actions/runs/41778363523) compiled a disposable .app and .appex with separate app identities, principal class and scoped activation metadata. Draft [PR #133](https://github.com/gamesbyian/AYA/pull/133) attempts the first installed Share Sheet byte-level acceptance. Until both transports pass, there is no receiver-ingestion evidence. This is a first-party, disposable *test fixture* for a generic AYA transport, not a runtime component, provider-specific bridge, or claimed assistant compatibility. It follows [Apple transport architecture](ARCHITECTURE.md), [Apple prior art](RESEARCH.md) and [release evidence levels](../components/RELEASE-EVIDENCE.md).
 
 ## What this test must establish
 
