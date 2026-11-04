@@ -53,6 +53,8 @@ jobs:
           ai = plistlib.loads((app / "Info.plist").read_bytes())
           ei = plistlib.loads((ext / "Info.plist").read_bytes())
           assert ai["CFBundleIdentifier"] == "org.example.aya.shareqa", ai
+          assert ai["UIFileSharingEnabled"] is True, "QA Documents must appear in Files"
+          assert ai["LSSupportsOpeningDocumentsInPlace"] is True, "QA documents need local File Provider access"
           assert ei["CFBundleIdentifier"] == "org.example.aya.shareqa.extension", ei
           assert isinstance(ei.get("CFBundleName"), str) and ei["CFBundleName"].strip(), "Share Extension must be installable (nonempty CFBundleName)"
           ns = ei["NSExtension"]
