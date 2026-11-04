@@ -11,17 +11,17 @@
 - [x] Add a SwiftPM first-party source preview with guarded iOS reference, editable draft representation, approved-text data contract and UIKit plain-text/.txt sharing entry points.
 - [x] Run portable Swift unit tests on Linux for reference identity, version, section completeness, duplicates, unresolved placeholders, user-edited approval, empty/oversized cases. **Local Linux test only.**
 - [x] Qualify actual iOS `UIKit` compilation with Xcode on macOS runner: [run 41600191635](https://github.com/gamesbyian/AYA/actions/runs/41600191635) passed both Linux Swift unit tests and a genuine Xcode iOS Simulator SDK compile at merged PR #119 head `987eeee8`. **No installed iOS app or synthetic recipient was run.**
-- [ ] Shared language-neutral JSON fixtures comparing Android and iOS guide acceptance and key handoff semantics.
+- [x] Shared [Python/iOS Swift reference fixtures](REFERENCE_PARITY.md), 13 structural and installed-version cases, merged in [PR #128](https://github.com/gamesbyian/AYA/pull/128) with docs, Linux Swift and Xcode checks green. **Android runtime cross-verifier comparison remains a separate compatibility task.**
 - [x] Path-scoped Apple CI for Swift source/tests/package and native sample; cheap always-on Python reference checks remain independent. Package README/docs-only edits do not trigger the macOS lane; native runner cost is still monitored.
 
 ### P1: fully accessible native host UI and real sample
 
 - [x] First-party native XcodeGen iOS sample with its own source-derived fictional guide and verified packaged bundle/version bytes: [PR #122, CI 41760530755](https://github.com/gamesbyian/AYA/actions/runs/41760530755). **Out-of-tree independently authored consumer is still outstanding.**
 - [ ] SwiftUI AYA card/source compiled in PR #122: visible disclosure, task and host-owned output instructions, question, 44pt actions, no fake import action. **Custom scalable AYA logo and full VoiceOver/high-contrast/Dynamic Type/keyboard/iPad acceptance remain.**
-- [x] Full editable SwiftUI review and explicit Cancel, Copy, Share text, Share .txt sources compile in [PR #122](https://github.com/gamesbyian/AYA/pull/122). **Interaction remains separately unverified on an installed Simulator** pending [PR #123](https://github.com/gamesbyian/AYA/pull/123).
+- [x] Full editable SwiftUI review and explicit Cancel, Copy, Share text, Share .txt sources compile in [PR #122](https://github.com/gamesbyian/AYA/pull/122); [PR #123 / run 41774435106](https://github.com/gamesbyian/AYA/actions/runs/41774435106) installed a real first-party iOS Simulator host and passed **3/3 XCUITests** for opened review/Cancel, populated review/Copy and stale-guide denial. **Actual Share Sheet payload delivery remains unverified.**
 - [ ] iPad popover anchoring, repeated share, cancellation, unavailable target fallback, dismissal/background, scene restoration and version mismatch.
 - [ ] iOS Simulator installed-host tests using a synthetic *foreign receiver* extension/app to inspect exactly what text and file bytes are passed, without claiming any real LLM compatibility.
-- [ ] Confirm exact app resources are packaged and stale/cross-app guide fails closed.
+- [x] Confirm exact app resources packaged ([CI 41760530755](https://github.com/gamesbyian/AYA/actions/runs/41760530755)) and installed stale-version guide fails closed before review ([CI 41774435106](https://github.com/gamesbyian/AYA/actions/runs/41774435106)); cross-app identity rejection covered by Swift unit tests, not a second installed host.
 - [ ] Host-owned Files picker source, scoped coordinated off-main snapshot with cap and SHA-256, content-based multi-route registry with wrong-card/ambiguity decisions, and separate sample Apply confirmation compile; portable negative routing tests pass. **Full wrong-card UX, provider revocation/oversize installed tests and independent importer integration remain.**
 - [ ] Reuse Android version/identity/test fixture decisions but reject any Android-only platform path assumptions.
 
@@ -50,7 +50,7 @@ Use source/OS version pinning, bounded execution and failure artifacts. macOS ru
 
 ## Work board handoff
 
-**Immediate next engineering session:** finish installed iOS Simulator interaction/negative controls (PR #123), then test the return picker with a real File Provider, iPad popover/VoiceOver/large text, multi-card wrong-route handling and an external synthetic share receiver. The SDK and first-party sample have already passed iOS SDK and `.app` packaging builds (PR #122); these builds are not installed UI evidence. Use one coherent batch of UI modifications before the first full simulator suite; correct only meaningful failures, preserve actionable build logs, and avoid redundant job fan-out.
+**Immediate next engineering session:** expand the now-green installed-simulator journey (PR #123, 3/3 XCUITests) to separately confirm reviewed **Share Sheet plain-text and .txt delivery** with a synthetic independent receiver; then test the return picker against a real File Provider, iPad popover/VoiceOver/large text and multi-card wrong-route handling. First-party iOS SDK and .app packaging are proven in PR #122; PR #123 adds only the observed local interaction flows, not external assistant receipt or safe manual import. Use one coherent batch of UI modifications before the first full simulator suite; correct only meaningful failures, preserve actionable build logs, and avoid redundant job fan-out.
 
 **Operational unknowns:** target iOS minimum deployment version, stable Xcode runner availability/cost, eligible physical test devices, and actual compatibility of individual assistant targets. iOS 16 is the provisional SwiftPM minimum for baseline accessibility and document workflows; reconsider if measured adoption benefits warrant older support. No Apple Developer account is necessary for source research/SwiftPM unit tests, but shipping/signed physical distribution may need one.
 
