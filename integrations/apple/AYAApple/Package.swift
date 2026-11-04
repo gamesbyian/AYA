@@ -11,6 +11,10 @@ let package = Package(
     targets: [
         .target(name: "AYAProtocol"),
         .target(name: "AYAApple", dependencies: ["AYAProtocol"]),
-        .testTarget(name: "AYAProtocolTests", dependencies: ["AYAProtocol"])
+        .testTarget(
+            name: "AYAProtocolTests",
+            dependencies: ["AYAProtocol"],
+            resources: [.copy("Fixtures")]
+        )
     ]
 )
