@@ -85,7 +85,13 @@ class AyaExternalUriGrantTest {
 
         // A share target knowing the URI string must not be able to read it
         // without a temporary permission grant. No ClipData or grant flags.
-        val ungranted = Intent(Intent.ACTION_SEND).apply {
+        // ACTION_SEND is special: when an Activity is started Android can
+        // migrate EXTRA_STREAM to ClipData and add a temporary URI grant
+        // automatically. A neutral, explicitly targeted QA action avoids
+        // accidentally granting the very permission this negative control
+        // is meant to withhold. The positive control below still dispatches
+        // the original genuine AYA ACTION_SEND and checks identical bytes.
+        val ungranted = Intent("dev.aya.qa.receiver.TEST_UNGRANTED").apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_STREAM, uri)
         }
