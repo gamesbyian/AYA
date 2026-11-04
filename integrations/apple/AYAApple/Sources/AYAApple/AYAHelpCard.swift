@@ -147,11 +147,6 @@ private struct AYAReviewSheet: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
-                if copied {
-                    Text("Copied the current approved text. Paste it into an assistant manually.")
-                        .font(.caption)
-                        .accessibilityAddTraits(.updatesFrequently)
-                }
                 VStack(spacing: 6) {
                     Button {
                         withApprovedPacket { packet in
@@ -196,13 +191,18 @@ private struct AYAReviewSheet: View {
             .sheet(item: $sharing) { item in
                 AYAActivitySheet(controller: item.controller)
             }
-            .alert("Cannot share", isPresented: Binding(
-                get: { errorMessage != nil },
-                set: { if !$0 { errorMessage = nil } }
+            .alert(copied ? "Copied to clipboard" : "Cannot share", isPresented: Binding(
+                get: { copied || errorMessage != nil },
+                set: { if !$0 { copied = false; errorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { errorMessage = nil }
+                Button("OK", role: .cancel) {
+                    copied = false
+                    errorMessage = nil
+                }
             } message: {
-                Text(errorMessage ?? "The current text could not be shared.")
+                Text(copied
+                    ? "The current approved text is on the clipboard. Paste it into your chosen assistant."
+                    : (errorMessage ?? "The current text could not be shared."))
             }
         }
         .presentationDetents([.large])
