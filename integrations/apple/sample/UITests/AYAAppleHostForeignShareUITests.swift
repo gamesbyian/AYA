@@ -26,9 +26,9 @@ final class AYAAppleHostForeignShareUITests: XCTestCase {
         SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
     }
 
-    private func verifyForeignShare(buttonId: String, expectedKind: String) throws {
-        let expected = try expectedApprovedBytes()
-        let digest = receiptSHA(expected)
+    private func verifyForeignShare(buttonId: String, expectedKind: String,
+                                    editInReview: Bool = false) throws {
+        var expected = try expectedApprovedBytes()
         let app = XCUIApplication()
         app.launch()
         let ask = app.buttons["aya.ask"]
@@ -38,9 +38,29 @@ final class AYAAppleHostForeignShareUITests: XCTestCase {
         let review = app.textViews["aya.review"]
         XCTAssertTrue(review.waitForExistence(timeout: 15), "Editable consent document missing")
         let approved = try XCTUnwrap(review.value as? String)
-        XCTAssertEqual(receiptSHA(Data(approved.utf8)), digest,
-                       "The actual reviewed document differs from the source fixture")
+        XCTAssertEqual(Data(approved.utf8), expected,
+                       "The initial review differs from the source-derived synthetic fixture")
 
+        if editInReview {
+            // Actually type into the user-facing TextEditor, rather than
+            // injecting a packet or faking a share callback. Verify the edit
+            // is exactly one insertion and the original document survived.
+            let marker = "AYA_QA_USER_EDIT_20261104"
+            review.tap()
+            review.typeText(marker)
+            let edited = try XCTUnwrap(review.value as? String)
+            XCTAssertNotEqual(edited, approved, "User's edit did not take effect")
+            XCTAssertTrue(edited.contains(marker), "Editor lost the requested edit")
+            XCTAssertEqual(edited.replacingOccurrences(of: marker, with: ""), approved,
+                           "Editor unexpectedly modified another part of the reference")
+            expected = Data(edited.utf8)
+
+            let done = app.buttons["aya.review.done-editing"]
+            XCTAssertTrue(done.waitForExistence(timeout: 10),
+                          "No accessible action to close the keyboard before sharing")
+            done.tap()
+        }
+        let digest = receiptSHA(expected)
         let share = app.buttons[buttonId]
         XCTAssertTrue(share.waitForExistence(timeout: 10), "Requested share mode not offered")
         share.tap()
@@ -113,5 +133,15 @@ final class AYAAppleHostForeignShareUITests: XCTestCase {
 
     func testApprovedTXTFileReceivedBySeparateExtension() throws {
         try verifyForeignShare(buttonId: "aya.share.document", expectedKind: "file")
+    }
+
+    func testEditedPlainTextDeliveredWithoutStaleContent() throws {
+        try verifyForeignShare(buttonId: "aya.share.text", expectedKind: "text",
+                               editInReview: true)
+    }
+
+    func testEditedTXTDeliveredWithoutStaleContent() throws {
+        try verifyForeignShare(buttonId: "aya.share.document", expectedKind: "file",
+                               editInReview: true)
     }
 }

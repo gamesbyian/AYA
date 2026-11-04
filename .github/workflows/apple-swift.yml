@@ -170,7 +170,7 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/aya-apple-ui.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ui-test.log"
-      - name: Verify iPad review controls at accessibility text size
+      - name: Verify iPad large-text review and independent Share Sheet receipts
         run: |
           set -euo pipefail
           IPAD_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((v["udid"] for arr in data["devices"].values() for v in arr if v.get("isAvailable") and v.get("name","").startswith("iPad")), ""))')"
@@ -180,6 +180,15 @@ jobs:
           fi
           xcrun simctl boot "$IPAD_ID" || true
           xcrun simctl bootstatus "$IPAD_ID" -b
+          # Native iPad Share Sheet acceptance needs two separately installed
+          # apps, just as the iPhone foreign-receiver test does. Reuse the
+          # existing compiled iOS app artifacts without a second Xcode build.
+          QA_APP="$RUNNER_TEMP/aya-share-qa-derived/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+          AYA_APP="$RUNNER_TEMP/aya-apple-sample-derived/Build/Products/Debug-iphonesimulator/AYAAppleHost.app"
+          xcrun simctl install "$IPAD_ID" "$QA_APP"
+          xcrun simctl launch "$IPAD_ID" org.example.aya.shareqa
+          xcrun simctl terminate "$IPAD_ID" org.example.aya.shareqa || true
+          xcrun simctl install "$IPAD_ID" "$AYA_APP"
           set -o pipefail
           xcodebuild \
             -project ../sample/AYAAppleHost.xcodeproj \
@@ -190,10 +199,14 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/aya-apple-sample-derived" \
             -resultBundlePath "$RUNNER_TEMP/aya-apple-ipad-ui.xcresult" \
             -only-testing:AYAAppleHostUITests/AYAAppleHostUITests/testLargeTypeReviewActionsRemainReachable \
+            -only-testing:AYAAppleHostUITests/AYAAppleHostForeignShareUITests/testApprovedPlainTextReceivedBySeparateExtension \
+            -only-testing:AYAAppleHostUITests/AYAAppleHostForeignShareUITests/testApprovedTXTFileReceivedBySeparateExtension \
             CODE_SIGNING_ALLOWED=NO \
             test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
           grep -q "testLargeTypeReviewActionsRemainReachable" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
-          grep -Eq "Executed 1 test, with 0 failures" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
+          grep -q "testApprovedPlainTextReceivedBySeparateExtension" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
+          grep -q "testApprovedTXTFileReceivedBySeparateExtension" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
+          grep -Eq "Executed 3 tests, with 0 failures" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
       - name: Retain bounded build diagnostic log on failure
         if: failure()
         uses: actions/upload-artifact@v4

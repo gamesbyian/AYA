@@ -1,0 +1,55 @@
+name: AYAIndependentHostQA
+options:
+  bundleIdPrefix: org.example
+  createIntermediateGroups: true
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+packages:
+  AYA:
+    path: ../../..
+targets:
+  AYAIndependentHostQA:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources
+      - path: Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.example.aya.readerqa
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "AYA Reader QA"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        CODE_SIGNING_ALLOWED: NO
+    dependencies:
+      - package: AYA
+        product: AYAApple
+  AYAIndependentHostQAUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: UITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.example.aya.readerqa.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+    dependencies:
+      - target: AYAIndependentHostQA
+schemes:
+  AYAIndependentHostQA:
+    build:
+      targets:
+        AYAIndependentHostQA: all
+    test:
+      targets:
+        - AYAIndependentHostQAUITests
