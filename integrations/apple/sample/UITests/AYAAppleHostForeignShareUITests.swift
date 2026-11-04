@@ -45,19 +45,49 @@ final class AYAAppleHostForeignShareUITests: XCTestCase {
         XCTAssertTrue(share.waitForExistence(timeout: 10), "Requested share mode not offered")
         share.tap()
 
-        // The other APK's Share Extension must be available in the actual
-        // operating-system activity chooser. No recipient substitution or
-        // simulation is permitted if its item is absent.
-        let foreign = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS[c] %@", "AYA QA Receiver"))
-            .firstMatch
-        _ = foreign.waitForExistence(timeout: 12)
-        for _ in 0..<8 {
-            if foreign.isHittable { break }
+        // The foreign .appex must appear as a genuine, selectable system
+        // share target. On current iOS versions the title can derive from
+        // either its own CFBundleDisplayName or its containing app. Probe
+        // both host and SpringBoard accessibility containers before failing.
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let labels = ["AYA QA Receiver", "AYA Share QA", "AYA Share QA Extension"]
+        var receiver: XCUIElement?
+        for attempt in 0..<8 {
+            for container in [app, springboard] {
+                for label in labels {
+                    let candidate = container.descendants(matching: .any)
+                        .matching(NSPredicate(format: "label CONTAINS[c] %@", label))
+                        .firstMatch
+                    if candidate.exists && candidate.isHittable {
+                        receiver = candidate
+                        break
+                    }
+                }
+                if receiver != nil { break }
+            }
+            if receiver != nil { break }
+            if attempt == 2 {
+                // Some iOS share panels hide new extensions behind More.
+                let more = app.buttons["More"]
+                if more.isHittable { more.tap() }
+            }
             app.swipeUp()
         }
-        XCTAssertTrue(foreign.isHittable,
-                      "Foreign QA Share Extension was not offered/reachable in the real system chooser")
+        if receiver == nil {
+            // Metadata-only diagnostics. Never print the entire accessibility
+            // tree, because the AYA review contains the user's approved text.
+            let appButtons = app.buttons.allElementsBoundByIndex
+                .map(\.label).filter { !$0.contains("\n") && $0.count < 65 }
+                .prefix(35)
+            let systemButtons = springboard.buttons.allElementsBoundByIndex
+                .map(\.label).filter { !$0.contains("\n") && $0.count < 65 }
+                .prefix(35)
+            print("Foreign Share QA unavailable; host button labels: \(Array(appButtons))")
+            print("Foreign Share QA unavailable; system button labels: \(Array(systemButtons))")
+            print("ActivityListView present: \(app.otherElements["ActivityListView"].exists)")
+        }
+        let foreign = try XCTUnwrap(receiver,
+            "Foreign QA Share Extension was not offered/reachable in the real system chooser")
         foreign.tap()
 
         let extensionApp = XCUIApplication(bundleIdentifier: "org.example.aya.shareqa.extension")

@@ -123,6 +123,10 @@ jobs:
           APP="$RUNNER_TEMP/aya-apple-sample-derived/Build/Products/Debug-iphonesimulator/AYAAppleHost.app"
           RECEIVER="$RUNNER_TEMP/aya-share-qa-derived/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
           xcrun simctl install "$SIM_ID" "$RECEIVER"
+          # Launch the disposable containing app once so SpringBoard can
+          # register its embedded share extension before UI automation.
+          xcrun simctl launch "$SIM_ID" org.example.aya.shareqa
+          xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
           set -o pipefail
