@@ -70,7 +70,7 @@ jobs:
               '  dependencies: [.package(path: ' + repr(str(root)).replace("'", '"') + ')],\n'
               '  targets: [\n'
               '    .target(name: "ForeignConsumer", dependencies: ['
-              '.product(name: "AYAProtocol", package: "AYAApple")]),\n'
+              '.product(name: "AYAProtocol", package: "AYA")]),\n'
               '    .testTarget(name: "ForeignConsumerTests", dependencies: ["ForeignConsumer"])\n'
               '  ]\n'
               ')\n', encoding="utf-8"
