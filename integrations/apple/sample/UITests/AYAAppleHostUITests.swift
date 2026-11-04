@@ -7,6 +7,14 @@ final class AYAAppleHostUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    private func reveal(_ target: XCUIElement, scrollingIn scroll: XCUIElement) {
+        for _ in 0..<10 {
+            if target.isHittable { return }
+            scroll.swipeUp()
+        }
+        XCTAssertTrue(target.isHittable, "Control remains unreachable after bounded scrolling")
+    }
+
     func testReviewOpensAndCancelReturnsWithoutSharing() throws {
         let app = XCUIApplication()
         app.launch()
@@ -59,6 +67,38 @@ final class AYAAppleHostUITests: XCTestCase {
         ].exists)
         confirmation.buttons["OK"].tap()
         app.buttons["aya.cancel"].tap()
+    }
+
+    func testLargeTypeReviewActionsRemainReachable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["AYA_UI_TEST_LARGE_TYPE"]
+        app.launch()
+
+        let ask = app.buttons["aya.ask"]
+        XCTAssertTrue(ask.waitForExistence(timeout: 20), "Large-type AYA card missing")
+        // The host deliberately scrolls at large Dynamic Type. Offscreen
+        // controls are acceptable if the user can reveal and tap them.
+        let hostScroll = app.scrollViews.firstMatch
+        XCTAssertTrue(hostScroll.exists, "Host has no scrollable large-text layout")
+        reveal(ask, scrollingIn: hostScroll)
+        XCTAssertGreaterThanOrEqual(ask.frame.height, 44, "Ask target is too small")
+        ask.tap()
+
+        let review = app.textViews["aya.review"]
+        XCTAssertTrue(review.waitForExistence(timeout: 15), "Full reviewed reference missing")
+        let text = try XCTUnwrap(review.value as? String)
+        XCTAssertTrue(text.contains("Scope and version"), "Large-type review lost reference content")
+
+        for identifier in ["aya.copy", "aya.share.text", "aya.share.document"] {
+            let action = app.buttons[identifier]
+            XCTAssertTrue(action.waitForExistence(timeout: 10), "\(identifier) missing")
+            XCTAssertGreaterThanOrEqual(action.frame.height, 44, "\(identifier) tap target too small")
+            let reviewScroll = app.scrollViews["aya.review.scroller"]
+            XCTAssertTrue(reviewScroll.exists, "Full review lacks an accessible scrolling surface")
+            reveal(action, scrollingIn: reviewScroll)
+        }
+        app.buttons["aya.cancel"].tap()
+        XCTAssertTrue(ask.waitForExistence(timeout: 10))
     }
 
     func testStaleBundledGuideFailsBeforeReview() throws {

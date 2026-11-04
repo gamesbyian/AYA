@@ -80,6 +80,16 @@ struct ContentView: View {
                         outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
                         onImportRequested: { showFilePicker = true }
                     )
+                    .transformEnvironment(\.dynamicTypeSize) { size in
+                        #if DEBUG
+                        // Deterministic first-party accessibility fixture.
+                        // The override is absent in Release and never reaches
+                        // the SDK or an independently adopting host.
+                        if ProcessInfo.processInfo.arguments.contains("AYA_UI_TEST_LARGE_TYPE") {
+                            size = .accessibility3
+                        }
+                        #endif
+                    }
                 }
                 .padding(16)
                 .frame(maxWidth: 560)

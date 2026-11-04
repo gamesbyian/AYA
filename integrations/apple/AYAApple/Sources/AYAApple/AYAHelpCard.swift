@@ -133,11 +133,14 @@ private struct AYAReviewSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 10) {
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
                 Text("Edit everything below before sharing. The selected assistant may store or upload the approved text.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 TextEditor(text: $editedText)
+                    .frame(height: max(180, geometry.size.height * 0.42))
                     .font(.body.monospaced())
                     .scrollContentBackground(.hidden)
                     .padding(6)
@@ -185,8 +188,11 @@ private struct AYAReviewSheet: View {
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("aya.share.document")
                 }
+                    }
+                    .padding(16)
+                }
+                .accessibilityIdentifier("aya.review.scroller")
             }
-            .padding(16)
             .navigationTitle("Review AYA handoff")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
