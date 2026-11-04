@@ -72,10 +72,15 @@ def validate(text: str, expected_platform: str = "android") -> dict:
         errors.append("schema_version must be aya-reference/v1.")
     if expected_platform not in ("android", "ios"):
         raise ValueError("expected_platform must be android or ios")
-    if fields.get("platform", "").lower() != expected_platform:
-        errors.append(f"platform must be {expected_platform} for this target.")
-    if fields.get("app_id") and not re.fullmatch(r"[a-zA-Z_][\w]*(\.[a-zA-Z_][\w]*)+", fields["app_id"]):
-        errors.append("app_id must be a dotted Android package identifier.")
+    if fields.get("platform") != expected_platform:
+        errors.append(f"platform must be exactly {expected_platform} for this target.")
+    app_id = fields.get("app_id")
+    if app_id:
+        if expected_platform == "android":
+            if not re.fullmatch(r"[a-zA-Z_][\w]*(\.[a-zA-Z_][\w]*)+", app_id):
+                errors.append("app_id must be a dotted Android package identifier.")
+        elif not re.fullmatch(r"[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*", app_id):
+            errors.append("app_id must use the iOS bundle ID character set (letters, numbers, hyphens, periods).")
     if fields.get("app_version_min") and fields.get("app_version_max"):
         if fields["app_version_min"] != fields["app_version_max"]:
             warnings.append("Version range spans multiple releases; verify that every instruction applies to the whole range.")
