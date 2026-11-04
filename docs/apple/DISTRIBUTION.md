@@ -1,6 +1,6 @@
 # Apple drop-in distribution: root Swift Package discovery
 
-**Status (2026-11-04): source-preview repository package; root SwiftPM and independent *synthetic* consumer qualified only when [PR #140](https://github.com/gamesbyian/AYA/pull/140) native/portable checks pass.** No semantically versioned public SDK release or independent commercial host has been certified. These instructions are for developers who choose to reuse code. AYA remains an Unlicensed, provider-neutral **interaction convention**; using the concept does not require using this package.
+**Status (2026-11-04): source-preview repository package; root SwiftPM and out-of-tree synthetic consumer qualified by [PR #140 / CI 41828745641](https://github.com/gamesbyian/AYA/actions/runs/41828745641), and a second separately authored fictional iOS native host passed [PR #141 / CI 41830294217](https://github.com/gamesbyian/AYA/actions/runs/41830294217).** No semantically versioned public SDK release or independent commercial host has been certified. These instructions are for developers who choose to reuse code. AYA remains an Unlicensed, provider-neutral **interaction convention**; using the concept does not require using this package.
 
 ## Why a root manifest matters
 
@@ -42,7 +42,7 @@ with `.package(path: ".../integrations/apple/AYAApple")`. Host developers must b
 ## Release/compatibility gates
 
 1. Both SwiftPM manifests agree on public products, targets and available source. One CI run builds/test the *root package*, another compiles the nested package and the actual iOS SwiftUI UIKit app, and one outside-tree Linux client imports the pure Foundation library.
-2. A second independently designed **native** host must build and use the public `AYAApple` UI/transport product in a real iOS Simulator, with its own authored guide. Copying the current Lantern first-party app into a different directory is a useful packaging check but does not establish independent implementation quality.
+2. A **second separately authored fictional native host** now uses root `AYAApple` with its own installed-version guide and has passed native iOS Simulator tests ([PR #141 / CI 41830294217](https://github.com/gamesbyian/AYA/actions/runs/41830294217)). A genuinely external developer adopting AYA in an actual production app still needs independent review, importer, accessibility, privacy and lifecycle acceptance. Repackaging Lantern alone would not establish that.
 3. Real assistants must be tested by dated app/version/iOS/transport against the actual approved text and attachment. The synthetic foreign extension passed plain text and .txt byte reception ([PR #133 / CI 41781406186](https://github.com/gamesbyian/AYA/actions/runs/41781406186)), but does not prove any third-party AI model consumed the packet.
 4. Actual Files return and semantic host apply, physical-device VoiceOver and iPad, lifecycle/background, security review, SemVer API policy, source provenance and public tag policy remain separate release requirements.
 5. A release must not introduce tracking, service accounts, a mandatory AI provider, hidden assistant output watchers, cross-app sandbox scanning or automatic artifact application.
