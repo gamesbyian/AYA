@@ -136,8 +136,21 @@ jobs:
           mkdir -p "$QA_DATA/Documents"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":3,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-valid.json"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}' > "$QA_DATA/Documents/aya-layout-invalid.json"
+          # Deliberately VALID JSON with only the host's three expected keys.
+          # Its trailing whitespace makes the user-picked artifact one byte
+          # beyond the 4 MiB default cap. If a read or cap is bypassed, the
+          # host's semantic validator would otherwise accept the document.
+          python3 - "$QA_DATA/Documents/aya-layout-oversized.json" <<'PY'
+          from pathlib import Path
+          import sys
+          payload = b'{"aya_demo_layout":"v1","columns":3,"accent":"cool"}'
+          output = Path(sys.argv[1])
+          output.write_bytes(payload + b' ' * (4 * 1024 * 1024 + 1 - len(payload)))
+          assert output.stat().st_size == 4 * 1024 * 1024 + 1
+          PY
           test -s "$QA_DATA/Documents/aya-layout-valid.json"
           test -s "$QA_DATA/Documents/aya-layout-invalid.json"
+          test -s "$QA_DATA/Documents/aya-layout-oversized.json"
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
           set -o pipefail
