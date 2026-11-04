@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.ResultReceiver
 import java.security.MessageDigest
 
 /**
@@ -16,11 +15,6 @@ import java.security.MessageDigest
 class ReceiverActivity : BroadcastReceiver() {
     @Suppress("DEPRECATION")
     override fun onReceive(context: Context, intent: Intent) {
-        val callback = if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra(EXTRA_CALLBACK, ResultReceiver::class.java)
-        } else {
-            intent.getParcelableExtra<ResultReceiver>(EXTRA_CALLBACK)
-        }
         val uri = if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
@@ -49,10 +43,12 @@ class ReceiverActivity : BroadcastReceiver() {
         }
         result.putString("status", status)
         result.putInt("receiver_uid", android.os.Process.myUid())
-        callback?.send(if (status == "read") 1 else 0, result)
+        result.putBoolean("receiver_ack", true)
+        // The sending instrumentation test receives these metadata-only
+        // extras from Android's ordered broadcast. No document body leaves
+        // this process through the evidence channel.
+        setResultExtras(result)
+        setResultCode(if (status == "read") 1 else 0)
     }
 
-    companion object {
-        const val EXTRA_CALLBACK = "dev.aya.qa.receiver.RESULT_CALLBACK"
-    }
 }
