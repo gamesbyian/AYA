@@ -94,28 +94,15 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
         selectForeignDocument(app, stem: "aya-layout-invalid")
-        let rejected = app.staticTexts["host.import.error"]
-        let visible = rejected.waitForExistence(timeout: 20)
-        if !visible {
-            // Metadata-only diagnostics: never dump the full accessibility
-            // tree, which may contain the editable AYA reference payload.
-            let buttons = app.buttons.allElementsBoundByIndex
-                .map(\.label)
-                .filter { !$0.contains("\n") && $0.count <= 60 }
-                .prefix(24)
-            let navigation = app.navigationBars.allElementsBoundByIndex
-                .map(\.label).filter { !$0.contains("\n") && $0.count <= 60 }
-                .prefix(12)
-            print("Foreign Files rejection did not surface. Host controls: \(Array(buttons))")
-            print("Navigation labels: \(Array(navigation))")
-            print("Host state accessible: \(app.staticTexts["host.layout.state"].exists)")
-        }
-        XCTAssertTrue(visible,
-                      "Invalid foreign JSON produced no visible host-owned rejection")
-        XCTAssertEqual(rejected.label, "This file is not a valid Lantern demo-layout JSON.")
+        let alert = app.alerts["Cannot use this file"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 20),
+                      "Invalid foreign JSON must produce an immediately visible host-owned alert")
+        let expected = "This file is not a valid Lantern demo-layout JSON."
+        XCTAssertTrue(alert.staticTexts[expected].exists,
+                      "Host failed to explain why the selected foreign JSON was rejected")
         XCTAssertFalse(app.buttons["Apply to demo"].exists,
                        "Invalid JSON offered Apply")
-        app.buttons["host.import.error.dismiss"].tap()
+        alert.buttons["Dismiss import error"].tap()
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
     }
