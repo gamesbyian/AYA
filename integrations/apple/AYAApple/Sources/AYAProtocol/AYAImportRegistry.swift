@@ -59,14 +59,16 @@ public struct AYAImportRegistry {
 
     public func inspect(_ file: AYAImportFile, cardRouteID: String? = nil) -> AYAImportDecision {
         let matched = routes.filter { $0.recognizes(file.data) }
-        let valid = matched.filter { $0.validates(file.data) }
-        if valid.count == 1 {
-            let selected = valid[0]
-            return .ready(route: selected, wrongCard: cardRouteID.map { $0 != selected.id } ?? false)
+        // Multiple format recognizers mean ambiguous user intent, even if
+        // one validator would subsequently reject the same data. Do not
+        // silently redirect a file through whichever validator is most
+        // permissive. Match Android's conservative app-wide routing rule.
+        if matched.count > 1 { return .ambiguous(routes: matched) }
+        guard let selected = matched.first else { return .unrecognized }
+        guard selected.validates(file.data) else {
+            return .unusable(recognizedRouteIDs: [selected.id])
         }
-        if valid.count > 1 { return .ambiguous(routes: valid) }
-        if !matched.isEmpty { return .unusable(recognizedRouteIDs: matched.map(\.id)) }
-        return .unrecognized
+        return .ready(route: selected, wrongCard: cardRouteID.map { $0 != selected.id } ?? false)
     }
 
     /// Explicit route choice re-runs recognition and validation; it does not
