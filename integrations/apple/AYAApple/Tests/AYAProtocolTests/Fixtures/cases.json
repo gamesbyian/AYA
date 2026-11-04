@@ -1,0 +1,97 @@
+{
+  "schema": "aya-reference-parity/v1",
+  "description": "Shared structural cases. offlineAccepts is Python AYA-RAS linter .ok; runtimeAccepts is Swift exact installed-build validator. Format/schema stays platform neutral; data is fictional.",
+  "installedAppID": "org.example.aya-lantern",
+  "installedVersion": "1.0.0",
+  "cases": [
+    {
+      "id": "exact-ios-guide",
+      "offlineAccepts": true,
+      "runtimeAccepts": true
+    },
+    {
+      "id": "android-guide-on-ios",
+      "find": "platform: ios",
+      "replace": "platform: android",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "wrong-schema",
+      "find": "schema_version: aya-reference/v1",
+      "replace": "schema_version: unknown/v1",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "wrong-installed-app",
+      "find": "app_id: org.example.aya-lantern",
+      "replace": "app_id: org.example.elsewhere",
+      "offlineAccepts": true,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "wrong-installed-version",
+      "find": "app_version_max: 1.0.0",
+      "replace": "app_version_max: 0.9.0",
+      "offlineAccepts": true,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "missing-owner",
+      "find": "owner: AYA fixture contributors\n",
+      "replace": "",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "duplicate-metadata",
+      "find": "app_name: Lantern Demonstration",
+      "replace": "app_name: Lantern Demonstration\napp_name: Duplicate",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "missing-section",
+      "find": "## Navigation map",
+      "replace": "## Navigation",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "extra-section",
+      "find": "## Navigation map",
+      "replace": "## Invented section\nThis section was invented.\n\n## Navigation map",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "empty-section",
+      "find": "The user may toggle a fictional display layout in the host. The setting has no external side effects or background processing and no third-party service is called.",
+      "replace": "",
+      "offlineAccepts": true,
+      "runtimeAccepts": true
+    },
+    {
+      "id": "unresolved-placeholder",
+      "find": "Use only this fixture's documented controls.",
+      "replace": "Use <finish this sentence> before answering.",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "missing-closing-frontmatter",
+      "find": "owner: AYA fixture contributors\n---",
+      "replace": "owner: AYA fixture contributors",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    },
+    {
+      "id": "case-sensitive-platform",
+      "find": "platform: ios",
+      "replace": "platform: IOS",
+      "offlineAccepts": false,
+      "runtimeAccepts": false
+    }
+  ]
+}
