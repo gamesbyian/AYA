@@ -17,12 +17,12 @@
 ### P1: fully accessible native host UI and real sample
 
 - [x] First-party native XcodeGen iOS sample with its own source-derived fictional guide and verified packaged bundle/version bytes: [PR #122, CI 41760530755](https://github.com/gamesbyian/AYA/actions/runs/41760530755). **Out-of-tree independently authored consumer is still outstanding.**
-- [~] SwiftUI AYA card/source compiled in PR #122: visible disclosure, task and host-owned output instructions, question, 44pt actions, no fake import action. **Custom scalable AYA logo and full VoiceOver/high-contrast/Dynamic Type/keyboard/iPad acceptance remain.**
+- [ ] SwiftUI AYA card/source compiled in PR #122: visible disclosure, task and host-owned output instructions, question, 44pt actions, no fake import action. **Custom scalable AYA logo and full VoiceOver/high-contrast/Dynamic Type/keyboard/iPad acceptance remain.**
 - [x] Full editable SwiftUI review and explicit Cancel, Copy, Share text, Share .txt sources compile in [PR #122](https://github.com/gamesbyian/AYA/pull/122). **Interaction remains separately unverified on an installed Simulator** pending [PR #123](https://github.com/gamesbyian/AYA/pull/123).
 - [ ] iPad popover anchoring, repeated share, cancellation, unavailable target fallback, dismissal/background, scene restoration and version mismatch.
 - [ ] iOS Simulator installed-host tests using a synthetic *foreign receiver* extension/app to inspect exactly what text and file bytes are passed, without claiming any real LLM compatibility.
 - [ ] Confirm exact app resources are packaged and stale/cross-app guide fails closed.
-- [~] Host-owned Files picker source, scoped coordinated off-main snapshot with cap and SHA-256, content-based multi-route registry with wrong-card/ambiguity decisions, and separate sample Apply confirmation compile; portable negative routing tests pass. **Full wrong-card UX, provider revocation/oversize installed tests and independent importer integration remain.**
+- [ ] Host-owned Files picker source, scoped coordinated off-main snapshot with cap and SHA-256, content-based multi-route registry with wrong-card/ambiguity decisions, and separate sample Apply confirmation compile; portable negative routing tests pass. **Full wrong-card UX, provider revocation/oversize installed tests and independent importer integration remain.**
 - [ ] Reuse Android version/identity/test fixture decisions but reject any Android-only platform path assumptions.
 
 ### P2: genuine compatibility and distribution
@@ -50,7 +50,7 @@ Use source/OS version pinning, bounded execution and failure artifacts. macOS ru
 
 ## Work board handoff
 
-**Immediate next engineering session:** implement the native review card and a real first-party iOS sample, then qualify Xcode iOS Simulator compilation and behavior. The UIKit source-preview helper in the foundation is **unverified on Apple** until then. Use one coherent batch of UI modifications before the first full simulator suite; correct only meaningful failures, preserve actionable build logs, and avoid redundant job fan-out.
+**Immediate next engineering session:** finish installed iOS Simulator interaction/negative controls (PR #123), then test the return picker with a real File Provider, iPad popover/VoiceOver/large text, multi-card wrong-route handling and an external synthetic share receiver. The SDK and first-party sample have already passed iOS SDK and `.app` packaging builds (PR #122); these builds are not installed UI evidence. Use one coherent batch of UI modifications before the first full simulator suite; correct only meaningful failures, preserve actionable build logs, and avoid redundant job fan-out.
 
 **Operational unknowns:** target iOS minimum deployment version, stable Xcode runner availability/cost, eligible physical test devices, and actual compatibility of individual assistant targets. iOS 16 is the provisional SwiftPM minimum for baseline accessibility and document workflows; reconsider if measured adoption benefits warrant older support. No Apple Developer account is necessary for source research/SwiftPM unit tests, but shipping/signed physical distribution may need one.
 
