@@ -170,11 +170,13 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/aya-apple-ipad-ui.xcresult" \
             -only-testing:AYAAppleHostUITests/AYAAppleHostUITests/testLargeTypeReviewActionsRemainReachable \
             -only-testing:AYAAppleHostUITests/AYAAppleHostForeignShareUITests/testApprovedPlainTextReceivedBySeparateExtension \
+            -only-testing:AYAAppleHostUITests/AYAAppleHostForeignShareUITests/testApprovedTXTFileReceivedBySeparateExtension \
             CODE_SIGNING_ALLOWED=NO \
             test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
           grep -q "testLargeTypeReviewActionsRemainReachable" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
           grep -q "testApprovedPlainTextReceivedBySeparateExtension" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
-          grep -Eq "Executed 2 tests, with 0 failures" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
+          grep -q "testApprovedTXTFileReceivedBySeparateExtension" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
+          grep -Eq "Executed 3 tests, with 0 failures" "$RUNNER_TEMP/aya-apple-ipad-ui-test.log"
       - name: Retain bounded build diagnostic log on failure
         if: failure()
         uses: actions/upload-artifact@v4
