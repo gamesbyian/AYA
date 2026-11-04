@@ -1,13 +1,14 @@
 package dev.aya.android
 
 import android.content.ComponentName
+import android.content.BroadcastReceiver
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.ResultReceiver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
@@ -31,23 +32,30 @@ class AyaExternalUriGrantTest {
     private fun sendToSeparateApp(intent: Intent): Bundle {
         val done = CountDownLatch(1)
         val result = AtomicReference<Bundle>()
-        val callback = object : ResultReceiver(Handler(Looper.getMainLooper())) {
-            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-                result.set(resultData)
+        // The system invokes this local final ordered-broadcast receiver even
+        // when the external receiver is missing. This makes absent delivery an
+        // explicit failed assertion instead of a missing Parcelable callback.
+        val finalReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                result.set(getResultExtras(false))
                 done.countDown()
             }
         }
         intent.component = ComponentName(
             "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
         )
-        intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
-        // An APK freshly installed by CI may be in Android's stopped-package state.
-        // An explicit, narrowly targeted QA broadcast is allowed to wake this fixture.
-        // The URI grant is temporary and scoped to the receiving package.
+        // A fresh CI APK may still be in Android's stopped-package state.
+        // Ordered delivery returns evidence without a Parcelable callback
+        // crossing the test and foreign-app process boundary.
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-        context.sendBroadcast(intent)
-        assertTrue("Independent receiver failed to respond", done.await(20, TimeUnit.SECONDS))
-        return result.get() ?: throw AssertionError("Receiver returned no evidence")
+        context.sendOrderedBroadcast(
+            intent, null, finalReceiver, Handler(Looper.getMainLooper()),
+            Activity.RESULT_OK, null, Bundle()
+        )
+        assertTrue("Ordered broadcast did not complete", done.await(20, TimeUnit.SECONDS))
+        val evidence = result.get() ?: throw AssertionError("Ordered broadcast returned no bundle")
+        assertTrue("Foreign receiver never handled the broadcast", evidence.getBoolean("receiver_ack"))
+        return evidence
     }
 
     @Test fun externalAppCannotOpenUngrantedUriButReadsSameUriWithExplicitReadGrant() {
