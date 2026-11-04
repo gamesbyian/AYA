@@ -24,6 +24,12 @@ object AyaReferenceVerifier {
     )
 
     fun verify(guide: String, installedPackageId: String, installedVersion: String): AyaReferenceCheck {
+        // Keep the installed-build guard aligned with the Swift reference and
+        // the eventual 2 MiB approved-share boundary. UTF-8 bytes matter here:
+        // counting UTF-16 code units could accept an oversized Unicode guide.
+        if (guide.toByteArray(Charsets.UTF_8).size > 2 * 1024 * 1024) {
+            return AyaReferenceCheck.Rejected("Reference document exceeds 2 MiB.")
+        }
         val lines = guide.removePrefix("\uFEFF").lineSequence().toList()
         if (lines.firstOrNull()?.trim() != "---") {
             return AyaReferenceCheck.Rejected("Reference metadata is missing.")

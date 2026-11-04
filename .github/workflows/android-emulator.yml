@@ -5,6 +5,7 @@ on:
       - "aya/**"
       - "qa-external-receiver/**"
       - "sample/**"
+      - "tools/run_android_emulator_qa.sh"
       - ".github/workflows/android-emulator.yml"
   workflow_dispatch:
 
