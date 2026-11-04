@@ -32,6 +32,14 @@ final class AYAAppleHostUITests: XCTestCase {
         XCTAssertTrue(ask.waitForExistence(timeout: 20))
         ask.tap()
 
+        let review = app.textViews["aya.review"]
+        XCTAssertTrue(review.waitForExistence(timeout: 15), "Review editor never appeared")
+        // Check the actual editable state before Copy. A presented sheet with
+        // an empty/stale State value must never count as usable review.
+        let editorValue = try XCTUnwrap(review.value as? String, "Review editor has no text value")
+        XCTAssertTrue(editorValue.contains("Ask Your Agent"), "The review has no AYA request header")
+        XCTAssertTrue(editorValue.contains("Scope and version"), "The bundled guide was not in review")
+
         let copy = app.buttons["aya.copy"]
         XCTAssertTrue(copy.waitForExistence(timeout: 15))
         copy.tap()
