@@ -69,8 +69,8 @@
       "id": "empty-section",
       "find": "The user may toggle a fictional display layout in the host. The setting has no external side effects or background processing and no third-party service is called.",
       "replace": "",
-      "offlineAccepts": true,
-      "runtimeAccepts": true
+      "offlineAccepts": false,
+      "runtimeAccepts": false
     },
     {
       "id": "unresolved-placeholder",
