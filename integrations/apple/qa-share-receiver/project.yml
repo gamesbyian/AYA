@@ -1,0 +1,47 @@
+name: AYAShareQA
+options:
+  bundleIdPrefix: org.example.aya
+  createIntermediateGroups: true
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  AYAShareQAHost:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Host
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.example.aya.shareqa
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "AYA Share QA"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        CODE_SIGNING_ALLOWED: NO
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+    dependencies:
+      - target: AYAShareQAExtension
+        embed: true
+  AYAShareQAExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.example.aya.shareqa.extension
+        INFOPLIST_FILE: Config/ShareExtensionInfo.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+schemes:
+  AYAShareQAHost:
+    build:
+      targets:
+        AYAShareQAHost: all
