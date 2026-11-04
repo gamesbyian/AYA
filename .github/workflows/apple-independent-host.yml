@@ -1,0 +1,99 @@
+name: Apple second native root-package host acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/qa-independent-host/**'
+      - '.github/workflows/apple-independent-host.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Package.swift'
+      - 'integrations/apple/AYAApple/Sources/**'
+      - 'integrations/apple/qa-independent-host/**'
+      - '.github/workflows/apple-independent-host.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-native-root-consumer-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  independently-authored-native-host:
+    name: Actual second native iOS host with root AYA package
+    runs-on: macos-15
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: integrations/apple/qa-independent-host
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source-derived iOS guide structure
+        run: python3 ../../../tools/validate_guide.py --platform ios Resources/aya-guide.md
+      - name: Generate native host project from its own project specification
+        run: |
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          xcodegen generate
+      - name: Compile real iOS SDK with the root AYA SwiftPM dependency
+        run: |
+          set -euo pipefail
+          xcodebuild -project AYAIndependentHostQA.xcodeproj \
+            -scheme AYAIndependentHostQA \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-second-host-derived" \
+            CODE_SIGNING_ALLOWED=NO build \
+            2>&1 | tee "$RUNNER_TEMP/aya-second-host-build.log"
+      - name: Verify different app identity, exact guide and package wiring
+        run: |
+          python3 - <<'PY'
+          import os, plistlib
+          from pathlib import Path
+          root = Path(os.environ["GITHUB_WORKSPACE"])
+          host = root / "integrations/apple/qa-independent-host"
+          app = Path(os.environ["RUNNER_TEMP"]) / "aya-second-host-derived/Build/Products/Debug-iphonesimulator/AYAIndependentHostQA.app"
+          info = plistlib.loads((app / "Info.plist").read_bytes())
+          assert info["CFBundleIdentifier"] == "org.example.aya.readerqa", info
+          assert info["CFBundleShortVersionString"] == "0.1.0", info
+          assert (app / "aya-guide.md").read_bytes() == (host / "Resources/aya-guide.md").read_bytes()
+          assert "AYAApple" in (host / "project.yml").read_text()
+          assert "AYAApple" in (host / "Sources/IndependentHostApp.swift").read_text()
+          assert "Package.swift" in {p.name for p in root.iterdir()}
+          print("Separate native host app, identity, bundled reference and root package source verified")
+          PY
+      - name: Run a real installed iPhone Simulator journey
+        run: |
+          set -euo pipefail
+          SIM_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; o=json.load(sys.stdin); print(next((v["udid"] for arr in o["devices"].values() for v in arr if v.get("isAvailable") and v.get("name","").startswith("iPhone")), ""))')"
+          if [ -z "$SIM_ID" ]; then echo "No available iPhone runtime" >&2; exit 2; fi
+          xcrun simctl boot "$SIM_ID" || true
+          xcrun simctl bootstatus "$SIM_ID" -b
+          APP="$RUNNER_TEMP/aya-second-host-derived/Build/Products/Debug-iphonesimulator/AYAIndependentHostQA.app"
+          xcrun simctl install "$SIM_ID" "$APP"
+          xcodebuild -project AYAIndependentHostQA.xcodeproj \
+            -scheme AYAIndependentHostQA \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/aya-second-host-derived" \
+            -resultBundlePath "$RUNNER_TEMP/aya-second-host.xcresult" \
+            -only-testing:AYAIndependentHostQAUITests/IndependentHostUITests/testRealInstalledAppUsesRootPackageCardAndSourceGuide \
+            CODE_SIGNING_ALLOWED=NO test \
+            2>&1 | tee "$RUNNER_TEMP/aya-second-host-ui-test.log"
+          grep -q "testRealInstalledAppUsesRootPackageCardAndSourceGuide" "$RUNNER_TEMP/aya-second-host-ui-test.log"
+          grep -Eq "Executed 1 test, with 0 failures" "$RUNNER_TEMP/aya-second-host-ui-test.log"
+      - name: Retain bounded failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-second-native-host-failure
+          path: |
+            ${{ runner.temp }}/aya-second-host-build.log
+            ${{ runner.temp }}/aya-second-host-ui-test.log
+            ${{ runner.temp }}/aya-second-host.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
