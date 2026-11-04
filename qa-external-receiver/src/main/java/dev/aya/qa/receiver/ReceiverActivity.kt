@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.ResultReceiver
+import android.app.PendingIntent
 import android.util.Log
 import java.security.MessageDigest
 
@@ -19,9 +19,9 @@ class ReceiverActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val callback = if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra(EXTRA_CALLBACK, ResultReceiver::class.java)
+            intent.getParcelableExtra(EXTRA_CALLBACK, PendingIntent::class.java)
         } else {
-            intent.getParcelableExtra<ResultReceiver>(EXTRA_CALLBACK)
+            intent.getParcelableExtra<PendingIntent>(EXTRA_CALLBACK)
         }
         Log.i("AYA_URI_QA", "foreign Activity created; callbackPresent=" + (callback != null)
             + " grantFlag=" + (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0))
@@ -59,12 +59,21 @@ class ReceiverActivity : Activity() {
         result.putBoolean("receiver_ack", true)
         Log.i("AYA_URI_QA", "foreign Activity read status=" + status +
             " byteCount=" + result.getInt("bytes", 0))
-        callback?.send(if (status == "read") 1 else 0, result)
-        Log.i("AYA_URI_QA", "foreign Activity sent callback; callbackPresent=" + (callback != null))
+        try {
+            // Send metadata through the creator app's framework PendingIntent.
+            // The callback cannot serialize a private test-only class.
+            callback?.send(this, if (status == "read") 1 else 0, Intent().apply {
+                putExtra(EXTRA_EVIDENCE, result)
+            })
+            Log.i("AYA_URI_QA", "foreign Activity sent platform callback; present=" + (callback != null))
+        } catch (_: PendingIntent.CanceledException) {
+            Log.i("AYA_URI_QA", "foreign Activity callback was canceled")
+        }
         finish()
     }
 
     companion object {
         const val EXTRA_CALLBACK = "dev.aya.qa.receiver.RESULT_CALLBACK"
+        const val EXTRA_EVIDENCE = "dev.aya.qa.receiver.EVIDENCE"
     }
 }

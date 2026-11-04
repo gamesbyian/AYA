@@ -1,14 +1,16 @@
 package dev.aya.android
 
 import android.content.ComponentName
-import android.os.ResultReceiver
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import android.os.Build
+import java.util.UUID
 import android.util.Log
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
@@ -32,28 +34,47 @@ class AyaExternalUriGrantTest {
     private fun sendToSeparateApp(intent: Intent): Bundle {
         val done = CountDownLatch(1)
         val result = AtomicReference<Bundle>()
-        val callback = object : ResultReceiver(Handler(Looper.getMainLooper())) {
-            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-                result.set(resultData)
+        val callbackAction = "dev.aya.android.AYA_URI_QA_" + UUID.randomUUID().toString()
+        val evidenceReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, reply: Intent) {
+                result.set(reply.getBundleExtra("dev.aya.qa.receiver.EVIDENCE"))
                 done.countDown()
             }
         }
-        intent.component = ComponentName(
-            "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
+        // Only the test app receives a unique, same-package PendingIntent
+        // callback. Its parcel is a framework type, so a foreign APK needs
+        // no private instrumentation classes to deserialize it.
+        val filter = IntentFilter(callbackAction)
+        if (Build.VERSION.SDK_INT >= 33) {
+            context.registerReceiver(evidenceReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(evidenceReceiver, filter)
+        }
+        val callback = PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(callbackAction).setPackage(context.packageName),
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_MUTABLE
         )
-        intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
-        // FileProvider's intent URI grant is lifetime-scoped to a receiving
-        // Activity stack. A BroadcastReceiver cannot qualify that contract.
-        // The separate disposable Activity reads and returns only metadata.
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        Log.i("AYA_URI_QA", "test dispatch foreign Activity with grant=" +
-            (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0))
-        context.startActivity(intent)
-        Log.i("AYA_URI_QA", "test startActivity returned, awaiting receiver callback")
-        assertTrue("Independent Activity did not return evidence", done.await(20, TimeUnit.SECONDS))
-        val evidence = result.get() ?: throw AssertionError("Receiver Activity returned no bundle")
-        assertTrue("Separate receiver Activity never processed the intent", evidence.getBoolean("receiver_ack"))
-        return evidence
+        try {
+            intent.component = ComponentName(
+                "dev.aya.qa.receiver", "dev.aya.qa.receiver.ReceiverActivity"
+            )
+            intent.putExtra("dev.aya.qa.receiver.RESULT_CALLBACK", callback)
+            // The system scopes FileProvider grants to the foreign Activity
+            // stack; do not downgrade to a broad manual grant.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            Log.i("AYA_URI_QA", "test dispatch foreign Activity with grant=" +
+                (intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0))
+            context.startActivity(intent)
+            assertTrue("Independent Activity did not return evidence", done.await(20, TimeUnit.SECONDS))
+            val evidence = result.get() ?: throw AssertionError("Foreign Activity returned no evidence bundle")
+            assertTrue("Foreign Activity never acknowledged URI inspection", evidence.getBoolean("receiver_ack"))
+            return evidence
+        } finally {
+            callback.cancel()
+            context.unregisterReceiver(evidenceReceiver)
+        }
     }
 
     @Test fun externalAppCannotOpenUngrantedUriButReadsSameUriWithExplicitReadGrant() {
