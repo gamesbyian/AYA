@@ -69,7 +69,18 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         // a still-open Files picker, missing state and overwritten child IDs.
         let title = app.staticTexts["Cannot use this file"]
         if !title.waitForExistence(timeout: timeout) {
-            XCTFail("\(why). AX hierarchy: \(app.debugDescription)")
+            // Diagnose the distinction between a still-present Files browser
+            // and a callback that completed but left feedback obscured.
+            // This remains a failed acceptance test, never a fallback pass.
+            let before = app.debugDescription
+            let cancel = app.buttons["Cancel"].matching(identifier: "Cancel").firstMatch
+            if cancel.exists && cancel.isHittable {
+                cancel.tap()
+            }
+            let probe = app.staticTexts["host.import.probe"].firstMatch
+            let stage = probe.waitForExistence(timeout: 5) ? probe.label : "no host probe visible"
+            let exposedError = app.staticTexts["Cannot use this file"].exists
+            XCTFail("\(why). Stage after picker dismissal: \(stage); error exposed: \(exposedError). Before: \(before)")
             return
         }
         XCTAssertEqual(title.identifier, "host.import.error.title")
