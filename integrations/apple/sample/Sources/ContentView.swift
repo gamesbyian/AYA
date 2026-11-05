@@ -135,7 +135,7 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("AYA Sample")
-            .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.json]) { result in
+            // Include malformed, mislabelled, and oversized candidate files in the\n            // user-visible Files browser. UTType filtering is advisory: the\n            // bounded snapshot and host semantic validator decide acceptance.\n            .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.item]) { result in
                 switch result {
                 case .failure:
                     importError = "No readable JSON file was selected."
