@@ -138,6 +138,12 @@ struct ContentView: View {
             // Include malformed, mislabelled, and oversized candidates.
             // The bounded reader and host validator decide acceptance.
             .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.item]) { result in
+                // The picker completion can arrive before UIKit finishes
+                // dismissing its document browser. Explicitly clear the
+                // presentation binding on every completion path. In
+                // particular, an invalid file must not leave an otherwise
+                // successful provider selection covering host feedback.
+                showFilePicker = false
                 switch result {
                 case .failure:
                     importError = "No readable JSON file was selected."
