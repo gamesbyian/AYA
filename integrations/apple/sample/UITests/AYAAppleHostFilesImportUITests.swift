@@ -62,7 +62,8 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
     }
 
     private func assertRejectedWithoutApply(
-        _ app: XCUIApplication, message: String, why: String, timeout: TimeInterval = 20
+        _ app: XCUIApplication, message: String, why: String,
+        stem: String, timeout: TimeInterval = 8
     ) {
         // Validate user-visible accessible text, not merely an implementation
         // detail. On a failure retain the *actual* hierarchy: it distinguishes
@@ -73,14 +74,31 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             // and a callback that completed but left feedback obscured.
             // This remains a failed acceptance test, never a fallback pass.
             let before = app.debugDescription
+            let capture = XCTAttachment(screenshot: app.screenshot())
+            capture.name = "Picker after first selection: \(stem)"
+            capture.lifetime = .keepAlways
+            add(capture)
+
+            // Diagnostic only: does a second tap cause a picker callback?
+            // The assertion still FAILS, because normal one-tap acceptance
+            // requires immediately visible rejection.
+            let candidate = app.cells
+                .matching(NSPredicate(format: "label CONTAINS[c] %@", stem))
+                .firstMatch
+            let secondTapAvailable = candidate.exists && candidate.isHittable
+            if secondTapAvailable {
+                candidate.tap()
+            }
+            let visibleErrorAfterSecondTap = app.staticTexts["Cannot use this file"]
+                .waitForExistence(timeout: 4)
+
             let cancel = app.buttons["Cancel"]
             if cancel.exists && cancel.isHittable {
                 cancel.tap()
             }
             let probe = app.staticTexts["host.import.probe"].firstMatch
             let stage = probe.waitForExistence(timeout: 5) ? probe.label : "no host probe visible"
-            let exposedError = app.staticTexts["Cannot use this file"].exists
-            XCTFail("\(why). Stage after picker dismissal: \(stage); error exposed: \(exposedError). Before: \(before)")
+            XCTFail("\(why). Second tap available: \(secondTapAvailable); error after second tap: \(visibleErrorAfterSecondTap); stage after dismissal: \(stage). Before: \(before)")
             return
         }
         XCTAssertEqual(title.identifier, "host.import.error.title")
@@ -130,7 +148,8 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         assertRejectedWithoutApply(
             app,
             message: "This file is not a valid Lantern demo-layout JSON.",
-            why: "Invalid foreign JSON must produce immediately visible host-owned feedback"
+            why: "Invalid foreign JSON must produce immediately visible host-owned feedback",
+            stem: "aya-layout-invalid"
         )
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
@@ -146,7 +165,7 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             app,
             message: "The selected file exceeds the host's size limit.",
             why: "A valid but oversized JSON must fail the capped read",
-            timeout: 30
+            stem: "aya-layout-oversized", timeout: 10
         )
         XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
         XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
@@ -162,7 +181,8 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             assertRejectedWithoutApply(
                 app,
                 message: "This file is not a valid Lantern demo-layout JSON.",
-                why: "\(filename) must fail the integer-only host schema"
+                why: "\(filename) must fail the integer-only host schema",
+                stem: filename
             )
             XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
             XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
