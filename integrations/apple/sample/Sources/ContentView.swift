@@ -42,6 +42,9 @@ struct ContentView: View {
     @State private var columns = 1
     @State private var accent = "warm"
     @State private var importError: String?
+    #if DEBUG
+    @State private var importProbe = "idle"
+    #endif
 
     private let guide: String = {
         guard let url = Bundle.main.url(forResource: "aya-guide", withExtension: "md"),
@@ -75,6 +78,10 @@ struct ContentView: View {
                     }
                     .font(.headline)
                     .accessibilityIdentifier("host.layout.state")
+                    #if DEBUG
+                    Text("Import stage: \(importProbe)")
+                        .accessibilityIdentifier("host.import.probe")
+                    #endif
                     Button("Reset demo layout") {
                         columns = 1
                         accent = "warm"
@@ -88,6 +95,9 @@ struct ContentView: View {
                         outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
                         onImportRequested: {
                             importError = nil
+                            #if DEBUG
+                            importProbe = "picker-opened"
+                            #endif
                             showFilePicker = true
                         }
                     )
@@ -144,15 +154,30 @@ struct ContentView: View {
                 // particular, an invalid file must not leave an otherwise
                 // successful provider selection covering host feedback.
                 showFilePicker = false
+                #if DEBUG
+                importProbe = "picker-completed"
+                #endif
                 switch result {
                 case .failure:
+                    #if DEBUG
+                    importProbe = "picker-failed"
+                    #endif
                     importError = "No readable JSON file was selected."
                 case .success(let url):
+                    #if DEBUG
+                    importProbe = "picker-selected"
+                    #endif
                     Task {
                         do {
                             let file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                            #if DEBUG
+                            importProbe = "snapshot-read"
+                            #endif
                             try inspectSelectedFile(file)
                         } catch {
+                            #if DEBUG
+                            importProbe = "snapshot-failed"
+                            #endif
                             importError = error.localizedDescription
                         }
                     }
@@ -194,8 +219,14 @@ struct ContentView: View {
                 importError = "The JSON layout did not pass the host's checks."
                 return
             }
+            #if DEBUG
+            importProbe = "validated"
+            #endif
             proposedLayout = proposal // only the later Apply action mutates state
         case .unusable, .ambiguous, .unrecognized:
+            #if DEBUG
+            importProbe = "rejected"
+            #endif
             importError = "This file is not a valid Lantern demo-layout JSON."
         }
     }
