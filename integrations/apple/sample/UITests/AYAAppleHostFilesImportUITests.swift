@@ -73,7 +73,7 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             // and a callback that completed but left feedback obscured.
             // This remains a failed acceptance test, never a fallback pass.
             let before = app.debugDescription
-            let cancel = app.buttons["Cancel"].matching(identifier: "Cancel").firstMatch
+            let cancel = app.buttons["Cancel"]
             if cancel.exists && cancel.isHittable {
                 cancel.tap()
             }
