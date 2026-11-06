@@ -119,6 +119,20 @@ class AyaSpatialShareTest {
         assertTrue(runCatching { AyaSpatialManifest.validate(unapproved) }.isFailure)
     }
 
+    @Test fun rejectsHiddenFieldsAndDangerousChangeTargets() {
+        val (task, _) = fixture()
+        val extra = JSONObject(task.manifestJson).put("backgroundUpload", true)
+        assertTrue(runCatching {
+            AyaSpatialManifest.validate(task.copy(manifestJson = extra.toString()))
+        }.isFailure)
+        val protected = JSONObject(task.manifestJson)
+        protected.getJSONObject("constraints")
+            .put("protectedAnnotationIds", JSONArray().put("B"))
+        assertTrue(runCatching {
+            AyaSpatialManifest.validate(task.copy(manifestJson = protected.toString()))
+        }.isFailure)
+    }
+
     @Test fun foreignAppReadsAllManifestAndImagesUnderTemporaryGrant() {
         val (task, images) = fixture()
         val edited = JSONObject(task.manifestJson).put("instructions", "Changed by the user").toString()
