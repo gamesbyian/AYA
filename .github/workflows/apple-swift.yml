@@ -181,6 +181,16 @@ jobs:
               --predicate '(process == "DocumentManager") OR (process == "fileproviderd") OR (subsystem CONTAINS[c] "FileProvider") OR (eventMessage CONTAINS[c] "materializ")' \
               2>&1 | tail -c 2000000 > "$RUNNER_TEMP/aya-fileprovider-events.log"
           ) || true
+          # A few stable OS signatures are more useful for triage than a
+          # 140 MB xcresult archive. Do not alter the failing XCTest status.
+          if [ -s "$RUNNER_TEMP/aya-fileprovider-events.log" ]; then
+            python3 "$GITHUB_WORKSPACE/scripts/ci/summarize_apple_fileprovider.py" \
+              "$RUNNER_TEMP/aya-fileprovider-events.log" \
+              "$RUNNER_TEMP/aya-fileprovider-summary.md" || true
+            if [ -s "$RUNNER_TEMP/aya-fileprovider-summary.md" ]; then
+              cat "$RUNNER_TEMP/aya-fileprovider-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
           exit "$TEST_STATUS"
       - name: Verify iPad large-text review and independent Share Sheet receipts
         run: |
@@ -229,6 +239,7 @@ jobs:
             ${{ runner.temp }}/aya-apple-sample-build.log
             ${{ runner.temp }}/aya-apple-ui-test.log
             ${{ runner.temp }}/aya-fileprovider-events.log
+            ${{ runner.temp }}/aya-fileprovider-summary.md
             ${{ runner.temp }}/aya-share-qa-build.log
             ${{ runner.temp }}/aya-apple-ui.xcresult
             ${{ runner.temp }}/aya-apple-ipad-ui-test.log
