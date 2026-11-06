@@ -10,22 +10,28 @@ struct AYAShareQAHostApp: App {
         // application create its own files through FileManager. This is
         // intentionally separate from the AYA importing host and bypasses
         // neither the system Files picker nor host-side byte validation.
-        if ProcessInfo.processInfo.arguments.contains("--aya-stage-fixtures") {
+        let arguments = ProcessInfo.processInfo.arguments
+        let isolated: String? = arguments.contains("--aya-stage-single-valid")
+            ? "aya-layout-valid.json"
+            : arguments.contains("--aya-stage-single-invalid")
+                ? "aya-layout-invalid.json" : nil
+        if arguments.contains("--aya-stage-fixtures") || isolated != nil {
             do {
-                try Self.stageLocalProviderFixtures()
+                try Self.stageLocalProviderFixtures(only: isolated)
             } catch {
                 NSLog("AYA QA fixture staging failed: %@", String(describing: error))
             }
         }
     }
 
-    private static func stageLocalProviderFixtures() throws {
+    private static func stageLocalProviderFixtures(only: String? = nil) throws {
         let manager = FileManager.default
         let directory = try manager.url(
             for: .documentDirectory, in: .userDomainMask,
             appropriateFor: nil, create: true
         )
         func put(_ name: String, _ content: String) throws {
+            guard only == nil || name == only else { return }
             try Data((content + "\n").utf8).write(
                 to: directory.appendingPathComponent(name), options: .atomic
             )
@@ -41,6 +47,7 @@ struct AYAShareQAHostApp: App {
         // Valid semantic JSON followed by whitespace, precisely one byte
         // above the importing host's 4 MiB default. If the cap is bypassed
         // the bytes could otherwise produce an authorized Apply preview.
+        if only == nil {
         let prefix = Data(#"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#.utf8)
         let oversizedCount = 4 * 1_024 * 1_024 + 1
         precondition(prefix.count < oversizedCount)
@@ -51,7 +58,8 @@ struct AYAShareQAHostApp: App {
             to: directory.appendingPathComponent("aya-layout-oversized.json"),
             options: .atomic
         )
-        NSLog("AYA QA staged seven local provider fixtures through its owning application")
+        }
+        NSLog("AYA QA staged %@ through its owning application", only ?? "seven fixtures")
     }
 
     var body: some Scene {
