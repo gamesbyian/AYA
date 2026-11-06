@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.InputType
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -90,6 +91,23 @@ object AyaSpatialHandoff {
         root.addView(direction, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
+        root.addView(Button(activity).apply {
+            text = "Inspect complete manifest"
+            contentDescription = "Inspect all structured data before sharing"
+            setOnClickListener {
+                val current = JSONObject(task.manifestJson)
+                    .put("instructions", direction.text.toString()).toString(2)
+                val detailView = TextView(activity).apply {
+                    text = current
+                    setTextIsSelectable(true)
+                    setPadding(24, 16, 24, 16)
+                }
+                AlertDialog.Builder(activity).setTitle("Complete outgoing manifest")
+                    .setMessage("This entire JSON document will accompany the photographs.")
+                    .setView(ScrollView(activity).apply { addView(detailView) })
+                    .setPositiveButton("Back to review", null).show()
+            }
+        })
         val scroll = ScrollView(activity).apply { addView(root) }
         val dialog = AlertDialog.Builder(activity).setTitle("Review visual composition")
             .setView(scroll)
@@ -111,7 +129,13 @@ object AyaSpatialHandoff {
                     Handler(Looper.getMainLooper()).post {
                         if (activity.isFinishing || activity.isDestroyed) return@post
                         attempt.onSuccess { share ->
-                            activity.startActivity(Intent.createChooser(share, "Send composition to your agent"))
+                            try {
+                                activity.startActivity(Intent.createChooser(share, "Send composition to your agent"))
+                            } catch (error: Exception) {
+                                AlertDialog.Builder(activity).setTitle("No compatible share target")
+                                    .setMessage(error.message ?: "Android could not open the share chooser")
+                                    .setPositiveButton("OK", null).show()
+                            }
                         }.onFailure { error ->
                             AlertDialog.Builder(activity).setTitle("Composition not shared")
                                 .setMessage(error.message ?: "Unable to prepare approved attachments")
@@ -225,14 +249,24 @@ internal object AyaSpatialManifest {
     private val digest = Regex("^[a-f0-9]{64}$")
     private val ident = Regex("^[A-Za-z][A-Za-z0-9_-]{0,63}$")
 
+    private fun keys(node: JSONObject, allowed: Set<String>) {
+        val names = node.keys()
+        while (names.hasNext()) {
+            val name = names.next()
+            require(name in allowed) { "Unexpected unreviewed manifest field: $name" }
+        }
+    }
+
     fun validate(task: AyaSpatialShareTask): Spec {
         require(task.manifestJson.toByteArray(Charsets.UTF_8).size <= 2 * 1024 * 1024)
         val root = try { JSONObject(task.manifestJson) } catch (_: Exception) {
             throw IllegalArgumentException("Invalid manifest JSON")
         }
         require(root.optString("format") == "aya-spatial-composition/v1") { "Unsupported packet version" }
+        keys(root, setOf("format", "source", "overlay", "assets", "annotations", "operations", "constraints", "instructions"))
         val images = mutableListOf<Image>()
         fun readImage(node: JSONObject, prefix: String) {
+            keys(node, setOf("path", "mime", "sha256", "bytes", "width", "height"))
             val path = node.optString("path")
             val mime = node.optString("mime")
             val bytes = node.optLong("bytes", -1)
@@ -258,17 +292,29 @@ internal object AyaSpatialManifest {
             }
         }
         val assetIds = mutableSetOf<String>()
+        val assetNames = mutableMapOf<String, String>()
         val assets = root.getJSONArray("assets")
         require(assets.length() <= 100)
         for (i in 0 until assets.length()) {
             val asset = assets.getJSONObject(i)
+            keys(asset, setOf("id", "name", "category", "dimensionsMm", "views"))
             val id = asset.getString("id")
             require(ident.matches(id) && assetIds.add(id)) { "Invalid or repeated asset ID" }
             require(asset.optString("name").isNotBlank() && asset.optString("category").isNotBlank())
+            assetNames[id] = asset.getString("name")
+            asset.optJSONObject("dimensionsMm")?.let { dim ->
+                keys(dim, setOf("width", "height", "depth"))
+                for (axis in listOf("width", "height", "depth")) {
+                    require(dim.getDouble(axis).isFinite() && dim.getDouble(axis) > 0) {
+                        "Invalid asset dimension"
+                    }
+                }
+            }
             val views = asset.getJSONArray("views")
             require(views.length() in 1..12)
             for (j in 0 until views.length()) {
                 val view = views.getJSONObject(j)
+                keys(view, setOf("angle", "image"))
                 require(view.optString("angle") in setOf("front","rear","left","right","three-quarter","detail","other"))
                 readImage(view.getJSONObject("image"), "references")
             }
@@ -287,27 +333,38 @@ internal object AyaSpatialManifest {
         require(ann.length() in 1..200)
         val ids = mutableSetOf<String>()
         val labels = mutableSetOf<String>()
+        val labelNames = mutableMapOf<String, String>()
         fun coord(v: Double) = require(v.isFinite() && v in 0.0..1.0) { "Invalid normalized coordinate" }
         for (i in 0 until ann.length()) {
             val a = ann.getJSONObject(i)
+            keys(a, setOf("id", "label", "geometry"))
             require(ident.matches(a.getString("id")) && ids.add(a.getString("id")))
             val label = a.getString("label").trim().lowercase()
             require(label.isNotEmpty() && labels.add(label))
+            labelNames[a.getString("id")] = a.getString("label")
             val geo = a.getJSONObject("geometry")
             when (geo.getString("kind")) {
-                "point" -> { val p = geo.getJSONObject("point"); coord(p.getDouble("x")); coord(p.getDouble("y")) }
+                "point" -> {
+                    keys(geo, setOf("kind", "point"))
+                    val p = geo.getJSONObject("point")
+                    keys(p, setOf("x", "y"))
+                    coord(p.getDouble("x")); coord(p.getDouble("y"))
+                }
                 "rect" -> {
+                    keys(geo, setOf("kind", "x", "y", "width", "height"))
                     val x=geo.getDouble("x"); val y=geo.getDouble("y")
                     val w=geo.getDouble("width"); val h=geo.getDouble("height")
                     coord(x); coord(y); coord(w); coord(h)
                     require(w > 0 && h > 0 && x + w <= 1 && y + h <= 1)
                 }
                 "polygon" -> {
+                    keys(geo, setOf("kind", "vertices"))
                     val vv = geo.getJSONArray("vertices")
                     require(vv.length() in 3..500)
                     var area = 0.0
                     for (j in 0 until vv.length()) {
                         val p=vv.getJSONObject(j); val q=vv.getJSONObject((j+1)%vv.length())
+                        keys(p, setOf("x", "y"))
                         val x=p.getDouble("x"); val y=p.getDouble("y")
                         coord(x); coord(y)
                         area += x*q.getDouble("y")-q.getDouble("x")*y
@@ -318,6 +375,7 @@ internal object AyaSpatialManifest {
             }
         }
         val constraints = root.getJSONObject("constraints")
+        keys(constraints, setOf("preserveUnmarked", "engineeringVerified", "protectedAnnotationIds"))
         require(constraints.opt("preserveUnmarked") == true && constraints.opt("engineeringVerified") == false) {
             "Preservation and conceptual-only constraints are required"
         }
@@ -333,6 +391,7 @@ internal object AyaSpatialManifest {
         val operations = mutableListOf<String>()
         for (i in 0 until ops.length()) {
             val op = ops.getJSONObject(i)
+            keys(op, setOf("targetAnnotationId", "kind", "assetId", "detail"))
             val id = op.getString("targetAnnotationId")
             require(id in ids && id !in protected && touched.add(id)) { "Invalid or conflicting operation target" }
             val kind = op.getString("kind")
@@ -340,7 +399,8 @@ internal object AyaSpatialManifest {
             val asset = op.optString("assetId")
             require((kind !in setOf("add","replace") || asset.isNotBlank()) &&
                 (asset.isBlank() || asset in assetIds)) { "Invalid operation asset" }
-            operations.add("$id: $kind${if (asset.isNotBlank()) " ($asset)" else ""}")
+            operations.add("$id (${labelNames[id]}): $kind${if (asset.isNotBlank()) " (${assetNames[asset]})" else ""}" +
+                op.optString("detail").takeIf { it.isNotBlank() }?.let { " — $it" }.orEmpty())
         }
         val instructions = root.getString("instructions")
         require(instructions.isNotBlank() && instructions.length <= 12000) { "Invalid instructions" }
