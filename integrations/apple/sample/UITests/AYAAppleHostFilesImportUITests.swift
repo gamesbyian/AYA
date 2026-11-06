@@ -151,6 +151,23 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Accent: cool"].exists)
     }
 
+    /// Separate transport experiment: use a real UIKit Files picker in
+    /// as-copy mode while retaining the identical foreign provider,
+    /// rejection requirements, and host validation.
+    func testCopyPickerProbeRejectsMalformedForeignJSON() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("AYA_UI_TEST_COPY_PICKER")
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-invalid")
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "UIKit copy-mode Files selection must reject invalid foreign JSON",
+            stem: "aya-layout-invalid"
+        )
+    }
+
     func testMalformedForeignJSONNeverAuthorizesApply() throws {
         let app = XCUIApplication()
         app.launch()
