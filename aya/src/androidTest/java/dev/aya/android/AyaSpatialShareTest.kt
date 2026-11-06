@@ -119,6 +119,15 @@ class AyaSpatialShareTest {
         assertTrue(runCatching { AyaSpatialManifest.validate(unapproved) }.isFailure)
     }
 
+    @Test fun rejectsNestedPathTraversal() {
+        val (task, _) = fixture()
+        val changed = JSONObject(task.manifestJson)
+        changed.getJSONObject("source").put("path", "source/folder/../room.png")
+        assertTrue(runCatching {
+            AyaSpatialManifest.validate(task.copy(manifestJson = changed.toString()))
+        }.isFailure)
+    }
+
     @Test fun rejectsHiddenFieldsAndDangerousChangeTargets() {
         val (task, _) = fixture()
         val extra = JSONObject(task.manifestJson).put("backgroundUpload", true)
