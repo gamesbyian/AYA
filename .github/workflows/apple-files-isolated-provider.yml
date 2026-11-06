@@ -10,9 +10,9 @@ permissions:
   contents: read
 jobs:
   isolated-one-file:
-    name: Fresh simulators / one vs seven foreign files
+    name: Fresh simulators / one vs seven, oversized control
     runs-on: macos-15
-    timeout-minutes: 50
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - name: Establish toolchain and native projects
@@ -32,7 +32,7 @@ jobs:
             build > "$RUNNER_TEMP/aya-qa-single-build.log" 2>&1 || {
               tail -80 "$RUNNER_TEMP/aya-qa-single-build.log"; exit 1;
             }
-      - name: One vs seven file valid and invalid tests on fresh simulators
+      - name: One vs seven file selection and oversized-neighbor control
         run: |
           set -euo pipefail
           TYPE="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["devicetypes"] if x["name"] == "iPhone 16 Pro"))')"
@@ -41,11 +41,15 @@ jobs:
           # Four genuinely new simulators isolate the provider's inventory
           # size from prior tests, with the exact same native user-initiated
           # Files selection, semantic validator, and Apply assertions.
-          for CASE in valid invalid seven-valid seven-invalid; do
+          for CASE in valid invalid seven-valid seven-invalid seven-small-invalid; do
             FILE_KIND="$CASE"
             STAGE_FLAG="--aya-stage-single-$CASE"
             EXPECTED=1
-            if [[ "$CASE" == seven-* ]]; then
+            if [[ "$CASE" == seven-small-* ]]; then
+              FILE_KIND="${CASE#seven-small-}"
+              STAGE_FLAG="--aya-stage-seven-small"
+              EXPECTED=7
+            elif [[ "$CASE" == seven-* ]]; then
               FILE_KIND="${CASE#seven-}"
               STAGE_FLAG="--aya-stage-fixtures"
               EXPECTED=7
@@ -63,6 +67,16 @@ jobs:
               echo "Expected $EXPECTED QA documents for $CASE, got $NUM_JSON" >&2
               exit 2
             }
+            # The only difference between seven-invalid and
+            # seven-small-invalid is the neighboring 4 MiB+1 document.
+            if [ "$EXPECTED" = 7 ]; then
+              SIZE="$(stat -f %z "$QA_DATA/Documents/aya-layout-oversized.json")"
+              if [ "$CASE" = seven-small-invalid ]; then
+                test "$SIZE" -lt 1024 || { echo "Small control not small: $SIZE" >&2; exit 2; }
+              else
+                test "$SIZE" -eq 4194305 || { echo "Byte-cap control size changed: $SIZE" >&2; exit 2; }
+              fi
+            fi
             xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
             if [ "$FILE_KIND" = valid ]; then
               TEST_NAME=testUserPickedForeignJSONRequiresExplicitApply
