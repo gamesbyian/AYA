@@ -37,12 +37,20 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             let local = app.descendants(matching: .any)
                 .matching(NSPredicate(format: "label ==[c] %@", "On My iPhone"))
                 .firstMatch
-            let browse = app.buttons["Browse"]
+            // Files can expose both its back-navigation Browse control and
+            // the bottom Browse tab at once. app.buttons["Browse"] is then
+            // ambiguous and XCUIElement.tap() throws before a file is chosen.
+            // Prefer the lowest visible Browse control (the bottom tab).
+            let browse = app.buttons.matching(
+                NSPredicate(format: "label == %@", "Browse")
+            ).allElementsBoundByIndex
+                .filter { $0.isHittable }
+                .max { $0.frame.midY < $1.frame.midY }
             if qaFolder.exists && qaFolder.isHittable {
                 qaFolder.tap()
             } else if local.exists && local.isHittable {
                 local.tap()
-            } else if browse.exists && browse.isHittable {
+            } else if let browse {
                 browse.tap()
             } else {
                 // Wait for document-provider enumeration instead of swiping
