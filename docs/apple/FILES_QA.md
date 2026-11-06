@@ -2,6 +2,16 @@
 
 **Status (2026-11-06): [Consolidated draft PR #147](https://github.com/gamesbyian/AYA/pull/147) is blocked on genuine native Files-return acceptance.** The latest [Xcode 16.4 / iOS 18.5 rerun 42199158594](https://github.com/gamesbyian/AYA/actions/runs/42199158594) passed **9/17 installed iPhone tests**: eight failed before receiving a selected Files URL, including the new list-view diagnostic. The [Xcode 26.6 / iOS 26.5 comparison 42192636283](https://github.com/gamesbyian/AYA/actions/runs/42192636283) passed 0/2 selected Files tests. All four support workflows passed. QA app-owned document staging, alternate UIKit copy-mode, long-press, double-tap, list view and content/position controls have not resolved this. The original first-party valid import and explicit Apply/Cancel journey still passes on iOS 18.5. **Do not merge or close #139 until exact-head acceptance qualifies its replacement.** The fictional cross-app fixture is separate from [outbound iOS QA receiver](RECEIVER_QA.md).
 
+## Fresh single-document simulator result (2026-11-06)
+
+The [isolation workflow run 42234704265](https://github.com/gamesbyian/AYA/actions/runs/42234704265) created two **separate new iOS 18.5 simulators**. Each independently installed the QA app, let it write **exactly one** synthetic file into its own Documents via FileManager, and used the real Lantern host/system Files importer.
+
+- **Malformed JSON case: passed** its full installed-app rejection test. That test asserts the host-owned visible error, absence of Apply, dismissal, and unchanged state. The bound 4-minute LocalStorage log recorded **zero** unresolved local-storage item IDs, indexing hard timeouts or helper communication failures.
+- **Valid JSON case: inconclusive, navigation-harness error.** XCTest threw `Failed to tap "Browse" Button: Find single matching element. Multiple matching elements found` in the common navigator, before reaching document selection. Its provider log likewise had zero LocalStorage errors in the named categories. A test failure caused by ambiguous navigation must never be counted as a valid document rejection or import failure.
+- [Commit `27e51b2`](https://github.com/gamesbyian/AYA/commit/27e51b28d6358606f0135c4afa32a1ef47ddc96d) resolves the specific XCTest ambiguity by selecting the lowest visible native Files `Browse` control. A new exact-head isolation run must qualify **both** valid and invalid cases before considering this evidence conclusive.
+
+**Interpretation:** the genuine invalid-file journey can pass end-to-end on a clean, one-file simulator. Multiple provider/item resolution failures observed with the larger seven-file fixture are consistent with bad simulator File Provider state, but a one-to-one causal relationship remains unproven. Continue to require the full seven-document tests, content guards and explicit Apply journey; the isolated success does **not** authorize merging.
+
 ## Native Apple File Provider OS evidence (2026-11-06)
 
 [Run 42199158594, attempt 2](https://github.com/gamesbyian/AYA/actions/runs/42199158594) retained `apple-xcodebuild-failure` artifact `aya-fileprovider-events.log`, a **bounded final 9-minute slice** of simulator system logs during real XCUITests. The 9,379 captured lines include:
