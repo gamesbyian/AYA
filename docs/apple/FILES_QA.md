@@ -1,6 +1,24 @@
 # Native iOS Files return: independent local-provider acceptance
 
-**Status (2026-11-06): [Consolidated draft PR #147](https://github.com/gamesbyian/AYA/pull/147) still fails real Files-provider negative acceptance; do not merge. On Xcode 16.4/iPhone 16 Pro Simulator, [run 42176938073](https://github.com/gamesbyian/AYA/actions/runs/42176938073) passed 9/15 iPhone UI tests, with 6 failures. The valid user-selected Cancel/Apply journey passes, and the separate supporting workflows are green. Malformed, oversized and certain valid duplicate fixtures sometimes remain visible in Files without triggering the host's import callback. The experimental UIKit copy-mode picker also failed to select malformed JSON. Earlier #139 is superseded only after a verified replacement.** This is a disposable, fictional cross-app test fixture. It is separate from the already verified [outbound iOS QA receiver](RECEIVER_QA.md).
+**Status (2026-11-06): [Consolidated draft PR #147](https://github.com/gamesbyian/AYA/pull/147) is blocked on genuine native Files-return acceptance.** The latest [Xcode 16.4 / iOS 18.5 rerun 42199158594](https://github.com/gamesbyian/AYA/actions/runs/42199158594) passed **9/17 installed iPhone tests**: eight failed before receiving a selected Files URL, including the new list-view diagnostic. The [Xcode 26.6 / iOS 26.5 comparison 42192636283](https://github.com/gamesbyian/AYA/actions/runs/42192636283) passed 0/2 selected Files tests. All four support workflows passed. QA app-owned document staging, alternate UIKit copy-mode, long-press, double-tap, list view and content/position controls have not resolved this. The original first-party valid import and explicit Apply/Cancel journey still passes on iOS 18.5. **Do not merge or close #139 until exact-head acceptance qualifies its replacement.** The fictional cross-app fixture is separate from [outbound iOS QA receiver](RECEIVER_QA.md).
+
+## Native Apple File Provider OS evidence (2026-11-06)
+
+[Run 42199158594, attempt 2](https://github.com/gamesbyian/AYA/actions/runs/42199158594) retained `apple-xcodebuild-failure` artifact `aya-fileprovider-events.log`, a **bounded final 9-minute slice** of simulator system logs during real XCUITests. The 9,379 captured lines include:
+
+| Specific signature | Count in bounded log |
+| --- | ---: |
+| `com.apple.FileProvider.LocalStorage` cannot resolve item ID, `NSFileProviderErrorNonExistentItemIdentifier` / FP -1005 | 9 |
+| `com.apple.DocumentManager.Service`: `Failed opening URL: 2` | 120 |
+| LocalStorage `indexOneBatchInDomain:completionHandler:` expired/hung | 2 |
+| LocalStorage extension launch / helper communication failure | 2 |
+| iCloud authentication failure (-1000), **separate provider / likely noise** | 8 |
+
+These are independent **OS-level** errors, not AYA validation messages. The `NSFileProviderErrorNonExistentItemIdentifier` entries mention localstorage IDs such as `did=3`, `did=4`, `did=6`, `did=7`; the Apple local File Provider indexer also exceeded its hard deadline and an extension failed to launch/communicate. In the same run, the native Files UI presented document cells, but failed negative selections left the host's `importProbe` at `picker-opened`. **This strongly implicates local Files provider resolution/indexing or its simulator environment as a contributing factor, but is not proof that each DocumentManager error refers to one of our seven fixtures.** Correlate timestamps and OS messages before declaring causality. Simulator logs are not a substitute for a real iPhone import journey.
+
+CI now includes `scripts/ci/summarize_apple_fileprovider.py` to aggregate these signatures into the GitHub step summary while keeping raw log artifacts and preserving XCTest's original failing exit status. The summary deliberately omits raw OS message contents and document metadata. The concrete next questions are whether a clean fresh simulator or native Files own-provider control can successfully select a document, and whether `LocalStorage` resolution failures correlate exactly with failed selections; avoid further speculative edits to AYA's bounded reader or host validator.
+
+
 
 ## What the imported file can and cannot authorize
 
