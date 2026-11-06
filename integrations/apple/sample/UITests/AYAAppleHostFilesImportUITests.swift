@@ -154,6 +154,34 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
     /// Separate transport experiment: use a real UIKit Files picker in
     /// as-copy mode while retaining the identical foreign provider,
     /// rejection requirements, and host validation.
+    /// Differential provider controls. Same valid payload as the proven
+    /// fixture, but sorted earlier in Files' grid; the invalid control is
+    /// deliberately sorted after the proven valid fixture.
+    func testEarlyGridValidForeignJSONStillReachesPreview() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-aaa-control")
+        let apply = app.buttons["Apply to demo"]
+        XCTAssertTrue(apply.waitForExistence(timeout: 12),
+                      "An early-grid valid JSON fixture should reach preview")
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+    }
+
+    func testLateGridInvalidForeignJSONStillRejected() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-zzz-invalid")
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "An invalid JSON fixture in a late grid slot must be rejected",
+            stem: "aya-layout-zzz-invalid"
+        )
+    }
+
     func testCopyPickerProbeRejectsMalformedForeignJSON() throws {
         let app = XCUIApplication()
         app.launchArguments.append("AYA_UI_TEST_COPY_PICKER")
