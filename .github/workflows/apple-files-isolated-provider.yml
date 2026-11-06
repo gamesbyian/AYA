@@ -1,4 +1,4 @@
-name: Apple Files fresh-provider inventory comparison
+name: Apple Files fresh-provider publication comparison
 on:
   pull_request:
     paths:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   isolated-one-file:
-    name: Fresh simulators / one vs seven, oversized control
+    name: Fresh simulators / one vs seven, atomic-write control
     runs-on: macos-15
     timeout-minutes: 55
     steps:
@@ -32,20 +32,24 @@ jobs:
             build > "$RUNNER_TEMP/aya-qa-single-build.log" 2>&1 || {
               tail -80 "$RUNNER_TEMP/aya-qa-single-build.log"; exit 1;
             }
-      - name: One vs seven file selection and oversized-neighbor control
+      - name: Fresh one/seven Files import and atomic/direct publication control
         run: |
           set -euo pipefail
           TYPE="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["devicetypes"] if x["name"] == "iPhone 16 Pro"))')"
           RUNTIME="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["runtimes"] if x.get("isAvailable") and x["identifier"].endswith(".iOS-18-5")))')"
           FAILED=0
-          # Four genuinely new simulators isolate the provider's inventory
-          # size from prior tests, with the exact same native user-initiated
-          # Files selection, semantic validator, and Apply assertions.
-          for CASE in valid invalid seven-valid seven-invalid seven-small-invalid; do
+          # Six genuinely new simulators isolate provider inventory and
+          # publication semantics. No bypass of genuine Files selection,
+          # semantic validator, rejection or explicit Apply.
+          for CASE in valid invalid seven-valid seven-invalid seven-small-invalid seven-direct-invalid; do
             FILE_KIND="$CASE"
             STAGE_FLAG="--aya-stage-single-$CASE"
             EXPECTED=1
-            if [[ "$CASE" == seven-small-* ]]; then
+            if [[ "$CASE" == seven-direct-* ]]; then
+              FILE_KIND="${CASE#seven-direct-}"
+              STAGE_FLAG="--aya-stage-seven-direct"
+              EXPECTED=7
+            elif [[ "$CASE" == seven-small-* ]]; then
               FILE_KIND="${CASE#seven-small-}"
               STAGE_FLAG="--aya-stage-seven-small"
               EXPECTED=7
@@ -67,8 +71,9 @@ jobs:
               echo "Expected $EXPECTED QA documents for $CASE, got $NUM_JSON" >&2
               exit 2
             }
-            # The only difference between seven-invalid and
-            # seven-small-invalid is the neighboring 4 MiB+1 document.
+            # seven-small-invalid only changes a neighboring payload size;
+            # seven-direct-invalid preserves ALL seven exact payloads,
+            # changing only Data.write(.atomic) to a direct file write.
             if [ "$EXPECTED" = 7 ]; then
               SIZE="$(stat -f %z "$QA_DATA/Documents/aya-layout-oversized.json")"
               if [ "$CASE" = seven-small-invalid ]; then
