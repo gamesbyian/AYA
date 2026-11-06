@@ -16,9 +16,12 @@ struct AYAShareQAHostApp: App {
             : arguments.contains("--aya-stage-single-invalid")
                 ? "aya-layout-invalid.json" : nil
         let sevenSmall = arguments.contains("--aya-stage-seven-small")
-        if arguments.contains("--aya-stage-fixtures") || isolated != nil || sevenSmall {
+        let sevenDirect = arguments.contains("--aya-stage-seven-direct")
+        if arguments.contains("--aya-stage-fixtures") || isolated != nil || sevenSmall || sevenDirect {
             do {
-                try Self.stageLocalProviderFixtures(only: isolated, smallOversized: sevenSmall)
+                try Self.stageLocalProviderFixtures(
+                    only: isolated, smallOversized: sevenSmall, directWrite: sevenDirect
+                )
             } catch {
                 NSLog("AYA QA fixture staging failed: %@", String(describing: error))
             }
@@ -26,7 +29,8 @@ struct AYAShareQAHostApp: App {
     }
 
     private static func stageLocalProviderFixtures(
-        only: String? = nil, smallOversized: Bool = false
+        only: String? = nil, smallOversized: Bool = false,
+        directWrite: Bool = false
     ) throws {
         let manager = FileManager.default
         let directory = try manager.url(
@@ -36,7 +40,8 @@ struct AYAShareQAHostApp: App {
         func put(_ name: String, _ content: String) throws {
             guard only == nil || name == only else { return }
             try Data((content + "\n").utf8).write(
-                to: directory.appendingPathComponent(name), options: .atomic
+                to: directory.appendingPathComponent(name),
+                options: directWrite ? [] : .atomic
             )
         }
 
@@ -64,12 +69,13 @@ struct AYAShareQAHostApp: App {
                 oversized.append(Data(repeating: 0x20, count: oversizedCount - prefix.count))
                 try oversized.write(
                     to: directory.appendingPathComponent("aya-layout-oversized.json"),
-                    options: .atomic
+                    options: directWrite ? [] : .atomic
                 )
             }
         }
-        NSLog("AYA QA staged %@ through its owning application",
-              only ?? (smallOversized ? "seven small fixtures" : "seven fixtures"))
+        let kind = only ?? (sevenDirect ? "seven direct-write fixtures"
+                          : smallOversized ? "seven small fixtures" : "seven fixtures")
+        NSLog("AYA QA staged %@ through its owning application", kind)
     }
 
     var body: some Scene {
