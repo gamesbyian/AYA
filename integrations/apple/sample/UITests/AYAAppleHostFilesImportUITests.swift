@@ -25,37 +25,53 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         // Use Files' cell identifier, not a broad 'any' query that can
         // resolve to a stale, offscreen label or a non-tappable subview.
         let file = app.cells["\(stem).json, json"]
-        // Files sometimes restores Recents, a provider root, or an existing
-        // folder between test launches. Explore each level explicitly and
-        // never scroll the host app behind the system document picker.
-        for _ in 0..<5 {
+        // Crucial Files distinction: a folder CELL labelled "AYA Share QA,
+        // N items" navigates into the provider; a static text with the name
+        // "AYA Share QA" is also the navigation-bar TITLE *inside* the provider.
+        // Tapping the title and then the "On My iPhone" back button caused
+        // the old helper to oscillate forever on a second import.
+        var refreshedProviderOnce = false
+        for _ in 0..<7 {
             if file.exists && file.isHittable { break }
 
-            let qaFolder = app.descendants(matching: .any)
-                .matching(NSPredicate(format: "label ==[c] %@", "AYA Share QA"))
+            let qaContainer = app.cells
+                .matching(NSPredicate(format: "label BEGINSWITH[c] %@",
+                                      "AYA Share QA,"))
                 .firstMatch
-            let local = app.descendants(matching: .any)
+            let providerTitle = app.navigationBars.staticTexts["AYA Share QA"]
+            let localLocation = app.descendants(matching: .any)
                 .matching(NSPredicate(format: "label ==[c] %@", "On My iPhone"))
                 .firstMatch
-            // Files can expose both its back-navigation Browse control and
-            // the bottom Browse tab at once. app.buttons["Browse"] is then
-            // ambiguous and XCUIElement.tap() throws before a file is chosen.
-            // Prefer the lowest visible Browse control (the bottom tab).
-            let browse = app.buttons.matching(
-                NSPredicate(format: "label == %@", "Browse")
-            ).allElementsBoundByIndex
-                .filter { $0.isHittable }
-                .max { $0.frame.midY < $1.frame.midY }
-            if qaFolder.exists && qaFolder.isHittable {
-                qaFolder.tap()
-            } else if local.exists && local.isHittable {
-                local.tap()
-            } else if let browse {
-                browse.tap()
+            if qaContainer.exists && qaContainer.isHittable {
+                // Use the folder's actual navigable cell, never its text
+                // label or an identically named navigation title.
+                qaContainer.tap()
+                _ = file.waitForExistence(timeout: 5)
+            } else if providerTitle.exists {
+                // We are already inside the QA provider. Allow its file
+                // enumeration to settle instead of blindly backing out.
+                if file.waitForExistence(timeout: 7) { break }
+                if refreshedProviderOnce { break }
+                refreshedProviderOnce = true
+                let back = app.buttons["On My iPhone"].firstMatch
+                if back.exists && back.isHittable {
+                    back.tap()
+                } else {
+                    break
+                }
+            } else if localLocation.exists && localLocation.isHittable {
+                localLocation.tap()
             } else {
-                // Wait for document-provider enumeration instead of swiping
-                // the host behind the sheet.
-                _ = file.waitForExistence(timeout: 3)
+                let browse = app.buttons.matching(
+                    NSPredicate(format: "label == %@", "Browse")
+                ).allElementsBoundByIndex
+                    .filter { $0.isHittable }
+                    .max { $0.frame.midY < $1.frame.midY }
+                if let browse {
+                    browse.tap()
+                } else {
+                    _ = file.waitForExistence(timeout: 3)
+                }
             }
         }
         if !file.exists || !file.isHittable {
