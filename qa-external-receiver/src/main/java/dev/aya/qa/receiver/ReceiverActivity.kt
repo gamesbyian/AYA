@@ -31,6 +31,57 @@ class ReceiverActivity : Activity() {
             intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         }
         val result = Bundle()
+        // Independent support for the spatial packet's separate manifest and image URIs.
+        // Report only content hashes/lengths, never the private image or manifest body.
+        if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
+            val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+            val hashes = arrayListOf<String>()
+            val lengths = arrayListOf<Int>()
+            var status = "read"
+            if (uris.isNullOrEmpty()) {
+                status = "invalid_uri"
+            } else {
+                for (item in uris) {
+                    if (item.scheme != "content") { status = "invalid_uri"; break }
+                    try {
+                        val hash = MessageDigest.getInstance("SHA-256")
+                        var length = 0
+                        contentResolver.openInputStream(item)?.use { input ->
+                            val buffer = ByteArray(8192)
+                            while (true) {
+                                val n = input.read(buffer)
+                                if (n < 0) break
+                                if (n > 0) { hash.update(buffer, 0, n); length += n }
+                            }
+                        } ?: throw IllegalStateException("Cannot open image stream")
+                        hashes.add(hash.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) })
+                        lengths.add(length)
+                    } catch (_: SecurityException) {
+                        status = "denied"; break
+                    } catch (_: Exception) {
+                        status = "unreadable"; break
+                    }
+                }
+            }
+            result.putString("status", status)
+            result.putInt("receiver_uid", android.os.Process.myUid())
+            result.putBoolean("receiver_ack", true)
+            result.putBoolean("received_grant_flag",
+                intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
+            result.putInt("attachment_count", hashes.size)
+            result.putStringArrayList("sha256_all", hashes)
+            result.putIntegerArrayList("bytes_all", lengths)
+            result.putString("received_text", intent.getStringExtra(Intent.EXTRA_TEXT))
+            try {
+                callback?.send(this, if (status == "read") 1 else 0, Intent().apply {
+                    putExtra(EXTRA_EVIDENCE, result)
+                })
+            } catch (_: PendingIntent.CanceledException) {
+                Log.i("AYA_URI_QA", "foreign multi-file callback canceled")
+            }
+            finish()
+            return
+        }
         val status = if (uri?.scheme != "content") {
             "invalid_uri"
         } else {

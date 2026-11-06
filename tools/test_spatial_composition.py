@@ -46,6 +46,9 @@ class SpatialCompositionTests(unittest.TestCase):
     def test_traversal(self):
         self.assert_rejected(lambda x: x["source"].update(path="source/../secrets.jpg"))
 
+    def test_nested_path_traversal(self):
+        self.assert_rejected(lambda x: x["source"].update(path="source/folder/../room.jpg"))
+
     def test_mime_mismatch(self):
         self.assert_rejected(lambda x: x["source"].update(mime="image/png"))
 

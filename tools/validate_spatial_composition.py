@@ -58,7 +58,7 @@ def validate(packet):
                   {"path", "mime", "sha256", "bytes", "width", "height"}, where):
             return
         path, mime = pic.get("path"), pic.get("mime")
-        if not isinstance(path, str) or not FILE.fullmatch(path) or not path.startswith(prefix + "/"):
+        if not isinstance(path, str) or not FILE.fullmatch(path) or not path.startswith(prefix + "/") or any(segment in (".", "..") for segment in path.split("/")):
             fail(f"{where}: unsafe/incorrect relative path")
         else:
             if path in paths:
