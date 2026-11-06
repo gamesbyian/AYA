@@ -135,6 +135,11 @@ jobs:
           test -d "$QA_DATA"
           mkdir -p "$QA_DATA/Documents"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":3,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-valid.json"
+          # Diagnostic controls: identical valid bytes in an early Files grid
+          # position and invalid bytes in a late position. These distinguish
+          # filename/grid placement from payload-dependent picker selection.
+          printf '%s\n' '{"aya_demo_layout":"v1","columns":3,"accent":"cool"}' > "$QA_DATA/Documents/aya-layout-aaa-control.json"
+          printf '%s\n' '{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}' > "$QA_DATA/Documents/aya-layout-zzz-invalid.json"
           printf '%s\n' '{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}' > "$QA_DATA/Documents/aya-layout-invalid.json"
           # NSNumber bridging makes JSON boolean/float values castable as Int;
           # they must not satisfy the fictional host's integer-only schema.
@@ -153,6 +158,8 @@ jobs:
           assert output.stat().st_size == 4 * 1024 * 1024 + 1
           PY
           test -s "$QA_DATA/Documents/aya-layout-valid.json"
+          test -s "$QA_DATA/Documents/aya-layout-aaa-control.json"
+          test -s "$QA_DATA/Documents/aya-layout-zzz-invalid.json"
           test -s "$QA_DATA/Documents/aya-layout-invalid.json"
           test -s "$QA_DATA/Documents/aya-layout-boolean.json"
           test -s "$QA_DATA/Documents/aya-layout-float.json"
