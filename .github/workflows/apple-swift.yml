@@ -157,7 +157,10 @@ jobs:
           PY
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
-          set -o pipefail
+          # Capture the system File Provider's own explanation for a
+          # visible-but-unselectable document. Preserve the XCTest exit
+          # status rather than allowing diagnostics to mask acceptance failure.
+          set +e
           xcodebuild \
             -project ../sample/AYAAppleHost.xcodeproj \
             -scheme AYAAppleHost \
@@ -168,6 +171,17 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/aya-apple-ui.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ui-test.log"
+          TEST_STATUS=${PIPESTATUS[0]}
+          set -e
+          # Only system File Provider / document preparation logs, never
+          # user documents, credentials or unrelated simulator telemetry.
+          (
+            set +e
+            xcrun simctl spawn "$SIM_ID" log show --last 9m --style compact \
+              --predicate '(process == "DocumentManager") OR (process == "fileproviderd") OR (subsystem CONTAINS[c] "FileProvider") OR (eventMessage CONTAINS[c] "materializ")' \
+              2>&1 | tail -c 2000000 > "$RUNNER_TEMP/aya-fileprovider-events.log"
+          ) || true
+          exit "$TEST_STATUS"
       - name: Verify iPad large-text review and independent Share Sheet receipts
         run: |
           set -euo pipefail
@@ -214,6 +228,7 @@ jobs:
             ${{ runner.temp }}/aya-apple-xcodebuild.log
             ${{ runner.temp }}/aya-apple-sample-build.log
             ${{ runner.temp }}/aya-apple-ui-test.log
+            ${{ runner.temp }}/aya-fileprovider-events.log
             ${{ runner.temp }}/aya-share-qa-build.log
             ${{ runner.temp }}/aya-apple-ui.xcresult
             ${{ runner.temp }}/aya-apple-ipad-ui-test.log
