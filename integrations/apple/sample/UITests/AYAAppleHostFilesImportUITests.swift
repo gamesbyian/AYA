@@ -20,7 +20,7 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         button.tap()
     }
 
-    private func selectForeignDocument(_ app: XCUIApplication, stem: String, longPressProbe: Bool = false) {
+    private func selectForeignDocument(_ app: XCUIApplication, stem: String, longPressProbe: Bool = false, listViewProbe: Bool = false) {
         openImport(app)
         // Use Files' cell identifier, not a broad 'any' query that can
         // resolve to a stale, offscreen label or a non-tappable subview.
@@ -57,6 +57,58 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             add(screenshot)
             XCTFail("QA fixture not visible in Files for \(stem). AX hierarchy: \(app.debugDescription)")
             return
+        }
+        if listViewProbe {
+            // Files can restore its grid layout between app launches.
+            // Test the native List display mode as a separate diagnostic:
+            // once shown, a single normal tap must still complete selection.
+            let more = app.buttons["More"]
+            guard more.exists && more.isHittable else {
+                XCTFail("Files More menu unavailable. AX hierarchy: \(app.debugDescription)")
+                return
+            }
+            more.tap()
+            var listOption: XCUIElement?
+            for title in ["List", "View as List", "List View"] {
+                let candidate = app.descendants(matching: .any)
+                    .matching(NSPredicate(format: "label ==[c] %@", title))
+                    .firstMatch
+                if candidate.exists && candidate.isHittable {
+                    listOption = candidate
+                    break
+                }
+            }
+            if listOption == nil {
+                for submenuName in ["View Options", "View", "View As"] {
+                    let submenu = app.descendants(matching: .any)
+                        .matching(NSPredicate(format: "label ==[c] %@", submenuName))
+                        .firstMatch
+                    if submenu.exists && submenu.isHittable {
+                        submenu.tap()
+                        break
+                    }
+                }
+                for title in ["List", "View as List", "List View"] {
+                    let candidate = app.descendants(matching: .any)
+                        .matching(NSPredicate(format: "label ==[c] %@", title))
+                        .firstMatch
+                    if candidate.exists && candidate.isHittable {
+                        listOption = candidate
+                        break
+                    }
+                }
+            }
+            guard let listOption else {
+                let screenshot = XCTAttachment(screenshot: app.screenshot())
+                screenshot.name = "Files list menu unavailable"
+                screenshot.lifetime = .keepAlways
+                add(screenshot)
+                XCTFail("Files list view menu unavailable. AX hierarchy: \(app.debugDescription)")
+                return
+            }
+            listOption.tap()
+            XCTAssertTrue(file.waitForExistence(timeout: 5),
+                          "List view did not retain the selected fixture")
         }
         if longPressProbe {
             // Separate simulator-only diagnostic based on historical
@@ -194,6 +246,23 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             why: "An invalid JSON fixture in a late grid slot must be rejected",
             stem: "aya-layout-zzz-invalid"
         )
+    }
+
+    /// Native picker differential: grid versus Files' List presentation.
+    /// Passing this control would establish a working user-mediated list
+    /// selection, without excusing failure of normal grid-mode acceptance.
+    func testFilesListViewSelectionDiagnostic() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-invalid", listViewProbe: true)
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "Files list view one-tap selection must reject invalid JSON",
+            stem: "aya-layout-invalid"
+        )
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
     }
 
     /// Historical simulator workaround: press and hold an OS Files item,
