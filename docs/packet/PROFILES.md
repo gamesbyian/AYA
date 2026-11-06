@@ -41,3 +41,7 @@ The compiler can emit a bounded full-context `--brief-output` for request-only p
 The current unpublished Android SDK accepts an installed-version AYA-RAS guide and uses a reviewed Android `ACTION_SEND`. Creative, Translation, Filesystem and Structured Artifact Handoffs have typed requests with guarded static kits where applicable. The packet compiler and optional `build_reference.py` fragment injection are developer-side tooling: **no runtime module-specific packet selection, multi-file attachment protocol, model API, reply observer or automatic result import is implemented**.
 
 Do not claim recipient interoperability or release readiness without dated, independent QA.
+
+## Spatial Composition
+
+Portable manifest profile: [Spatial Composition Handoff](../spatial/README.md), [packet contract](../spatial/PACKET.md) and [schema](../spatial/schema/aya-spatial-composition-v1.schema.json). Source-backed host facts include actual supported image formats, annotation geometry, asset catalogue and installed-version import action. A task packet must preserve source and reference image provenance, target-region mapping, unchanged-region constraints, manual import/return, privacy/consent and conceptual-only claims. **No SDK multi-image launcher is currently available**. Treat its manifest as an offline staging protocol until a reviewed platform adapter and independent recipient receipt are verified.
