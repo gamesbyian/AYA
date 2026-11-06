@@ -57,7 +57,7 @@ object AyaSpatialHandoff {
     fun launch(activity: Activity, task: AyaSpatialShareTask) {
         val spec = try {
             AyaSpatialManifest.validate(task)
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
             AlertDialog.Builder(activity).setTitle("Cannot prepare composition")
                 .setMessage(e.message ?: "Invalid composition packet").setPositiveButton("OK", null)
                 .show()
