@@ -54,14 +54,48 @@ object AyaSpatialHandoff {
      * The host must give us source/reference content URIs it has permission to read and
      * must preserve the draft itself across Activity recreation. No raw filesystem paths.
      */
-    fun launch(activity: Activity, task: AyaSpatialShareTask) {
+    fun launch(
+        activity: Activity,
+        task: AyaSpatialShareTask,
+        guideAsset: String = "aya-guide.md"
+    ): AyaBundledLaunchResult {
+        // Keep the same exact-installed-build reference guard as the established AYA launchers.
+        // The guide is used for host identity verification, not silently attached.
+        if (guideAsset.isBlank() || guideAsset.startsWith("/") || ".." in guideAsset) {
+            return AyaBundledLaunchResult.Rejected("Invalid guide asset path")
+        }
+        val guideCheck = try {
+            val data = java.io.ByteArrayOutputStream()
+            activity.assets.open(guideAsset).use { input ->
+                val chunk = ByteArray(8192)
+                while (true) {
+                    val size = input.read(chunk)
+                    if (size < 0) break
+                    if (data.size() + size > 2 * 1024 * 1024) {
+                        return AyaBundledLaunchResult.Rejected("Bundled guide exceeds 2 MiB")
+                    }
+                    data.write(chunk, 0, size)
+                }
+            }
+            val guide = Charsets.UTF_8.newDecoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(data.toByteArray())).toString()
+            val version = activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
+                ?: return AyaBundledLaunchResult.Rejected("Installed version unavailable")
+            AyaReferenceVerifier.verify(guide, activity.packageName, version)
+        } catch (error: Exception) {
+            return AyaBundledLaunchResult.Rejected(
+                "Bundled guide could not be validated: ${error.message ?: "unreadable"}"
+            )
+        }
+        if (guideCheck is AyaReferenceCheck.Rejected) {
+            return AyaBundledLaunchResult.Rejected(guideCheck.reason)
+        }
         val spec = try {
             AyaSpatialManifest.validate(task)
         } catch (e: Exception) {
-            AlertDialog.Builder(activity).setTitle("Cannot prepare composition")
-                .setMessage(e.message ?: "Invalid composition packet").setPositiveButton("OK", null)
-                .show()
-            return
+            return AyaBundledLaunchResult.Rejected(e.message ?: "Invalid composition packet")
         }
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
@@ -146,6 +180,7 @@ object AyaSpatialHandoff {
             }
         }
         dialog.show()
+        return AyaBundledLaunchResult.PreviewOpened
     }
 
     /** Explicitly reviewed material only. Primarily useful for host/device acceptance tests. */
