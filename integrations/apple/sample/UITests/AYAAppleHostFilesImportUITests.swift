@@ -47,7 +47,16 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         }
         XCTAssertTrue(file.isHittable,
                       "QA fixture document never became available through the real Files browser")
-        file.tap()
+        // iOS Files may display documents in a large grid cell whose centre
+        // falls on a preview region. Prefer the visible filename itself,
+        // which is the deterministic single-tap activation target in the
+        // native browser. Retain cell fallback only when Files omits text.
+        let filename = app.staticTexts["\(stem).json"]
+        if filename.exists && filename.isHittable {
+            filename.tap()
+        } else {
+            file.tap()
+        }
 
         // First-use local Files providers may present a separate system
         // confirmation after a user selects the document. Only confirm the
