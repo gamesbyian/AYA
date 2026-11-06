@@ -89,6 +89,8 @@ class AyaSpatialShareTest {
         val streams = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)!!
         assertEquals(3, streams.size)
         assertEquals(3, intent.clipData!!.itemCount)
+        assertTrue(streams[1].path!!.endsWith("/source/room.png"))
+        assertTrue(streams[2].path!!.endsWith("/references/replacement.png"))
         assertTrue(intent.getStringExtra(Intent.EXTRA_TEXT)!!.contains("preserve the surrounding wall"))
         assertFalse(intent.getStringExtra(Intent.EXTRA_TEXT)!!.contains("Replace B with fictional replacement"))
         assertEquals(edited, context.contentResolver.openInputStream(streams[0])!!
