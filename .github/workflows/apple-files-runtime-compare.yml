@@ -1,0 +1,73 @@
+name: Apple Files picker iOS 26 comparison
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/apple-files-runtime-compare.yml'
+permissions:
+  contents: read
+jobs:
+  real-files-on-ios26:
+    name: Real foreign Files provider / iOS 26
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact Apple toolchain and runtimes
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes
+          xcrun simctl list devices available
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          xcodegen --version
+      - name: Build independently installed QA provider
+        run: |
+          set -euo pipefail
+          cd integrations/apple/qa-share-receiver
+          xcodegen generate
+          xcodebuild -project AYAShareQA.xcodeproj -scheme AYAShareQAHost \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-qa26" CODE_SIGNING_ALLOWED=NO \
+            build > "$GITHUB_WORKSPACE/aya-qa26-build.log" 2>&1 || {
+              tail -100 "$GITHUB_WORKSPACE/aya-qa26-build.log"; exit 1;
+            }
+          cd ../sample
+          xcodegen generate
+      - name: Compare native valid and rejected Files selection on iOS 26
+        run: |
+          set -euo pipefail
+          SIM_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys;d=json.load(sys.stdin);r=sorted(((k,v) for k,v in d["devices"].items() if "iOS-26-" in k),reverse=True);print(next((x["udid"] for k,arr in r for x in arr if x.get("isAvailable") and x.get("name","").startswith("iPhone")),""))')"
+          if [ -z "$SIM_ID" ]; then
+            echo 'No installed iOS 26 iPhone simulator runtime found' >&2
+            exit 2
+          fi
+          echo "iOS 26 comparison simulator: $SIM_ID"
+          xcrun simctl boot "$SIM_ID" || true
+          xcrun simctl bootstatus "$SIM_ID" -b
+          xcrun simctl install "$SIM_ID" "$RUNNER_TEMP/aya-qa26/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+          xcrun simctl launch "$SIM_ID" org.example.aya.shareqa --aya-stage-fixtures
+          QA_DATA="$(xcrun simctl get_app_container "$SIM_ID" org.example.aya.shareqa data)"
+          test -s "$QA_DATA/Documents/aya-layout-valid.json"
+          test -s "$QA_DATA/Documents/aya-layout-invalid.json"
+          xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
+          cd integrations/apple/sample
+          set -o pipefail
+          xcodebuild -project AYAAppleHost.xcodeproj -scheme AYAAppleHost \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/aya-host26" \
+            -resultBundlePath "$GITHUB_WORKSPACE/aya-files26.xcresult" \
+            -only-testing:AYAAppleHostUITests/AYAAppleHostFilesImportUITests/testUserPickedForeignJSONRequiresExplicitApply \
+            -only-testing:AYAAppleHostUITests/AYAAppleHostFilesImportUITests/testMalformedForeignJSONNeverAuthorizesApply \
+            CODE_SIGNING_ALLOWED=NO test 2>&1 | tee "$GITHUB_WORKSPACE/aya-files26-test.log"
+      - name: Retain bounded iOS 26 comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-files-ios26-comparison
+          path: |
+            aya-qa26-build.log
+            aya-files26-test.log
+            aya-files26.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
