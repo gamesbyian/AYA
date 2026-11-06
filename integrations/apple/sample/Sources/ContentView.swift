@@ -38,6 +38,7 @@ private struct LayoutProposal {
 
 struct ContentView: View {
     @State private var showFilePicker = false
+    @State private var showCopyPickerProbe = false
     @State private var proposedLayout: LayoutProposal?
     @State private var columns = 1
     @State private var accent = "warm"
@@ -98,7 +99,15 @@ struct ContentView: View {
                             #if DEBUG
                             importProbe = "picker-opened"
                             #endif
+                            #if DEBUG
+                            if ProcessInfo.processInfo.arguments.contains("AYA_UI_TEST_COPY_PICKER") {
+                                showCopyPickerProbe = true
+                            } else {
+                                showFilePicker = true
+                            }
+                            #else
                             showFilePicker = true
+                            #endif
                         }
                     )
                     .transformEnvironment(\.dynamicTypeSize) { size in
@@ -145,6 +154,36 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("AYA Sample")
+            .sheet(isPresented: $showCopyPickerProbe) {
+                CopyPickerProbe(
+                    onPick: { url in
+                        #if DEBUG
+                        importProbe = "picker-selected"
+                        #endif
+                        showCopyPickerProbe = false
+                        Task {
+                            do {
+                                let file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                                #if DEBUG
+                                importProbe = "snapshot-read"
+                                #endif
+                                try inspectSelectedFile(file)
+                            } catch {
+                                #if DEBUG
+                                importProbe = "snapshot-failed"
+                                #endif
+                                importError = error.localizedDescription
+                            }
+                        }
+                    },
+                    onCancel: {
+                        showCopyPickerProbe = false
+                        #if DEBUG
+                        importProbe = "picker-cancelled"
+                        #endif
+                    }
+                )
+            }
             // Include malformed, mislabelled, and oversized candidates.
             // The bounded reader and host validator decide acceptance.
             .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.item]) { result in
