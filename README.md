@@ -34,6 +34,10 @@ The optional [Filesystem Automation module](docs/filesystem/README.md) helps dev
 
 The SDK now exposes `Aya.launchFilesystemBundled()` with `AyaFilesystemTask`, a structurally guarded bundled kit and an optional bounded JSON snapshot. **Snapshot generation and recipe execution are host-owned, not included in AYA.** See [fixture and acceptance tests](docs/filesystem/TEST_PLAN.md).
 
+## Spatial Composition Handoff · optional visual-editing packet
+
+The [Spatial Composition module](docs/spatial/README.md) defines a portable, host-neutral packet for annotated photographs, region-targeted changes, catalogue-selected reference images, preservation rules and a user-approved assistant handoff. It applies to equipment-room proposals, interiors, grounds plans and other image-editing hosts. A [fictional fixture](docs/spatial/examples/mechanical-room.json), [normative contract](docs/spatial/PACKET.md), JSON Schema and offline validator are provided. **Multi-image Android sharing and real recipient acceptance are not implemented or verified in the current SDK**; adopting hosts must implement reviewed attachment transport, manual return and independent import validation.
+
 ## Structured artifact handoffs
 
 AYA's one-way concept also applies when a host asks an agent to generate a **structured data file**: a procedural-design preset, editor layout, visualization configuration, animation sequence, or another host-importable artifact. A source-derived, version-matched schema and field-interaction guide can accompany an editable brief. The current Android SDK does **not** attach an existing user artifact; that would require a separately reviewed, user-consented future attachment mechanism. The person saves the result and explicitly imports it into their host app. AYA does not monitor replies or import files automatically.
