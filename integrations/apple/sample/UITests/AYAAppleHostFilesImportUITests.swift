@@ -20,7 +20,7 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         button.tap()
     }
 
-    private func selectForeignDocument(_ app: XCUIApplication, stem: String) {
+    private func selectForeignDocument(_ app: XCUIApplication, stem: String, longPressProbe: Bool = false) {
         openImport(app)
         // Use Files' cell identifier, not a broad 'any' query that can
         // resolve to a stale, offscreen label or a non-tappable subview.
@@ -58,7 +58,24 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
             XCTFail("QA fixture not visible in Files for \(stem). AX hierarchy: \(app.debugDescription)")
             return
         }
-        file.tap()
+        if longPressProbe {
+            // Separate simulator-only diagnostic based on historical
+            // reports: hold a Files item, then select it. Never use
+            // this fallback in the ordinary one-tap acceptance tests.
+            file.press(forDuration: 1.3)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Files after long press: \(stem)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            let open = app.buttons["Open"]
+            if open.exists && open.isHittable {
+                open.tap()
+            } else if file.exists && file.isHittable {
+                file.tap()
+            }
+        } else {
+            file.tap()
+        }
 
         // First-use local Files providers may present a separate system
         // confirmation after a user selects the document. Only confirm the
@@ -151,9 +168,6 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Accent: cool"].exists)
     }
 
-    /// Separate transport experiment: use a real UIKit Files picker in
-    /// as-copy mode while retaining the identical foreign provider,
-    /// rejection requirements, and host validation.
     /// Differential provider controls. Same valid payload as the proven
     /// fixture, but sorted earlier in Files' grid; the invalid control is
     /// deliberately sorted after the proven valid fixture.
@@ -182,6 +196,24 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         )
     }
 
+    /// Historical simulator workaround: press and hold an OS Files item,
+    /// then try selecting it. This test is deliberately separate from all
+    /// standard one-tap acceptance cases, which must still pass unchanged.
+    func testLongPressFilesSelectionDiagnostic() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-invalid", longPressProbe: true)
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "Long press diagnostic must still use real Files and reject invalid bytes",
+            stem: "aya-layout-invalid"
+        )
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+    }
+
+    /// Separate UIKit as-copy transport experiment with the same provider.
     func testCopyPickerProbeRejectsMalformedForeignJSON() throws {
         let app = XCUIApplication()
         app.launchArguments.append("AYA_UI_TEST_COPY_PICKER")
