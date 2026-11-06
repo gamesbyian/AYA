@@ -308,7 +308,10 @@ internal object AyaSpatialManifest {
             val width = node.optInt("width", -1)
             val height = node.optInt("height", -1)
             val hash = node.optString("sha256")
-            require(validPath.matches(path) && path.startsWith("$prefix/")) { "Invalid attachment path: $path" }
+            require(validPath.matches(path) && path.startsWith("$prefix/") &&
+                path.split('/').none { it == "." || it == ".." }) {
+                "Invalid attachment path: $path"
+            }
             val ext = path.substringAfterLast('.')
             require((mime == "image/jpeg" && ext in setOf("jpg", "jpeg")) ||
                 (mime == "image/png" && ext == "png") || (mime == "image/webp" && ext == "webp")) {
