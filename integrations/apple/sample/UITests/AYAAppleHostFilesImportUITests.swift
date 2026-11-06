@@ -22,31 +22,42 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
 
     private func selectForeignDocument(_ app: XCUIApplication, stem: String) {
         openImport(app)
-        let file = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS[c] %@", stem))
-            .firstMatch
-        // Navigate the actual Files browser instead of granting synthetic
-        // test-only filesystem access. UI labels may vary by device version;
-        // retain a fail-closed diagnostic with only fixed fixture names.
-        var visited = Set<String>()
-        for _ in 0..<12 {
+        // Use Files' cell identifier, not a broad 'any' query that can
+        // resolve to a stale, offscreen label or a non-tappable subview.
+        let file = app.cells["\(stem).json, json"]
+        // Files sometimes restores Recents, a provider root, or an existing
+        // folder between test launches. Explore each level explicitly and
+        // never scroll the host app behind the system document picker.
+        for _ in 0..<5 {
             if file.exists && file.isHittable { break }
-            var advanced = false
-            for destination in ["AYA Share QA", "On My iPhone", "Browse"] {
-                let node = app.descendants(matching: .any)
-                    .matching(NSPredicate(format: "label ==[c] %@", destination))
-                    .firstMatch
-                if node.exists && node.isHittable && !visited.contains(destination) {
-                    visited.insert(destination)
-                    node.tap()
-                    advanced = true
-                    break
-                }
+
+            let qaFolder = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label ==[c] %@", "AYA Share QA"))
+                .firstMatch
+            let local = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label ==[c] %@", "On My iPhone"))
+                .firstMatch
+            let browse = app.buttons["Browse"]
+            if qaFolder.exists && qaFolder.isHittable {
+                qaFolder.tap()
+            } else if local.exists && local.isHittable {
+                local.tap()
+            } else if browse.exists && browse.isHittable {
+                browse.tap()
+            } else {
+                // Wait for document-provider enumeration instead of swiping
+                // the host behind the sheet.
+                _ = file.waitForExistence(timeout: 3)
             }
-            if !advanced { app.swipeUp() }
         }
-        XCTAssertTrue(file.isHittable,
-                      "QA fixture document never became available through the real Files browser")
+        if !file.exists || !file.isHittable {
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Files navigation failed: \(stem)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            XCTFail("QA fixture not visible in Files for \(stem). AX hierarchy: \(app.debugDescription)")
+            return
+        }
         file.tap()
 
         // First-use local Files providers may present a separate system
