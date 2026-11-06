@@ -1,6 +1,6 @@
 # Native iOS Files return: independent local-provider acceptance
 
-**Status (2026-11-04): [PR #139 / CI 41890208508](https://github.com/gamesbyian/AYA/actions/runs/41890208508) passed the valid foreign pick/Cancel/Apply journey but failed visible malformed-file rejection. [Replacement draft #147](https://github.com/gamesbyian/AYA/pull/147) carries the complete flow plus a host-owned persistent accessible error panel and strict size/type negatives; acceptance is pending its exact-head native CI.** This is a disposable, fictional cross-app test fixture. It is separate from the already verified [outbound iOS QA receiver](RECEIVER_QA.md).
+**Status (2026-11-06): [Consolidated draft PR #147](https://github.com/gamesbyian/AYA/pull/147) still fails real Files-provider negative acceptance; do not merge. On Xcode 16.4/iPhone 16 Pro Simulator, [run 42176938073](https://github.com/gamesbyian/AYA/actions/runs/42176938073) passed 9/15 iPhone UI tests, with 6 failures. The valid user-selected Cancel/Apply journey passes, and the separate supporting workflows are green. Malformed, oversized and certain valid duplicate fixtures sometimes remain visible in Files without triggering the host's import callback. The experimental UIKit copy-mode picker also failed to select malformed JSON. Earlier #139 is superseded only after a verified replacement.** This is a disposable, fictional cross-app test fixture. It is separate from the already verified [outbound iOS QA receiver](RECEIVER_QA.md).
 
 ## What the imported file can and cannot authorize
 
@@ -38,6 +38,21 @@ The QA app itself makes no network calls, telemetry requests, writes to the host
 | Future negative cases | No scope, revoked provider, file mutated during coordination, custom >16 MiB cap, wrong card and multiple matching host formats all reject or require correct host-directed confirmation |
 
 **Evidence boundary:** a green test here would prove a first-party app reading a user-selected file from a *different local sandbox* via the system provider on a dated iOS Simulator. It would not establish iCloud sync, third-party cloud File Providers, revocation races, physical iPhone/iPad accessibility, arbitrary production importer correctness or compatibility with any model.
+
+## Online incident comparison and next discrimination (2026-11-06)
+
+The observed problem is **before host byte reading**: after tapping a Files document, the host debug marker often remains at `picker-opened`; no picker completion, read, route decision, or visible rejection occurs. A second normal tap does not change that. Valid and invalid payloads both exhibit failures on some runs, so neither the JSON schema nor grid position alone explains them. An independent UIKit `UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)` on the same File Provider exhibited the failure as well. On the latest run 9 of 15 iPhone tests passed; the first Boolean negative could pass while the subsequent floating-point negative failed in the same test, further indicating intermittent selection.
+
+Public reports relevant to triage, **not proof of a current OS bug or a production fix**:
+
+- [Stack Overflow: simulator fileImporter selection](https://stackoverflow.com/questions/71806115/how-can-i-select-files-using-file-importer-in-swiftui/71946287): historically a file **long press followed by a second selection** worked when tapping did not. The author reports the issue was fixed for their scenario in Xcode 14.2 by using `allowedContentTypes: [.item]`. Our Xcode **16.4** sample already uses `.item`, so run long press as a **diagnostic** only, not a substitute for the one-tap gate.
+- [Stack Overflow: iOS 18 simulator picker freezing](https://stackoverflow.com/questions/79441895/swiftui-fileimporter-inside-uihostingcontroller): reported version-specific simulator regression; compare a second OS runtime before attributing failure to host validation.
+- [Stack Overflow: local Files provider visible but not selectable](https://stackoverflow.com/questions/48884248/how-can-i-add-files-to-the-ios-simulator): older simulators displayed files while clicks did nothing; real-device acceptance is a separate requirement.
+- [Apple Developer documentation: XCUIElement press(forDuration:)](https://developer.apple.com/documentation/xcuiautomation/xcuielement/press%28forduration%3A%29): supported native automation for the long-press control experiment.
+- [Apple Developer documentation: fileImporter](https://developer.apple.com/documentation/swiftui/view/fileimporter%28ispresented%3Aallowedcontenttypes%3Aoncompletion%3A%29): a scoped URL is only available **after** a successful picker completion.
+- [Swift Forums: simulator fixture staging](https://forums.swift.org/t/how-do-you-get-files-into-simulator/85026) and [Apple Developer Forums: direct LocalStorage writes](https://developer.apple.com/forums/thread/846994): document staging and File Provider indexing can complicate simulator tests. Test real user selection; never substitute direct host path access as a passing acceptance signal.
+
+**Next decision tree:** run a separately named long-press picker test while preserving all existing strict single-tap cases. If a long press succeeds, compare Files grid/list selection and runtime versions before choosing a production approach. If it fails, test whether a fixture created through the QA app itself or system Files import (rather than direct `simctl` container writes) restores selectable provider items. Keep ordinary host behavior and the bounded semantic validator unchanged until the boundary is demonstrated. Save failing AX snapshots and exact Xcode/runtime details. No hypothetical workaround may be counted as an accepted user journey.
 
 ## Relevant official Apple references
 
