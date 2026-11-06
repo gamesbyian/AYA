@@ -1,0 +1,30 @@
+name: Spatial composition contract
+on:
+  pull_request:
+    paths:
+      - 'docs/spatial/**'
+      - 'tools/validate_spatial_composition.py'
+      - 'tools/test_spatial_composition.py'
+      - '.github/workflows/spatial-composition.yml'
+      - 'docs/MODULE_PORTABILITY.md'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/spatial/**'
+      - 'tools/validate_spatial_composition.py'
+      - 'tools/test_spatial_composition.py'
+      - '.github/workflows/spatial-composition.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate example packet
+        run: python3 tools/validate_spatial_composition.py docs/spatial/examples/mechanical-room.json
+      - name: Test positive and negative contracts
+        run: python3 -m unittest tools.test_spatial_composition tools.test_module_portability

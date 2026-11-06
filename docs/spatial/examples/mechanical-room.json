@@ -1,0 +1,132 @@
+{
+  "format": "aya-spatial-composition/v1",
+  "source": {
+    "path": "source/site-photo.jpg",
+    "mime": "image/jpeg",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bytes": 120000,
+    "width": 1600,
+    "height": 1000
+  },
+  "overlay": {
+    "path": "overlays/labels.png",
+    "mime": "image/png",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bytes": 12000,
+    "width": 1600,
+    "height": 1000
+  },
+  "annotations": [
+    {
+      "id": "A",
+      "label": "Floor mark",
+      "geometry": {
+        "kind": "polygon",
+        "vertices": [
+          {
+            "x": 0.3,
+            "y": 0.83
+          },
+          {
+            "x": 0.48,
+            "y": 0.83
+          },
+          {
+            "x": 0.44,
+            "y": 0.94
+          }
+        ]
+      }
+    },
+    {
+      "id": "B",
+      "label": "Existing boiler",
+      "geometry": {
+        "kind": "rect",
+        "x": 0.12,
+        "y": 0.25,
+        "width": 0.28,
+        "height": 0.48
+      }
+    },
+    {
+      "id": "C",
+      "label": "Wall position",
+      "geometry": {
+        "kind": "point",
+        "point": {
+          "x": 0.78,
+          "y": 0.43
+        }
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "product1",
+      "name": "Fictional Model XL47B",
+      "category": "boiler",
+      "dimensionsMm": {
+        "width": 850,
+        "height": 1400,
+        "depth": 700
+      },
+      "views": [
+        {
+          "angle": "three-quarter",
+          "image": {
+            "path": "references/boiler-3q.jpg",
+            "mime": "image/jpeg",
+            "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "bytes": 23000,
+            "width": 800,
+            "height": 800
+          }
+        }
+      ]
+    },
+    {
+      "id": "product2",
+      "name": "Fictional HX-12",
+      "category": "heat exchanger",
+      "views": [
+        {
+          "angle": "front",
+          "image": {
+            "path": "references/exchanger.jpg",
+            "mime": "image/jpeg",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "bytes": 23000,
+            "width": 800,
+            "height": 800
+          }
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "targetAnnotationId": "A",
+      "kind": "clean",
+      "detail": "Remove visible stain only"
+    },
+    {
+      "targetAnnotationId": "B",
+      "kind": "replace",
+      "assetId": "product1",
+      "detail": "Retain unaffected nearby pipework"
+    },
+    {
+      "targetAnnotationId": "C",
+      "kind": "add",
+      "assetId": "product2",
+      "detail": "Illustrate proposed wall location; do not claim mounting clearance"
+    }
+  ],
+  "constraints": {
+    "preserveUnmarked": true,
+    "engineeringVerified": false,
+    "protectedAnnotationIds": []
+  },
+  "instructions": "Create a conceptual after-image; preserve room perspective and lighting."
+}
