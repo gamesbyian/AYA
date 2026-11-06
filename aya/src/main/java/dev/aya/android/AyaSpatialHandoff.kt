@@ -196,10 +196,12 @@ object AyaSpatialHandoff {
             require(manifestBytes.size <= MAX_MANIFEST_BYTES) { "Manifest exceeds 2 MiB" }
             manifestFile.writeBytes(manifestBytes)
             streams.add(fileUri(context, manifestFile))
-            for ((index, expected) in spec.images.withIndex()) {
+            for (expected in spec.images) {
                 val original = task.images.single { it.path == expected.path }.contentUri
-                val extension = expected.path.substringAfterLast('.')
-                val staged = File(folder, "image-${index.toString().padStart(2, '0')}.$extension")
+                // Preserve declared relative names, so manifest references resolve to
+                // the actual shared attachment names. The validator rejects dot segments.
+                val staged = File(folder, expected.path)
+                check(staged.parentFile!!.mkdirs() || staged.parentFile!!.isDirectory)
                 val actual = MessageDigest.getInstance("SHA-256")
                 var count = 0L
                 val signature = ByteArray(16)
