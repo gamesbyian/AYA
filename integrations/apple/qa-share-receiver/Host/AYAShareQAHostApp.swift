@@ -73,7 +73,7 @@ struct AYAShareQAHostApp: App {
                 )
             }
         }
-        let kind = only ?? (sevenDirect ? "seven direct-write fixtures"
+        let kind = only ?? (directWrite ? "seven direct-write fixtures"
                           : smallOversized ? "seven small fixtures" : "seven fixtures")
         NSLog("AYA QA staged %@ through its owning application", kind)
     }
