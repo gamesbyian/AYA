@@ -1,17 +1,18 @@
-name: Apple Files isolated single-document provider
+name: Apple Files fresh-provider inventory comparison
 on:
   pull_request:
     paths:
       - '.github/workflows/apple-files-isolated-provider.yml'
       - 'integrations/apple/qa-share-receiver/Host/AYAShareQAHostApp.swift'
+      - 'integrations/apple/sample/UITests/AYAAppleHostFilesImportUITests.swift'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   isolated-one-file:
-    name: Fresh simulator / exactly one foreign file
+    name: Fresh simulators / one vs seven foreign files
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - name: Establish toolchain and native projects
@@ -31,28 +32,39 @@ jobs:
             build > "$RUNNER_TEMP/aya-qa-single-build.log" 2>&1 || {
               tail -80 "$RUNNER_TEMP/aya-qa-single-build.log"; exit 1;
             }
-      - name: One-file valid and invalid tests on separate brand-new simulators
+      - name: One vs seven file valid and invalid tests on fresh simulators
         run: |
           set -euo pipefail
           TYPE="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["devicetypes"] if x["name"] == "iPhone 16 Pro"))')"
           RUNTIME="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["runtimes"] if x.get("isAvailable") and x["identifier"].endswith(".iOS-18-5")))')"
           FAILED=0
-          for CASE in valid invalid; do
+          # Four genuinely new simulators isolate the provider's inventory
+          # size from prior tests, with the exact same native user-initiated
+          # Files selection, semantic validator, and Apply assertions.
+          for CASE in valid invalid seven-valid seven-invalid; do
+            FILE_KIND="$CASE"
+            STAGE_FLAG="--aya-stage-single-$CASE"
+            EXPECTED=1
+            if [[ "$CASE" == seven-* ]]; then
+              FILE_KIND="${CASE#seven-}"
+              STAGE_FLAG="--aya-stage-fixtures"
+              EXPECTED=7
+            fi
             SIM_ID="$(xcrun simctl create "AYA isolated $CASE" "$TYPE" "$RUNTIME")"
             echo "Fresh $CASE simulator: $SIM_ID"
             xcrun simctl boot "$SIM_ID"
             xcrun simctl bootstatus "$SIM_ID" -b
             xcrun simctl install "$SIM_ID" "$RUNNER_TEMP/aya-qa-single/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
-            xcrun simctl launch "$SIM_ID" org.example.aya.shareqa "--aya-stage-single-$CASE"
+            xcrun simctl launch "$SIM_ID" org.example.aya.shareqa "$STAGE_FLAG"
             QA_DATA="$(xcrun simctl get_app_container "$SIM_ID" org.example.aya.shareqa data)"
-            test -s "$QA_DATA/Documents/aya-layout-$CASE.json"
+            test -s "$QA_DATA/Documents/aya-layout-$FILE_KIND.json"
             NUM_JSON="$(find "$QA_DATA/Documents" -maxdepth 1 -name 'aya-layout-*.json' -type f | wc -l | tr -d ' ')"
-            test "$NUM_JSON" = 1 || {
-              echo "Expected exactly one QA file, got $NUM_JSON" >&2
+            test "$NUM_JSON" = "$EXPECTED" || {
+              echo "Expected $EXPECTED QA documents for $CASE, got $NUM_JSON" >&2
               exit 2
             }
             xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
-            if [ "$CASE" = valid ]; then
+            if [ "$FILE_KIND" = valid ]; then
               TEST_NAME=testUserPickedForeignJSONRequiresExplicitApply
             else
               TEST_NAME=testMalformedForeignJSONNeverAuthorizesApply
