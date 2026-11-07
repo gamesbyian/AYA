@@ -96,6 +96,8 @@ public struct AYAImportPickerButton: View {
     @State private var picking = false
     @State private var reading = false
     @State private var errorMessage: String?
+    @State private var importTask: Task<Void, Never>?
+    @State private var activeImportID: UUID?
 
     public init(
         title: String = "Import saved agent output",
@@ -122,21 +124,46 @@ public struct AYAImportPickerButton: View {
         .fileImporter(isPresented: $picking, allowedContentTypes: acceptedTypes) { result in
             switch result {
             case .success(let url):
+                // A second selection supersedes any read still in flight.
+                // Only its own live task may publish validated snapshot bytes.
+                importTask?.cancel()
+                let id = UUID()
+                activeImportID = id
+                errorMessage = nil
                 reading = true
-                Task {
-                    defer { reading = false }
+                importTask = Task { @MainActor in
                     do {
                         let snapshot = try await AYAAppleFileImport.snapshot(
                             userSelectedURL: url, maximumBytes: maximumBytes
                         )
+                        try Task.checkCancellation()
+                        guard activeImportID == id else { return }
                         onSelected(snapshot)
+                    } catch is CancellationError {
+                        // User dismissed the host or superseded this import.
+                        // Cancellation is not an invalid-file error.
                     } catch {
-                        errorMessage = error.localizedDescription
+                        if activeImportID == id && !Task.isCancelled {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                    if activeImportID == id {
+                        reading = false
+                        activeImportID = nil
+                        importTask = nil
                     }
                 }
             case .failure:
                 errorMessage = "The file picker could not return a document."
             }
+        }
+        .onDisappear {
+            // A host navigation/dismissal must not leave a read alive that
+            // subsequently exposes Apply in a no-longer-active context.
+            importTask?.cancel()
+            importTask = nil
+            activeImportID = nil
+            reading = false
         }
         .alert("Cannot import this file", isPresented: Binding(
             get: { errorMessage != nil },
