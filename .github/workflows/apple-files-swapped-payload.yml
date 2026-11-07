@@ -1,12 +1,6 @@
 name: Apple Files swapped-payload identity differential
 # Bounded diagnostic; the ordinary real Files negative acceptance stays strict.
 on:
-  push:
-    branches: [test/apple-files-oversize-negative-20261104]
-    paths:
-      - '.github/workflows/apple-files-swapped-payload.yml'
-      - 'integrations/apple/qa-share-receiver/Host/AYAShareQAHostApp.swift'
-      - 'integrations/apple/sample/UITests/AYAAppleHostFilesImportUITests.swift'
   workflow_dispatch:
 permissions:
   contents: read
