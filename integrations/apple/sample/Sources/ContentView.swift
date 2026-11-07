@@ -219,9 +219,12 @@ struct ContentView: View {
         let token = importLifetime.begin()
         importTask = Task { @MainActor in
             do {
-                let file = try await (fromOpenIn
-                    ? AYAAppleFileImport.snapshot(userOpenedURL: url)
-                    : AYAAppleFileImport.snapshot(userSelectedURL: url))
+                let file: AYAImportFile
+                if fromOpenIn {
+                    file = try await AYAAppleFileImport.snapshot(userOpenedURL: url)
+                } else {
+                    file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                }
                 try Task.checkCancellation()
                 guard importLifetime.isCurrent(token) else { return }
                 try inspectSelectedFile(file)
