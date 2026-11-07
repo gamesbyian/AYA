@@ -12,6 +12,16 @@ struct AYAShareQAHostApp: App {
 
 private struct QAProviderPreparationView: View {
     @State private var result = "No Files test documents prepared"
+    @State private var preparedDirectory: URL?
+    @State private var selectedFixture = "aya-layout-valid.json"
+
+    // Only the three synthetic QA samples are exposed as explicit document
+    // outgoing actions. Real user content is never read or shared.
+    private let shareableFixtures = [
+        "aya-layout-valid.json",
+        "aya-layout-invalid.json",
+        "aya-layout-oversized.json"
+    ]
 
     var body: some View {
         ScrollView {
@@ -23,8 +33,13 @@ private struct QAProviderPreparationView: View {
                 Button("Prepare seven Files test documents") {
                     do {
                         try QAProviderFixtures.prepare()
+                        preparedDirectory = try FileManager.default.url(
+                            for: .documentDirectory, in: .userDomainMask,
+                            appropriateFor: nil, create: false
+                        )
                         result = "Prepared: seven verified JSON files in this QA app's Documents folder"
                     } catch {
+                        preparedDirectory = nil
                         result = "Preparation failed: \(error.localizedDescription)"
                     }
                 }
@@ -33,6 +48,24 @@ private struct QAProviderPreparationView: View {
                 Text(result)
                     .accessibilityIdentifier("qa.prepare.status")
                     .textSelection(.enabled)
+                if let preparedDirectory {
+                    Picker("Synthetic document to send", selection: $selectedFixture) {
+                        ForEach(shareableFixtures, id: \.self) { filename in
+                            Text(filename).tag(filename)
+                        }
+                    }
+                    .accessibilityIdentifier("qa.openin.file")
+                    ShareLink(item: preparedDirectory.appendingPathComponent(
+                        selectedFixture, isDirectory: false
+                    )) {
+                        Label("Share selected JSON with another app",
+                              systemImage: "square.and.arrow.up")
+                            .frame(minHeight: 44)
+                    }
+                    .accessibilityIdentifier("qa.openin.share")
+                    Text("Choose AYA Lantern in iOS's system sharing interface if it is offered. This is an actual cross-app document handoff, not a direct call into AYA.")
+                        .font(.footnote)
+                }
                 Text("No user files are examined. Existing QA documents are verified, never silently overwritten. Delete this disposable app to remove its fixtures.")
                     .font(.footnote)
             }
