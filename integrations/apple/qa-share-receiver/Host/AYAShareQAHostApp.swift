@@ -17,10 +17,14 @@ struct AYAShareQAHostApp: App {
                 ? "aya-layout-invalid.json" : nil
         let sevenSmall = arguments.contains("--aya-stage-seven-small")
         let sevenDirect = arguments.contains("--aya-stage-seven-direct")
-        if arguments.contains("--aya-stage-fixtures") || isolated != nil || sevenSmall || sevenDirect {
+        let invalidFirst = arguments.contains("--aya-stage-seven-invalid-first")
+        let invalidLast = arguments.contains("--aya-stage-seven-invalid-last")
+        if arguments.contains("--aya-stage-fixtures") || isolated != nil || sevenSmall
+            || sevenDirect || invalidFirst || invalidLast {
             do {
                 try Self.stageLocalProviderFixtures(
-                    only: isolated, smallOversized: sevenSmall, directWrite: sevenDirect
+                    only: isolated, smallOversized: sevenSmall, directWrite: sevenDirect,
+                    invalidFirst: invalidFirst, invalidLast: invalidLast
                 )
             } catch {
                 NSLog("AYA QA fixture staging failed: %@", String(describing: error))
@@ -30,8 +34,10 @@ struct AYAShareQAHostApp: App {
 
     private static func stageLocalProviderFixtures(
         only: String? = nil, smallOversized: Bool = false,
-        directWrite: Bool = false
+        directWrite: Bool = false, invalidFirst: Bool = false,
+        invalidLast: Bool = false
     ) throws {
+        precondition(!(invalidFirst && invalidLast), "QA creation-order probes are exclusive")
         let manager = FileManager.default
         let directory = try manager.url(
             for: .documentDirectory, in: .userDomainMask,
@@ -45,8 +51,15 @@ struct AYAShareQAHostApp: App {
             )
         }
 
+        // Creation-order differential, *not* a changed document or new
+        // lookup route: preserve all seven names and exact bytes. Finder/Files
+        // sorts by filename, so the visible grid stays fixed while first
+        // publication order (and LocalStorage's potential item IDs) changes.
+        let invalidName = "aya-layout-invalid.json"
+        let invalidJSON = #"{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}"#
+        if invalidFirst { try put(invalidName, invalidJSON) }
         try put("aya-layout-valid.json", #"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#)
-        try put("aya-layout-invalid.json", #"{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}"#)
+        if !invalidFirst && !invalidLast { try put(invalidName, invalidJSON) }
         try put("aya-layout-boolean.json", #"{"aya_demo_layout":"v1","columns":true,"accent":"cool"}"#)
         try put("aya-layout-float.json", #"{"aya_demo_layout":"v1","columns":1.0,"accent":"cool"}"#)
         try put("aya-layout-aaa-control.json", #"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#)
@@ -73,7 +86,10 @@ struct AYAShareQAHostApp: App {
                 )
             }
         }
-        let kind = only ?? (directWrite ? "seven direct-write fixtures"
+        if invalidLast { try put(invalidName, invalidJSON) }
+        let kind = only ?? (invalidFirst ? "seven fixtures, invalid written first"
+                          : invalidLast ? "seven fixtures, invalid written last"
+                          : directWrite ? "seven direct-write fixtures"
                           : smallOversized ? "seven small fixtures" : "seven fixtures")
         NSLog("AYA QA staged %@ through its owning application", kind)
     }
