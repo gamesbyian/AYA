@@ -93,6 +93,15 @@ jobs:
           info = plistlib.loads((app / "Info.plist").read_bytes())
           assert info["CFBundleIdentifier"] == "org.example.ayalantern", info
           assert info["CFBundleShortVersionString"] == "1.0.0", info
+          # The alternate Open In route must actually be declared in the
+          # packaged native host, not merely present in source YAML.
+          assert info.get("LSSupportsOpeningDocumentsInPlace") is True, info
+          accepted = info.get("CFBundleDocumentTypes", [])
+          assert len(accepted) == 1, accepted
+          doc = accepted[0]
+          assert doc["CFBundleTypeRole"] == "Viewer", doc
+          assert doc["LSHandlerRank"] == "Alternate", doc
+          assert doc["LSItemContentTypes"] == ["public.json"], doc
           guide = (root / "integrations/apple/sample/Resources/aya-guide.md").read_bytes()
           packaged = (app / "aya-guide.md").read_bytes()
           assert packaged == guide, "packaged iOS AYA guide does not match source"
