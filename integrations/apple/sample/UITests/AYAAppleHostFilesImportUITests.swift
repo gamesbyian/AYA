@@ -272,6 +272,37 @@ final class AYAAppleHostFilesImportUITests: XCTestCase {
         )
     }
 
+    /// Provider experiment: the usual valid filename now contains invalid
+    /// bytes. Actual OS selection and visible host rejection are still strict.
+    func testSwappedValidNameWithInvalidPayloadMustReject() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-valid")
+        assertRejectedWithoutApply(
+            app,
+            message: "This file is not a valid Lantern demo-layout JSON.",
+            why: "Invalid bytes under the formerly valid name must visibly reject",
+            stem: "aya-layout-valid"
+        )
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+        XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
+    }
+
+    /// Provider experiment: the usual invalid filename now contains valid
+    /// bytes. A real selection must show the preview without auto-Apply.
+    func testSwappedInvalidNameWithValidPayloadMustPreview() throws {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 15))
+        selectForeignDocument(app, stem: "aya-layout-invalid")
+        XCTAssertTrue(app.buttons["Apply to demo"].waitForExistence(timeout: 20),
+                      "Valid bytes under the formerly invalid name must reach preview")
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+    }
+
     /// Native picker differential: grid versus Files' List presentation.
     /// Passing this control would establish a working user-mediated list
     /// selection, without excusing failure of normal grid-mode acceptance.
