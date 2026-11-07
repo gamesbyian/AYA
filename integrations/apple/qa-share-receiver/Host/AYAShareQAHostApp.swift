@@ -1,21 +1,89 @@
+import Foundation
 import SwiftUI
 
-/// Disposable installation container for the separately packaged Share Extension.
-/// The host app itself never reads AYA data and is not an AYA runtime dependency.
+/// Independently installed, disposable QA fixture provider. The containing
+/// application is never an AYA SDK runtime dependency or a production inbox.
 @main
 struct AYAShareQAHostApp: App {
     var body: some Scene {
-        WindowGroup {
-            VStack(spacing: 12) {
-                Text("AYA Share QA")
-                    .font(.title)
-                Text("This disposable test app installs a separate Share Extension for verifying bytes received through the iOS Share Sheet.")
-                    .multilineTextAlignment(.center)
-                Text("There is no account, backend, inbox, saved document or automatic import.")
-                    .font(.footnote)
+        WindowGroup { QAProviderPreparationView() }
+    }
+}
+
+private struct QAProviderPreparationView: View {
+    @State private var result = "No Files test documents prepared"
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("AYA Share QA").font(.title)
+                Text("A disposable, separate application for verifying Share Sheet receipts and user-selected Files return into another host.")
+                Text("To test Files on an actual iPhone or iPad, prepare seven synthetic JSON documents, then switch to the AYA sample and select them using the system Files picker.")
                     .foregroundStyle(.secondary)
+                Button("Prepare seven Files test documents") {
+                    do {
+                        try QAProviderFixtures.prepare()
+                        result = "Prepared: seven verified JSON files in this QA app's Documents folder"
+                    } catch {
+                        result = "Preparation failed: \(error.localizedDescription)"
+                    }
+                }
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("qa.prepare.files")
+                Text(result)
+                    .accessibilityIdentifier("qa.prepare.status")
+                    .textSelection(.enabled)
+                Text("No user files are examined. Existing QA documents are verified, never silently overwritten. Delete this disposable app to remove its fixtures.")
+                    .font(.footnote)
             }
             .padding()
+        }
+    }
+}
+
+private enum QAProviderFixtures {
+    private enum FixtureError: LocalizedError {
+        case contentMismatch(String)
+        var errorDescription: String? {
+            switch self {
+            case .contentMismatch(let name):
+                return "Existing \(name) differs from the expected QA fixture. Reinstall the disposable QA app before retrying."
+            }
+        }
+    }
+
+    static func prepare() throws {
+        let fm = FileManager.default
+        let folder = try fm.url(for: .documentDirectory, in: .userDomainMask,
+                                appropriateFor: nil, create: true)
+        let items: [(String, Data)] = [
+            ("aya-layout-valid.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":3,\"accent\":\"cool\"}\n".utf8)),
+            ("aya-layout-invalid.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":99,\"accent\":\"invalid\"}\n".utf8)),
+            ("aya-layout-boolean.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":true,\"accent\":\"cool\"}\n".utf8)),
+            ("aya-layout-float.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":1.0,\"accent\":\"cool\"}\n".utf8)),
+            ("aya-layout-aaa-control.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":3,\"accent\":\"cool\"}\n".utf8)),
+            ("aya-layout-zzz-invalid.json", Data("{\"aya_demo_layout\":\"v1\",\"columns\":99,\"accent\":\"invalid\"}\n".utf8))
+        ]
+        let prefix = Data("{\"aya_demo_layout\":\"v1\",\"columns\":3,\"accent\":\"cool\"}".utf8)
+        let oversizedCount = 4 * 1_024 * 1_024 + 1
+        var oversized = Data(capacity: oversizedCount)
+        oversized.append(prefix)
+        oversized.append(Data(repeating: 0x20, count: oversizedCount - prefix.count))
+        var complete = items
+        complete.append(("aya-layout-oversized.json", oversized))
+
+        // Write only inside the owning QA application's Documents. The
+        // importing sample remains a different sandbox and receives nothing
+        // until the person deliberately chooses a file through Files.
+        for (name, content) in complete {
+            let url = folder.appendingPathComponent(name, isDirectory: false)
+            if fm.fileExists(atPath: url.path) {
+                guard try Data(contentsOf: url) == content else {
+                    throw FixtureError.contentMismatch(name)
+                }
+            } else {
+                try content.write(to: url, options: .atomic)
+            }
         }
     }
 }
