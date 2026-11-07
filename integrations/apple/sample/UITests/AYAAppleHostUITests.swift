@@ -101,6 +101,21 @@ final class AYAAppleHostUITests: XCTestCase {
         XCTAssertTrue(ask.waitForExistence(timeout: 10))
     }
 
+    func testAlreadyCancelledImportNeverRequestsProviderAccess() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["AYA_UI_TEST_PRE_CANCELLED_IMPORT"]
+        app.launch()
+
+        let outcome = app.staticTexts["host.import.cancel.probe"]
+        XCTAssertTrue(outcome.waitForExistence(timeout: 20),
+                      "Synthetic pre-cancelled snapshot did not finish")
+        XCTAssertEqual(outcome.label, "Cancelled read: cancelled",
+                       "A cancelled call must fail before any file scope access")
+        XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+        XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
+        XCTAssertFalse(app.buttons["Apply to demo"].exists)
+    }
+
     func testStaleBundledGuideFailsBeforeReview() throws {
         let app = XCUIApplication()
         app.launchArguments = ["AYA_UI_TEST_STALE_GUIDE"]
