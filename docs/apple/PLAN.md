@@ -1,6 +1,8 @@
 # iOS and iPadOS rollout plan / acceptance ledger (2026-11-04)
 
-**Goal:** developer-drop-in, zero-backend AYA for real native Apple hosts, without splitting the convention or diluting established Android security and evidence standards. [Research](RESEARCH.md) · [Architecture](ARCHITECTURE.md).
+**Goal:** developer-drop-in, zero-backend AYA for real native Apple hosts, without splitting the convention or diluting established Android security and evidence standards.
+
+**Current execution authority (2026-11-06):** [Apple delivery lanes and bounded investigation policy](DELIVERY_GATES.md). Keep real Files-picker failures red and PR #147 draft, but do not spend unbounded macOS CI time investigating Apple's simulator instead of completing independent packaging, lifecycle and developer-integration work. Diagnostic Files-provider workflows are opt-in; full acceptance remains a separate, explicit unresolved release gate. [Research](RESEARCH.md) · [Architecture](ARCHITECTURE.md).
 
 ## Scope and priority
 
