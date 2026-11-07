@@ -1,5 +1,20 @@
 import Foundation
 import SwiftUI
+import CoreTransferable
+import UniformTypeIdentifiers
+
+/// Ensures the iOS Share Sheet offers a JSON *file*, not a bare transferable
+/// URL (which can be interpreted as a link). Apple's ShareLink documentation
+/// recommends FileRepresentation for destinations that accept files.
+private struct QAJSONDocument: Transferable {
+    let fileURL: URL
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .json) { document in
+            SentTransferredFile(document.fileURL)
+        }
+    }
+}
 
 /// Independently installed, disposable QA fixture provider. The containing
 /// application is never an AYA SDK runtime dependency or a production inbox.
@@ -55,8 +70,10 @@ private struct QAProviderPreparationView: View {
                         }
                     }
                     .accessibilityIdentifier("qa.openin.file")
-                    ShareLink(item: preparedDirectory.appendingPathComponent(
-                        selectedFixture, isDirectory: false
+                    ShareLink(item: QAJSONDocument(
+                        fileURL: preparedDirectory.appendingPathComponent(
+                            selectedFixture, isDirectory: false
+                        )
                     )) {
                         Label("Share selected JSON with another app",
                               systemImage: "square.and.arrow.up")
