@@ -65,6 +65,24 @@ final class AYAAppleHostPasteImportUITests: XCTestCase {
         app.alerts.buttons["OK"].tap()
     }
 
+    func testPastedBooleanAndFloatCannotImpersonateInteger() {
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Columns: 1"].waitForExistence(timeout: 12))
+        for unexpectedNumber in ["true", "1.0"] {
+            submit(app, text: "{\"aya_demo_layout\":\"v1\",\"columns\":"
+                    + unexpectedNumber + ",\"accent\":\"cool\"}")
+            let alert = app.alerts["Cannot use this file"]
+            XCTAssertTrue(alert.waitForExistence(timeout: 12),
+                          "\(unexpectedNumber) must be rejected by the integer-only demo validator")
+            XCTAssertFalse(app.buttons["Apply to demo"].exists,
+                           "Invalid JSON number offered Apply")
+            XCTAssertTrue(app.staticTexts["Columns: 1"].exists)
+            XCTAssertTrue(app.staticTexts["Accent: warm"].exists)
+            alert.buttons["OK"].tap()
+        }
+    }
+
     func testPasteCancelNeverSubmitsOrMutates() {
         let app = XCUIApplication()
         app.launch()
