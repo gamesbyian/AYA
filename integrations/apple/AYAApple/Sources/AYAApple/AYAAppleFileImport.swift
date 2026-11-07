@@ -34,33 +34,56 @@ public enum AYAAppleFileImport {
         guard maximumBytes > 0 && maximumBytes <= absoluteLimit else {
             throw AYAAppleImportError.invalidLimit
         }
-        return try await Task.detached(priority: .userInitiated) {
+        // A caller already cancelled must never start provider access or
+        // allocate an unstructured worker that races the cancellation handler.
+        try Task.checkCancellation()
+        // Detached work keeps the coordinated file read off the UI actor.
+        // Explicitly bind its lifetime to the caller: awaiting a detached
+        // task alone does not propagate cancellation.
+        let coordinator = NSFileCoordinator(filePresenter: nil)
+        let worker = Task.detached(priority: .userInitiated) {
+            try Task.checkCancellation()
             guard url.isFileURL, url.startAccessingSecurityScopedResource() else {
                 throw AYAAppleImportError.permissionDenied
             }
             defer { url.stopAccessingSecurityScopedResource() }
 
-            let coordinator = NSFileCoordinator(filePresenter: nil)
+            try Task.checkCancellation()
             var coordinationError: NSError?
             var readResult: Result<Data, Error>?
             coordinator.coordinate(readingItemAt: url, options: [], error: &coordinationError) { fileURL in
                 do {
+                    try Task.checkCancellation()
                     let handle = try FileHandle(forReadingFrom: fileURL)
                     defer { try? handle.close() }
                     // Bound the read even if a File Provider lies about its size.
                     let data = try handle.read(upToCount: maximumBytes + 1) ?? Data()
+                    try Task.checkCancellation()
                     guard data.count <= maximumBytes else { throw AYAAppleImportError.tooLarge }
                     readResult = .success(data)
                 } catch {
                     readResult = .failure(error)
                 }
             }
+            try Task.checkCancellation()
             if let error = coordinationError { throw error }
             guard let outcome = readResult else { throw AYAAppleImportError.missingData }
             let bytes = try outcome.get()
             let fingerprint = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+            try Task.checkCancellation()
             return AYAImportFile(data: bytes, displayName: url.lastPathComponent, sha256Hex: fingerprint)
-        }.value
+        }
+        return try await withTaskCancellationHandler {
+            let result = try await worker.value
+            try Task.checkCancellation()
+            return result
+        } onCancel: {
+            // NSFileCoordinator.cancel() can terminate pending coordination,
+            // but cannot interrupt an already running accessor. The worker's
+            // own cancellation checks fence publication in either case.
+            worker.cancel()
+            coordinator.cancel()
+        }
     }
 }
 
@@ -76,6 +99,8 @@ public struct AYAImportPickerButton: View {
     @State private var picking = false
     @State private var reading = false
     @State private var errorMessage: String?
+    @State private var importTask: Task<Void, Never>?
+    @State private var selectionLifetime = AYAImportSelectionLifetime()
 
     public init(
         title: String = "Import saved agent output",
@@ -102,21 +127,44 @@ public struct AYAImportPickerButton: View {
         .fileImporter(isPresented: $picking, allowedContentTypes: acceptedTypes) { result in
             switch result {
             case .success(let url):
+                // A second selection supersedes any read still in flight.
+                // Only its own live task may publish validated snapshot bytes.
+                importTask?.cancel()
+                let id = selectionLifetime.begin()
+                errorMessage = nil
                 reading = true
-                Task {
-                    defer { reading = false }
+                importTask = Task { @MainActor in
                     do {
                         let snapshot = try await AYAAppleFileImport.snapshot(
                             userSelectedURL: url, maximumBytes: maximumBytes
                         )
+                        try Task.checkCancellation()
+                        guard selectionLifetime.isCurrent(id) else { return }
                         onSelected(snapshot)
+                    } catch is CancellationError {
+                        // User dismissed the host or superseded this import.
+                        // Cancellation is not an invalid-file error.
                     } catch {
-                        errorMessage = error.localizedDescription
+                        if selectionLifetime.isCurrent(id) && !Task.isCancelled {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                    if selectionLifetime.finish(id) {
+                        reading = false
+                        importTask = nil
                     }
                 }
             case .failure:
                 errorMessage = "The file picker could not return a document."
             }
+        }
+        .onDisappear {
+            // A host navigation/dismissal must not leave a read alive that
+            // subsequently exposes Apply in a no-longer-active context.
+            importTask?.cancel()
+            importTask = nil
+            selectionLifetime.cancel()
+            reading = false
         }
         .alert("Cannot import this file", isPresented: Binding(
             get: { errorMessage != nil },
