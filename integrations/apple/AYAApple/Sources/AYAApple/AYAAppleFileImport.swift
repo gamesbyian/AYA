@@ -45,6 +45,27 @@ public enum AYAAppleFileImport {
         userSelectedURL url: URL,
         maximumBytes: Int = defaultLimit
     ) async throws -> AYAImportFile {
+        try await snapshotAuthorizedFile(
+            url, maximumBytes: maximumBytes, allowCopiedInbox: false
+        )
+    }
+
+    /// Call only with a document URL delivered by the host app's *user-driven*
+    /// scene Open In callback. Supports a security-scoped external URL or an
+    /// OS-created copy under this app's own Documents/Inbox. Unlike this
+    /// entrypoint, userSelectedURL remains strict about a security scope.
+    public static func snapshot(
+        userOpenedURL url: URL,
+        maximumBytes: Int = defaultLimit
+    ) async throws -> AYAImportFile {
+        try await snapshotAuthorizedFile(
+            url, maximumBytes: maximumBytes, allowCopiedInbox: true
+        )
+    }
+
+    private static func snapshotAuthorizedFile(
+        _ url: URL, maximumBytes: Int, allowCopiedInbox: Bool
+    ) async throws -> AYAImportFile {
         guard maximumBytes > 0 && maximumBytes <= absoluteLimit else {
             throw AYAAppleImportError.invalidLimit
         }
@@ -57,10 +78,23 @@ public enum AYAAppleFileImport {
         let cancellableCoordinator = AYACancelableFileCoordinator()
         let worker = Task.detached(priority: .userInitiated) {
             try Task.checkCancellation()
-            guard url.isFileURL, url.startAccessingSecurityScopedResource() else {
+            guard url.isFileURL else {
                 throw AYAAppleImportError.permissionDenied
             }
-            defer { url.stopAccessingSecurityScopedResource() }
+            let startedScope = url.startAccessingSecurityScopedResource()
+            let copiedIntoInbox = allowCopiedInbox
+                && FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    .first.map {
+                        AYAInboxPathPolicy.permitsCopiedDocument(
+                            url, documentsDirectory: $0
+                        )
+                    } == true
+            guard startedScope || copiedIntoInbox else {
+                throw AYAAppleImportError.permissionDenied
+            }
+            // A scoped external URL must always be balanced. An OS-created
+            // Inbox copy is already inside the receiving app's own sandbox.
+            defer { if startedScope { url.stopAccessingSecurityScopedResource() } }
 
             try Task.checkCancellation()
             var coordinationError: NSError?

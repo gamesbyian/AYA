@@ -96,7 +96,7 @@ struct ContentView: View {
                     AYAHelpCard(
                         guide: guide,
                         explanation: "Ask an assistant for guidance or a demo-layout JSON proposal.",
-                        outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
+                        outputInstructions: "For demo JSON, save the raw file and choose Import saved agent output, or use Paste JSON output if Files is unavailable. Compatible iOS versions can also offer Open In > AYA Lantern for saved JSON. Every return is validated and previewed before Apply.",
                         onImportRequested: {
                             // Opening a new picker supersedes any outstanding
                             // read and makes stale import completions inert.
@@ -169,24 +169,16 @@ struct ContentView: View {
                 case .failure:
                     importError = "No readable JSON file was selected."
                 case .success(let url):
-                    importTask?.cancel()
-                    let token = importLifetime.begin()
-                    importTask = Task { @MainActor in
-                        do {
-                            let file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
-                            try Task.checkCancellation()
-                            guard importLifetime.isCurrent(token) else { return }
-                            try inspectSelectedFile(file)
-                        } catch is CancellationError {
-                            // Cancelled reads cannot expose Apply or errors.
-                        } catch {
-                            if importLifetime.isCurrent(token) && !Task.isCancelled {
-                                importError = error.localizedDescription
-                            }
-                        }
-                        if importLifetime.finish(token) { importTask = nil }
-                    }
+                    receiveUserOpenedDocument(url)
                 }
+            }
+            // Files > Share/Open In > AYA Lantern: Launch Services delivers a
+            // user-chosen JSON document. This route uses the same scoped
+            // bounded snapshot, semantic validation and explicit Apply as the
+            // native fileImporter. It cannot browse another app's files.
+            .onOpenURL { url in
+                guard url.isFileURL else { return }
+                receiveUserOpenedDocument(url, fromOpenIn: true)
             }
             .confirmationDialog(
                 "Apply imported layout to this demo?",
@@ -220,6 +212,38 @@ struct ContentView: View {
             } message: {
                 Text(importError ?? "The import could not be completed.")
             }
+        }
+    }
+
+    private func receiveUserOpenedDocument(_ url: URL, fromOpenIn: Bool = false) {
+        // A new explicit user choice invalidates any pending document read,
+        // preview, and completion. The URL may originate from either
+        // fileImporter or the system's Open In entry point.
+        guard url.isFileURL else { return }
+        importTask?.cancel()
+        importTask = nil
+        proposedLayout = nil
+        importError = nil
+        let token = importLifetime.begin()
+        importTask = Task { @MainActor in
+            do {
+                let file: AYAImportFile
+                if fromOpenIn {
+                    file = try await AYAAppleFileImport.snapshot(userOpenedURL: url)
+                } else {
+                    file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                }
+                try Task.checkCancellation()
+                guard importLifetime.isCurrent(token) else { return }
+                try inspectSelectedFile(file)
+            } catch is CancellationError {
+                // A superseded user selection cannot be published.
+            } catch {
+                if importLifetime.isCurrent(token) && !Task.isCancelled {
+                    importError = error.localizedDescription
+                }
+            }
+            if importLifetime.finish(token) { importTask = nil }
         }
     }
 
