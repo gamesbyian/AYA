@@ -34,6 +34,9 @@ public enum AYAAppleFileImport {
         guard maximumBytes > 0 && maximumBytes <= absoluteLimit else {
             throw AYAAppleImportError.invalidLimit
         }
+        // A caller already cancelled must never start provider access or
+        // allocate an unstructured worker that races the cancellation handler.
+        try Task.checkCancellation()
         // Detached work keeps the coordinated file read off the UI actor.
         // Explicitly bind its lifetime to the caller: awaiting a detached
         // task alone does not propagate cancellation.
