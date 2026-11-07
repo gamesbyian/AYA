@@ -125,11 +125,42 @@ jobs:
           xcrun simctl install "$SIM_ID" "$RECEIVER"
           # Launch the disposable containing app once so SpringBoard can
           # register its embedded share extension before UI automation.
-          xcrun simctl launch "$SIM_ID" org.example.aya.shareqa
+          # Stage fixtures by running the owning QA app's FileManager
+          # operation, not by mutating its data container from macOS.
+          xcrun simctl launch "$SIM_ID" org.example.aya.shareqa --aya-stage-fixtures
           xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
+          # Apple local File Provider exposes another app's Documents when its
+          # Info.plist declares UIFileSharingEnabled plus open-in-place.
+          # These fixture files are synthetic and reside only in the QA app;
+          # AYAHost must still request and receive access via Files picker.
+          QA_DATA="$(xcrun simctl get_app_container "$SIM_ID" org.example.aya.shareqa data)"
+          test -d "$QA_DATA"
+          # QA app created these itself at launch. Inspect its sandbox only
+          # to verify fixture staging, never to make a file available to the
+          # separate AYA importing host.
+          test -s "$QA_DATA/Documents/aya-layout-valid.json"
+          test -s "$QA_DATA/Documents/aya-layout-aaa-control.json"
+          test -s "$QA_DATA/Documents/aya-layout-zzz-invalid.json"
+          test -s "$QA_DATA/Documents/aya-layout-invalid.json"
+          test -s "$QA_DATA/Documents/aya-layout-boolean.json"
+          test -s "$QA_DATA/Documents/aya-layout-float.json"
+          test -s "$QA_DATA/Documents/aya-layout-oversized.json"
+          python3 - "$QA_DATA/Documents" <<'PY'
+          from pathlib import Path
+          import json, sys
+          documents = Path(sys.argv[1])
+          assert (documents / "aya-layout-oversized.json").stat().st_size == 4 * 1024 * 1024 + 1
+          for path in documents.glob("aya-layout-*.json"):
+              if path.name != "aya-layout-oversized.json":
+                  json.loads(path.read_bytes())
+          print("Verified QA app self-staged seven JSON fixtures; no direct container writes")
+          PY
           xcrun simctl install "$SIM_ID" "$APP"
           xcrun simctl launch "$SIM_ID" org.example.ayalantern
-          set -o pipefail
+          # Capture the system File Provider's own explanation for a
+          # visible-but-unselectable document. Preserve the XCTest exit
+          # status rather than allowing diagnostics to mask acceptance failure.
+          set +e
           xcodebuild \
             -project ../sample/AYAAppleHost.xcodeproj \
             -scheme AYAAppleHost \
@@ -140,6 +171,27 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/aya-apple-ui.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             test 2>&1 | tee "$RUNNER_TEMP/aya-apple-ui-test.log"
+          TEST_STATUS=${PIPESTATUS[0]}
+          set -e
+          # Only system File Provider / document preparation logs, never
+          # user documents, credentials or unrelated simulator telemetry.
+          (
+            set +e
+            xcrun simctl spawn "$SIM_ID" log show --last 9m --style compact \
+              --predicate '(process == "DocumentManager") OR (process == "fileproviderd") OR (subsystem CONTAINS[c] "FileProvider") OR (eventMessage CONTAINS[c] "materializ")' \
+              2>&1 | tail -c 2000000 > "$RUNNER_TEMP/aya-fileprovider-events.log"
+          ) || true
+          # A few stable OS signatures are more useful for triage than a
+          # 140 MB xcresult archive. Do not alter the failing XCTest status.
+          if [ -s "$RUNNER_TEMP/aya-fileprovider-events.log" ]; then
+            python3 "$GITHUB_WORKSPACE/scripts/ci/summarize_apple_fileprovider.py" \
+              "$RUNNER_TEMP/aya-fileprovider-events.log" \
+              "$RUNNER_TEMP/aya-fileprovider-summary.md" || true
+            if [ -s "$RUNNER_TEMP/aya-fileprovider-summary.md" ]; then
+              cat "$RUNNER_TEMP/aya-fileprovider-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          exit "$TEST_STATUS"
       - name: Verify iPad large-text review and independent Share Sheet receipts
         run: |
           set -euo pipefail
@@ -186,6 +238,8 @@ jobs:
             ${{ runner.temp }}/aya-apple-xcodebuild.log
             ${{ runner.temp }}/aya-apple-sample-build.log
             ${{ runner.temp }}/aya-apple-ui-test.log
+            ${{ runner.temp }}/aya-fileprovider-events.log
+            ${{ runner.temp }}/aya-fileprovider-summary.md
             ${{ runner.temp }}/aya-share-qa-build.log
             ${{ runner.temp }}/aya-apple-ui.xcresult
             ${{ runner.temp }}/aya-apple-ipad-ui-test.log

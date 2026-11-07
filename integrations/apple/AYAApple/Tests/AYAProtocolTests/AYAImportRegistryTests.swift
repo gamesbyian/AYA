@@ -39,6 +39,34 @@ final class AYAImportRegistryTests: XCTestCase {
         }
     }
 
+    func testMultipleRecognizersRemainAmbiguousEvenWhenOneValidatorRejects() throws {
+        let rejecting = AYAImportRoute(
+            id: "rejecting", title: "Another possible format",
+            recognizes: { String(data: $0, encoding: .utf8)?.contains(#""kind":"palette""#) ?? false },
+            validates: { _ in false }
+        )
+        let registry = try AYAImportRegistry(routes: [paletteRoute(), rejecting])
+        switch registry.inspect(good, cardRouteID: "rejecting") {
+        case .ambiguous(let routes):
+            XCTAssertEqual(routes.map(\.id), ["palette", "rejecting"])
+        default:
+            XCTFail("Conflicting recognized formats must require user destination choice")
+        }
+        switch registry.inspectAs(good, routeID: "rejecting") {
+        case .unusable(let recognized):
+            XCTAssertEqual(recognized, ["rejecting"])
+        default:
+            XCTFail("User-chosen route must still reject semantically invalid bytes")
+        }
+        switch registry.inspectAs(good, routeID: "palette", cardRouteID: "rejecting") {
+        case .ready(let route, let wrongCard):
+            XCTAssertEqual(route.id, "palette")
+            XCTAssertTrue(wrongCard)
+        default:
+            XCTFail("Explicit user route choice still needs content validation")
+        }
+    }
+
     func testUnrecognizedAndInvalidInputsDoNotAuthorizeApply() throws {
         let registry = try AYAImportRegistry(routes: [paletteRoute()])
         let alien = AYAImportFile(data: Data("unrelated".utf8), displayName: "palette.json")

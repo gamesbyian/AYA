@@ -1,0 +1,132 @@
+name: Apple Files fresh-provider publication comparison
+# Diagnostic-only workflow. Opt in from Actions > Run workflow.
+# Preserve genuine XCTest exit codes and artifacts; avoid automatic
+# macOS simulator fan-out on routine PR or QA fixture edits.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-one-file:
+    name: Fresh simulators / one vs seven, atomic-write control
+    runs-on: macos-15
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Establish toolchain and native projects
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          ( cd integrations/apple/qa-share-receiver && xcodegen generate )
+          ( cd integrations/apple/sample && xcodegen generate )
+      - name: Build independently installed QA provider
+        run: |
+          set -euo pipefail
+          xcodebuild -project integrations/apple/qa-share-receiver/AYAShareQA.xcodeproj \
+            -scheme AYAShareQAHost -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-qa-single" CODE_SIGNING_ALLOWED=NO \
+            build > "$RUNNER_TEMP/aya-qa-single-build.log" 2>&1 || {
+              tail -80 "$RUNNER_TEMP/aya-qa-single-build.log"; exit 1;
+            }
+      - name: Fresh one/seven Files import and atomic/direct publication control
+        run: |
+          set -euo pipefail
+          TYPE="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["devicetypes"] if x["name"] == "iPhone 16 Pro"))')"
+          RUNTIME="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["runtimes"] if x.get("isAvailable") and x["identifier"].endswith(".iOS-18-5")))')"
+          FAILED=0
+          # Six genuinely new simulators isolate provider inventory and
+          # publication semantics. No bypass of genuine Files selection,
+          # semantic validator, rejection or explicit Apply.
+          for CASE in valid invalid seven-valid seven-invalid seven-small-invalid seven-direct-invalid; do
+            FILE_KIND="$CASE"
+            STAGE_FLAG="--aya-stage-single-$CASE"
+            EXPECTED=1
+            if [[ "$CASE" == seven-direct-* ]]; then
+              FILE_KIND="${CASE#seven-direct-}"
+              STAGE_FLAG="--aya-stage-seven-direct"
+              EXPECTED=7
+            elif [[ "$CASE" == seven-small-* ]]; then
+              FILE_KIND="${CASE#seven-small-}"
+              STAGE_FLAG="--aya-stage-seven-small"
+              EXPECTED=7
+            elif [[ "$CASE" == seven-* ]]; then
+              FILE_KIND="${CASE#seven-}"
+              STAGE_FLAG="--aya-stage-fixtures"
+              EXPECTED=7
+            fi
+            SIM_ID="$(xcrun simctl create "AYA isolated $CASE" "$TYPE" "$RUNTIME")"
+            echo "Fresh $CASE simulator: $SIM_ID"
+            xcrun simctl boot "$SIM_ID"
+            xcrun simctl bootstatus "$SIM_ID" -b
+            xcrun simctl install "$SIM_ID" "$RUNNER_TEMP/aya-qa-single/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+            xcrun simctl launch "$SIM_ID" org.example.aya.shareqa "$STAGE_FLAG"
+            QA_DATA="$(xcrun simctl get_app_container "$SIM_ID" org.example.aya.shareqa data)"
+            test -s "$QA_DATA/Documents/aya-layout-$FILE_KIND.json"
+            NUM_JSON="$(find "$QA_DATA/Documents" -maxdepth 1 -name 'aya-layout-*.json' -type f | wc -l | tr -d ' ')"
+            test "$NUM_JSON" = "$EXPECTED" || {
+              echo "Expected $EXPECTED QA documents for $CASE, got $NUM_JSON" >&2
+              exit 2
+            }
+            # seven-small-invalid only changes a neighboring payload size;
+            # seven-direct-invalid preserves ALL seven exact payloads,
+            # changing only Data.write(.atomic) to a direct file write.
+            if [ "$EXPECTED" = 7 ]; then
+              SIZE="$(stat -f %z "$QA_DATA/Documents/aya-layout-oversized.json")"
+              if [ "$CASE" = seven-small-invalid ]; then
+                test "$SIZE" -lt 1024 || { echo "Small control not small: $SIZE" >&2; exit 2; }
+              else
+                test "$SIZE" -eq 4194305 || { echo "Byte-cap control size changed: $SIZE" >&2; exit 2; }
+              fi
+            fi
+            xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
+            if [ "$FILE_KIND" = valid ]; then
+              TEST_NAME=testUserPickedForeignJSONRequiresExplicitApply
+            else
+              TEST_NAME=testMalformedForeignJSONNeverAuthorizesApply
+            fi
+            set +e
+            xcodebuild -project integrations/apple/sample/AYAAppleHost.xcodeproj \
+              -scheme AYAAppleHost -sdk iphonesimulator \
+              -destination "platform=iOS Simulator,id=$SIM_ID" \
+              -parallel-testing-enabled NO \
+              -derivedDataPath "$RUNNER_TEMP/aya-host-single" \
+              -resultBundlePath "$RUNNER_TEMP/aya-single-$CASE.xcresult" \
+              "-only-testing:AYAAppleHostUITests/AYAAppleHostFilesImportUITests/$TEST_NAME" \
+              CODE_SIGNING_ALLOWED=NO test > "$RUNNER_TEMP/aya-single-$CASE.log" 2>&1
+            STATUS=$?
+            set -e
+            grep -E 'error:|Executed [0-9]+ tests|TEST (SUCCEEDED|FAILED)' "$RUNNER_TEMP/aya-single-$CASE.log" | tail -25 || true
+            (
+              set +e
+              xcrun simctl spawn "$SIM_ID" log show --last 4m --style compact \
+                --predicate '(process == "DocumentManager") OR (process == "fileproviderd") OR (subsystem CONTAINS[c] "FileProvider")' \
+                2>&1 | tail -c 1000000 > "$RUNNER_TEMP/aya-single-$CASE-provider.log"
+            ) || true
+            if [ -s "$RUNNER_TEMP/aya-single-$CASE-provider.log" ]; then
+              python3 scripts/ci/summarize_apple_fileprovider.py \
+                "$RUNNER_TEMP/aya-single-$CASE-provider.log" \
+                "$RUNNER_TEMP/aya-single-$CASE-provider-summary.md" || true
+              if [ -f "$RUNNER_TEMP/aya-single-$CASE-provider-summary.md" ]; then
+                echo "#### Isolated $CASE, exit $STATUS" >> "$GITHUB_STEP_SUMMARY"
+                cat "$RUNNER_TEMP/aya-single-$CASE-provider-summary.md" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+            if [ "$STATUS" -ne 0 ]; then FAILED=1; fi
+            xcrun simctl shutdown "$SIM_ID" || true
+            xcrun simctl delete "$SIM_ID" || true
+          done
+          exit "$FAILED"
+      - name: Retain scoped comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-files-isolated-provider
+          path: |
+            ${{ runner.temp }}/aya-single-*.log
+            ${{ runner.temp }}/aya-single-*.md
+            ${{ runner.temp }}/aya-single-*.xcresult
+            ${{ runner.temp }}/aya-qa-single-build.log
+          if-no-files-found: ignore
+          retention-days: 7
