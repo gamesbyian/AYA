@@ -1,4 +1,5 @@
 import Foundation
+import CoreFoundation
 import SwiftUI
 import UniformTypeIdentifiers
 import AYAApple
@@ -21,7 +22,14 @@ private struct LayoutProposal {
         guard let object = (try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any],
               Set(object.keys) == Set(["aya_demo_layout", "columns", "accent"]),
               object["aya_demo_layout"] as? String == "v1",
-              let columns = object["columns"] as? Int, (1...3).contains(columns),
+              // JSONSerialization bridges true to NSNumber(1) and even 1.0 to
+              // Int(1) under Swift's normal casts. Keep the fictional host's
+              // integer schema strict before any user-confirmed Apply.
+              let columnNumber = object["columns"] as? NSNumber,
+              CFGetTypeID(columnNumber) != CFBooleanGetTypeID(),
+              ["c", "C", "s", "S", "i", "I", "l", "L", "q", "Q"]
+                  .contains(String(cString: columnNumber.objCType)),
+              let columns = columnNumber as? Int, (1...3).contains(columns),
               let accent = object["accent"] as? String, ["warm", "cool"].contains(accent)
         else { return nil }
         return LayoutProposal(columns: columns, accent: accent)
