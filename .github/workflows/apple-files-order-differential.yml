@@ -1,9 +1,8 @@
 name: Apple Files item creation-order differential
+# Diagnostic-only workflow. Opt in from Actions > Run workflow.
+# Preserve genuine XCTest exit codes and artifacts; avoid automatic
+# macOS simulator fan-out on routine PR or QA fixture edits.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/apple-files-order-differential.yml'
-      - 'integrations/apple/qa-share-receiver/Host/AYAShareQAHostApp.swift'
   workflow_dispatch:
 permissions:
   contents: read
