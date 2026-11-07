@@ -110,6 +110,22 @@ struct ContentView: View {
                         }
                         #endif
                     }
+
+                    // Explicit text-only alternative when a saved file cannot
+                    // be selected. This is a reusable AYA transport, while
+                    // recognizing a Lantern JSON remains host-owned.
+                    AYAImportPasteButton(title: "Paste JSON output") { file in
+                        importTask?.cancel()
+                        importTask = nil
+                        importLifetime.cancel()
+                        proposedLayout = nil
+                        importError = nil
+                        do {
+                            try inspectSelectedFile(file)
+                        } catch {
+                            importError = error.localizedDescription
+                        }
+                    }
                 }
                 .padding(16)
                 .frame(maxWidth: 560)
