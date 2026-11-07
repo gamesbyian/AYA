@@ -10,7 +10,7 @@
 4. Select Lantern from the system UI, require the **receiving app** to show its own review with **Apply to demo**. The host stays one column/warm until the person cancels or applies. Cancel preserves state; select again through QA's actual system sharing UI and Apply changes the state to three columns/cool.
 5. Repeat the system handoff after selecting `aya-layout-invalid.json`. Require a visible `Cannot use this file` host rejection, no Apply, unchanged layout. No automatic mutation even though the source asked another app to open JSON.
 
-The QA source has an iOS 16+ native `ShareLink` whose item is the actual `file:` URL **inside QA's own Documents**. The receiving app can be targeted only through Apple's UI and document registration. All byte snapshots, type/limit checks, review and Apply remain controlled by the receiving app. The AYA module never searches another app's sandbox or monitors user files.
+The QA source has an iOS 16+ native `ShareLink` whose item is an explicit `Transferable` using `FileRepresentation(exportedContentType: .json)`, backed by the actual file in QA's own Documents. This advertises a JSON **file** instead of merely a transferable URL or link, following [Apple's ShareLink guidance](https://developer.apple.com/documentation/swiftui/sharelink?changes=latest_major) for file-oriented recipients. The receiving app can be targeted only through Apple's UI and document registration. All byte snapshots, type/limit checks, review and Apply remain controlled by the receiving app. The AYA module never searches another app's sandbox or monitors user files.
 
 ## CI and human verification
 
