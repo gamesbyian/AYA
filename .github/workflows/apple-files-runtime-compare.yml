@@ -1,9 +1,9 @@
 name: Apple Files picker iOS 26 comparison
+# Diagnostic-only workflow. Opt in from Actions > Run workflow.
+# Preserve genuine XCTest exit codes and artifacts; avoid automatic
+# macOS simulator fan-out on routine PR or QA fixture edits.
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - '.github/workflows/apple-files-runtime-compare.yml'
 permissions:
   contents: read
 jobs:
