@@ -2,6 +2,20 @@
 
 **Status (2026-11-06): [Consolidated draft PR #147](https://github.com/gamesbyian/AYA/pull/147) is blocked on genuine native Files-return acceptance.** The latest [Xcode 16.4 / iOS 18.5 rerun 42199158594](https://github.com/gamesbyian/AYA/actions/runs/42199158594) passed **9/17 installed iPhone tests**: eight failed before receiving a selected Files URL, including the new list-view diagnostic. The [Xcode 26.6 / iOS 26.5 comparison 42192636283](https://github.com/gamesbyian/AYA/actions/runs/42192636283) passed 0/2 selected Files tests. All four support workflows passed. QA app-owned document staging, alternate UIKit copy-mode, long-press, double-tap, list view and content/position controls have not resolved this. The original first-party valid import and explicit Apply/Cancel journey still passes on iOS 18.5. **Do not merge or close #139 until exact-head acceptance qualifies its replacement.** The fictional cross-app fixture is separate from [outbound iOS QA receiver](RECEIVER_QA.md).
 
+
+## Creation-order differential completed: no selection recovery (2026-11-07)
+
+The [two-runner control, run 42323413239](https://github.com/gamesbyian/AYA/actions/runs/42323413239), failed both isolated, unchanged, strict one-tap negative tests despite deliberately reversing the original invalid fixture's creation order. Each runner verified **all seven exact filenames and bytes**, including the 4 MiB + 1 byte control, before the user-visible system picker test.
+
+| Fresh iOS 18.5 simulator | Native result | LocalStorage -1005 | DocumentManager failed opening |
+| --- | --- | ---: | ---: |
+| Invalid created first, job `128253040357` | Fail: host remained `picker-opened` | 2 | 16 |
+| Invalid created last, job `128253040089` | Fail: host remained `picker-opened` | 2 | 16 |
+
+Both tests found the target selectable as an accessibility element, tried one normal tap and a second diagnostic tap, but **neither reached the host's `fileImporter` completion callback**. Neither run recorded a LocalStorage hard indexing timeout in its bounded window; missing item IDs alone remain enough to break these journeys. Creation order is now a negative hypothesis, **not** a remedy.
+
+**Stop condition reached:** seven-file size, publication, cell position, runtime and creation-order speculation has produced no reliable recovery. Do not add another ad hoc simulator matrix for swapped filenames or provider state without a genuinely new causal mechanism and a strict attempt budget. Preserve the existing red acceptance gate and original artifacts. The next decisive evidence is an on-device iPhone/iPad selection through Files using the same independently installed QA provider and explicit Apply/Cancel checks; if a fresh physical device passes, record OS/build/provider identity and retain the simulator issue separately. If physical selection fails, retain the picker hierarchy and system File Provider evidence to develop a minimal Apple feedback report. No direct app-sandbox path is an acceptable substitute for the system picker.
+
 ## Fresh single-document simulator result (2026-11-06)
 
 The [isolation workflow run 42234704265](https://github.com/gamesbyian/AYA/actions/runs/42234704265) created two **separate new iOS 18.5 simulators**. Each independently installed the QA app, let it write **exactly one** synthetic file into its own Documents via FileManager, and used the real Lantern host/system Files importer.
