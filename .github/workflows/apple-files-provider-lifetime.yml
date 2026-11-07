@@ -1,10 +1,6 @@
 name: Apple Files source-process lifetime comparison
 # Standalone OS diagnostic; never replaces full native Files picker acceptance.
 on:
-  push:
-    branches: [test/apple-files-oversize-negative-20261104]
-    paths:
-      - '.github/workflows/apple-files-provider-lifetime.yml'
   workflow_dispatch:
 permissions:
   contents: read
