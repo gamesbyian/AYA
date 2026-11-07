@@ -1,0 +1,100 @@
+name: Apple Files document-slot differential
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/apple-files-slot-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  position-controls:
+    name: Fresh simulator / ${{ matrix.case }}
+    runs-on: macos-15
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [early-valid, late-invalid]
+    env:
+      CONTROL_CASE: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build native independent QA provider
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          ( cd integrations/apple/qa-share-receiver && xcodegen generate )
+          ( cd integrations/apple/sample && xcodegen generate )
+          xcodebuild -project integrations/apple/qa-share-receiver/AYAShareQA.xcodeproj \
+            -scheme AYAShareQAHost -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/aya-qa-slot" CODE_SIGNING_ALLOWED=NO \
+            build > "$RUNNER_TEMP/aya-qa-slot-build.log" 2>&1 || {
+              tail -100 "$RUNNER_TEMP/aya-qa-slot-build.log"; exit 1;
+            }
+      - name: Run one existing strict real-Files UI test on a fresh simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          TYPE="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["devicetypes"] if x["name"] == "iPhone 16 Pro"))')"
+          RUNTIME="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next(x["identifier"] for x in d["runtimes"] if x.get("isAvailable") and x["identifier"].endswith(".iOS-18-5")))')"
+          SIM_ID="$(xcrun simctl create "AYA slot $CONTROL_CASE" "$TYPE" "$RUNTIME")"
+          echo "Fresh simulator for $CONTROL_CASE: $SIM_ID"
+          xcrun simctl boot "$SIM_ID"
+          xcrun simctl bootstatus "$SIM_ID" -b
+          xcrun simctl install "$SIM_ID" "$RUNNER_TEMP/aya-qa-slot/Build/Products/Debug-iphonesimulator/AYAShareQAHost.app"
+          xcrun simctl launch "$SIM_ID" org.example.aya.shareqa --aya-stage-fixtures
+          QA_DATA="$(xcrun simctl get_app_container "$SIM_ID" org.example.aya.shareqa data)"
+          test "$(find "$QA_DATA/Documents" -maxdepth 1 -name 'aya-layout-*.json' -type f | wc -l | tr -d ' ')" = 7
+          test "$(stat -f %z "$QA_DATA/Documents/aya-layout-oversized.json")" = 4194305
+          # Both controls share the ordinary seven-file directory and its
+          # exact bytes, but target different names/positions. No test skips.
+          if [ "$CONTROL_CASE" = early-valid ]; then
+            TEST_NAME=testEarlyGridValidForeignJSONStillReachesPreview
+          else
+            TEST_NAME=testLateGridInvalidForeignJSONStillRejected
+          fi
+          xcrun simctl terminate "$SIM_ID" org.example.aya.shareqa || true
+          set +e
+          xcodebuild -project integrations/apple/sample/AYAAppleHost.xcodeproj \
+            -scheme AYAAppleHost -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/aya-host-slot" \
+            -resultBundlePath "$RUNNER_TEMP/aya-slot-$CONTROL_CASE.xcresult" \
+            "-only-testing:AYAAppleHostUITests/AYAAppleHostFilesImportUITests/$TEST_NAME" \
+            CODE_SIGNING_ALLOWED=NO test > "$RUNNER_TEMP/aya-slot-$CONTROL_CASE.log" 2>&1
+          STATUS=$?
+          set -e
+          grep -E 'error:|Executed [0-9]+ tests|TEST (SUCCEEDED|FAILED)' "$RUNNER_TEMP/aya-slot-$CONTROL_CASE.log" | tail -25 || true
+          (
+            set +e
+            xcrun simctl spawn "$SIM_ID" log show --last 4m --style compact \
+              --predicate '(process == "DocumentManager") OR (process == "fileproviderd") OR (subsystem CONTAINS[c] "FileProvider")' \
+              2>&1 | tail -c 1000000 > "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider.log"
+          ) || true
+          if [ -s "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider.log" ]; then
+            python3 scripts/ci/summarize_apple_fileprovider.py \
+              "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider.log" \
+              "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider-summary.md" || true
+            if [ -s "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider-summary.md" ]; then
+              cat "$RUNNER_TEMP/aya-slot-$CONTROL_CASE-provider-summary.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          xcrun simctl shutdown "$SIM_ID" || true
+          xcrun simctl delete "$SIM_ID" || true
+          exit "$STATUS"
+      - name: Preserve real native picker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aya-files-slot-${{ matrix.case }}
+          path: |
+            ${{ runner.temp }}/aya-slot-*.log
+            ${{ runner.temp }}/aya-slot-*.md
+            ${{ runner.temp }}/aya-slot-*.xcresult
+            ${{ runner.temp }}/aya-qa-slot-build.log
+          if-no-files-found: ignore
+          retention-days: 7
