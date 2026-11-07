@@ -121,3 +121,12 @@ Public reports relevant to triage, **not proof of a current OS bug or a producti
 - [LSSupportsOpeningDocumentsInPlace](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/LaunchServicesKeys.html): reads from other providers can change concurrently and require coordinated access
 
 For the portable content-recognition contract, see [Output Return & Import](../OUTPUT_RETURN_IMPORT.md), [Apple architecture](ARCHITECTURE.md), [Apple rollout plan](PLAN.md) and [module portability](../MODULE_PORTABILITY.md).
+
+
+## Exact identity-versus-payload discriminator (2026-11-07)
+
+The creation-order control could not cure the system LocalStorage -1005 failures: both the invalid-first and invalid-last macOS-runner test cases stayed red. To distinguish a particular **file-provider item identity/name** from the **semantic payload**, diagnostic commits `a2c7082` and `2e7ab78` add an opt-in `--aya-stage-seven-swap-content` QA fixture and two strict OS-selection UI cases. All seven filenames, ordering, total sizes and other five content payloads are unchanged. The bytes originally under `aya-layout-valid.json` and `aya-layout-invalid.json` are simply exchanged.
+
+The opt-in workflow `apple-files-swapped-payload.yml` performs **two independent freshly created iOS 18.5 simulators**, verifies every file's exact bytes *before* testing, then checks whether (a) the formerly valid name holding invalid bytes triggers a visible host rejection with no Apply, and (b) the formerly invalid name holding valid bytes opens preview without any auto-Apply. Native XCTest exit codes and scoped File Provider OS logs remain intact, even on failure. This is a diagnostic, not a replacement for the full seven-document acceptance suite. A failure to choose either document before URL callback cannot be counted as schema validation failure.
+
+**Interpretation to record only after exact-head jobs finish:** if failure follows a specific *name/slot*, investigate LocalStorage index identities; if it follows the *content* consistently, investigate provider document metadata/materialization without attributing semantic validation (which has not run). If results vary across independent fresh simulators, treat this as unstable OS/provider resolution rather than a deterministic discriminator. In every outcome #147 remains blocked until the original full Files-picker acceptance is green. Physical-device Open In and paste fallback checks do not satisfy the original picker gate.
