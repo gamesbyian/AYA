@@ -88,7 +88,7 @@ struct ContentView: View {
                     AYAHelpCard(
                         guide: guide,
                         explanation: "Ask an assistant for guidance or a demo-layout JSON proposal.",
-                        outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
+                        outputInstructions: "For demo JSON, save the raw file and choose Import saved agent output, or use Paste JSON output if Files is unavailable. Compatible iOS versions can also offer Open In > AYA Lantern for saved JSON. Every return is validated and previewed before Apply.",
                         onImportRequested: {
                             // Opening a new picker supersedes any outstanding
                             // read and makes stale import completions inert.
