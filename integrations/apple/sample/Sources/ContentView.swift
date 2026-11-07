@@ -170,7 +170,7 @@ struct ContentView: View {
             // native fileImporter. It cannot browse another app's files.
             .onOpenURL { url in
                 guard url.isFileURL else { return }
-                receiveUserOpenedDocument(url)
+                receiveUserOpenedDocument(url, fromOpenIn: true)
             }
             .confirmationDialog(
                 "Apply imported layout to this demo?",
@@ -207,7 +207,7 @@ struct ContentView: View {
         }
     }
 
-    private func receiveUserOpenedDocument(_ url: URL) {
+    private func receiveUserOpenedDocument(_ url: URL, fromOpenIn: Bool = false) {
         // A new explicit user choice invalidates any pending document read,
         // preview, and completion. The URL may originate from either
         // fileImporter or the system's Open In entry point.
@@ -219,7 +219,9 @@ struct ContentView: View {
         let token = importLifetime.begin()
         importTask = Task { @MainActor in
             do {
-                let file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                let file = try await (fromOpenIn
+                    ? AYAAppleFileImport.snapshot(userOpenedURL: url)
+                    : AYAAppleFileImport.snapshot(userSelectedURL: url))
                 try Task.checkCancellation()
                 guard importLifetime.isCurrent(token) else { return }
                 try inspectSelectedFile(file)
