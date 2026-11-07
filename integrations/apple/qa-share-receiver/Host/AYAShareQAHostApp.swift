@@ -19,12 +19,14 @@ struct AYAShareQAHostApp: App {
         let sevenDirect = arguments.contains("--aya-stage-seven-direct")
         let invalidFirst = arguments.contains("--aya-stage-seven-invalid-first")
         let invalidLast = arguments.contains("--aya-stage-seven-invalid-last")
+        let swapContent = arguments.contains("--aya-stage-seven-swap-content")
         if arguments.contains("--aya-stage-fixtures") || isolated != nil || sevenSmall
-            || sevenDirect || invalidFirst || invalidLast {
+            || sevenDirect || invalidFirst || invalidLast || swapContent {
             do {
                 try Self.stageLocalProviderFixtures(
                     only: isolated, smallOversized: sevenSmall, directWrite: sevenDirect,
-                    invalidFirst: invalidFirst, invalidLast: invalidLast
+                    invalidFirst: invalidFirst, invalidLast: invalidLast,
+                    swapContent: swapContent
                 )
             } catch {
                 NSLog("AYA QA fixture staging failed: %@", String(describing: error))
@@ -35,9 +37,11 @@ struct AYAShareQAHostApp: App {
     private static func stageLocalProviderFixtures(
         only: String? = nil, smallOversized: Bool = false,
         directWrite: Bool = false, invalidFirst: Bool = false,
-        invalidLast: Bool = false
+        invalidLast: Bool = false, swapContent: Bool = false
     ) throws {
         precondition(!(invalidFirst && invalidLast), "QA creation-order probes are exclusive")
+        precondition(!(swapContent && (invalidFirst || invalidLast)),
+                     "QA swapped-payload control must preserve ordinary file-creation order")
         let manager = FileManager.default
         let directory = try manager.url(
             for: .documentDirectory, in: .userDomainMask,
@@ -57,9 +61,14 @@ struct AYAShareQAHostApp: App {
         // publication order (and LocalStorage's potential item IDs) changes.
         let invalidName = "aya-layout-invalid.json"
         let invalidJSON = #"{"aya_demo_layout":"v1","columns":99,"accent":"invalid"}"#
-        if invalidFirst { try put(invalidName, invalidJSON) }
-        try put("aya-layout-valid.json", #"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#)
-        if !invalidFirst && !invalidLast { try put(invalidName, invalidJSON) }
+        let validJSON = #"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#
+        // Identity-vs-payload differential: keep all seven filename slots and
+        // every byte *except* exchanging the usual valid/invalid payloads.
+        let bytesUnderInvalidName = swapContent ? validJSON : invalidJSON
+        let bytesUnderValidName = swapContent ? invalidJSON : validJSON
+        if invalidFirst { try put(invalidName, bytesUnderInvalidName) }
+        try put("aya-layout-valid.json", bytesUnderValidName)
+        if !invalidFirst && !invalidLast { try put(invalidName, bytesUnderInvalidName) }
         try put("aya-layout-boolean.json", #"{"aya_demo_layout":"v1","columns":true,"accent":"cool"}"#)
         try put("aya-layout-float.json", #"{"aya_demo_layout":"v1","columns":1.0,"accent":"cool"}"#)
         try put("aya-layout-aaa-control.json", #"{"aya_demo_layout":"v1","columns":3,"accent":"cool"}"#)
@@ -86,8 +95,9 @@ struct AYAShareQAHostApp: App {
                 )
             }
         }
-        if invalidLast { try put(invalidName, invalidJSON) }
-        let kind = only ?? (invalidFirst ? "seven fixtures, invalid written first"
+        if invalidLast { try put(invalidName, bytesUnderInvalidName) }
+        let kind = only ?? (swapContent ? "seven fixtures, valid/invalid payloads swapped"
+                          : invalidFirst ? "seven fixtures, invalid written first"
                           : invalidLast ? "seven fixtures, invalid written last"
                           : directWrite ? "seven direct-write fixtures"
                           : smallOversized ? "seven small fixtures" : "seven fixtures")
