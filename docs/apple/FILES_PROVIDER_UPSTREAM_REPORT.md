@@ -48,6 +48,16 @@ Earlier [six-case differential 42307760222](https://github.com/gamesbyian/AYA/ac
 
 The [draft PR's automated QA fixtures](https://github.com/gamesbyian/AYA/pull/147) retain the isolated reproduction scripts and system logs. CI artifacts expire after seven days; export relevant evidence for any Apple Feedback Assistant submission while available. Do not attach arbitrary personal documents, model prompts or private user data. These examples are fully synthetic.
 
+
+## Relevant public prior art (not proof of the same root cause)
+
+- An [Apple Developer Technical Support engineer](https://developer.apple.com/forums/thread/713814) has warned that the iOS Simulator does not reproduce all physical-device sandbox behavior. That supports **testing a real device next**, not treating every simulator failure as automatically harmless.
+- [React Native Document Picker issue #246](https://github.com/react-native-documents/document-picker/issues/246) describes a visible file in the **iOS 13 Simulator** whose selection does nothing, while the reporter says an iOS 12 physical device worked. This is an analogous historic user-visible symptom, not direct evidence about iOS 18.5.
+- [Nextcloud iOS issue #3261](https://github.com/nextcloud/ios/issues/3261) contains a File Provider log with error **FP -1005** during an iOS 18.5 Simulator investigation. That provider and operation differ, so the matching error code alone does not establish the same bug. It does show that the symptom family exists outside AYA's reader code.
+- [Apple's document-picker documentation](https://developer.apple.com/documentation/uikit/uidocumentpickerviewcontroller) explicitly describes OS-provided security-scoped URLs and coordinated document access for external files. AYA's reader follows those post-selection responsibilities; the red case never receives a URL to process.
+
+These sources motivate escalation and physical-device comparisons but do **not** replace the controlled local evidence or authorize relaxing the acceptance assertions.
+
 ## Severity, limitations and next decision
 
 - **Release effect:** AYA's Files-return full seven-document native acceptance is not qualified. Do not mark the underlying importer production-proven or bypass the system to force green tests.
