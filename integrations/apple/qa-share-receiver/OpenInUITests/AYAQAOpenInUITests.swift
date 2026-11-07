@@ -36,34 +36,46 @@ final class AYAQAOpenInUITests: XCTestCase {
         XCTAssertTrue(share.isHittable)
         share.tap()
 
-        // This is a real iOS system activity UI, not a test-injected URL.
-        // Discover the *installed application target*, not just any Share
-        // Sheet button or the visible contents of the document.
+        // A receiving application must be a real *action* in Apple's UI.
+        // DO NOT search all accessibility element types: the QA app's own
+        // instructions can contain the destination name as static text, and
+        // tapping that text will produce a false-positive handoff.
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         var target: XCUIElement?
-        for attempt in 0..<8 {
+        for attempt in 0..<6 {
             for container in [qa, springboard] {
-                let candidate = container.descendants(matching: .any)
-                    .matching(NSPredicate(
-                        format: "label CONTAINS[c] %@", "AYA Lantern"
-                    )).firstMatch
-                if candidate.exists && candidate.isHittable {
+                for candidate in [
+                    container.buttons["AYA Lantern"],
+                    container.buttons["Open in AYA Lantern"],
+                    container.buttons["Open with AYA Lantern"],
+                    container.cells["AYA Lantern"],
+                    container.cells["Open in AYA Lantern"]
+                ] where candidate.exists && candidate.isHittable {
                     target = candidate
                     break
                 }
+                if target != nil { break }
             }
             if target != nil { break }
-            if attempt == 2 {
+            if attempt == 1 {
+                // Only open More if the native Share Sheet actually displays
+                // such a button. Do not let guidance text satisfy selection.
                 let more = qa.buttons["More"]
                 if more.exists && more.isHittable { more.tap() }
             }
-            qa.swipeUp()
+            if qa.otherElements["ActivityListView"].exists {
+                qa.swipeUp()
+            }
         }
         guard let receiver = target else {
-            let labels = qa.buttons.allElementsBoundByIndex
-                .map(\.label).filter { !$0.contains("\n") && $0.count < 65 }
-                .prefix(30)
-            XCTFail("OS did not offer independently installed Lantern for the QA JSON document. Share buttons: \(Array(labels))")
+            let screenshot = XCTAttachment(screenshot: qa.screenshot())
+            screenshot.name = "System Share Sheet without an AYA Lantern action"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            print("Open In diagnostic: activity UI exists = \(qa.otherElements["ActivityListView"].exists)")
+            print("Open In diagnostic: QA hierarchy = \(qa.debugDescription)")
+            print("Open In diagnostic: SpringBoard hierarchy = \(springboard.debugDescription)")
+            XCTFail("OS did not offer a selectable AYA Lantern application target. Do not infer a handoff from source-app text.")
             return
         }
         receiver.tap()
