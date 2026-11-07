@@ -97,7 +97,7 @@ public struct AYAImportPickerButton: View {
     @State private var reading = false
     @State private var errorMessage: String?
     @State private var importTask: Task<Void, Never>?
-    @State private var activeImportID: UUID?
+    @State private var selectionLifetime = AYAImportSelectionLifetime()
 
     public init(
         title: String = "Import saved agent output",
@@ -127,8 +127,7 @@ public struct AYAImportPickerButton: View {
                 // A second selection supersedes any read still in flight.
                 // Only its own live task may publish validated snapshot bytes.
                 importTask?.cancel()
-                let id = UUID()
-                activeImportID = id
+                let id = selectionLifetime.begin()
                 errorMessage = nil
                 reading = true
                 importTask = Task { @MainActor in
@@ -137,19 +136,18 @@ public struct AYAImportPickerButton: View {
                             userSelectedURL: url, maximumBytes: maximumBytes
                         )
                         try Task.checkCancellation()
-                        guard activeImportID == id else { return }
+                        guard selectionLifetime.isCurrent(id) else { return }
                         onSelected(snapshot)
                     } catch is CancellationError {
                         // User dismissed the host or superseded this import.
                         // Cancellation is not an invalid-file error.
                     } catch {
-                        if activeImportID == id && !Task.isCancelled {
+                        if selectionLifetime.isCurrent(id) && !Task.isCancelled {
                             errorMessage = error.localizedDescription
                         }
                     }
-                    if activeImportID == id {
+                    if selectionLifetime.finish(id) {
                         reading = false
-                        activeImportID = nil
                         importTask = nil
                     }
                 }
@@ -162,7 +160,7 @@ public struct AYAImportPickerButton: View {
             // subsequently exposes Apply in a no-longer-active context.
             importTask?.cancel()
             importTask = nil
-            activeImportID = nil
+            selectionLifetime.cancel()
             reading = false
         }
         .alert("Cannot import this file", isPresented: Binding(
