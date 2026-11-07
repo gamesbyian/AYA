@@ -63,7 +63,7 @@ private struct QAProviderPreparationView: View {
                             .frame(minHeight: 44)
                     }
                     .accessibilityIdentifier("qa.openin.share")
-                    Text("Choose AYA Lantern in iOS's system sharing interface if it is offered. This is an actual cross-app document handoff, not a direct call into AYA.")
+                    Text("Choose an installed app in the system sharing interface if a compatible document viewer is offered. This action makes no direct call into the recipient.")
                         .font(.footnote)
                 }
                 Text("No user files are examined. Existing QA documents are verified, never silently overwritten. Delete this disposable app to remove its fixtures.")
