@@ -1,8 +1,8 @@
 name: Apple Files document-slot differential
+# Diagnostic-only workflow. Opt in from Actions > Run workflow.
+# Preserve genuine XCTest exit codes and artifacts; avoid automatic
+# macOS simulator fan-out on routine PR or QA fixture edits.
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/apple-files-slot-differential.yml'
   workflow_dispatch:
 permissions:
   contents: read
