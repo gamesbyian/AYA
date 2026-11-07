@@ -34,6 +34,8 @@ struct ContentView: View {
     @State private var columns = 1
     @State private var accent = "warm"
     @State private var importError: String?
+    @State private var importTask: Task<Void, Never>?
+    @State private var importLifetime = AYAImportSelectionLifetime()
 
     private let guide: String = {
         guard let url = Bundle.main.url(forResource: "aya-guide", withExtension: "md"),
@@ -78,7 +80,16 @@ struct ContentView: View {
                         guide: guide,
                         explanation: "Ask an assistant for guidance or a demo-layout JSON proposal.",
                         outputInstructions: "For a demo-layout JSON, save the raw file in Files and use Import saved agent output. This sample validates and previews it before applying.",
-                        onImportRequested: { showFilePicker = true }
+                        onImportRequested: {
+                            // Opening a new picker supersedes any outstanding
+                            // read and makes stale import completions inert.
+                            importTask?.cancel()
+                            importTask = nil
+                            importLifetime.cancel()
+                            proposedLayout = nil
+                            importError = nil
+                            showFilePicker = true
+                        }
                     )
                     .transformEnvironment(\.dynamicTypeSize) { size in
                         #if DEBUG
@@ -101,13 +112,22 @@ struct ContentView: View {
                 case .failure:
                     importError = "No readable JSON file was selected."
                 case .success(let url):
-                    Task {
+                    importTask?.cancel()
+                    let token = importLifetime.begin()
+                    importTask = Task { @MainActor in
                         do {
                             let file = try await AYAAppleFileImport.snapshot(userSelectedURL: url)
+                            try Task.checkCancellation()
+                            guard importLifetime.isCurrent(token) else { return }
                             try inspectSelectedFile(file)
+                        } catch is CancellationError {
+                            // Cancelled reads cannot expose Apply or errors.
                         } catch {
-                            importError = error.localizedDescription
+                            if importLifetime.isCurrent(token) && !Task.isCancelled {
+                                importError = error.localizedDescription
+                            }
                         }
+                        if importLifetime.finish(token) { importTask = nil }
                     }
                 }
             }
@@ -128,6 +148,12 @@ struct ContentView: View {
                 Button("Cancel", role: .cancel) { proposedLayout = nil }
             } message: {
                 Text("The proposed layout changes this sample to \(proposedLayout?.columns ?? 1) columns with a \(proposedLayout?.accent ?? "warm") accent. No files are modified.")
+            }
+            .onDisappear {
+                importTask?.cancel()
+                importTask = nil
+                importLifetime.cancel()
+                proposedLayout = nil
             }
             .alert("Cannot use this file", isPresented: Binding(
                 get: { importError != nil },
