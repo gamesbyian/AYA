@@ -21,6 +21,20 @@ public enum AYAAppleImportError: Error, LocalizedError {
     }
 }
 
+/// Narrow sendability boundary for Foundation's coordinated-read cancellation.
+/// Apple permits cancelling a pending NSFileCoordinator operation from another
+/// thread; `cancel()` is explicitly designed to race with a blocking
+/// `coordinate(...)` call. The underlying coordinator never escapes
+/// this private per-import lifetime. This wrapper exposes no shared mutable file
+/// data or arbitrary coordinator access to callers.
+private final class AYACancelableFileCoordinator: @unchecked Sendable {
+    let value = NSFileCoordinator(filePresenter: nil)
+
+    func cancel() {
+        value.cancel()
+    }
+}
+
 /// Reads only a user-selected URL. The security scope and file coordination
 /// run off the main actor and are released once immutable bytes are captured.
 public enum AYAAppleFileImport {
@@ -40,7 +54,7 @@ public enum AYAAppleFileImport {
         // Detached work keeps the coordinated file read off the UI actor.
         // Explicitly bind its lifetime to the caller: awaiting a detached
         // task alone does not propagate cancellation.
-        let coordinator = NSFileCoordinator(filePresenter: nil)
+        let cancellableCoordinator = AYACancelableFileCoordinator()
         let worker = Task.detached(priority: .userInitiated) {
             try Task.checkCancellation()
             guard url.isFileURL, url.startAccessingSecurityScopedResource() else {
@@ -51,7 +65,7 @@ public enum AYAAppleFileImport {
             try Task.checkCancellation()
             var coordinationError: NSError?
             var readResult: Result<Data, Error>?
-            coordinator.coordinate(readingItemAt: url, options: [], error: &coordinationError) { fileURL in
+            cancellableCoordinator.value.coordinate(readingItemAt: url, options: [], error: &coordinationError) { fileURL in
                 do {
                     try Task.checkCancellation()
                     let handle = try FileHandle(forReadingFrom: fileURL)
@@ -92,7 +106,7 @@ public enum AYAAppleFileImport {
             // but cannot interrupt an already running accessor. The worker's
             // own cancellation checks fence publication in either case.
             worker.cancel()
-            coordinator.cancel()
+            cancellableCoordinator.cancel()
         }
     }
 }
