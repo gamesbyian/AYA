@@ -12,6 +12,23 @@ The [isolation workflow run 42234704265](https://github.com/gamesbyian/AYA/actio
 
 **Interpretation:** the genuine invalid-file journey can pass end-to-end on a clean, one-file simulator. Multiple provider/item resolution failures observed with the larger seven-file fixture are consistent with bad simulator File Provider state, but a one-to-one causal relationship remains unproven. Continue to require the full seven-document tests, content guards and explicit Apply journey; the isolated success does **not** authorize merging.
 
+## Matched fresh-provider evidence: contents, size and publication (2026-11-06)
+
+Two independently repeated fresh-simulator matrices now distinguish user-visible import behavior from Apple's system-picker failures:
+
+| Real iOS 18.5 user-selected Files test | Five-case [42294432482](https://github.com/gamesbyian/AYA/actions/runs/42294432482) | Six-case [42307760222](https://github.com/gamesbyian/AYA/actions/runs/42307760222) |
+| --- | --- | --- |
+| One file, valid JSON, Cancel/reselect/Apply | Pass | Pass |
+| One file, malformed JSON, visible error/no Apply | Pass | Pass |
+| Seven files, valid JSON, Cancel/reselect/Apply | Pass | Pass |
+| Seven files, malformed JSON, original 4 MiB+1 neighbour | Fail, LocalStorage -1005 ×2 | Fail, LocalStorage -1005 ×2 |
+| Seven files, malformed JSON, neighbour replaced by tiny JSON | Fail, LocalStorage -1005 ×2 | Fail, LocalStorage -1005 ×2 |
+| Seven files, same exact bytes, direct first-write instead of `.atomic` | Not in run | **Fail, LocalStorage -1005 ×2** |
+
+All passes recorded zero `NSFileProviderErrorNonExistentItemIdentifier` errors in their captured windows. Changing only the oversized neighbouring file's size or changing QA-app publication from atomic temp-file/replacement to direct initial writes **did not** resolve the failing seven-file malformed selection. That does not prove content validity or position is causal: this is system File Provider behavior **before any selected URL reaches the host**. The failing full native [run 42307760296](https://github.com/gamesbyian/AYA/actions/runs/42307760296) still had eight failures in seventeen installed tests, eleven missing-ID errors, and two LocalStorage indexing timeouts. The iOS 26 focused control [run 42307760239](https://github.com/gamesbyian/AYA/actions/runs/42307760239) failed both of its real selections.
+
+**Next matched differential:** [`apple-files-slot-differential.yml`](../../.github/workflows/apple-files-slot-differential.yml) runs the existing `testEarlyGridValidForeignJSONStillReachesPreview` and `testLateGridInvalidForeignJSONStillRejected` tests on **two independent clean macOS-15 runners**. Both publish the same seven real files with identical names, bytes, sizes and File Provider flags. Only the user-selected filename/content and grid location differ. Retain both XCTest results, the exact picker hierarchy, and bounded LocalStorage logs. Successful selection at one position is not proof that the semantic validator would reject a document whose picker never returns it. Never weaken normal one-tap/Cancel/Apply/size gates.
+
 ## Native Apple File Provider OS evidence (2026-11-06)
 
 [Run 42199158594, attempt 2](https://github.com/gamesbyian/AYA/actions/runs/42199158594) retained `apple-xcodebuild-failure` artifact `aya-fileprovider-events.log`, a **bounded final 9-minute slice** of simulator system logs during real XCUITests. The 9,379 captured lines include:
