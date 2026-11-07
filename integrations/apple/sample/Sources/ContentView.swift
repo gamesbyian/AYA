@@ -36,6 +36,9 @@ struct ContentView: View {
     @State private var importError: String?
     @State private var importTask: Task<Void, Never>?
     @State private var importLifetime = AYAImportSelectionLifetime()
+    #if DEBUG
+    @State private var cancellationProbe: String?
+    #endif
 
     private let guide: String = {
         guard let url = Bundle.main.url(forResource: "aya-guide", withExtension: "md"),
@@ -60,6 +63,12 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     Text("Lantern Layout Demo")
                         .font(.title2.bold())
+                    #if DEBUG
+                    if let cancellationProbe {
+                        Text("Cancelled read: \(cancellationProbe)")
+                            .accessibilityIdentifier("host.import.cancel.probe")
+                    }
+                    #endif
                     Text("A fictional, temporary layout editor that demonstrates an AYA handoff and a separate manual JSON import.")
                         .foregroundStyle(.secondary)
                     HStack {
@@ -107,6 +116,30 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
             }
             .navigationTitle("AYA Sample")
+            #if DEBUG
+            .task {
+                // Deterministic, synthetic cancellation control. No Files UI,
+                // private-app access or claimed provider-revocation coverage.
+                // An already cancelled caller must fail *before* scope access.
+                guard ProcessInfo.processInfo.arguments.contains(
+                    "AYA_UI_TEST_PRE_CANCELLED_IMPORT"
+                ) else { return }
+                cancellationProbe = await Task.detached {
+                    () -> String in
+                    withUnsafeCurrentTask { $0?.cancel() }
+                    do {
+                        _ = try await AYAAppleFileImport.snapshot(
+                            userSelectedURL: URL(fileURLWithPath: "/aya-absent-cancel-probe.json")
+                        )
+                        return "unexpected-success"
+                    } catch is CancellationError {
+                        return "cancelled"
+                    } catch {
+                        return "unexpected-error"
+                    }
+                }.value
+            }
+            #endif
             .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.json]) { result in
                 switch result {
                 case .failure:
