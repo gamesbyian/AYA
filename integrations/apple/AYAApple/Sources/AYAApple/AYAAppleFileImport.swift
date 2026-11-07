@@ -34,33 +34,53 @@ public enum AYAAppleFileImport {
         guard maximumBytes > 0 && maximumBytes <= absoluteLimit else {
             throw AYAAppleImportError.invalidLimit
         }
-        return try await Task.detached(priority: .userInitiated) {
+        // Detached work keeps the coordinated file read off the UI actor.
+        // Explicitly bind its lifetime to the caller: awaiting a detached
+        // task alone does not propagate cancellation.
+        let coordinator = NSFileCoordinator(filePresenter: nil)
+        let worker = Task.detached(priority: .userInitiated) {
+            try Task.checkCancellation()
             guard url.isFileURL, url.startAccessingSecurityScopedResource() else {
                 throw AYAAppleImportError.permissionDenied
             }
             defer { url.stopAccessingSecurityScopedResource() }
 
-            let coordinator = NSFileCoordinator(filePresenter: nil)
+            try Task.checkCancellation()
             var coordinationError: NSError?
             var readResult: Result<Data, Error>?
             coordinator.coordinate(readingItemAt: url, options: [], error: &coordinationError) { fileURL in
                 do {
+                    try Task.checkCancellation()
                     let handle = try FileHandle(forReadingFrom: fileURL)
                     defer { try? handle.close() }
                     // Bound the read even if a File Provider lies about its size.
                     let data = try handle.read(upToCount: maximumBytes + 1) ?? Data()
+                    try Task.checkCancellation()
                     guard data.count <= maximumBytes else { throw AYAAppleImportError.tooLarge }
                     readResult = .success(data)
                 } catch {
                     readResult = .failure(error)
                 }
             }
+            try Task.checkCancellation()
             if let error = coordinationError { throw error }
             guard let outcome = readResult else { throw AYAAppleImportError.missingData }
             let bytes = try outcome.get()
             let fingerprint = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+            try Task.checkCancellation()
             return AYAImportFile(data: bytes, displayName: url.lastPathComponent, sha256Hex: fingerprint)
-        }.value
+        }
+        return try await withTaskCancellationHandler {
+            let result = try await worker.value
+            try Task.checkCancellation()
+            return result
+        } onCancel: {
+            // NSFileCoordinator.cancel() can terminate pending coordination,
+            // but cannot interrupt an already running accessor. The worker's
+            // own cancellation checks fence publication in either case.
+            worker.cancel()
+            coordinator.cancel()
+        }
     }
 }
 
