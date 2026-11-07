@@ -56,10 +56,20 @@ public enum AYAAppleFileImport {
                     try Task.checkCancellation()
                     let handle = try FileHandle(forReadingFrom: fileURL)
                     defer { try? handle.close() }
-                    // Bound the read even if a File Provider lies about its size.
-                    let data = try handle.read(upToCount: maximumBytes + 1) ?? Data()
+                    // FileHandle may return a short chunk before EOF. Never
+                    // accept a valid-looking prefix as a complete artifact.
+                    // Preserve the one-extra-byte cap and per-chunk cancellation.
+                    let data: Data
+                    do {
+                        data = try AYAImportBoundedReader.read(maximumBytes: maximumBytes) {
+                            try handle.read(upToCount: $0)
+                        }
+                    } catch AYAImportBoundedReadError.tooLarge {
+                        throw AYAAppleImportError.tooLarge
+                    } catch AYAImportBoundedReadError.invalidChunk {
+                        throw AYAAppleImportError.missingData
+                    }
                     try Task.checkCancellation()
-                    guard data.count <= maximumBytes else { throw AYAAppleImportError.tooLarge }
                     readResult = .success(data)
                 } catch {
                     readResult = .failure(error)
