@@ -70,11 +70,14 @@ private struct QAProviderPreparationView: View {
                         }
                     }
                     .accessibilityIdentifier("qa.openin.file")
-                    ShareLink(item: QAJSONDocument(
-                        fileURL: preparedDirectory.appendingPathComponent(
-                            selectedFixture, isDirectory: false
-                        )
-                    )) {
+                    ShareLink(
+                        item: QAJSONDocument(
+                            fileURL: preparedDirectory.appendingPathComponent(
+                                selectedFixture, isDirectory: false
+                            )
+                        ),
+                        preview: SharePreview("Synthetic JSON QA document")
+                    ) {
                         Label("Share selected JSON with another app",
                               systemImage: "square.and.arrow.up")
                             .frame(minHeight: 44)
