@@ -1,12 +1,10 @@
 name: Apple minimal Files callback differential
 # Exactly two independent native experiments: one versus seven source files.
 # This is an *AYA-free* system picker reproduction, never a product gate bypass.
+# Completed exact A/B control: 42433068046 (one PASS; seven FAIL before callback).
+# Manual-only after the bounded experiment; never automatically rerun the
+# known-red diagnostic on every source/doc edit.
 on:
-  push:
-    branches: [test/apple-minimal-native-picker-callback-20261107]
-    paths:
-      - '.github/workflows/apple-minimal-native-picker-callback.yml'
-      - 'integrations/apple/file-provider-minimal-repro/**'
   workflow_dispatch:
 
 permissions:
