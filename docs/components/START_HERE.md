@@ -18,6 +18,10 @@ This guide is written for someone who knows what they want their app to do but h
 
 See the [live snapshot of source and verification evidence](STATUS.md) before trying another toolchain. If you are implementing the **AYA interaction convention without any AYA SDK**, see the [offline handoff trace verifier](../conformance/README.md). It checks declared event ordering and negative cases, not real app behavior or recipient ingestion.
 
+### Need a short questionnaire before the handoff?
+
+Start with [Workflow Composition](../workflow/README.md). Have your coding agent inspect the real host goals and capabilities, identify only choices that materially affect the task, model conditional visibility and incompatible options, then resolve answers into a validated task specification before composing the reviewed agent-facing prompt. The [coding-agent playbook](../workflow/AGENT_GUIDE.md) and [validation guidance](../workflow/VALIDATION.md) describe that process. These are design specifications; no ready-made runtime questionnaire composer is currently shipped.
+
 ## 2. Tell your coding agent what to do
 
 If you're building with an AI coding agent, a reasonable prompt is:

@@ -1,0 +1,42 @@
+name: Workflow Composer reference
+
+on:
+  push:
+    paths:
+      - 'tools/workflow_composer.py'
+      - 'tools/test_workflow_composer.py'
+      - 'docs/workflow/**'
+      - '.github/workflows/workflow-composer.yml'
+  pull_request:
+    paths:
+      - 'tools/workflow_composer.py'
+      - 'tools/test_workflow_composer.py'
+      - 'docs/workflow/**'
+      - '.github/workflows/workflow-composer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: python3 -m unittest tools.test_workflow_composer -v
+      - name: Compile fictional image workflow
+        run: |
+          python3 tools/workflow_composer.py docs/workflow/examples/fictional-image-workflow.json docs/workflow/examples/fictional-image-answers.json --trace
+      - name: Compile fictional report workflow
+        run: |
+          python3 tools/workflow_composer.py docs/workflow/examples/fictional-report-workflow.json docs/workflow/examples/fictional-report-answers.json --trace
+      - name: Verify JSON fixture syntax
+        run: |
+          python3 -m json.tool docs/workflow/schema/aya-workflow-v0.schema.json > /dev/null
+          python3 -m json.tool docs/workflow/examples/fictional-image-workflow.json > /dev/null
+          python3 -m json.tool docs/workflow/examples/fictional-report-workflow.json > /dev/null

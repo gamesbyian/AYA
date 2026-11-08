@@ -1,0 +1,97 @@
+{
+  "schema": "aya-workflow/v0",
+  "title": "Fictional report builder",
+  "questions": [
+    {
+      "id": "goal",
+      "prompt": "What kind of report?",
+      "options": [
+        "summary",
+        "comparison"
+      ],
+      "required": true
+    },
+    {
+      "id": "audience",
+      "prompt": "Who will read it?",
+      "options": [
+        "general",
+        "technical"
+      ],
+      "default": "general"
+    },
+    {
+      "id": "citations",
+      "prompt": "Include source references?",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "default": "yes"
+    },
+    {
+      "id": "differences",
+      "prompt": "Highlight differences between groups?",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "when": {
+        "goal": "comparison"
+      },
+      "default": "yes"
+    }
+  ],
+  "rules": [
+    {
+      "id": "summary",
+      "when": {
+        "goal": "summary"
+      },
+      "section": "objective",
+      "text": "Summarize the supplied dataset."
+    },
+    {
+      "id": "comparison",
+      "when": {
+        "goal": "comparison"
+      },
+      "section": "objective",
+      "text": "Compare the supplied dataset groups."
+    },
+    {
+      "id": "technical",
+      "when": {
+        "audience": "technical"
+      },
+      "section": "constraints",
+      "text": "Include technical assumptions and limitations."
+    },
+    {
+      "id": "general",
+      "when": {
+        "audience": "general"
+      },
+      "section": "constraints",
+      "text": "Use accessible language and define specialized terms."
+    },
+    {
+      "id": "cite",
+      "when": {
+        "citations": "yes"
+      },
+      "section": "output",
+      "text": "Cite supplied source material; do not invent references."
+    },
+    {
+      "id": "differences",
+      "when": {
+        "goal": "comparison",
+        "differences": "yes"
+      },
+      "section": "operations",
+      "text": "Identify meaningful between-group differences and uncertainties."
+    }
+  ],
+  "conflicts": []
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "aya-workflow/v0",
+  "title": "Fictional image editor",
+  "questions": [
+    {
+      "id": "task",
+      "prompt": "What would you like to do?",
+      "options": [
+        "restore",
+        "reinterpret"
+      ],
+      "required": true
+    },
+    {
+      "id": "fidelity",
+      "prompt": "How closely should the source be preserved?",
+      "options": [
+        "strict",
+        "flexible"
+      ],
+      "default": "strict"
+    },
+    {
+      "id": "comparison",
+      "prompt": "Show a before/after comparison?",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "default": "no"
+    },
+    {
+      "id": "labels",
+      "prompt": "Add comparison labels?",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "when": {
+        "comparison": "yes"
+      },
+      "default": "no"
+    }
+  ],
+  "rules": [
+    {
+      "id": "restore",
+      "when": {
+        "task": "restore"
+      },
+      "section": "objective",
+      "text": "Restore visible damage in the supplied image."
+    },
+    {
+      "id": "reinterpret",
+      "when": {
+        "task": "reinterpret"
+      },
+      "section": "objective",
+      "text": "Create a new interpretation of the supplied image."
+    },
+    {
+      "id": "strict",
+      "when": {
+        "fidelity": "strict"
+      },
+      "section": "constraints",
+      "text": "Preserve original geometry and fine details."
+    },
+    {
+      "id": "compare",
+      "when": {
+        "comparison": "yes"
+      },
+      "section": "output",
+      "text": "Include a before/after comparison."
+    },
+    {
+      "id": "label",
+      "when": {
+        "comparison": "yes",
+        "labels": "yes"
+      },
+      "section": "output",
+      "text": "Label the before/after comparison."
+    }
+  ],
+  "conflicts": [
+    {
+      "when": {
+        "task": "reinterpret",
+        "fidelity": "strict"
+      },
+      "message": "This example requires flexible fidelity for reinterpretation; revise one answer."
+    }
+  ]
+}
