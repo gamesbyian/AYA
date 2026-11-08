@@ -9,7 +9,7 @@ From the repository root:
     python3 -m unittest tools.test_workflow_composer tools.test_workflow_composer_v1 -v
     python3 tools/workflow_composer_v1.py docs/workflow/examples/fictional-visual-v1.json docs/workflow/examples/fictional-visual-v1-answers.json --trace
 
-The typed implementation is [tools/workflow_composer_v1.py](../../tools/workflow_composer_v1.py), and its structural shape is described by [JSON Schema](schema/aya-workflow-v1.schema.json). Conformance cases are in [visual-v1-cases.json](conformance/visual-v1-cases.json). A future implementation in Swift, Kotlin or JavaScript should parse the same workflow, consume the same answer objects, and produce the same resolved sections, normalized answers and ignored-answer set. Tests are a *minimum*, not certification.
+The typed implementation is [tools/workflow_composer_v1.py](../../tools/workflow_composer_v1.py), and its structural shape is described by [JSON Schema](schema/aya-workflow-v1.schema.json). Conformance cases cover both [the fictional visual proposal](conformance/visual-v1-cases.json) and [an unrelated report builder](conformance/report-v1-cases.json). A future implementation in Swift, Kotlin or JavaScript should parse the same workflow, consume the same answer objects, and produce the same resolved sections, normalized answers and ignored-answer set. Tests are a *minimum*, not certification.
 
 ## Inputs and semantics
 
@@ -28,7 +28,7 @@ Explicit conflicts use a predicate and human-readable explanation. Detecting und
 
 ## Conformance and security boundaries
 
-The [test corpus](conformance/visual-v1-cases.json) covers expected results and explicit failure cases, including hidden stale answers, multi-select normalization, required dependent questions, and strict booleans. The [unit suite](../../tools/test_workflow_composer_v1.py) also covers cycles, malformed shapes, invalid references, navigation order independence and rule dependencies. The developer-side CLI writes inspectable text to stdout; it does not share it with any assistant.
+The conformance corpora cover expected results and explicit failure cases, including hidden stale answers, multi-select normalization, required dependent questions, and strict booleans. The [unit suite](../../tools/test_workflow_composer_v1.py) also covers cycles, malformed shapes, invalid references, navigation order independence and rule dependencies. CI additionally uses the independent `jsonschema` Draft 2020-12 validator to check both v0 and v1 schemas and their fictional workflow definitions. This verifies declared structure, not the correctness of prompt semantics. The developer-side CLI writes inspectable text to stdout; it does not share it with any assistant.
 
 A host remains responsible for disclosure of private selections, prompt/attachment inspection, authoring and verifying capabilities against the installed app, final editable review, Copy/Share, manual return/import, and output validation. A JSON Schema validating an input's shape cannot establish that its questions are intuitive, that the generated prompt is semantically correct, or that an external assistant supports the requested task.
 

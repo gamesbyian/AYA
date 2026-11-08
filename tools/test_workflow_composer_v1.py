@@ -13,17 +13,20 @@ CORPUS = json.loads((ROOT / "conformance" / "visual-v1-cases.json").read_text(en
 
 class TypedWorkflowTests(unittest.TestCase):
     def test_corpus(self):
-        self.assertEqual(CORPUS["schema"], "aya-workflow-cases/v1")
-        for case in CORPUS["cases"]:
-            with self.subTest(case=case["id"]):
-                if "error" in case:
-                    with self.assertRaisesRegex(WorkflowV1Error, case["error"].replace(".", r"\.")):
-                        resolve(SPEC, case["answers"])
-                else:
-                    result = resolve(SPEC, case["answers"])
-                    for field, expected in case["expected"].items():
-                        self.assertEqual(result[field], expected)
-                    self.assertTrue(compose(result).startswith("Task:\n"))
+        for name in ("visual", "report"):
+            spec = json.loads((ROOT / "examples" / f"fictional-{name}-v1.json").read_text(encoding="utf-8"))
+            corpus = json.loads((ROOT / "conformance" / f"{name}-v1-cases.json").read_text(encoding="utf-8"))
+            self.assertEqual(corpus["schema"], "aya-workflow-cases/v1")
+            for case in corpus["cases"]:
+                with self.subTest(host=name, case=case["id"]):
+                    if "error" in case:
+                        with self.assertRaisesRegex(WorkflowV1Error, case["error"].replace(".", r"\.")):
+                            resolve(spec, case["answers"])
+                    else:
+                        result = resolve(spec, case["answers"])
+                        for field, expected in case["expected"].items():
+                            self.assertEqual(result[field], expected)
+                        self.assertTrue(compose(result).startswith("Task:\n"))
 
     def test_multi_answers_canonical(self):
         forward = resolve(SPEC, {"goal": "restore", "deliverables": ["image", "notes"]})

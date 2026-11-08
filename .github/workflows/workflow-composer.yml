@@ -42,10 +42,32 @@ jobs:
       - name: Compile typed v1 workflow
         run: |
           python3 tools/workflow_composer_v1.py docs/workflow/examples/fictional-visual-v1.json docs/workflow/examples/fictional-visual-v1-answers.json --trace
+      - name: Validate workflow fixtures against JSON Schema
+        run: |
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          root = Path('docs/workflow')
+          for version, files in (
+              ('v0', ['fictional-image-workflow.json', 'fictional-report-workflow.json']),
+              ('v1', ['fictional-visual-v1.json', 'fictional-report-v1.json']),
+          ):
+              schema = json.loads((root / 'schema' / f'aya-workflow-{version}.schema.json').read_text())
+              Draft202012Validator.check_schema(schema)
+              validator = Draft202012Validator(schema)
+              for filename in files:
+                  data = json.loads((root / 'examples' / filename).read_text())
+                  validator.validate(data)
+                  print(f'Valid {version}: {filename}')
+          PY
       - name: Verify JSON fixture syntax
         run: |
           python3 -m json.tool docs/workflow/schema/aya-workflow-v0.schema.json > /dev/null
           python3 -m json.tool docs/workflow/schema/aya-workflow-v1.schema.json > /dev/null
           python3 -m json.tool docs/workflow/conformance/visual-v1-cases.json > /dev/null
+          python3 -m json.tool docs/workflow/conformance/report-v1-cases.json > /dev/null
+          python3 -m json.tool docs/workflow/examples/fictional-report-v1.json > /dev/null
           python3 -m json.tool docs/workflow/examples/fictional-image-workflow.json > /dev/null
           python3 -m json.tool docs/workflow/examples/fictional-report-workflow.json > /dev/null

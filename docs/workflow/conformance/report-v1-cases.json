@@ -1,0 +1,95 @@
+{
+  "schema": "aya-workflow-cases/v1",
+  "workflow": "../examples/fictional-report-v1.json",
+  "cases": [
+    {
+      "id": "summary",
+      "answers": {
+        "goal": "summary",
+        "focus": "trends",
+        "formats": [
+          "narrative",
+          "table"
+        ]
+      },
+      "expected": {
+        "answers": {
+          "goal": "summary",
+          "citations": true,
+          "formats": [
+            "table",
+            "narrative"
+          ]
+        },
+        "ignored_answers": [
+          "focus"
+        ],
+        "sections": {
+          "objective": [
+            "Summarize the available dataset."
+          ],
+          "operations": [],
+          "constraints": [
+            "Attribute claims only to supplied sources."
+          ],
+          "output": [
+            "Provide a table.",
+            "Provide a written narrative."
+          ]
+        }
+      }
+    },
+    {
+      "id": "comparison",
+      "answers": {
+        "formats": [
+          "chart",
+          "table"
+        ],
+        "goal": "compare",
+        "focus": "outliers",
+        "citations": false
+      },
+      "expected": {
+        "answers": {
+          "goal": "compare",
+          "citations": false,
+          "formats": [
+            "table",
+            "chart"
+          ],
+          "focus": "outliers"
+        },
+        "ignored_answers": [],
+        "sections": {
+          "objective": [
+            "Compare the supplied groups."
+          ],
+          "operations": [
+            "Identify unusual cases and their limitations."
+          ],
+          "constraints": [],
+          "output": [
+            "Provide a table.",
+            "Provide a chart."
+          ]
+        }
+      }
+    },
+    {
+      "id": "missing-focus",
+      "answers": {
+        "goal": "compare"
+      },
+      "error": "focus: missing required answer"
+    },
+    {
+      "id": "invalid-citations",
+      "answers": {
+        "goal": "summary",
+        "citations": "false"
+      },
+      "error": "citations: invalid answer"
+    }
+  ]
+}

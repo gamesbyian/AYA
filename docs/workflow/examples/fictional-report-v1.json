@@ -1,0 +1,139 @@
+{
+  "schema": "aya-workflow/v1",
+  "title": "Fictional data report",
+  "questions": [
+    {
+      "id": "goal",
+      "prompt": "What should the report accomplish?",
+      "kind": "choice",
+      "options": [
+        "summary",
+        "compare"
+      ],
+      "required": true
+    },
+    {
+      "id": "citations",
+      "prompt": "Include source citations?",
+      "kind": "boolean",
+      "default": true
+    },
+    {
+      "id": "formats",
+      "prompt": "Which formats should be included?",
+      "kind": "multi",
+      "options": [
+        "table",
+        "chart",
+        "narrative"
+      ],
+      "default": [
+        "narrative"
+      ]
+    },
+    {
+      "id": "focus",
+      "prompt": "What should the comparison emphasize?",
+      "kind": "choice",
+      "options": [
+        "trends",
+        "outliers"
+      ],
+      "required": true,
+      "when": {
+        "question": "goal",
+        "equals": "compare"
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "summary",
+      "section": "objective",
+      "text": "Summarize the available dataset.",
+      "when": {
+        "question": "goal",
+        "equals": "summary"
+      }
+    },
+    {
+      "id": "compare",
+      "section": "objective",
+      "text": "Compare the supplied groups.",
+      "when": {
+        "question": "goal",
+        "equals": "compare"
+      }
+    },
+    {
+      "id": "trend",
+      "section": "operations",
+      "text": "Analyze trends and major differences.",
+      "when": {
+        "all": [
+          {
+            "question": "goal",
+            "equals": "compare"
+          },
+          {
+            "question": "focus",
+            "equals": "trends"
+          }
+        ]
+      }
+    },
+    {
+      "id": "outliers",
+      "section": "operations",
+      "text": "Identify unusual cases and their limitations.",
+      "when": {
+        "all": [
+          {
+            "question": "goal",
+            "equals": "compare"
+          },
+          {
+            "question": "focus",
+            "equals": "outliers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "citations",
+      "section": "constraints",
+      "text": "Attribute claims only to supplied sources.",
+      "when": {
+        "question": "citations",
+        "equals": true
+      }
+    },
+    {
+      "id": "table",
+      "section": "output",
+      "text": "Provide a table.",
+      "when": {
+        "question": "formats",
+        "contains": "table"
+      }
+    },
+    {
+      "id": "chart",
+      "section": "output",
+      "text": "Provide a chart.",
+      "when": {
+        "question": "formats",
+        "contains": "chart"
+      }
+    },
+    {
+      "id": "narrative",
+      "section": "output",
+      "text": "Provide a written narrative.",
+      "when": {
+        "question": "formats",
+        "contains": "narrative"
+      }
+    }
+  ]
+}
