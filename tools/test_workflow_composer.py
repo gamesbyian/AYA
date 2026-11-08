@@ -51,6 +51,22 @@ class TestWorkflow(unittest.TestCase):
     def test_trace(self):
         a=resolve(BASE, {'task':'restore'})
         self.assertEqual([x['rule_id'] for x in a['trace']],['r1','r3'])
+    def test_second_host_fixture(self):
+        import json
+        from pathlib import Path
+        root = Path(__file__).resolve().parent.parent
+        directory = root / 'docs' / 'workflow' / 'examples'
+        spec = json.loads((directory / 'fictional-report-workflow.json').read_text(encoding='utf-8'))
+        answers = json.loads((directory / 'fictional-report-answers.json').read_text(encoding='utf-8'))
+        result = resolve(spec, answers)
+        text = compose(result)
+        self.assertIn('Compare the supplied dataset groups', text)
+        self.assertIn('Identify meaningful between-group differences', text)
+        self.assertIn('Cite supplied source material', text)
+        self.assertNotIn('Summarize the supplied dataset', text)
+        stale = resolve(spec, {'goal': 'summary', 'differences': 'yes'})
+        self.assertEqual(stale['ignored_answers'], ['differences'])
+        self.assertNotIn('between-group differences', compose(stale))
     def test_order_independent(self):
         first=resolve(BASE, {'task':'restore','comparison':'yes','labels':'yes'})
         second=resolve(BASE, {'labels':'yes','comparison':'yes','task':'restore'})
