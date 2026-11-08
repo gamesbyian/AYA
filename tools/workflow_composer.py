@@ -20,9 +20,11 @@ def _condition_matches(condition: dict[str, Any] | None, state: dict[str, Any]) 
     return all(state.get(key) == value for key, value in condition.items())
 
 def validate(spec: dict[str, Any]) -> None:
+    _ensure(isinstance(spec, dict), 'Workflow specification must be an object')
     _ensure(spec.get('schema') == 'aya-workflow/v0', 'Unsupported workflow schema')
     _ensure(isinstance(spec.get('questions'), list) and bool(spec['questions']), 'Missing questions')
     _ensure(isinstance(spec.get('rules'), list), 'Missing rules')
+    _ensure(isinstance(spec.get('conflicts', []), list), 'Conflicts must be an array')
     _ensure(isinstance(spec.get('title'), str) and bool(spec['title'].strip()), 'Missing title')
     questions: dict[str, dict[str, Any]] = {}
     for q in spec['questions']:
@@ -30,7 +32,7 @@ def validate(spec: dict[str, Any]) -> None:
         _ensure(q['id'] not in questions, f"Duplicate question {q['id']}")
         _ensure(isinstance(q.get('prompt'), str) and q['prompt'], f"Missing question prompt: {q['id']}")
         _ensure(isinstance(q.get('options'), list) and bool(q['options']), f"Missing options: {q['id']}")
-        _ensure(all(isinstance(v, str) for v in q['options']), f"Non-string option: {q['id']}")
+        _ensure(all(isinstance(v, str) and bool(v) for v in q['options']), f"Empty or non-string option: {q['id']}")
         _ensure(len(q['options']) == len(set(q['options'])), f"Duplicate option: {q['id']}")
         _ensure(isinstance(q.get('required', False), bool), f"Invalid required: {q['id']}")
         if 'default' in q:
@@ -81,12 +83,14 @@ def resolve(spec: dict[str, Any], answers: dict[str, Any]) -> dict[str, Any]:
         _ensure(value in questions[key]['options'], f'Invalid answer: {key}')
     state: dict[str, Any] = {}
     ignored: list[str] = []
+    processed: set[str] = set()
     remaining = dict(questions)
     while remaining:
-        ready = [key for key, q in remaining.items() if set(q.get('when', {})).issubset(state.keys() | set(ignored))]
+        ready = [key for key, q in remaining.items() if set(q.get('when', {})).issubset(processed)]
         _ensure(bool(ready), 'Unresolved conditional dependencies')
         for key in ready:
             q = remaining.pop(key)
+            processed.add(key)
             if not _condition_matches(q.get('when'), state):
                 ignored.append(key)
                 continue
