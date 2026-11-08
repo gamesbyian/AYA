@@ -20,6 +20,10 @@
 
 AYA has no model API key, inference hosting, developer AI bill, telemetry or account system. Users use their own assistant, subject to that assistant's terms and limits. **The receiving app decides whether to accept the attachment and open a new chat; AYA cannot guarantee either.**
 
+## Optional pre-handoff workflow composition (guidance proposal)
+
+Developers can design questionnaires, toggles and dependent choices leading into any AYA handoff. The [Workflow Composition guide](docs/workflow/README.md) covers human-centered question design, resolving answers into a typed task specification, conditional restructuring of agent instructions, traceability and combination testing. This is currently **developer and coding-agent guidance**, not a shipped Workflow Composer runtime or new recipient capability. The host continues to own UI, state and output import; users retain final approval of the exact content offered to their chosen assistant.
+
 ## Translation Kit: optional language and personality packs
 
 Apps can offer ordinary **Language** settings (device language, installed languages, Import pack) with a small optional **"Make a language pack with your AI"** AYA card. AYA now provides `Aya.launchTranslationBundled()`: an exact-version-guarded, one-way handoff carrying a host-authored translation schema, catalog, Rosetta/glossary, style and safety constraints, examples, and import instructions. Users can request French, Pirate, Cajun-flavoured, space-sage, technical terminology, or other creative voices. The recipient may produce a JSON pack; the user saves it and imports it through the **host's existing language importer**. AYA never sees the response or applies a pack.
