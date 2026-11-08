@@ -2,6 +2,10 @@
 
 **Status:** verified API/documentation research, **not** empirical AI-recipient or device compatibility. Scope: iOS/iPadOS native host apps. AYA remains an optional, Unlicensed interaction convention, not an AI service. Platform-specific integration must not redefine or specialize the host-neutral modules in [Module Portability](../MODULE_PORTABILITY.md).
 
+## Current Files-provider blocker research (2026-11-07)
+
+See [evidence-based File Provider blocker review](FILES_PROVIDER_BLOCKER_RESEARCH_20261107.md) for the exact -1005 pre-callback failure boundary, the already-tried UIKit copy picker, published Apple guidance and independent incident precedents, the separate ShareLink recipient-representation differential, and the physical-device/Feedback Assistant decision path. The seven-file native picker gate [#147](https://github.com/gamesbyian/AYA/pull/147) remains red; this research is not itself acceptance evidence.
+
 ## Executive decision
 
 Start with **reviewed handoff → system share / Copy fallback → manual import of a user-picked output**. Use an optional Swift Package; no runtime assistant API or automatic output watcher. App Intents and Shortcuts are separately gated enhancements rather than prerequisites. Align payload and identity semantics with the Android reference and portable packet authoring standards, while making native transport and importer details platform-specific. Do not assume that the iOS Share Sheet has identical behavior to Android's Intent chooser.
