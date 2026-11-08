@@ -1,6 +1,6 @@
 # Independent-app iOS JSON return acceptance
 
-**Candidate implementation:** [PR #162](https://github.com/gamesbyian/AYA/pull/162). This checks a *real* Apple system-mediated document handoff from one installed app to another, separate from the broken multi-document SwiftUI Files-picker gate in [PR #147](https://github.com/gamesbyian/AYA/pull/147). This is an executable test plan, not a declaration of success.
+**Verified simulator acceptance:** [merged PR #162 / exact-head run 42431460633](https://github.com/gamesbyian/AYA/actions/runs/42431460633) passed **2/2 genuine installed cross-app Open In tests**: valid JSON from a separate QA app reached Lantern review, Cancel kept the original layout, a second explicit system share + Apply changed it, and invalid JSON was visibly rejected without Apply. [Earlier independent run 42429726479](https://github.com/gamesbyian/AYA/actions/runs/42429726479) also passed 2/2, while intermediate runs failed to find or present the native Share Sheet recipient. This proves a real **iOS Simulator** two-app journey, not signed physical-device compatibility or ingestion by any real assistant. The original separate [Files-picker gate #147](https://github.com/gamesbyian/AYA/pull/147) remains red.
 
 ## What is being proved
 
