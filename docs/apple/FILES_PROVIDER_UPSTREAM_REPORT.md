@@ -1,6 +1,6 @@
 # Reproducible iOS LocalStorage File Provider selection failure
 
-**Report status:** Candidate for Apple Feedback Assistant, 2026-11-07. Not submitted to Apple. iOS AYA's independent seven-file native picker gate remains **red** in [draft PR #147](https://github.com/gamesbyian/AYA/pull/147). This document is the minimal reproducible technical account, not an assertion that Apple's OS is proven uniquely at fault.
+**Report status:** Candidate for Apple Feedback Assistant, updated 2026-11-08 UTC. Not submitted to Apple. The seven-file native Files picker gate remains **red** in [draft PR #147](https://github.com/gamesbyian/AYA/pull/147). [Exact native two-app control 42433068046](https://github.com/gamesbyian/AYA/actions/runs/42433068046) now reproduces the missing callback with **no AYA SDK in either app**. This is strong isolation of the pre-callback system selection boundary, not proof of a specific Apple root cause or failure on physical devices.
 
 ## Environment and user-visible failure
 
@@ -9,6 +9,23 @@
 - Using the **real native Files interface**, an XCTest driver navigates `On My iPhone → AYA Share QA`, finds the complete visible document cell and taps it. No direct sandbox read, fake callback or test-injected `AYAImportFile` occurs.
 - Expected: the system supplies a security-scoped file URL to `.fileImporter` or a user-visible system error. Actual for certain document identities in seven-file inventory: native Files remains open; the importer callback has not fired, the host still reports `Import stage: picker-opened`, and even a second diagnostic tap does not complete selection. The consuming app's byte-limit reader and semantic validation have **not run**.
 - Bounded simulator system logs contain `NSFileProviderErrorNonExistentItemIdentifier` / LocalStorage `-1005` and `DocumentManager failed opening URL (code 2)`. The latter signature also occurs in passing cases, so **do not use it alone to declare a failure**.
+
+## New decisive AYA-independent two-app native reproduction (2026-11-08 UTC)
+
+The standalone [minimal two-app project](../../integrations/apple/file-provider-minimal-repro/README.md) has now **executed genuine iOS Simulator system Files selections**, not merely compiled. Its source app writes the same synthetic invalid JSON filename/bytes into its own Documents with the documented local Files publication keys. Its completely unrelated receiving app uses **only SwiftUI `.fileImporter(allowedContentTypes: [.item])` and an on-screen native callback counter**. Neither app imports AYA; the receiver has no JSON parser, bounded reader, security-scoped snapshot implementation or synthetic callback injection.
+
+[Native differential 42433068046](https://github.com/gamesbyian/AYA/actions/runs/42433068046) was executed on two separately erased GitHub-hosted iPhone Simulators with Xcode **16.4 (16F6)**:
+
+| Same real document selected from a separate app | Actual installed XCUITest result | Receiving app callback |
+| --- | --- | --- |
+| **One file**: `aya-layout-invalid.json` only | **PASS**, 29.438s | Native user-selected file was returned |
+| **Seven files**: same target with six neighbouring files | **FAIL**, 46.022s | `State: picker-opened`; `Callbacks: 0` after tapping the visible, hittable native file cell |
+
+The one-file result is a positive OS-level control. The seven-file failure occurs **even though the receiver contains no AYA application-specific code** and before any read or semantic check. The test strictly fails when the picker never calls back; it does not replace document selection with file-path injection or accept a missing callback as success.
+
+This independently reproduces the **same failure boundary** as #147 under a minimized program and fixture. It increases confidence that the failure is in the simulator's system document-selection/provider path rather than AYA's parsing, byte cap or coordination code, but does **not** prove that Apple's LocalStorage `-1005` was logged on this particular minimal run until its retained bounded OS logs are independently inspected. Earlier #147 runs *did* log `-1005`. Do not conflate those evidence layers.
+
+The [run's two preserved artifact bundles](https://github.com/gamesbyian/AYA/actions/runs/42433068046) contain native XCTest records and bounded File Provider logs (seven-file failure artifacts expire). The companion [diagnostic workflow](../../.github/workflows/apple-minimal-native-picker-callback.yml) was changed to **manual-only** after these two fixed controls to avoid repeated expensive macOS CI. It retains the failing test unmodified, ready for Apple Feedback Assistant and future signed-device comparison. No physical device has been tested.
 
 ## Minimal A/B that separates filename identity from JSON contents
 

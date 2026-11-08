@@ -8,7 +8,16 @@
 
 **Highest-value next test:** install the independent QA source and Lantern consumer on a **signed physical iPhone/iPad** and repeat one-file plus seven-file, valid plus malformed, through the *same user-driven system Files UI*. Prefer that over yet another speculative fresh-simulator matrix. If physical device succeeds, retain the simulator failure rather than redefining its red tests as green. If it fails, record the OS-selected item's identity and collect sysdiagnose for Apple Feedback Assistant.
 
-**Practical alternate route:** host-registered document Open In, merged in [#160](https://github.com/gamesbyian/AYA/pull/160), has native package/host qualification but its genuine *foreign-app-to-host* OS delivery is still under test in [#162](https://github.com/gamesbyian/AYA/pull/162). A passing Open In journey can serve users despite the simulator problem; it must never be misreported as passing the original SwiftUI fileImporter gate.
+**Practical alternate route:** host-registered document Open In merged in [#160](https://github.com/gamesbyian/AYA/pull/160) and its genuine foreign-app-to-host iOS Simulator handoff **passed 2/2 strict native tests** in [merged #162 / run 42431460633](https://github.com/gamesbyian/AYA/actions/runs/42431460633). It supports a tested simulator fallback but does not qualify the still-red native Files picker or arbitrary real assistant apps/physical devices.
+
+## New independent reproduction, 2026-11-08 UTC
+
+[Minimal independent-app native differential 42433068046](https://github.com/gamesbyian/AYA/actions/runs/42433068046) has now answered the next narrower question: **the system picker failure still occurs when the importing app has no AYA code or byte-reader whatsoever.** Two separate erased iPhone Simulators and Xcode 16.4 (16F6) received different numbers of files published by a separate minimal Files app, while both XCUITests selected the same file name and bytes through Apple's actual Files interface.
+
+- **One source file: PASS**; the real picker returned the selected foreign JSON through its completion.
+- **Seven source files: FAIL**; a visible, hittable Files item was tapped, but the receiving app remained at `State: picker-opened`, with `Callbacks: 0`. AYA's schema validation, scoped snapshot reader and file coordination do not exist in this isolated consumer.
+
+The [standalone reproduction](../../integrations/apple/file-provider-minimal-repro/README.md), tests and OS log artifacts are tracked in [#168](https://github.com/gamesbyian/AYA/pull/168). The experiment confirms the same **pre-callback failure boundary** under an AYA-free host; it does not yet prove an Apple implementation defect, the exact provider item ID, or a physical-device failure. Retain the failed native assertion for diagnostic use, and do not repeat the completed simulator matrix automatically. **A signed physical iPhone/iPad comparison remains the next decisive new evidence.**
 
 ## Established results from AYA itself
 
