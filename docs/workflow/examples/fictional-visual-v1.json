@@ -1,0 +1,161 @@
+{
+  "schema": "aya-workflow/v1",
+  "title": "Fictional visual proposal",
+  "questions": [
+    {
+      "id": "goal",
+      "prompt": "What is the main task?",
+      "kind": "choice",
+      "options": [
+        "restore",
+        "design"
+      ],
+      "required": true
+    },
+    {
+      "id": "strict",
+      "prompt": "Preserve original geometry?",
+      "kind": "boolean",
+      "default": true
+    },
+    {
+      "id": "deliverables",
+      "prompt": "Which outputs?",
+      "kind": "multi",
+      "options": [
+        "image",
+        "comparison",
+        "notes"
+      ],
+      "default": [
+        "image"
+      ]
+    },
+    {
+      "id": "detail",
+      "prompt": "Level of design detail?",
+      "kind": "choice",
+      "options": [
+        "low",
+        "high"
+      ],
+      "when": {
+        "all": [
+          {
+            "question": "goal",
+            "equals": "design"
+          },
+          {
+            "not": {
+              "question": "strict",
+              "equals": true
+            }
+          }
+        ]
+      },
+      "required": true
+    }
+  ],
+  "rules": [
+    {
+      "id": "restore",
+      "section": "objective",
+      "text": "Restore the existing image.",
+      "when": {
+        "question": "goal",
+        "equals": "restore"
+      }
+    },
+    {
+      "id": "design",
+      "section": "objective",
+      "text": "Propose a new design.",
+      "when": {
+        "question": "goal",
+        "equals": "design"
+      }
+    },
+    {
+      "id": "annotate",
+      "section": "operations",
+      "text": "Add explanatory notes.",
+      "when": {
+        "question": "deliverables",
+        "contains": "notes"
+      },
+      "after": [
+        "prepare"
+      ]
+    },
+    {
+      "id": "prepare",
+      "section": "operations",
+      "text": "Prepare supplemental materials.",
+      "when": {
+        "any": [
+          {
+            "question": "deliverables",
+            "contains": "notes"
+          },
+          {
+            "question": "deliverables",
+            "contains": "comparison"
+          }
+        ]
+      }
+    },
+    {
+      "id": "strict",
+      "section": "constraints",
+      "text": "Preserve original geometry.",
+      "when": {
+        "question": "strict",
+        "equals": true
+      }
+    },
+    {
+      "id": "image",
+      "section": "output",
+      "text": "Provide an image.",
+      "when": {
+        "question": "deliverables",
+        "contains": "image"
+      }
+    },
+    {
+      "id": "comparison",
+      "section": "output",
+      "text": "Provide a before/after comparison.",
+      "when": {
+        "question": "deliverables",
+        "contains": "comparison"
+      }
+    },
+    {
+      "id": "notes",
+      "section": "output",
+      "text": "Provide written notes.",
+      "when": {
+        "question": "deliverables",
+        "contains": "notes"
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "when": {
+        "all": [
+          {
+            "question": "goal",
+            "equals": "design"
+          },
+          {
+            "question": "strict",
+            "equals": true
+          }
+        ]
+      },
+      "message": "Design requires geometry changes; disable strict preservation."
+    }
+  ]
+}
