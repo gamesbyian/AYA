@@ -36,71 +36,58 @@ final class AYAQAOpenInUITests: XCTestCase {
         XCTAssertTrue(share.isHittable)
         share.tap()
 
-        // A receiving application must be a real *action* in Apple's UI.
-        // DO NOT search all accessibility element types: the QA app's own
-        // instructions can contain the destination name as static text, and
-        // tapping that text will produce a false-positive handoff.
+        // Strictly separate two *different* OS failures: the activity sheet
+        // never opened, or it opened but did not offer the registered viewer.
+        // No retries, alternate actions, synthetic callbacks or blind swipes.
+        let activity = qa.otherElements["ActivityListView"]
+        guard activity.waitForExistence(timeout: 12) else {
+            let capture = XCTAttachment(screenshot: qa.screenshot())
+            capture.name = "File ShareLink did not present the native activity UI"
+            capture.lifetime = .keepAlways
+            add(capture)
+            XCTFail("iOS did not present a Share Sheet after one explicit user-triggered file share")
+            return
+        }
+
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         var target: XCUIElement?
-        for attempt in 0..<6 {
+        // Native run 42429726479 passed BOTH actual two-app journeys by
+        // tapping a shareCell which accessibility exposes as "AYA Lantern"
+        // even though the underlying identifier is just "shareCell".
+        for _ in 0..<5 {
             for container in [qa, springboard] {
-                // Apple's actual activity accessibility hierarchy uses an
-                // *unlabelled* cell identifier "shareCell" with a nested
-                // StaticText "AYA Lantern" (seen in native run 42427447880).
-                // Tap the selectable cell, never the nested label or a source
-                // guidance sentence that merely mentions the app name.
-                let nativeCells = container.cells
-                    .matching(identifier: "shareCell").allElementsBoundByIndex
-                for cell in nativeCells {
-                    // The cell has identifier "shareCell" while the *child*
-                    // static text has identifier "cellTitleLabel" and a
-                    // VARIABLE label (AYA Lantern, More, QA Receiver). The
-                    // previous query accidentally compared "AYA Lantern"
-                    // against the static text's identifier, not its label.
-                    let title = cell.staticTexts["cellTitleLabel"].firstMatch
-                    if title.exists && title.label == "AYA Lantern" && cell.isHittable {
+                let labelledCell = container.cells["AYA Lantern"]
+                if labelledCell.exists && labelledCell.isHittable {
+                    target = labelledCell
+                    break
+                }
+                // A provider/UI version can instead publish the label on a
+                // nested StaticText with identifier "cellTitleLabel".
+                for cell in container.cells.matching(identifier: "shareCell")
+                    .allElementsBoundByIndex {
+                    let label = cell.staticTexts["cellTitleLabel"].firstMatch
+                    if label.exists && label.label == "AYA Lantern" && cell.isHittable {
                         target = cell
                         break
                     }
                 }
                 if target != nil { break }
-                for candidate in [
-                    container.buttons["AYA Lantern"],
-                    container.buttons["Open in AYA Lantern"],
-                    container.buttons["Open with AYA Lantern"],
-                    container.cells["AYA Lantern"],
-                    container.cells["Open in AYA Lantern"]
-                ] where candidate.exists && candidate.isHittable {
-                    target = candidate
-                    break
-                }
-                if target != nil { break }
             }
             if target != nil { break }
-            if attempt == 1 {
-                // "More" is also a shareCell with child title "More" on this
-                // runtime, rather than necessarily a UIButton.
-                for cell in qa.cells.matching(identifier: "shareCell")
-                    .allElementsBoundByIndex {
-                    let title = cell.staticTexts["cellTitleLabel"].firstMatch
-                    if title.exists && title.label == "More" && cell.isHittable {
-                        cell.tap()
-                        break
-                    }
-                }
-            }
-            // Do not swipe the entire source app here: previous AX traces
-            // show this can scroll a visible app recipient out of the row.
         }
         guard let receiver = target else {
-            let screenshot = XCTAttachment(screenshot: qa.screenshot())
-            screenshot.name = "System Share Sheet without an AYA Lantern action"
-            screenshot.lifetime = .keepAlways
-            add(screenshot)
-            print("Open In diagnostic: activity UI exists = \(qa.otherElements["ActivityListView"].exists)")
-            print("Open In diagnostic: QA hierarchy = \(qa.debugDescription)")
-            print("Open In diagnostic: SpringBoard hierarchy = \(springboard.debugDescription)")
-            XCTFail("OS did not offer a selectable AYA Lantern application target. Do not infer a handoff from source-app text.")
+            let capture = XCTAttachment(screenshot: qa.screenshot())
+            capture.name = "Native Share Sheet lacks registered JSON viewer"
+            capture.lifetime = .keepAlways
+            add(capture)
+            let titles = qa.cells.matching(identifier: "shareCell")
+                .allElementsBoundByIndex.compactMap { cell -> String? in
+                    let title = cell.staticTexts["cellTitleLabel"].firstMatch
+                    return title.exists ? title.label : nil
+                }
+            print("System Share Sheet app targets: \(titles)")
+            print("ActivityListView still visible: \(activity.exists)")
+            XCTFail("The genuine activity UI did not offer AYA Lantern as a selectable viewer")
             return
         }
         receiver.tap()
