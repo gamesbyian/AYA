@@ -4,6 +4,8 @@
 
 A host can ask goal-oriented questions, collect choices, and compile them into a coherent task for the user's preferred assistant. This optional capability is independent of the Help, Creative, Structured Artifact, Translation, Filesystem and Spatial handoff profiles.
 
+A **standard-library Python reference composer** and runnable fictional fixture now exist. See [REFERENCE_IMPLEMENTATION.md](REFERENCE_IMPLEMENTATION.md). They are developer-side examples, not a shipping AYA integration or verified recipient pathway.
+
 ## Begin here
 
 1. Discover the host's actual user goals, supported capabilities and vocabulary using [Application Understanding](../understanding/README.md). Distinguish intended, implemented, observed and expected behavior.
