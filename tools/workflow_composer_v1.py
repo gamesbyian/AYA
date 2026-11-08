@@ -34,7 +34,7 @@ def refs(predicate: Any, questions: dict[str, dict[str, Any]]) -> set[str]:
             require(q["kind"] == "multi" and type(predicate["contains"]) is str
                     and predicate["contains"] in q["options"], "invalid contains value")
         else:
-            require(_valid_value(q, predicate["equals"], element=True), "invalid equals value")
+            require(q["kind"] != "multi" and _valid_value(q, predicate["equals"]), "invalid equals value")
         return {qid}
     require(len(predicate) == 1, "predicate must specify exactly one operator")
     if "not" in predicate:
@@ -66,6 +66,15 @@ def _hashable_strings(values: list[Any]) -> list[str]:
     return [v if type(v) is str else repr(v) for v in values]
 
 
+def _predicate_refs(predicate: dict[str, Any]) -> set[str]:
+    if "question" in predicate:
+        return {predicate["question"]}
+    if "not" in predicate:
+        return _predicate_refs(predicate["not"])
+    children = predicate.get("all", predicate.get("any", []))
+    return set().union(*(_predicate_refs(child) for child in children))
+
+
 def _match(predicate: dict[str, Any] | None, state: dict[str, Any]) -> bool:
     if predicate is None:
         return True
@@ -76,7 +85,7 @@ def _match(predicate: dict[str, Any] | None, state: dict[str, Any]) -> bool:
         return (predicate["contains"] in state[qid] if "contains" in predicate
                 else state[qid] == predicate["equals"])
     if "not" in predicate:
-        return not _match(predicate["not"], state)
+        return _predicate_refs(predicate["not"]).issubset(state) and not _match(predicate["not"], state)
     if "all" in predicate:
         return all(_match(p, state) for p in predicate["all"])
     return any(_match(p, state) for p in predicate["any"])
