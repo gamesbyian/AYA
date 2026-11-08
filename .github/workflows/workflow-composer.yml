@@ -4,13 +4,17 @@ on:
   push:
     paths:
       - 'tools/workflow_composer.py'
+      - 'tools/workflow_composer_v1.py'
       - 'tools/test_workflow_composer.py'
+      - 'tools/test_workflow_composer_v1.py'
       - 'docs/workflow/**'
       - '.github/workflows/workflow-composer.yml'
   pull_request:
     paths:
       - 'tools/workflow_composer.py'
+      - 'tools/workflow_composer_v1.py'
       - 'tools/test_workflow_composer.py'
+      - 'tools/test_workflow_composer_v1.py'
       - 'docs/workflow/**'
       - '.github/workflows/workflow-composer.yml'
   workflow_dispatch:
@@ -28,15 +32,20 @@ jobs:
         with:
           python-version: '3.12'
       - name: Unit tests
-        run: python3 -m unittest tools.test_workflow_composer -v
+        run: python3 -m unittest tools.test_workflow_composer tools.test_workflow_composer_v1 -v
       - name: Compile fictional image workflow
         run: |
           python3 tools/workflow_composer.py docs/workflow/examples/fictional-image-workflow.json docs/workflow/examples/fictional-image-answers.json --trace
       - name: Compile fictional report workflow
         run: |
           python3 tools/workflow_composer.py docs/workflow/examples/fictional-report-workflow.json docs/workflow/examples/fictional-report-answers.json --trace
+      - name: Compile typed v1 workflow
+        run: |
+          python3 tools/workflow_composer_v1.py docs/workflow/examples/fictional-visual-v1.json docs/workflow/examples/fictional-visual-v1-answers.json --trace
       - name: Verify JSON fixture syntax
         run: |
           python3 -m json.tool docs/workflow/schema/aya-workflow-v0.schema.json > /dev/null
+          python3 -m json.tool docs/workflow/schema/aya-workflow-v1.schema.json > /dev/null
+          python3 -m json.tool docs/workflow/conformance/visual-v1-cases.json > /dev/null
           python3 -m json.tool docs/workflow/examples/fictional-image-workflow.json > /dev/null
           python3 -m json.tool docs/workflow/examples/fictional-report-workflow.json > /dev/null
