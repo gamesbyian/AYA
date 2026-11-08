@@ -67,6 +67,35 @@ class TestWorkflow(unittest.TestCase):
         stale = resolve(spec, {'goal': 'summary', 'differences': 'yes'})
         self.assertEqual(stale['ignored_answers'], ['differences'])
         self.assertNotIn('between-group differences', compose(stale))
+    def test_optional_absent_dependency_does_not_deadlock(self):
+        s = copy.deepcopy(BASE)
+        s['questions'].append({'id': 'notes', 'prompt': 'Optional?', 'options': ['yes', 'no']})
+        s['questions'].append({'id': 'detail', 'prompt': 'Dependent?', 'options': ['long', 'short'], 'when': {'notes': 'yes'}})
+        s['rules'].append({'id': 'r6', 'when': {'detail': 'long'}, 'section': 'operations', 'text': 'Long detail'})
+        result = resolve(s, {'task': 'restore'})
+        self.assertNotIn('notes', result['answers'])
+        self.assertNotIn('detail', result['answers'])
+        self.assertNotIn('Long detail', compose(result))
+    def test_malformed_spec_rejected_as_workflow_error(self):
+        for bad in [None, [], 'text', 9]:
+            with self.subTest(spec=bad), self.assertRaises(WorkflowError):
+                validate(bad)
+        for invalid in [None, {}, 'bad']:
+            s = copy.deepcopy(BASE)
+            s['conflicts'] = invalid
+            with self.subTest(conflicts=invalid), self.assertRaises(WorkflowError):
+                validate(s)
+    def test_empty_option_rejected(self):
+        s = copy.deepcopy(BASE)
+        s['questions'][0]['options'].append('')
+        with self.assertRaises(WorkflowError):
+            validate(s)
+    def test_hidden_required_question_does_not_block(self):
+        s = copy.deepcopy(BASE)
+        s['questions'][3]['required'] = True
+        self.assertEqual(resolve(s, {'task': 'restore'})['ignored_answers'], [])
+        with self.assertRaisesRegex(WorkflowError, 'Missing required answer: labels'):
+            resolve(s, {'task': 'restore', 'comparison': 'yes'})
     def test_order_independent(self):
         first=resolve(BASE, {'task':'restore','comparison':'yes','labels':'yes'})
         second=resolve(BASE, {'labels':'yes','comparison':'yes','task':'restore'})
