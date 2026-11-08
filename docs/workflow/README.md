@@ -6,6 +6,8 @@ A host can ask goal-oriented questions, collect choices, and compile them into a
 
 A **standard-library Python reference composer** and runnable fictional fixture now exist. See [REFERENCE_IMPLEMENTATION.md](REFERENCE_IMPLEMENTATION.md). They are developer-side examples, not a shipping AYA integration or verified recipient pathway.
 
+An experimental [typed v1 composition contract](TYPED_V1.md) extends the earlier single-choice prototype with booleans, multi-select, nested conditions, ordered clauses, and machine-readable conformance cases. Both remain developer-side reference implementations, not platform SDK integrations.
+
 ## Begin here
 
 1. Discover the host's actual user goals, supported capabilities and vocabulary using [Application Understanding](../understanding/README.md). Distinguish intended, implemented, observed and expected behavior.
