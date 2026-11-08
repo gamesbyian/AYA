@@ -1,20 +1,5 @@
 import Foundation
 import SwiftUI
-import CoreTransferable
-import UniformTypeIdentifiers
-
-/// Ensures the iOS Share Sheet offers a JSON *file*, not a bare transferable
-/// URL (which can be interpreted as a link). Apple's ShareLink documentation
-/// recommends FileRepresentation for destinations that accept files.
-private struct QAJSONDocument: Transferable {
-    let fileURL: URL
-
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(exportedContentType: .json) { document in
-            SentTransferredFile(document.fileURL)
-        }
-    }
-}
 
 /// Independently installed, disposable QA fixture provider. The containing
 /// application is never an AYA SDK runtime dependency or a production inbox.
@@ -70,14 +55,15 @@ private struct QAProviderPreparationView: View {
                         }
                     }
                     .accessibilityIdentifier("qa.openin.file")
-                    ShareLink(
-                        item: QAJSONDocument(
-                            fileURL: preparedDirectory.appendingPathComponent(
-                                selectedFixture, isDirectory: false
-                            )
-                        ),
-                        preview: SharePreview("Synthetic JSON QA document")
-                    ) {
+                    // Native run 42427447880 offered the registered AYA Lantern
+                    // viewer for this real QA file URL. In contrast, custom
+                    // FileRepresentation (run 42428250171) exposed only More.
+                    // Keep the one representation empirically offering a
+                    // genuine selectable recipient; the receiving host must
+                    // still prove an actual file URL/bytes, never a link.
+                    ShareLink(item: preparedDirectory.appendingPathComponent(
+                        selectedFixture, isDirectory: false
+                    )) {
                         Label("Share selected JSON with another app",
                               systemImage: "square.and.arrow.up")
                             .frame(minHeight: 44)
