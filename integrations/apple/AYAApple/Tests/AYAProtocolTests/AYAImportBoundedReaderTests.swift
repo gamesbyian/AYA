@@ -73,4 +73,64 @@ final class AYAImportBoundedReaderTests: XCTestCase {
             XCTFail("Unexpected error: \(error)")
         }
     }
+
+    /// An *external parent* cancels a worker already inside a simulated,
+    /// blocking FileHandle/provider chunk read. When the read returns, the
+    /// bounded reader must reject partial data and run the worker's cleanup.
+    ///
+    /// This models the post-accessor cooperative cancellation boundary;
+    /// it does not assert that NSFileCoordinator can interrupt a provider's
+    /// blocking accessor, or that security-scoped OS resource cleanup was run.
+    func testExternalCancellationWhileReadCallbackIsBlocked() async {
+        let beganReading = expectation(description: "Reader has entered blocked chunk callback")
+        let cleanedUp = expectation(description: "Worker has exited and run cleanup")
+        let unblockRead = DispatchSemaphore(value: 0)
+
+        let worker = Task.detached(priority: .userInitiated) { () throws -> Data in
+            defer { cleanedUp.fulfill() }
+            return try AYAImportBoundedReader.read(maximumBytes: 32, chunkSize: 8) { _ in
+                beganReading.fulfill()
+                // Emulates one already-executing provider accessor. External
+                // cancellation alone cannot interrupt a synchronous read.
+                guard unblockRead.wait(timeout: .now() + 8) == .success else {
+                    throw CancellationError()
+                }
+                return Data("valid-looking-prefix".utf8)
+            }
+        }
+
+        await fulfillment(of: [beganReading], timeout: 10)
+        worker.cancel()
+        unblockRead.signal()
+
+        do {
+            let bytes = try await worker.value
+            XCTFail("Externally cancelled reader published \(bytes.count) partial bytes")
+        } catch is CancellationError {
+            // Expected: cancellation checked after the chunk completes, with
+            // no successful immutable artifact returned to the host.
+        } catch {
+            XCTFail("Unexpected error from externally cancelled worker: \(error)")
+        }
+        await fulfillment(of: [cleanedUp], timeout: 10)
+    }
+
+    func testProviderErrorAfterPartialChunkNeverReturnsIncompleteArtifact() {
+        enum SimulatedProviderError: Error { case accessRevoked }
+        var requests = 0
+        XCTAssertThrowsError(
+            try AYAImportBoundedReader.read(maximumBytes: 64, chunkSize: 8) { _ in
+                requests += 1
+                if requests == 1 { return Data("partial".utf8) }
+                throw SimulatedProviderError.accessRevoked
+            }
+        ) { error in
+            guard case SimulatedProviderError.accessRevoked = error else {
+                XCTFail("Stream error was swallowed or replaced: \(error)")
+                return
+            }
+        }
+        XCTAssertEqual(requests, 2)
+    }
+
 }
