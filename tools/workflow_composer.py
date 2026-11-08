@@ -19,8 +19,13 @@ def _condition_matches(condition: dict[str, Any] | None, state: dict[str, Any]) 
         return True
     return all(state.get(key) == value for key, value in condition.items())
 
+def _known_keys(value: dict[str, Any], allowed: set[str], context: str) -> None:
+    extras = set(value) - allowed
+    _ensure(not extras, f'Unknown {context} fields: {sorted(extras)}')
+
 def validate(spec: dict[str, Any]) -> None:
     _ensure(isinstance(spec, dict), 'Workflow specification must be an object')
+    _known_keys(spec, {'schema', 'title', 'questions', 'rules', 'conflicts'}, 'workflow')
     _ensure(spec.get('schema') == 'aya-workflow/v0', 'Unsupported workflow schema')
     _ensure(isinstance(spec.get('questions'), list) and bool(spec['questions']), 'Missing questions')
     _ensure(isinstance(spec.get('rules'), list), 'Missing rules')
@@ -29,6 +34,7 @@ def validate(spec: dict[str, Any]) -> None:
     questions: dict[str, dict[str, Any]] = {}
     for q in spec['questions']:
         _ensure(isinstance(q, dict) and isinstance(q.get('id'), str) and q['id'], 'Bad question ID')
+        _known_keys(q, {'id', 'prompt', 'options', 'required', 'default', 'when'}, 'question')
         _ensure(q['id'] not in questions, f"Duplicate question {q['id']}")
         _ensure(isinstance(q.get('prompt'), str) and q['prompt'], f"Missing question prompt: {q['id']}")
         _ensure(isinstance(q.get('options'), list) and bool(q['options']), f"Missing options: {q['id']}")
@@ -60,6 +66,7 @@ def validate(spec: dict[str, Any]) -> None:
     ids: set[str] = set()
     for rule in spec['rules']:
         _ensure(isinstance(rule, dict) and isinstance(rule.get('id'), str) and rule['id'], 'Bad rule ID')
+        _known_keys(rule, {'id', 'when', 'section', 'text'}, 'rule')
         _ensure(rule['id'] not in ids, f"Duplicate rule {rule['id']}")
         ids.add(rule['id'])
         cond = rule.get('when', {})
@@ -70,6 +77,7 @@ def validate(spec: dict[str, Any]) -> None:
         _ensure(isinstance(rule.get('text'), str) and rule['text'].strip(), f"Empty text: {rule['id']}")
     for c in spec.get('conflicts', []):
         _ensure(isinstance(c, dict) and isinstance(c.get('when'), dict) and len(c['when']) > 0, 'Invalid conflict')
+        _known_keys(c, {'when', 'message'}, 'conflict')
         _ensure(isinstance(c.get('message'), str) and c['message'], 'Invalid conflict message')
         for ref, value in c['when'].items():
             _ensure(ref in questions and value in questions[ref]['options'], f'Bad conflict condition: {ref}')
