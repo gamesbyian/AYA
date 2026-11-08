@@ -10,6 +10,19 @@ This disposable XcodeGen project is **independent of AYA's SDK**. It isolates th
 
 Requires macOS with Xcode, iOS Simulator SDK and [XcodeGen](https://github.com/yonaskolb/XcodeGen). From integrations/apple/file-provider-minimal-repro, run XcodeGen generate for project.yml; build the MinimalSource and MinimalConsumer schemes from AYAFileProviderMinimalRepro.xcodeproj with xcodebuild, an iOS Simulator destination and CODE_SIGNING_ALLOWED=NO. CI checks both built app Info.plists rather than trusting source-only declarations. For physical devices, supply valid Apple development signing/provisioning and install both apps. **No physical-device test has been performed.**
 
+## Actual installed iOS Simulator A/B, 2026-11-08 UTC
+
+[GitHub Actions native run 42433068046](https://github.com/gamesbyian/AYA/actions/runs/42433068046) built these **two independent apps** on two separately erased iPhone simulators with **Xcode 16.4 (16F6)** and used XCUITest to tap the **real system Files cell** `aya-layout-invalid.json`. No AYA SDK, JSON parsing, security-scoped snapshot reader, injected callback or direct cross-sandbox access is present in this receiver.
+
+| Actual source inventory | Native selection result | Test duration |
+| --- | --- | --- |
+| Exactly 1 file (`aya-layout-invalid.json`) | **PASS**: actual Files picker returned the selected file through its callback | 29.438 s |
+| Exactly 7 files (same target name and bytes, plus 6 neighbours) | **FAIL**: native selection left the receiving app at `State: picker-opened`, `Callbacks: 0` | 46.022 s |
+
+Both jobs selected source-owned documents using the same explicit user action and test code, differing in the number of files the source had authored. The seven-file test reached and tapped an existing, hittable native Files cell before failing the subsequent callback assertion. The seven-file failure is **before any consumer file reading**. This reproduces the original #147 failure boundary without AYA code and removes its reader and host-schema parser from the possible immediate causes. The specific Apple component responsible remains unproven, and no physical-device result is implied.
+
+The exact run retains native `.xcresult`, screenshots/accessibility diagnostics, test logs, and bounded File Provider OS logs for each matrix case as expiring GitHub Actions artifacts. The **seven-file XCTest remains intentionally red**; do not count the whole differential as a successful green workflow. The native differential workflow is **manual-only** after this bounded experiment to control macOS runner cost. The installed apps are available for physical-device reproduction when signed hardware can be tested.
+
 ## Reproduction with real user selection
 
 1. Create or erase an iOS Simulator and install both apps. Launch MinimalSource, tap **Prepare only malformed JSON**, and verify “Prepared 1 verified document(s)”. Confirm that it appears in Files → On My iPhone → Minimal Files Source.
