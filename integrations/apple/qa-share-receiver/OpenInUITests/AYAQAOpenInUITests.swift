@@ -44,6 +44,19 @@ final class AYAQAOpenInUITests: XCTestCase {
         var target: XCUIElement?
         for attempt in 0..<6 {
             for container in [qa, springboard] {
+                // Apple's actual activity accessibility hierarchy uses an
+                // *unlabelled* cell identifier "shareCell" with a nested
+                // StaticText "AYA Lantern" (seen in native run 42427447880).
+                // Tap the selectable cell, never the nested label or a source
+                // guidance sentence that merely mentions the app name.
+                let nativeCell = container.cells
+                    .matching(identifier: "shareCell")
+                    .containing(.staticText, identifier: "AYA Lantern")
+                    .firstMatch
+                if nativeCell.exists && nativeCell.isHittable {
+                    target = nativeCell
+                    break
+                }
                 for candidate in [
                     container.buttons["AYA Lantern"],
                     container.buttons["Open in AYA Lantern"],
