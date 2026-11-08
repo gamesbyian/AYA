@@ -1,0 +1,71 @@
+name: Apple minimal two-app File Provider repro build
+# Only a native compile/installability check. This workflow cannot validate
+# physical-device behavior or substitute for the original seven-file XCUITest.
+on:
+  push:
+    branches: [test/apple-minimal-local-files-repro-20261107]
+    paths:
+      - '.github/workflows/apple-file-provider-minimal-repro.yml'
+      - 'integrations/apple/file-provider-minimal-repro/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-independent-repro:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate tiny independent iOS apps
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          cd integrations/apple/file-provider-minimal-repro
+          xcodegen generate
+      - name: Compile BOTH app schemes with no AYA SDK
+        run: |
+          set -euo pipefail
+          ROOT=integrations/apple/file-provider-minimal-repro
+          PROJECT="$ROOT/AYAFileProviderMinimalRepro.xcodeproj"
+          for SCHEME in MinimalSource MinimalConsumer; do
+            xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
+              -sdk iphonesimulator \
+              -destination 'generic/platform=iOS Simulator' \
+              -derivedDataPath "$RUNNER_TEMP/aya-minimal-fileprovider-$SCHEME" \
+              CODE_SIGNING_ALLOWED=NO build \
+              > "$RUNNER_TEMP/aya-minimal-fileprovider-$SCHEME.log" 2>&1 || {
+                tail -110 "$RUNNER_TEMP/aya-minimal-fileprovider-$SCHEME.log"
+                exit 1
+              }
+          done
+      - name: Inspect signed-independent bundle identities and local publication
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, pathlib, plistlib
+          temp = pathlib.Path(os.environ["RUNNER_TEMP"])
+          for name, identifier in [
+              ("MinimalSource", "org.example.aya.minfiles.source"),
+              ("MinimalConsumer", "org.example.aya.minfiles.consumer")
+          ]:
+              app = temp / f"aya-minimal-fileprovider-{name}/Build/Products/Debug-iphonesimulator/{name}.app"
+              assert app.is_dir(), app
+              info = plistlib.loads((app / "Info.plist").read_bytes())
+              assert info["CFBundleIdentifier"] == identifier, info
+              if name == "MinimalSource":
+                  assert info.get("UIFileSharingEnabled") is True, info
+                  assert info.get("LSSupportsOpeningDocumentsInPlace") is True, info
+              else:
+                  assert info.get("UIFileSharingEnabled") is not True, info
+              print(name, identifier, "bundle verified")
+          PY
+          echo "Both standalone iOS apps compiled; native Files selection and real-device behavior are NOT implied" >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain compile errors
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minimal-fileprovider-repro-compile-failure
+          path: ${{ runner.temp }}/aya-minimal-fileprovider-*.log
+          if-no-files-found: ignore
+          retention-days: 7
