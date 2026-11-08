@@ -118,6 +118,42 @@ class TestWorkflow(unittest.TestCase):
         for fixture in ('fictional-image-workflow.json', 'fictional-report-workflow.json'):
             with self.subTest(fixture=fixture):
                 validate(json.loads((root / 'examples' / fixture).read_text(encoding='utf-8')))
+    def test_exhaustive_fictional_small_workflows(self):
+        import itertools
+        import json
+        from pathlib import Path
+        root = Path(__file__).resolve().parent.parent / 'docs' / 'workflow' / 'examples'
+        for filename in ('fictional-image-workflow.json', 'fictional-report-workflow.json'):
+            spec = json.loads((root / filename).read_text(encoding='utf-8'))
+            ids = [q['id'] for q in spec['questions']]
+            options = [q['options'] for q in spec['questions']]
+            checked = 0
+            for values in itertools.product(*options):
+                answers = dict(zip(ids, values))
+                try:
+                    intent = resolve(spec, answers)
+                except WorkflowError as exc:
+                    # The only declared conflict in these fixtures is image reinterpret + strict.
+                    self.assertEqual(filename, 'fictional-image-workflow.json')
+                    self.assertEqual(answers['task'], 'reinterpret')
+                    self.assertEqual(answers['fidelity'], 'strict')
+                    continue
+                checked += 1
+                text = compose(intent)
+                self.assertTrue(text.startswith('Task:'))
+                if filename.startswith('fictional-image'):
+                    if answers['fidelity'] == 'strict':
+                        self.assertIn('Preserve original geometry', text)
+                    if answers['comparison'] == 'no':
+                        self.assertNotIn('Label the before/after comparison', text)
+                        self.assertEqual('labels' in intent['ignored_answers'], True)
+                else:
+                    if answers['goal'] == 'summary':
+                        self.assertNotIn('between-group differences', text)
+                        self.assertIn('differences', intent['ignored_answers'])
+                    if answers['citations'] == 'no':
+                        self.assertNotIn('Cite supplied source', text)
+            self.assertGreater(checked, 0)
     def test_order_independent(self):
         first=resolve(BASE, {'task':'restore','comparison':'yes','labels':'yes'})
         second=resolve(BASE, {'labels':'yes','comparison':'yes','task':'restore'})
