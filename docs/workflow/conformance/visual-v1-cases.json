@@ -1,0 +1,148 @@
+{
+  "schema": "aya-workflow-cases/v1",
+  "workflow": "../examples/fictional-visual-v1.json",
+  "cases": [
+    {
+      "id": "restoration",
+      "answers": {
+        "goal": "restore",
+        "deliverables": [
+          "comparison",
+          "image"
+        ]
+      },
+      "expected": {
+        "answers": {
+          "goal": "restore",
+          "strict": true,
+          "deliverables": [
+            "image",
+            "comparison"
+          ]
+        },
+        "ignored_answers": [],
+        "sections": {
+          "objective": [
+            "Restore the existing image."
+          ],
+          "operations": [
+            "Prepare supplemental materials."
+          ],
+          "constraints": [
+            "Preserve original geometry."
+          ],
+          "output": [
+            "Provide an image.",
+            "Provide a before/after comparison."
+          ]
+        }
+      }
+    },
+    {
+      "id": "design",
+      "answers": {
+        "detail": "high",
+        "goal": "design",
+        "strict": false,
+        "deliverables": [
+          "notes",
+          "image"
+        ]
+      },
+      "expected": {
+        "answers": {
+          "goal": "design",
+          "strict": false,
+          "deliverables": [
+            "image",
+            "notes"
+          ],
+          "detail": "high"
+        },
+        "ignored_answers": [],
+        "sections": {
+          "objective": [
+            "Propose a new design."
+          ],
+          "operations": [
+            "Prepare supplemental materials.",
+            "Add explanatory notes."
+          ],
+          "constraints": [],
+          "output": [
+            "Provide an image.",
+            "Provide written notes."
+          ]
+        }
+      }
+    },
+    {
+      "id": "stale",
+      "answers": {
+        "goal": "restore",
+        "detail": "high",
+        "deliverables": [
+          "image"
+        ]
+      },
+      "expected": {
+        "answers": {
+          "goal": "restore",
+          "strict": true,
+          "deliverables": [
+            "image"
+          ]
+        },
+        "ignored_answers": [
+          "detail"
+        ],
+        "sections": {
+          "objective": [
+            "Restore the existing image."
+          ],
+          "operations": [],
+          "constraints": [
+            "Preserve original geometry."
+          ],
+          "output": [
+            "Provide an image."
+          ]
+        }
+      }
+    },
+    {
+      "id": "conflict",
+      "answers": {
+        "goal": "design"
+      },
+      "error": "Design requires geometry changes; disable strict preservation."
+    },
+    {
+      "id": "required",
+      "answers": {
+        "goal": "design",
+        "strict": false
+      },
+      "error": "detail: missing required answer"
+    },
+    {
+      "id": "invalid-bool",
+      "answers": {
+        "goal": "restore",
+        "strict": 1
+      },
+      "error": "strict: invalid answer"
+    },
+    {
+      "id": "invalid-multi",
+      "answers": {
+        "goal": "restore",
+        "deliverables": [
+          "image",
+          "image"
+        ]
+      },
+      "error": "deliverables: invalid answer"
+    }
+  ]
+}
