@@ -97,6 +97,9 @@ final class AYAQAOpenInUITests: XCTestCase {
     func testForeignDocumentRequiresPreviewCancelAndApply() throws {
         let qa = XCUIApplication(bundleIdentifier: "org.example.aya.shareqa")
         let lantern = XCUIApplication(bundleIdentifier: "org.example.ayalantern")
+        // Each test must start with a clean fictional host layout. The prior
+        // test may have completed an explicit Apply and left Lantern running.
+        if lantern.state != .notRunning { lantern.terminate() }
         prepareQA(qa, filename: "aya-layout-valid.json")
         try shareToInstalledLantern(qa)
 
@@ -121,6 +124,9 @@ final class AYAQAOpenInUITests: XCTestCase {
     func testForeignInvalidDocumentNeverOffersApply() throws {
         let qa = XCUIApplication(bundleIdentifier: "org.example.aya.shareqa")
         let lantern = XCUIApplication(bundleIdentifier: "org.example.ayalantern")
+        // Each test must start with a clean fictional host layout. The prior
+        // test may have completed an explicit Apply and left Lantern running.
+        if lantern.state != .notRunning { lantern.terminate() }
         prepareQA(qa, filename: "aya-layout-invalid.json")
         try shareToInstalledLantern(qa)
 
