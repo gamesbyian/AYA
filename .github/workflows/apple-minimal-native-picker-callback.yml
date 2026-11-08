@@ -1,0 +1,110 @@
+name: Apple minimal Files callback differential
+# Exactly two independent native experiments: one versus seven source files.
+# This is an *AYA-free* system picker reproduction, never a product gate bypass.
+on:
+  push:
+    branches: [test/apple-minimal-native-picker-callback-20261107]
+    paths:
+      - '.github/workflows/apple-minimal-native-picker-callback.yml'
+      - 'integrations/apple/file-provider-minimal-repro/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  system-picker:
+    name: Native Files callback – ${{ matrix.mode }}
+    runs-on: macos-15
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode: one
+            test: testOneForeignFileReturnsSystemCallback
+          - mode: seven
+            test: testSevenForeignFilesReturnSystemCallback
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare independent iOS Simulator and Xcode project
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          (cd integrations/apple/file-provider-minimal-repro && xcodegen generate)
+          SIM_ID="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next((x["udid"] for group in d["devices"].values() for x in group if x.get("isAvailable") and x["name"].startswith("iPhone")), ""))')"
+          test -n "$SIM_ID"
+          # Matrix jobs run on separate macOS VMs. Erase the selected simulator
+          # so each source app starts with empty Documents and a new provider.
+          xcrun simctl shutdown "$SIM_ID" >/dev/null 2>&1 || true
+          xcrun simctl erase "$SIM_ID"
+          xcrun simctl boot "$SIM_ID"
+          xcrun simctl bootstatus "$SIM_ID" -b
+          echo "SIM_ID=$SIM_ID" >> "$GITHUB_ENV"
+          echo "Simulator: $SIM_ID, control: ${{ matrix.mode }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build and install independent File Provider source app
+        run: |
+          set -euo pipefail
+          ROOT=integrations/apple/file-provider-minimal-repro
+          xcodebuild -project "$ROOT/AYAFileProviderMinimalRepro.xcodeproj" \
+            -scheme MinimalSource \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -derivedDataPath "$RUNNER_TEMP/minimal-source" \
+            CODE_SIGNING_ALLOWED=NO build \
+            > "$RUNNER_TEMP/minimal-source-build.log" 2>&1 || {
+              tail -100 "$RUNNER_TEMP/minimal-source-build.log"
+              exit 1
+            }
+          APP="$RUNNER_TEMP/minimal-source/Build/Products/Debug-iphonesimulator/MinimalSource.app"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist" | grep -Fx 'org.example.aya.minfiles.source'
+          /usr/libexec/PlistBuddy -c 'Print :UIFileSharingEnabled' "$APP/Info.plist" | grep -Fx 'true'
+          /usr/libexec/PlistBuddy -c 'Print :LSSupportsOpeningDocumentsInPlace' "$APP/Info.plist" | grep -Fx 'true'
+          xcrun simctl install "$SIM_ID" "$APP"
+
+      - name: Run EXACT user-picked foreign file callback journey
+        run: |
+          set -euo pipefail
+          ROOT=integrations/apple/file-provider-minimal-repro
+          set +e
+          xcodebuild -project "$ROOT/AYAFileProviderMinimalRepro.xcodeproj" \
+            -scheme MinimalConsumer \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$SIM_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/minimal-consumer" \
+            -resultBundlePath "$RUNNER_TEMP/minimal-${{ matrix.mode }}.xcresult" \
+            -only-testing:MinimalConsumerUITests/MinimalFilesConsumerUITests/${{ matrix.test }} \
+            CODE_SIGNING_ALLOWED=NO test > "$RUNNER_TEMP/minimal-${{ matrix.mode }}-test.log" 2>&1
+          RESULT=$?
+          set -e
+          grep -E 'Test Case .* (passed|failed)|Executed [0-9]+ tests|TEST (SUCCEEDED|FAILED)|MINIMAL FILES CALLBACK FAILURE' "$RUNNER_TEMP/minimal-${{ matrix.mode }}-test.log" | tail -30 || true
+          # Narrow, time-bounded OS evidence. This is *only* from disposable
+          # synthetic fixtures; never collect general on-device user files.
+          xcrun simctl spawn "$SIM_ID" log show --last 8m --style compact \
+            --predicate 'process CONTAINS[c] "LocalStorage" OR process CONTAINS[c] "DocumentManager" OR eventMessage CONTAINS[c] "NonExistentItemIdentifier" OR eventMessage CONTAINS[c] "NSFileProviderError"' \
+            > "$RUNNER_TEMP/minimal-${{ matrix.mode }}-fileprovider.log" 2>&1 || true
+          grep -E 'NSFileProviderErrorNonExistentItemIdentifier|error = -1005|error: -1005' "$RUNNER_TEMP/minimal-${{ matrix.mode }}-fileprovider.log" \
+            | wc -l | xargs echo "Bounded log matches for missing provider IDs:" >> "$GITHUB_STEP_SUMMARY" || true
+          if [[ "$RESULT" -eq 0 ]]; then
+            echo "PASS: real Files selection returned a foreign URL to the AYA-free consumer (${{ matrix.mode }} fixtures)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "FAIL: genuine iOS Files selection did not pass the strict AYA-free callback assertion (${{ matrix.mode }} fixtures); inspect test stage and LocalStorage logs." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$RESULT"
+
+      - name: Preserve exact native test and provider evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-minimal-files-callback-${{ matrix.mode }}
+          path: |
+            ${{ runner.temp }}/minimal-${{ matrix.mode }}-test.log
+            ${{ runner.temp }}/minimal-${{ matrix.mode }}-fileprovider.log
+            ${{ runner.temp }}/minimal-${{ matrix.mode }}.xcresult
+            ${{ runner.temp }}/minimal-source-build.log
+          if-no-files-found: ignore
+          retention-days: 7
