@@ -95,7 +95,7 @@ final class AYAImportBoundedReaderTests: XCTestCase {
                 guard unblockRead.wait(timeout: .now() + 8) == .success else {
                     throw CancellationError()
                 }
-                return Data("valid-looking-prefix".utf8)
+                return Data("partial".utf8)
             }
         }
 
