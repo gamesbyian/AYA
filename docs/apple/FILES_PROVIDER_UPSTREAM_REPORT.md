@@ -5,7 +5,7 @@
 ## Environment and user-visible failure
 
 - **Environment:** GitHub-hosted `macos-15` runners, Xcode 16.4, iOS 18.5 simulator; distinct independently installed `org.example.aya.shareqa` source and `org.example.ayalantern` importing applications, no App Group.
-- Source application declares `UIFileSharingEnabled = YES` and `LSSupportsOpeningDocumentsInPlace = YES`; it stages seven `.json` documents in its own `Documents` via `FileManager`. The importer presents SwiftUI `.fileImporter(isPresented:allowedContentTypes:)` allowing `UTType.json`.
+- Source application declares `UIFileSharingEnabled = YES` and `LSSupportsOpeningDocumentsInPlace = YES`; it stages seven `.json` documents in its own `Documents` via `FileManager`. The failing seven-file branch presents SwiftUI `.fileImporter(isPresented:allowedContentTypes:)` allowing the broad `UTType.item` (the separate minimal reproducer also uses `.item`). This is an intentionally broader picker than the sample's production JSON-only choice; the failure occurs before any host content validation.
 - Using the **real native Files interface**, an XCTest driver navigates `On My iPhone → AYA Share QA`, finds the complete visible document cell and taps it. No direct sandbox read, fake callback or test-injected `AYAImportFile` occurs.
 - Expected: the system supplies a security-scoped file URL to `.fileImporter` or a user-visible system error. Actual for certain document identities in seven-file inventory: native Files remains open; the importer callback has not fired, the host still reports `Import stage: picker-opened`, and even a second diagnostic tap does not complete selection. The consuming app's byte-limit reader and semantic validation have **not run**.
 - Bounded simulator system logs contain `NSFileProviderErrorNonExistentItemIdentifier` / LocalStorage `-1005` and `DocumentManager failed opening URL (code 2)`. The latter signature also occurs in passing cases, so **do not use it alone to declare a failure**.
@@ -36,7 +36,7 @@ Earlier [six-case differential 42307760222](https://github.com/gamesbyian/AYA/ac
 
 ## Steps for Apple / minimal reproduction
 
-1. Build two **separate** iOS applications. App A exposes `Documents` through `UIFileSharingEnabled` and `LSSupportsOpeningDocumentsInPlace` and writes seven JSON files, including `aya-layout-valid.json` and `aya-layout-invalid.json`; app B declares a document picker for `public.json`.
+1. Build two **separate** iOS applications. App A exposes `Documents` through `UIFileSharingEnabled` and `LSSupportsOpeningDocumentsInPlace` and writes seven JSON files, including `aya-layout-valid.json` and `aya-layout-invalid.json`; app B declares a document picker for `UTType.item`, matching the actual failing seven-file host. This is intentionally distinct from a narrowly restricted JSON-only picker.
 2. On a fresh iOS 18.5 simulator, install app A and write documents using its own process, confirm they appear in Files under `On My iPhone → App A`. Install app B.
 3. In app B, invoke the native picker and select `aya-layout-valid.json`: inspect callback delivery.
 4. Restart from fresh simulator with original inventory and select `aya-layout-invalid.json`: record whether the picker returns a URL, closes, or surfaces an error. Repeat after exchanging only the two payloads.
@@ -46,7 +46,7 @@ Earlier [six-case differential 42307760222](https://github.com/gamesbyian/AYA/ac
 
 **Actual symptom:** visible selectable cell can correspond to a stale/unresolvable LocalStorage provider identity and leave the document picker open without return/error.
 
-The [draft PR's automated QA fixtures](https://github.com/gamesbyian/AYA/pull/147) retain the isolated reproduction scripts and system logs. CI artifacts expire after seven days; export relevant evidence for any Apple Feedback Assistant submission while available. Do not attach arbitrary personal documents, model prompts or private user data. These examples are fully synthetic.
+The [draft PR's automated QA fixtures](https://github.com/gamesbyian/AYA/pull/147) retain the isolated reproduction scripts and system logs. An [AYA-free two-application minimal reproduction](../../integrations/apple/file-provider-minimal-repro/README.md), merged as [#166](https://github.com/gamesbyian/AYA/pull/166), also compiles on the native iOS Simulator SDK. It has **not yet demonstrated the picker failure**; its consumer merely displays real picker callback state and allows a clean single-file/seven-file manual or future physical-device comparison. CI artifacts expire after seven days; export relevant evidence for any Apple Feedback Assistant submission while available. Do not attach arbitrary personal documents, model prompts or private user data. These examples are fully synthetic.
 
 
 ## Relevant public prior art (not proof of the same root cause)
@@ -63,4 +63,4 @@ These sources motivate escalation and physical-device comparisons but do **not**
 - **Release effect:** AYA's Files-return full seven-document native acceptance is not qualified. Do not mark the underlying importer production-proven or bypass the system to force green tests.
 - **Not proven:** all physical devices fail; all File Providers fail; any specific Apple defect or AYA OS-version compatibility issue; true cancellation of an already executing accessor.
 - **Next decisive evidence:** signed physical iPhone/iPad, independently installed source and importing host, same seven-file user-selected flow. If a physical device reproduces the failure, include its diagnostic logs in an Apple Feedback Assistant report. If a physical device passes, preserve simulator CI as an unresolved OS/harness reliability issue rather than relabeling it green.
-- **Parallel validated functionality:** the text-paste fallback and alternate registered Open In pathway have merged, but Open In genuine foreign-file receipt is tracked by a separate, strict installed-app acceptance. Neither substitutes for the red `.fileImporter` gate.
+- **Parallel validated functionality:** the text-paste fallback and alternate registered Open In pathway are merged. Genuine foreign-app-to-host **Open In succeeded in 2/2 installed iOS Simulator cases** at [run 42431460633](https://github.com/gamesbyian/AYA/actions/runs/42431460633), including explicit Apply and invalid rejection; signed real-device and real AI-app compatibility remain unqualified. Neither substitutes for the red `.fileImporter` gate.
