@@ -96,6 +96,28 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(resolve(s, {'task': 'restore'})['ignored_answers'], [])
         with self.assertRaisesRegex(WorkflowError, 'Missing required answer: labels'):
             resolve(s, {'task': 'restore', 'comparison': 'yes'})
+    def test_unknown_schema_fields_rejected(self):
+        for location in ('workflow', 'question', 'rule', 'conflict'):
+            s = copy.deepcopy(BASE)
+            if location == 'workflow':
+                s['accidental'] = True
+            elif location == 'question':
+                s['questions'][0]['accidental'] = True
+            elif location == 'rule':
+                s['rules'][0]['accidental'] = True
+            else:
+                s['conflicts'][0]['accidental'] = True
+            with self.subTest(location=location), self.assertRaisesRegex(WorkflowError, 'Unknown'):
+                validate(s)
+    def test_schema_and_examples_are_json(self):
+        import json
+        from pathlib import Path
+        root = Path(__file__).resolve().parent.parent / 'docs' / 'workflow'
+        schema = json.loads((root / 'schema' / 'aya-workflow-v0.schema.json').read_text(encoding='utf-8'))
+        self.assertEqual(schema['properties']['schema']['const'], 'aya-workflow/v0')
+        for fixture in ('fictional-image-workflow.json', 'fictional-report-workflow.json'):
+            with self.subTest(fixture=fixture):
+                validate(json.loads((root / 'examples' / fixture).read_text(encoding='utf-8')))
     def test_order_independent(self):
         first=resolve(BASE, {'task':'restore','comparison':'yes','labels':'yes'})
         second=resolve(BASE, {'labels':'yes','comparison':'yes','task':'restore'})
