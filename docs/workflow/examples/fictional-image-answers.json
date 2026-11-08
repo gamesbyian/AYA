@@ -1,0 +1,6 @@
+{
+  "task": "restore",
+  "fidelity": "strict",
+  "comparison": "yes",
+  "labels": "yes"
+}
