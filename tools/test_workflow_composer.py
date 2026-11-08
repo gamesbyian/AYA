@@ -93,6 +93,7 @@ class TestWorkflow(unittest.TestCase):
     def test_hidden_required_question_does_not_block(self):
         s = copy.deepcopy(BASE)
         s['questions'][3]['required'] = True
+        del s['questions'][3]['default']
         self.assertEqual(resolve(s, {'task': 'restore'})['ignored_answers'], [])
         with self.assertRaisesRegex(WorkflowError, 'Missing required answer: labels'):
             resolve(s, {'task': 'restore', 'comparison': 'yes'})
