@@ -49,14 +49,21 @@ final class AYAQAOpenInUITests: XCTestCase {
                 // StaticText "AYA Lantern" (seen in native run 42427447880).
                 // Tap the selectable cell, never the nested label or a source
                 // guidance sentence that merely mentions the app name.
-                let nativeCell = container.cells
-                    .matching(identifier: "shareCell")
-                    .containing(.staticText, identifier: "AYA Lantern")
-                    .firstMatch
-                if nativeCell.exists && nativeCell.isHittable {
-                    target = nativeCell
-                    break
+                let nativeCells = container.cells
+                    .matching(identifier: "shareCell").allElementsBoundByIndex
+                for cell in nativeCells {
+                    // The cell has identifier "shareCell" while the *child*
+                    // static text has identifier "cellTitleLabel" and a
+                    // VARIABLE label (AYA Lantern, More, QA Receiver). The
+                    // previous query accidentally compared "AYA Lantern"
+                    // against the static text's identifier, not its label.
+                    let title = cell.staticTexts["cellTitleLabel"].firstMatch
+                    if title.exists && title.label == "AYA Lantern" && cell.isHittable {
+                        target = cell
+                        break
+                    }
                 }
+                if target != nil { break }
                 for candidate in [
                     container.buttons["AYA Lantern"],
                     container.buttons["Open in AYA Lantern"],
@@ -71,14 +78,19 @@ final class AYAQAOpenInUITests: XCTestCase {
             }
             if target != nil { break }
             if attempt == 1 {
-                // Only open More if the native Share Sheet actually displays
-                // such a button. Do not let guidance text satisfy selection.
-                let more = qa.buttons["More"]
-                if more.exists && more.isHittable { more.tap() }
+                // "More" is also a shareCell with child title "More" on this
+                // runtime, rather than necessarily a UIButton.
+                for cell in qa.cells.matching(identifier: "shareCell")
+                    .allElementsBoundByIndex {
+                    let title = cell.staticTexts["cellTitleLabel"].firstMatch
+                    if title.exists && title.label == "More" && cell.isHittable {
+                        cell.tap()
+                        break
+                    }
+                }
             }
-            if qa.otherElements["ActivityListView"].exists {
-                qa.swipeUp()
-            }
+            // Do not swipe the entire source app here: previous AX traces
+            // show this can scroll a visible app recipient out of the row.
         }
         guard let receiver = target else {
             let screenshot = XCTAttachment(screenshot: qa.screenshot())
