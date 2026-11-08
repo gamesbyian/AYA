@@ -1,0 +1,72 @@
+{
+  "schema": "aya-apple-localstorage-reproduction/v1",
+  "recorded_utc": "2026-11-08",
+  "purpose": "AYA-free native Files picker callback A/B, single versus seven synthetic JSON files",
+  "workflow_run": "https://github.com/gamesbyian/AYA/actions/runs/42433068046",
+  "exact_test_head_sha": "c87b6f175731001ad742990dbbe19c4d99737fac",
+  "merge_pr": "https://github.com/gamesbyian/AYA/pull/168",
+  "xcode_version": "16.4 (16F6)",
+  "environment": "GitHub macos-15 with separately erased iPhone Simulators",
+  "apps": {
+    "source": "org.example.aya.minfiles.source",
+    "consumer": "org.example.aya.minfiles.consumer"
+  },
+  "excluded_from_both_apps": [
+    "AYA SDK",
+    "AYA import registry",
+    "JSON semantic validation",
+    "NSFileCoordinator",
+    "security-scoped snapshot reader",
+    "cross-app filesystem injection"
+  ],
+  "accepted_user_action": "XCUITest tapping a visible, hittable aya-layout-invalid.json native Files cell",
+  "cases": [
+    {
+      "name": "one",
+      "source_file_count": 1,
+      "native_xctest": "testOneForeignFileReturnsSystemCallback",
+      "result": "passed",
+      "native_duration_seconds": 29.438,
+      "selected_filename": "aya-layout-invalid.json",
+      "test_start_utc": "2026-11-08T01:17:23.062Z",
+      "tap_offset_seconds": 27.53,
+      "computed_tap_utc": "2026-11-08T01:17:50.592Z",
+      "system_callback": "success",
+      "bounded_provider_log_line_count": 1401,
+      "bounded_provider_log_fp_minus_1005_count": 0,
+      "bounded_provider_log_missing_item_identifier_count": 0,
+      "run_artifact_id": 13597659551
+    },
+    {
+      "name": "seven",
+      "source_file_count": 7,
+      "native_xctest": "testSevenForeignFilesReturnSystemCallback",
+      "result": "failed",
+      "native_duration_seconds": 46.022,
+      "selected_filename": "aya-layout-invalid.json",
+      "test_start_utc": "2026-11-08T01:15:28.498Z",
+      "tap_offset_seconds": 27.14,
+      "computed_tap_utc": "2026-11-08T01:15:55.638Z",
+      "final_consumer_state": "picker-opened",
+      "observed_callback_count": 0,
+      "bounded_provider_log_line_count": 1685,
+      "bounded_provider_log_fp_minus_1005_count": 1,
+      "bounded_provider_log_missing_item_identifier_count": 1,
+      "provider_error": {
+        "timestamp_utc": "2026-11-08T01:15:56.394Z",
+        "tap_to_error_seconds": 0.756,
+        "process": "fileproviderd",
+        "extension": "com.apple.FileProvider.LocalStorage",
+        "error": "NSFileProviderErrorDomain Code=-1005",
+        "missing_item_identifier": "did=6",
+        "sampled_log_message": "Cannot get URL for item ID localstorage/did=6 for extension com.apple.FileProvider.LocalStorage",
+        "exact_tapped_document_item_id_confirmed": false
+      },
+      "run_artifact_id": 13597619715
+    }
+  ],
+  "confidence_boundary": "Strong evidence of a simulator system picker/LocalStorage item resolution failure before any AYA code. The tapped document's provider ID and physical-device behavior are not proven.",
+  "retention_note": "Full XCTest xcresult and bounded OS logs attached to GitHub Actions run as seven-day artifacts. This record preserves nonsecret diagnostic observations without copying large system logs.",
+  "system_picker_gate_status": "red",
+  "manual_only_workflow": ".github/workflows/apple-minimal-native-picker-callback.yml"
+}
