@@ -20,6 +20,7 @@ IGNORE = {"tools/test_module_portability.py"}
 GENERATED_OR_EXTERNAL_DIRS = {
     ".git", ".gradle", ".dart_tool", ".expo", "node_modules",
     "build", "dist", "coverage", ".next", "vendor",
+    "skills",  # Independently versioned cross-project reference corpus, not AYA modules.
 }
 # Known historical leaks. This test lives in tools; no AYA module depends on it.
 UNRELATED_HOSTS = re.compile(
